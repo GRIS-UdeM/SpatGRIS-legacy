@@ -1,13 +1,13 @@
-#Octogris2
+#SpatGris
 
-Octogris2 is a multichannel sound spatialization plug-in (up to 8 sources / 16 speakers) available in Audio Unit and VST formats. The free and open-source plug-in allows movement of multichannel sound sources on a variable set of speakers. Modes of grouped movement and a trajectory system are provided for spatialization of stereo and multichannel sources.
+SpatGRIS is a multichannel sound spatialization plug-in (up to 8 sources / 16 speakers) available in Audio Unit and VST formats. The free and open-source plug-in allows movement of multichannel sound sources on a variable set of speakers. Modes of grouped movement and a trajectory system are provided for spatialization of stereo and multichannel sources.
 
 You can find the manual at this address:
 https://sourceforge.net/projects/octogris/files/Manuals/
 
 ========
 
-Copyright (C) 2014  GRIS-UdeM, octogris@gmail.com
+Copyright (C) 2016  GRIS-UdeM, octogris@gmail.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

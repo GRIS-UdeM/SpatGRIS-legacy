@@ -443,7 +443,7 @@ AudioProcessorEditor (ownerFilter)
     version += STRING(__TIME__);
 #endif
     
-    m_VersionLabel->setText("Octogris" + version,  dontSendNotification);
+    m_VersionLabel->setText("SpatGRIS" + version,  dontSendNotification);
     m_VersionLabel->setJustificationType(Justification(Justification::right));
     m_VersionLabel->setColour(Label::textColourId, Colours::whitesmoke);
     addAndMakeVisible(m_VersionLabel);
