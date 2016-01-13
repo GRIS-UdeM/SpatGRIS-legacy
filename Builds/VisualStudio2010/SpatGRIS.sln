@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{C5E8BC31-F578-0995-C50F-40CBD1EF12AC}") = "Octogris", "Octogris.vcxproj", "{85B349BE-0514-8781-EF8C-E922FF5EEC35}"
+Project("{85A258DB-E0EC-DBA5-F960-91A2E7AB3005}") = "SpatGRIS", "SpatGRIS.vcxproj", "{85B349BE-0514-8781-EF8C-E922FF5EEC35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

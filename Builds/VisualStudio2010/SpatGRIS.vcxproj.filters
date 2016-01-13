@@ -1,20 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Octogris">
-      <UniqueIdentifier>{F2BBDB65-D4F8-7D74-2DF6-4698FB11323A}</UniqueIdentifier>
+    <Filter Include="SpatGRIS">
+      <UniqueIdentifier>{3C4B0490-933E-ABE8-6EFB-744E5CCC85CE}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Octogris\GrisCommonFiles">
-      <UniqueIdentifier>{63E59617-BBFB-EE2E-FF91-3C28E38AFEA4}</UniqueIdentifier>
+    <Filter Include="SpatGRIS\GrisCommonFiles">
+      <UniqueIdentifier>{04E41C82-E6E4-7C50-BB54-AE6F867FDD75}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Octogris\Resources">
-      <UniqueIdentifier>{5A610E2C-C3B9-7CCC-AE65-2ED51185DAED}</UniqueIdentifier>
+    <Filter Include="SpatGRIS\Resources">
+      <UniqueIdentifier>{CCC557BF-FE31-6EC1-707A-94DF92B5A9AA}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Octogris\HIDManager">
-      <UniqueIdentifier>{0AAB8877-5765-9D31-9DB3-C30880E9B8EB}</UniqueIdentifier>
+    <Filter Include="SpatGRIS\HIDManager">
+      <UniqueIdentifier>{945C46A1-8C42-EB70-79A9-C1A269F39BED}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Octogris\Source">
-      <UniqueIdentifier>{CE10D066-2F2C-4339-3389-B271135C4071}</UniqueIdentifier>
+    <Filter Include="SpatGRIS\Source">
+      <UniqueIdentifier>{DBC5A6A7-6E42-D2F1-50DC-44389135B97E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules">
       <UniqueIdentifier>{422C46B7-0467-2DB0-BF3C-16DFCAFD69AC}</UniqueIdentifier>
@@ -274,61 +275,61 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\HIDManager\HID_Config_Utilities.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\HID_Error_Handler.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\HID_Name_Lookup.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\HID_Queue_Utilities.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\HID_Utilities.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\ImmHIDUtilAddOn.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\IOHIDDevice_.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\HIDManager\IOHIDElement_.cpp">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\HIDDelegate.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\FieldComponent.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\FirFilter.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\LevelComponent.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\OctoLeap.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\OscComponent.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PluginEditor.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Routing.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\SourceMover.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Trajectories.cpp">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
@@ -414,6 +415,18 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp">
       <Filter>Juce Modules\juce_audio_basics\synthesisers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_plugin_client\AU\juce_AU_Wrapper.mm">
+      <Filter>Juce Modules\juce_audio_plugin_client\AU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_plugin_client\RTAS\juce_RTAS_MacUtilities.mm">
+      <Filter>Juce Modules\juce_audio_plugin_client\RTAS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm">
+      <Filter>Juce Modules\juce_audio_plugin_client\VST</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm">
+      <Filter>Juce Modules\juce_audio_plugin_client\AAX</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\processors\juce_AudioChannelSet.cpp">
       <Filter>Juce Modules\juce_audio_processors\processors</Filter>
     </ClCompile>
@@ -437,6 +450,9 @@
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.cpp">
       <Filter>Juce Modules\juce_audio_processors\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.mm">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
@@ -675,6 +691,21 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_linux_Threads.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Files.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Network.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Strings.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_SystemStats.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Threads.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_posix_NamedPipe.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
@@ -750,7 +781,13 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_android_Messaging.cpp">
       <Filter>Juce Modules\juce_events\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_ios_MessageManager.mm">
+      <Filter>Juce Modules\juce_events\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_linux_Messaging.cpp">
+      <Filter>Juce Modules\juce_events\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_mac_MessageManager.mm">
       <Filter>Juce Modules\juce_events\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_win32_Messaging.cpp">
@@ -850,6 +887,12 @@
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_linux_Fonts.cpp">
+      <Filter>Juce Modules\juce_graphics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm">
+      <Filter>Juce Modules\juce_graphics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_mac_Fonts.mm">
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp">
@@ -1200,6 +1243,12 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_android_Windowing.cpp">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_ios_UIViewComponentPeer.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_ios_Windowing.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_linux_Clipboard.cpp">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
@@ -1207,6 +1256,21 @@
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_linux_Windowing.cpp">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_FileChooser.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_MainMenu.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_MouseCursor.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_NSViewComponentPeer.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_Windowing.mm">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_win32_DragAndDrop.cpp">
@@ -1266,13 +1330,25 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_linux_SystemTrayIcon.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_linux_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_SystemTrayIcon.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_WebBrowserComponent.mm">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_win32_ActiveXComponent.cpp">
@@ -1368,73 +1444,73 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\GrisCommonFiles\GrisLookAndFeel.h">
-      <Filter>Octogris\GrisCommonFiles</Filter>
+      <Filter>SpatGRIS\GrisCommonFiles</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\HID_Config_Utilities.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\HID_Error_Handler.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\HID_Name_Lookup.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\HID_Queue_Utilities.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\HID_Utilities.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\HID_Utilities_External.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\ImmHIDUtilAddOn.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\IOHIDDevice_.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\IOHIDElement_.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\HIDManager\IOHIDLib_.h">
-      <Filter>Octogris\HIDManager</Filter>
+      <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\HIDDelegate.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\_firs.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\FieldComponent.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\FirFilter.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\LevelComponent.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\OctoLeap.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\OscComponent.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PluginProcessor.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PluginEditor.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Routing.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SourceMover.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Trajectories.h">
-      <Filter>Octogris\Source</Filter>
+      <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
@@ -2708,10 +2784,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\logoGris.png">
-      <Filter>Octogris\Resources</Filter>
+      <Filter>SpatGRIS\Resources</Filter>
     </None>
     <None Include="..\MacOSX\libLeap.dylib">
-      <Filter>Octogris</Filter>
+      <Filter>SpatGRIS</Filter>
     </None>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_basics\juce_module_info">
       <Filter>Juce Modules\juce_audio_basics</Filter>

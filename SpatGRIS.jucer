@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.1.0"
+              bundleIdentifier="com.UdeM.SpatGRIS" includeBinaryInAppConfig="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
+              pluginName="SpatGris" pluginDesc="SpatGris" pluginManufacturer="UdeM"
+              pluginManufacturerCode="UdeM" pluginCode="Spat" pluginChannelConfigs="{8,16}, {1,2}, {1,4}, {1,6}, {1,8}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,16}, {4,4}, {4,6}, {4,8}, {4,16}, {6,6}, {6,8}, {6,16}, {8,8}, {8,16}"
+              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
+              pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="OctogrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.Octogris2"
+              pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.1.0"
+              pluginIsMidiEffectPlugin="0" companyName="UdeM">
+  <MAINGROUP id="rRl79u" name="SpatGRIS">
+    <GROUP id="{48A026D6-2EE7-E714-8C68-003BA85B16C8}" name="GrisCommonFiles">
+      <FILE id="jDkaGa" name="GrisLookAndFeel.h" compile="1" resource="0"
+            file="../GrisCommonFiles/GrisLookAndFeel.h"/>
+    </GROUP>
+    <GROUP id="{B76B0FE8-BBC6-AA42-5E09-44DABB7BB441}" name="Resources">
+      <FILE id="NATXje" name="logoGris.png" compile="0" resource="1" file="logoGris.png"/>
+    </GROUP>
+    <FILE id="Rh67hJ" name="libLeap.dylib" compile="0" resource="1" file="Builds/MacOSX/libLeap.dylib"/>
+    <GROUP id="{86F10CED-1EF2-11AE-6DFA-1E8A090A7A24}" name="HIDManager">
+      <FILE id="RebHZI" name="HID_Config_Utilities.cpp" compile="1" resource="0"
+            file="HIDManager/HID_Config_Utilities.cpp"/>
+      <FILE id="hqBKBt" name="HID_Config_Utilities.h" compile="0" resource="1"
+            file="HIDManager/HID_Config_Utilities.h"/>
+      <FILE id="iFJ5ws" name="HID_Error_Handler.cpp" compile="1" resource="0"
+            file="HIDManager/HID_Error_Handler.cpp"/>
+      <FILE id="vL3lvI" name="HID_Error_Handler.h" compile="0" resource="1"
+            file="HIDManager/HID_Error_Handler.h"/>
+      <FILE id="mpoSvN" name="HID_Name_Lookup.cpp" compile="1" resource="0"
+            file="HIDManager/HID_Name_Lookup.cpp"/>
+      <FILE id="rZmPrq" name="HID_Name_Lookup.h" compile="0" resource="1"
+            file="HIDManager/HID_Name_Lookup.h"/>
+      <FILE id="K5AoSF" name="HID_Queue_Utilities.cpp" compile="1" resource="0"
+            file="HIDManager/HID_Queue_Utilities.cpp"/>
+      <FILE id="bjiowX" name="HID_Queue_Utilities.h" compile="0" resource="1"
+            file="HIDManager/HID_Queue_Utilities.h"/>
+      <FILE id="FfX1kW" name="HID_Utilities.cpp" compile="1" resource="0"
+            file="HIDManager/HID_Utilities.cpp"/>
+      <FILE id="HQwkAl" name="HID_Utilities.h" compile="0" resource="1" file="HIDManager/HID_Utilities.h"/>
+      <FILE id="GdNnRt" name="HID_Utilities_External.h" compile="0" resource="1"
+            file="HIDManager/HID_Utilities_External.h"/>
+      <FILE id="qaW3Fz" name="ImmHIDUtilAddOn.cpp" compile="1" resource="0"
+            file="HIDManager/ImmHIDUtilAddOn.cpp"/>
+      <FILE id="f4ENYc" name="ImmHIDUtilAddOn.h" compile="0" resource="1"
+            file="HIDManager/ImmHIDUtilAddOn.h"/>
+      <FILE id="mRDyIc" name="IOHIDDevice_.cpp" compile="1" resource="0"
+            file="HIDManager/IOHIDDevice_.cpp"/>
+      <FILE id="ygbU65" name="IOHIDDevice_.h" compile="0" resource="1" file="HIDManager/IOHIDDevice_.h"/>
+      <FILE id="n8RfFk" name="IOHIDElement_.cpp" compile="1" resource="0"
+            file="HIDManager/IOHIDElement_.cpp"/>
+      <FILE id="SsW75f" name="IOHIDElement_.h" compile="0" resource="1" file="HIDManager/IOHIDElement_.h"/>
+      <FILE id="ebGlDe" name="IOHIDLib_.h" compile="0" resource="1" file="HIDManager/IOHIDLib_.h"/>
+    </GROUP>
+    <GROUP id="{89B00B3D-3E60-2792-C7A4-D570AF057C40}" name="Source">
+      <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>
+      <FILE id="QwSZHu" name="HIDDelegate.h" compile="0" resource="0" file="Source/HIDDelegate.h"/>
+      <FILE id="iDZlup" name="_firs.h" compile="0" resource="0" file="Source/_firs.h"/>
+      <FILE id="dqxZV5" name="FieldComponent.cpp" compile="1" resource="0"
+            file="Source/FieldComponent.cpp"/>
+      <FILE id="S23HIf" name="FieldComponent.h" compile="0" resource="0"
+            file="Source/FieldComponent.h"/>
+      <FILE id="HUCESA" name="FirFilter.cpp" compile="1" resource="0" file="Source/FirFilter.cpp"/>
+      <FILE id="Dxarr9" name="FirFilter.h" compile="0" resource="0" file="Source/FirFilter.h"/>
+      <FILE id="Amo7KP" name="LevelComponent.cpp" compile="1" resource="0"
+            file="Source/LevelComponent.cpp"/>
+      <FILE id="qrzOaK" name="LevelComponent.h" compile="0" resource="0"
+            file="Source/LevelComponent.h"/>
+      <FILE id="YmogaO" name="OctoLeap.cpp" compile="1" resource="0" file="Source/OctoLeap.cpp"/>
+      <FILE id="y1Har7" name="OctoLeap.h" compile="0" resource="0" file="Source/OctoLeap.h"/>
+      <FILE id="kCb8Dq" name="OscComponent.cpp" compile="1" resource="0"
+            file="Source/OscComponent.cpp"/>
+      <FILE id="Ik4mYY" name="OscComponent.h" compile="0" resource="0" file="Source/OscComponent.h"/>
+      <FILE id="dgSZr1" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="weDkcs" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="pRoxoW" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="HICz75" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="X5IVQ5" name="Routing.cpp" compile="1" resource="0" file="Source/Routing.cpp"/>
+      <FILE id="kcqw8e" name="Routing.h" compile="0" resource="0" file="Source/Routing.h"/>
+      <FILE id="rZP6xp" name="SourceMover.cpp" compile="1" resource="0" file="Source/SourceMover.cpp"/>
+      <FILE id="ppYknM" name="SourceMover.h" compile="0" resource="0" file="Source/SourceMover.h"/>
+      <FILE id="y4THbS" name="Trajectories.cpp" compile="1" resource="0"
+            file="Source/Trajectories.cpp"/>
+      <FILE id="tjT8To" name="Trajectories.h" compile="0" resource="0" file="Source/Trajectories.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/Documents/sdks/steinberg/VST3 SDK"
+               postbuildCommand="&#10;# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on &#10;# which plugin types you've built&#10;&#10;original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME&#10;&#10;# this looks inside the binary to detect which platforms are needed.. &#10;copyAU=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'AudioUnit' | wc -l&#96;&#10;copyVST=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'VSTPlugin' | wc -l&#96;&#10;copyVST3=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'GetPluginFactory' | wc -l&#96;&#10;copyRTAS=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'CProcess' | wc -l&#96;&#10;copyAAX=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'ACFStartup' | wc -l&#96;&#10;&#10;if [ $copyAU -gt 0 ]; then&#10;  echo &quot;Copying to AudioUnit folder...&quot;&#10;  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component&#10;  if [ -d &quot;$AU&quot; ]; then &#10;    rm -r &quot;$AU&quot;&#10;  fi&#10;&#10;  cp -r &quot;$original&quot; &quot;$AU&quot;&#10;  sed -i &quot;&quot; -e 's/TDMwPTul/BNDLPTul/g' &quot;$AU/Contents/PkgInfo&quot;&#10;  sed -i &quot;&quot; -e 's/TDMw/BNDL/g' &quot;$AU/Contents/$INFOPLIST_FILE&quot;&#10;&#10;  # Fix info.plist for AUs built with Xcode 3&#10;  if [ -f &quot;$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp&quot; ]; then&#10;    echo&#10;  else&#10;    echo &quot;Removing AudioComponents entry from Info.plist because this is not a new-format AU&quot;&#10;    /usr/libexec/PlistBuddy -c &quot;Delete AudioComponents&quot; &quot;$AU/Contents/Info.plist&quot;&#10;  fi&#10;fi&#10;&#10;if [ $copyVST -gt 0 ]; then&#10;  echo &quot;Copying to VST folder...&quot;&#10;  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst&#10;  if [ -d &quot;$VST&quot; ]; then &#10;    rm -r &quot;$VST&quot;&#10;  fi&#10;&#10;  cp -r &quot;$original&quot; &quot;$VST&quot;&#10;  sed -i &quot;&quot; -e 's/TDMwPTul/BNDLPTul/g' &quot;$VST/Contents/PkgInfo&quot;&#10;  sed -i &quot;&quot; -e 's/TDMw/BNDL/g' &quot;$VST/Contents/$INFOPLIST_FILE&quot;&#10;fi&#10;&#10;if [ $copyVST3 -gt 0 ]; then&#10;  echo &quot;Copying to VST3 folder...&quot;&#10;  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3&#10;  if [ -d &quot;$VST3&quot; ]; then &#10;    rm -r &quot;$VST3&quot;&#10;  fi&#10;&#10;  cp -r &quot;$original&quot; &quot;$VST3&quot;&#10;  sed -i &quot;&quot; -e 's/TDMwPTul/BNDLPTul/g' &quot;$VST3/Contents/PkgInfo&quot;&#10;  sed -i &quot;&quot; -e 's/TDMw/BNDL/g' &quot;$VST3/Contents/$INFOPLIST_FILE&quot;&#10;fi&#10;&#10;if [ $copyRTAS -gt 0 ]; then&#10;  echo &quot;Copying to RTAS folder...&quot;&#10;  RTAS=/Library/Application\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm&#10;  if [ -d &quot;$RTAS&quot; ]; then&#10;    rm -r &quot;$RTAS&quot;&#10;  fi&#10;&#10;  cp -r &quot;$original&quot; &quot;$RTAS&quot;&#10;fi&#10;&#10;if [ $copyAAX -gt 0 ]; then&#10;  echo &quot;Copying to AAX folder...&quot;&#10;&#10;  if [ -d &quot;/Applications/ProTools_3PDev/Plug-Ins&quot; ]; then&#10;    AAX1=&quot;/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin&quot;&#10;&#10;    if [ -d &quot;$AAX1&quot; ]; then&#10;      rm -r &quot;$AAX1&quot;&#10;    fi&#10;&#10;    cp -r &quot;$original&quot; &quot;$AAX1&quot;&#10;  fi&#10;&#10;  if [ -d &quot;/Library/Application Support/Avid/Audio/Plug-Ins&quot; ]; then&#10;    AAX2=&quot;/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin&quot;&#10;&#10;    if [ -d &quot;$AAX2&quot; ]; then&#10;      rm -r &quot;$AAX2&quot;&#10;    fi&#10;&#10;    cp -r &quot;$original&quot; &quot;$AAX2&quot;&#10;  fi&#10;fi&#10;"
+               externalLibraries="Leap" aaxFolder="~/Documents/sdks/AAX_SDK_2p1p1/"
+               vst3Folder="~/Documents/sdks/steinberg/VST3 SDK">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="Native"
+                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="~/Documents/sdks/LeapSDK/include"
+                       libraryPath="~/Documents/sdks/LeapSDK/lib&#10;"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
+                       isDebug="0" optimisation="3" targetName="SpatGRiS" headerPath="~/Documents/sdks/LeapSDK/include&#10;"
+                       libraryPath="~/Documents/sdks/LeapSDK/lib"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_osc" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="C:\SDKs\vstsdk2.4"
+            aaxFolder="C:\SDKs\AAX_SDK_2p1p1" vst3Folder="c:\SDKs\VST3 SDK">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="&#9;&#9;&#9;C:\SDKs\liblo-0.28&#10;C:\SDKs\liblo-0.28\lo"
+                       libraryPath="C:\SDKs\liblo-0.28\lib\ReleaseLib"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath="C:\SDKs\liblo-0.28&#10;C:\SDKs\liblo-0.28\lo"
+                       libraryPath="C:\SDKs\liblo-0.28\lib\ReleaseLib"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_osc" path="../../juce"/>
+      </MODULEPATHS>
+    </VS2010>
+    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
+            vst3Folder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
+            externalLibraries="Leap.lib">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="SpatGRIS_x86" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
+                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="SpatGRIS_x86" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
+                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
+        <CONFIGURATION name="Release_x64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       optimisation="3" targetName="SpatGRIS_x64" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
+                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x64"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_osc" path="../../juce"/>
+      </MODULEPATHS>
+    </VS2015>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_gui_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+</JUCERPROJECT>
