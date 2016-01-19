@@ -42,8 +42,9 @@ string toString(const T &value) {
 	os << value;
 	return os.str();
 }
+#endif
 
-#elif USE_JOYSTICK
+#if USE_JOYSTICK
 #include "HIDDelegate.h"
 #include "HID_Utilities_External.h"
 #endif

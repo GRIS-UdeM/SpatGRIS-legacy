@@ -7,12 +7,12 @@
  
  ==============================================================================
  */
-#if USE_JOYSTICK
+
 
 #include <iostream>
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "HIDDelegate.h"
 #include "FieldComponent.h"
+#if USE_JOYSTICK
+#include "HIDDelegate.h"
 
 /*#if JUCE_WINDOWS
  Component * CreateHIDComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
@@ -69,8 +69,7 @@ void HIDDelegate::Handle_DeviceRemovalCallback(void *inContext, IOReturn inResul
 
 /** joystickPositionCallback is called evereytime the connected joystick is used, the type of use and value of use are recovered from IOHIDValueRef sent by the event. First the method convert the IOHIDValueRef to a IOHIDElementRef which allow us to get the usagePage (type of control), the usage (the id of the control), the PhysicalMin and PhysicalMax which are 0 and 1 for common buttons or the max can vary from 256 to 1024 in our experience for the axis from one joystick to an other. We use the physical maximum to get a normalized value otherwise a less precise joystick would not permit mouvement accross the whole circle.
  Exemple for usagePage, usage and value, if I press the button 5 of my joystick usagePage will be 9(Id of the button type and usage will be 5 (number of the button)and value will be 1 (1 if pressed and 0 if not) */
-void HIDDelegate::joystickPositionCallback(
-                                                       void *          inContext,      // context from IOHIDDeviceRegisterInputValueCallback
+void HIDDelegate::joystickPositionCallback(            void *          inContext,      // context from IOHIDDeviceRegisterInputValueCallback
                                                        IOReturn        inResult,       // completion result for the input value operation
                                                        void *          inSender,       // IOHIDDeviceRef of the device this element is from
                                                        IOHIDValueRef   inIOHIDValueRef) // the new element value
