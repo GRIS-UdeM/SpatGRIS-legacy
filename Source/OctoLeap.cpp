@@ -29,8 +29,6 @@
 
 #if USE_LEAP
 
-//#include "Leap.h"
-
 int gIsLeapConnected = NULL;
 
 OctoLeap::OctoLeap(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor):
@@ -124,7 +122,7 @@ OctoLeap::Ptr OctoLeap::CreateLeapComponent(OctogrisAudioProcessor *filter, Octo
 
 #else
 
-class Component;
+//class Component;
 class OctogrisAudioProcessor;
 class OctogrisAudioProcessorEditor;
 Component * CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)

@@ -1078,9 +1078,10 @@ AudioProcessorEditor (ownerFilter)
         box->addAndMakeVisible(mStateLeap);
         mComponents.add(mStateLeap);
        
-        y += dh + 10;
+        y += dh;
 #endif
-#if USE_JOYSTICK        
+#if USE_JOYSTICK  
+		y += 10;
         mEnableJoystick = new ToggleButton();
         mEnableJoystick->setButtonText("Enable Joystick");
         mEnableJoystick->setSize(cw-150, dh);
@@ -1257,16 +1258,11 @@ OctogrisAudioProcessorEditor::~OctogrisAudioProcessorEditor()
 #endif
 #if USE_LEAP
     if(mController) {
-  //      mController->enableGesture(Leap::Gesture::TYPE_INVALID);
-		//mController.release();
-  //      gIsLeapConnected = 0;
 		mController->enableGesture(Leap::Gesture::TYPE_INVALID);
 		mController->removeListener(*mleap);
 		gIsLeapConnected = 0;
 		mController.release();
 	}
-
-
     getMover()->end(kLeap);
     getMover()->end(kHID);
 #endif
