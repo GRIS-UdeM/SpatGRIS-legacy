@@ -23,6 +23,14 @@
  ==============================================================================
  */
 
+#ifndef USE_LEAP
+#define USE_LEAP 1
+#endif
+
+//#ifndef USE_JOYSTICK
+//#define USE_JOYSTICK 1
+//#endif
+
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 

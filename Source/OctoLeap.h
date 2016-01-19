@@ -26,14 +26,13 @@
 
 #ifndef OCTOLEAP_H_INCLUDED
 #define OCTOLEAP_H_INCLUDED
+#include "PluginEditor.h"
 
 extern int gIsLeapConnected;
 
-//#if WIN32
-//
-//#else
+#if USE_LEAP
+#include "Leap.h"
 
-#include "PluginEditor.h"
 class OctoLeap : public ReferenceCountedObject , public Leap::Listener
 {
 public:
@@ -50,7 +49,7 @@ public:
     void onFrame(const Leap::Controller& controller);
     //! Called when a Leap Motion service is unreachable (Crashed)
     void onServiceDisconnect(const Leap::Controller& controller);
-    //! Destroyer
+
     virtual ~OctoLeap(){
     }
     
@@ -70,8 +69,6 @@ private:
     
 };
 
-void updateLeapComponent(Component * leapComponent);
-
-//#endif
+#endif
 
 #endif  // OCTOLEAP_H_INCLUDED
