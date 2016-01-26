@@ -25,6 +25,7 @@
  */
 
 #include "OscComponent.h"
+#if USE_OSC
 const String kOscPathSourceXY = "/Octo/SourceXY";
 const String kOscPathSelectSource = "/Octo/Source";
 
@@ -184,6 +185,7 @@ public:
                 }
                 mFilter->setOscReceiveEnabled(mReceive->getToggleState());
             } else if (button == mSend) {
+
                 if (mSend->getToggleState()) {
                     mOscIpAddress = mSendIp->getText();
                     int iSendPort = mSendPort->getText().getIntValue();
@@ -198,6 +200,7 @@ public:
                         mSendIp->setEnabled(false);
                         mSendPort->setEnabled(false);
                     }
+
                 } else {
                     mSendIp->setEnabled(true);
                     mSendPort->setEnabled(true);
@@ -283,7 +286,6 @@ private:
 	ScopedPointer<ToggleButton> mSend;
 	ScopedPointer<TextEditor> mSendIp;
 	ScopedPointer<TextEditor> mSendPort;
-	
 	OSCSender mOscSender;
 	String mOscIpAddress;
 	
@@ -301,3 +303,4 @@ HeartbeatComponent * CreateOscComponent(OctogrisAudioProcessor *filter, Octogris
 void updateOscComponent(HeartbeatComponent* oscComponent){
     dynamic_cast<OscComponent*>(oscComponent)->updateInfo();
 }
+#endif

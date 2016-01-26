@@ -42,9 +42,8 @@ string toString(const T &value) {
 	os << value;
 	return os.str();
 }
-#endif
 
-#if USE_JOYSTICK
+#elif USE_JOYSTICK
 #include "HIDDelegate.h"
 #include "HID_Utilities_External.h"
 #endif
@@ -1102,7 +1101,8 @@ AudioProcessorEditor (ownerFilter)
         mComponents.add(mStateJoystick);
         
         y += dh;
-#endif        
+#endif      
+#if USE_OSC
         mOsc = CreateOscComponent(mFilter, this);
         if (mOsc) {
             mOsc->setTopLeftPosition(0, y);
@@ -1110,6 +1110,7 @@ AudioProcessorEditor (ownerFilter)
             box->addAndMakeVisible(mOsc);
             mComponents.add(mOsc);
         }
+#endif
     }
 
     
@@ -2078,8 +2079,9 @@ void OctogrisAudioProcessorEditor::timerCallback()
         mTrDampeningTextEditor->setText(String(mFilter->getTrDampening()));
         mTrDeviationTextEditor->setText(String(mFilter->getTrDeviation()*360));
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
-        
+#if USE_OSC
         updateOscComponent(mOsc);
+#endif
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
         mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
         mLinkDistances->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
