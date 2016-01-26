@@ -235,6 +235,49 @@ void OctogrisAudioProcessor::setCalculateLevels(bool c)
 	
 }
 
+void OctogrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
+    m_bIsOscSpat = p_bIsOscSpat;
+    
+    if (m_bIsOscSpat){
+       
+        mOscSpatSender.disconnect();
+        JUCE_COMPILER_WARNING("need to do this intelligently")
+        //if(!mOscSpatSender.connect(mOscSendIp, mOscSendPort)){
+        if(!mOscSpatSender.connect("127.0.0.1", 18032)){
+            DBG("OSC cannot connect to " + mOscSendIp);
+        }
+    } else {
+        mOscSpatSender.disconnect();
+        
+    }
+}
+
+JUCE_COMPILER_WARNING("this needs to be called in a thread or something")
+void OctogrisAudioProcessor::sendOscSpatValues(){
+    for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
+        int   channel_osc   = m_oAllSources[iCurSrc].getSourceId()-1;
+        float azim_osc      = PercentToHR(m_oAllSources[iCurSrc].getAzimuth01(), ZirkOSC_Azim_Min, ZirkOSC_Azim_Max) /180.;
+        float elev_osc      = PercentToHR(m_oAllSources[iCurSrc].getElevation01(), ZirkOSC_Elev_Min, ZirkOSC_Elev_Max)/180.;
+        float azimspan_osc  = PercentToHR(m_oAllSources[iCurSrc].getAzimuthSpan(), ZirkOSC_AzimSpan_Min,ZirkOSC_AzimSpan_Max)/180.;
+        float elevspan_osc  = PercentToHR(m_oAllSources[iCurSrc].getElevationSpan(), ZirkOSC_ElevSpan_Min, ZirkOSC_Elev_Max)/180.;
+        float gain_osc      = m_oAllSources[iCurSrc].getGain01();
+        
+        //        lo_send(_OscZirkonium, "/pan/az", "ifffff", channel_osc, azim_osc, elev_osc, azimspan_osc, elevspan_osc, gain_osc);
+        OSCAddressPattern oscPattern("/pan/az");
+        OSCMessage message(oscPattern);
+        
+        message.addInt32(channel_osc);
+        message.addFloat32(azim_osc);
+        message.addFloat32(elev_osc);
+        message.addFloat32(azimspan_osc);
+        message.addFloat32(elevspan_osc);
+        message.addFloat32(gain_osc);
+        
+        if (!mOscSender.send(message)) {
+            DBG("Error: could not send OSC message.");
+        }
+    }
+
 //==============================================================================
 const String OctogrisAudioProcessor::getName() const
 {

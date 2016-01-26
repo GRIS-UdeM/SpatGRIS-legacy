@@ -394,7 +394,9 @@ public:
     }
     
     bool getOscSpat(){ return m_bIsOscSpat;}
-    void setOscSpat(bool p_bIsOscSpat){ m_bIsOscSpat = p_bIsOscSpat;}
+    void setOscSpat(bool p_bIsOscSpat);
+    
+    void sendOscSpatValues();
     
     int getIsJoystickEnabled() const { return mJoystickEnabled; }
     void setIsJoystickEnabled(int s) { mJoystickEnabled = s; }
@@ -739,6 +741,7 @@ private:
     std::pair <float, float> m_fEndLocationXY;
     bool m_bJustSelectedEndPoint;
     bool m_bIsOscSpat;
+    OSCSender mOscSpatSender;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OctogrisAudioProcessor)
 };

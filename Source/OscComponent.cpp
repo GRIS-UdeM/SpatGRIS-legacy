@@ -264,7 +264,6 @@ public:
 			OSCMessage message(oscPattern);
 			message.addFloat32(p.y);
 			message.addFloat32(p.x);
-
 			if (!mOscSender.send(message)) {
 				DBG("Error: could not send OSC message.");
 			}
