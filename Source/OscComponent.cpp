@@ -260,9 +260,7 @@ public:
 		
 		FPoint p = mFilter->getSourceXY01(src);
 		if (mSourceXY != p) {
-            JUCE_COMPILER_WARNING("make kOscPathSourceXY a String")
-            String ridiculous(kOscPathSourceXY);
-            OSCAddressPattern oscPattern(ridiculous);
+            OSCAddressPattern oscPattern(kOscPathSourceXY);
 			OSCMessage message(oscPattern);
 			message.addFloat32(p.y);
 			message.addFloat32(p.x);

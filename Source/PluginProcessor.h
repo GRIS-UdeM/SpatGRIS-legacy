@@ -30,6 +30,10 @@
 #define USE_LEAP 1
 #endif
 
+#ifndef USE_OSC
+#define USE_OSC 1
+#endif
+
 #if !WIN32
 #ifndef USE_JOYSTICK
 #define USE_JOYSTICK 1
@@ -682,11 +686,10 @@ private:
 	int mOscSendEnabled;
 	int mOscSendPort;
     String mOscSendIp;
-	//char mOscSendIp[64]; // if changing size, change kDataVersion
+
 	uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
 	uint64_t mProcessCounter;
-	//int64 mLastTimeInSamples;
 	
 	int mProcessMode;
 	int mRoutingMode;
