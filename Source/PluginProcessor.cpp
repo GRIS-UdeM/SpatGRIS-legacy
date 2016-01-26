@@ -147,6 +147,7 @@ OctogrisAudioProcessor::OctogrisAudioProcessor()
 	mLinkDistances = false;
 	mMovementMode = 0;
 	mShowGridLines = false;
+    m_bIsOscSpat = false;
 	mTrSeparateAutomationMode = false;
     mIsNumberSourcesChanged = false;
     mIsNumberSpeakersChanged = false;
@@ -1815,6 +1816,7 @@ void OctogrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     
     xml.setAttribute ("kDataVersion", kDataVersion);
     xml.setAttribute ("mShowGridLines", mShowGridLines);
+    xml.setAttribute ("m_bIsOscSpat", m_bIsOscSpat);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
     xml.setAttribute ("mMovementMode", mMovementMode);
     xml.setAttribute ("mLinkDistances", mLinkDistances);
@@ -1886,22 +1888,17 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
 {
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
-    if (xmlState != nullptr)
-    {
+    if (xmlState != nullptr) {
         // make sure that it's actually our type of XML object..˝
-        if (xmlState->hasTagName ("OCTOGRIS_SETTINGS") || xmlState->hasTagName ("OCTOGRIS2SETTINGS"))
-        {
-            int version         = xmlState->getIntAttribute ("kDataVersion", 13);
-            
+        if (xmlState->hasTagName ("SPATGRIS_SETTINGS")) {
+            int version         = xmlState->getIntAttribute ("kDataVersion", 1);
             if (version > kDataVersion){
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Octogris - Loading preset/state from newer version",
-                                                  "You are attempting to load Octogris with a preset from a newer version.\nDefault values will be used for all parameters.",
-                                                  "OK");
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "SpatGRIS - Loading preset/state from newer version",
+                                                  "You are attempting to load SpatGRIS with a preset from a newer version.\nDefault values will be used for all parameters.", "OK");
                 return;
             }
-            
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
+            m_bIsOscSpat        = xmlState->getIntAttribute ("m_bIsOscSpat", m_bIsOscSpat);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
             mMovementMode       = xmlState->getIntAttribute ("mMovementMode", 0);
             mLinkDistances      = xmlState->getIntAttribute ("mLinkDistances", 0);
@@ -1913,20 +1910,14 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mOscReceivePort     = xmlState->getIntAttribute ("mOscReceivePort", 8000);
             mOscSendEnabled     = xmlState->getIntAttribute ("mOscSendEnabled", 0);
             mOscSendPort        = xmlState->getIntAttribute ("mOscSendPort", 9000);
-            
-            //strlcpy(mOscSendIp, xmlState->getStringAttribute(mOscSendIp, "192.168.1.100").toStdString().c_str(), 64);
             mOscSendIp          = xmlState->getStringAttribute ("mOscSendIp", mOscSendIp);
-            
             mProcessMode        = xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode);
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
-            
             mInputOutputMode    = xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode);
-            
             mSrcPlacementMode   = xmlState->getIntAttribute ("mSrcPlacementMode", 1);
             mSpPlacementMode    = xmlState->getIntAttribute ("mSpPlacementMode", 1);
             mSrcSelected        = xmlState->getIntAttribute ("mSrcSelected", 0);
             mSpSelected         = xmlState->getIntAttribute ("mSpSelected", 1);
-            
             mTrState            = xmlState->getIntAttribute ("mTrState", 0);
             m_iTrDirection      = xmlState->getIntAttribute ("m_iTrDirection", 0);
             m_iTrReturn         = xmlState->getIntAttribute ("m_iTrReturn", 0);
@@ -1940,13 +1931,10 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             m_fTrTurns          = static_cast<float>(xmlState->getDoubleAttribute("m_fTrTurns", m_fTrTurns));
             m_fEndLocationXY.first  = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationX", m_fEndLocationXY.first));
             m_fEndLocationXY.second = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationY", m_fEndLocationXY.second));
-            
             mLeapEnabled        = xmlState->getIntAttribute ("mLeapEnabled", 0);
             mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
-            
             mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
             setRoutingMode(xmlState->getIntAttribute ("mRoutingMode", 0));
-            
             mParameters.set(kSmooth,        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
             mParameters.set(kVolumeNear,    static_cast<float>(xmlState->getDoubleAttribute("kVolumeNear", normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault))));
             mParameters.set(kVolumeMid,     static_cast<float>(xmlState->getDoubleAttribute("kVolumeMid", normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault))));
@@ -1954,7 +1942,6 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mParameters.set(kFilterNear,    static_cast<float>(xmlState->getDoubleAttribute("kFilterNear", normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault))));
             mParameters.set(kFilterMid,     static_cast<float>(xmlState->getDoubleAttribute("kFilterMid", normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault))));
             mParameters.set(kFilterFar,     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
-            
             for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i){
                 String srcX = "src" + to_string(i) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));
@@ -1964,8 +1951,6 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mParameters.set(getParamForSourceY(i), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
                 mOldSrcLocRT[i] = convertXy012Rt(curPoint);
-                
-                
                 String srcD = "src" + to_string(i) + "d";
                 mParameters.set(getParamForSourceD(i), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
             }
@@ -1980,118 +1965,7 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mParameters.set(getParamForSpeakerM(i), static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
             }
         }
-    } else {
-        int version = readIntData(data, sizeInBytes, 0);
-        if (version <= 13 && version > 0)
-        {
-            //the weird order here is because the order had to match what is in getStateInformation for version <= 13
-            
-            mShowGridLines = readIntData(data, sizeInBytes, 0);
-            if (version < 7) readIntData(data, sizeInBytes, 0); // old show levels
-            if (version < 7) readIntData(data, sizeInBytes, 0); // old account for attenuation
-            if (version < 2) readIntData(data, sizeInBytes, 0); // old link movement
-            mMovementMode = readIntData(data, sizeInBytes, 0);
-            mLinkDistances = readIntData(data, sizeInBytes, 0);
-            readIntData(data, sizeInBytes, 1); //mGuiSize
-            if (version >= 8)
-            {
-                mGuiTab = readIntData(data, sizeInBytes, 0);
-                mOscLeapSource = readIntData(data, sizeInBytes, 0);
-                mOscReceiveEnabled = readIntData(data, sizeInBytes, 0);
-                mOscReceivePort = readIntData(data, sizeInBytes, 8000);
-                mOscSendEnabled = readIntData(data, sizeInBytes, 0);
-                mOscSendPort = readIntData(data, sizeInBytes, 9000);
-                char mOscSendIpChar[64];
-                readStringData(data, sizeInBytes, "192.168.1.100", mOscSendIpChar, sizeof(mOscSendIp));
-                mOscSendIp = String(mOscSendIpChar);
-            }
-            if (version >= 3) mProcessMode = readIntData(data, sizeInBytes, kPanVolumeMode);
-            if (version >= 6) mApplyFilter = readIntData(data, sizeInBytes, 1);
-            
-            if (version >= 9){
-                mInputOutputMode = readIntData(data, sizeInBytes, 1);
-                if (mInputOutputMode >= i2o2 && mInputOutputMode <= i2o16){
-                    if (mMovementMode >= 1 && mMovementMode <= 3){
-                        mMovementMode += 5;
-                    } else if (mMovementMode >= 4 && mMovementMode < 8){
-                        mMovementMode -= 3;
-                    } else if (mMovementMode == 8){
-                        mMovementMode = 4;  //if mMovementMode was symmetric XY, we convert that to circular fully fixed, since that is the same thing
-                    }
-                }
-                
-                mSrcPlacementMode   = readIntData(data, sizeInBytes, 1);
-                mSpPlacementMode    = readIntData(data, sizeInBytes, 1);
-                mSrcSelected        = readIntData(data, sizeInBytes, 0);
-                mSpSelected         = readIntData(data, sizeInBytes, 1);
-                m_iTrType           = readIntData(data, sizeInBytes, 0);
-                m_iTrSrcSelect      = readIntData(data, sizeInBytes, 1);
-                m_fTrDuration       = readFloatData(data, sizeInBytes, 1);
-                m_iTrUnits          = readIntData(data, sizeInBytes, 0);
-                m_fTrRepeats        = readFloatData(data, sizeInBytes, 1);
-                mLeapEnabled        = readIntData(data, sizeInBytes, 0);
-            }
-            
-            if (version >= 10){
-                mParameters.set(kMaxSpanVolume, readFloatData(data, sizeInBytes, normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault)));
-            }
-            
-            if (version >= 13){
-                mParameters.set(kRoutingVolume, readFloatData(data, sizeInBytes, normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault)));
-                setRoutingMode(readIntData(data, sizeInBytes, 0));
-            }
-            
-            if (version >= 4)
-            {
-                readFloatData(data, sizeInBytes, 0); //this was for kLinkMovement
-                mParameters.set(kSmooth, readFloatData(data, sizeInBytes, normalize(kSmoothMin, kSmoothMax, kSmoothDefault)));
-                
-                //OLD kVolumeNearMin WAS 0 AND IS NOW -10, REGLE DE 3
-                
-                float fVolumeNear = readFloatData(data, sizeInBytes, kVolumeNearDefault);
-                //starting at version 14, we have a new kVolumeNearMin so we need to renormalize
-                fVolumeNear = normalize(kVolumeNearMin, kVolumeNearMax, fVolumeNear);
-
-                mParameters.set(kVolumeNear, fVolumeNear);
-                
-                if (version >= 5) mParameters.set(kVolumeMid, readFloatData(data, sizeInBytes, normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault)));
-                mParameters.set(kVolumeFar, readFloatData(data, sizeInBytes, normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault)));
-                mParameters.set(kFilterNear, readFloatData(data, sizeInBytes, normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault)));
-                if (version >= 5) mParameters.set(kFilterMid, readFloatData(data, sizeInBytes, normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault)));
-                mParameters.set(kFilterFar, readFloatData(data, sizeInBytes, normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault)));
-                for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++)//for (int i = 0; i < mNumberOfSources; i++)
-                {
-                    mParameters.set(getParamForSourceX(i), readFloatData(data, sizeInBytes, 0));
-                    mParameters.set(getParamForSourceY(i), readFloatData(data, sizeInBytes, 0));
-                    float distance = readFloatData(data, sizeInBytes, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance));
-                    mParameters.set(getParamForSourceD(i), distance);
-                }
-                for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++)//for (int i = 0; i < mNumberOfSpeakers; i++)
-                {
-                    mParameters.set(getParamForSpeakerX(i), readFloatData(data, sizeInBytes, 0));
-                    mParameters.set(getParamForSpeakerY(i), readFloatData(data, sizeInBytes, 0));
-                    float att = readFloatData(data, sizeInBytes, normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation));
-                    mParameters.set(getParamForSpeakerA(i), att);
-                    float mute = readFloatData(data, sizeInBytes, 0);
-                    mParameters.set(getParamForSpeakerM(i), mute );
-                }
-            }
-            
-            //in version 11, we had the joystick state saved here, but in >= 12 we removed that, hence it's been replaced by the next
-            //parameter, ie mTrState
-            if (version == 11){
-                mJoystickEnabled = readIntData(data, sizeInBytes, 0);
-            } else if (version >= 12){
-                mTrState = readIntData(data, sizeInBytes, 0);
-            }
-            
-            if (version >= 13){
-                m_iTrDirection = readIntData(data, sizeInBytes, 0);
-                m_iTrReturn = readIntData(data, sizeInBytes, 0);
-            }
-        }
     }
-    
     mHostChangedParameter++;
     mHostChangedProperty++;
 }
