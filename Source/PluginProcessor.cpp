@@ -1812,7 +1812,7 @@ void OctogrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
 static const int kDataVersion = 16;
 void OctogrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    XmlElement xml ("OCTOGRIS_SETTINGS");
+    XmlElement xml ("SPATGRIS_SETTINGS");
     
     xml.setAttribute ("kDataVersion", kDataVersion);
     xml.setAttribute ("mShowGridLines", mShowGridLines);

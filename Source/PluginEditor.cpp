@@ -676,7 +676,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 5;
         }
         
-        mToggleOscSpat = addCheckbox("OSC spatialization", mFilter->getShowGridLines(), x, y, w, dh, box);
+        mToggleOscSpat = addCheckbox("OSC spatialization", mFilter->getOscSpat(), x, y, w, dh, box);
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
