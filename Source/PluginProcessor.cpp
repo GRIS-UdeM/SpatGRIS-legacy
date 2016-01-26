@@ -1809,7 +1809,7 @@ void OctogrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
     }
 }
 
-static const int kDataVersion = 16;
+static const int kDataVersion = 1;
 void OctogrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     XmlElement xml ("SPATGRIS_SETTINGS");
