@@ -1354,7 +1354,6 @@ void OctogrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     if (!p_bCalledFromConstructor){
         buttonClicked(mApplySrcPlacementButton);
-        //comboBoxChanged(mSrcPlacement);
     }
     
     //source position combobox in source tab
@@ -1806,10 +1805,10 @@ void OctogrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mApplyFilter) {
         mFilter->setApplyFilter(button->getToggleState());
     }
+    
 #if USE_JOYSTICK
     //Changements lié a l'ajout de joystick à l'onglet interface
     else if(button == mEnableJoystick) {
-
         bool bJoystickEnabled = mEnableJoystick->getToggleState();
         mFilter->setIsJoystickEnabled(bJoystickEnabled);
         if (bJoystickEnabled) {
@@ -1848,6 +1847,7 @@ void OctogrisAudioProcessorEditor::buttonClicked (Button *button){
         }
     }
 #endif   
+    
 #if USE_LEAP
     else if(button == mEnableLeap) {
         bool state = mEnableLeap->getToggleState();

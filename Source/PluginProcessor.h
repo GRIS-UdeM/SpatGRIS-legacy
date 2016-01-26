@@ -23,18 +23,19 @@
  ==============================================================================
  */
 
+#ifndef PLUGINPROCESSOR_H_INCLUDED
+#define PLUGINPROCESSOR_H_INCLUDED
+
 #ifndef USE_LEAP
 #define USE_LEAP 1
 #endif
 
-//#if !WIN32
+#if !WIN32
 #ifndef USE_JOYSTICK
 #define USE_JOYSTICK 1
 #endif
-//#endif
+#endif
 
-#ifndef PLUGINPROCESSOR_H_INCLUDED
-#define PLUGINPROCESSOR_H_INCLUDED
 
 #ifndef M_PI // for visual studio 2010
 #define M_PI 3.14159265358979323846264338327950288
