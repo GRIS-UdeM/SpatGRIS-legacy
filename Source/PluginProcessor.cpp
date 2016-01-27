@@ -289,22 +289,23 @@ void OctogrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
 
 JUCE_COMPILER_WARNING("this needs to be called in a thread or something")
 void OctogrisAudioProcessor::sendOscSpatValues(){
-    DBG("!");
     if  (!getOscSpat()){
         return;
     }
-        
-        
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
-        JUCE_COMPILER_WARNING("will need to add source numbers")
+        JUCE_COMPILER_WARNING("will need to add source numbers in the editor")
         int   channel_osc   = iCurSrc;//m_oAllSources[iCurSrc].getSourceId()-1;
-        JUCE_COMPILER_WARNING("need to make sure these RT coordinates are between -180 and 180 or whatever ZirkOSC sends")
+        
+        JUCE_COMPILER_WARNING("Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle," +
+                              ".5 in the middle. Need to replace getSourceRT by a function that converts the xy (here, 0,0 is bottom left, not center) to azim, elev")
         FPoint curPoint = getSourceRT(iCurSrc);
-        float azim_osc      = curPoint.x;// //PercentToHR(m_oAllSources[iCurSrc].getAzimuth01(), ZirkOSC_Azim_Min, ZirkOSC_Azim_Max) /180.;
-        float elev_osc      = curPoint.y;//PercentToHR(m_oAllSources[iCurSrc].getElevation01(), ZirkOSC_Elev_Min, ZirkOSC_Elev_Max)/180.;
-        float azimspan_osc  = getSourceD(iCurSrc);//getPercentToHR(m_oAllSources[iCurSrc].getAzimuthSpan(), ZirkOSC_AzimSpan_Min,ZirkOSC_AzimSpan_Max)/180.;
+        float azim_osc      = curPoint.x;   //-1 is in the back right and +1 in the back left. 0 is forward
+        float elev_osc      = curPoint.y;   //0 is the edge of the dome, .5 is the top
+        cout << "(" << azim_osc << ", " << elev_osc << ")\n";
+        
+        float azimspan_osc  = getSourceD(iCurSrc);  //min azim span is 0, max is 2
         JUCE_COMPILER_WARNING("will need to implement elevation span")
-        float elevspan_osc  = 0;//PercentToHR(m_oAllSources[iCurSrc].getElevationSpan(), ZirkOSC_ElevSpan_Min, ZirkOSC_Elev_Max)/180.;
+        float elevspan_osc  = 0;                    //min elev span is 0, max is .5
         float gain_osc      = getSourceD(iCurSrc);//m_oAllSources[iCurSrc].getGain01();
         
         //        lo_send(_OscZirkonium, "/pan/az", "ifffff", channel_osc, azim_osc, elev_osc, azimspan_osc, elevspan_osc, gain_osc);
