@@ -1312,7 +1312,7 @@ void OctogrisAudioProcessorEditor::resized()
 void OctogrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
-    
+
     Component *ct = mSourcesBox->getContent();
     
     //remove old stuff

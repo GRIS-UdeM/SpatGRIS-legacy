@@ -70,6 +70,41 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 	}
 #endif
 
+//==============================================================================
+class OscSpatThread : public Thread {
+public:
+    OscSpatThread(OctogrisAudioProcessor* p_pProcessor)
+    : Thread ("OscSpatThread")
+    , m_iInterval(25)
+    , m_pProcessor(p_pProcessor) {
+        startThread ();
+    }
+    
+    ~OscSpatThread() {
+        // allow the thread .5 second to stop cleanly - should be plenty of time.
+        stopThread (500);
+    }
+    
+    void run() override {
+        while (!threadShouldExit()) {
+            wait (m_iInterval);
+            
+            // because this is a background thread, we mustn't do any UI work without first grabbing a MessageManagerLock
+            const MessageManagerLock mml (Thread::getCurrentThread());
+            
+            if (!mml.lockWasGained())  // if something is trying to kill this job, the lock will fail, in which case we'd better return
+                return;
+            
+            // now we've got the UI thread locked, we can mess about with the components
+            m_pProcessor->sendOscSpatValues();
+        }
+    }
+private:
+    int m_iInterval;
+    OctogrisAudioProcessor* m_pProcessor;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSpatThread)
+};
+
 
 //==============================================================================
 int IndexedAngleCompare(const void *a, const void *b)
@@ -189,35 +224,31 @@ OctogrisAudioProcessor::OctogrisAudioProcessor()
 	mOscSendPort = 9000;
 	setOscSendIp("192.168.1.100");
 	
-     //changements lié a l'ajout de joystick à l'onglet leap
     mLeapEnabled = 0;
     mJoystickEnabled = 0;
-
-     //fin changements lié a l'ajout de joystick à l'onglet leap
     
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
+    m_pOscSpatThread = nullptr;
 	
 	// default values for parameters
-    //whatever the actual mNumberOfSources, mParameters always has the same number of parameters, so might as well initialize
-    //everything (JucePlugin_MaxNumInputChannels) instead of just mNumberOfSources
-    for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){   	//for (int i = 0; i < mNumberOfSources; i++){
+    for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
         float fDefaultVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance);
         mParameters.set(getParamForSourceD(i), fDefaultVal);
     }
 
-    for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){   	//for (int i = 0; i < mNumberOfSources; i++){
+    for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerA(i), normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation));
         mParameters.set(getParamForSpeakerM(i), 0);
     }
 }
 
-OctogrisAudioProcessor::~OctogrisAudioProcessor()
-{
-    //delete[] mFilters;
-    
+OctogrisAudioProcessor::~OctogrisAudioProcessor() {
     Trajectory::Ptr t = getTrajectory();
     if (t){
         t->stop();
+    }
+    if (m_pOscSpatThread){
+        delete m_pOscSpatThread;
     }
 }
 
@@ -245,22 +276,36 @@ void OctogrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
         //if(!mOscSpatSender.connect(mOscSendIp, mOscSendPort)){
         if(!mOscSpatSender.connect("127.0.0.1", 18032)){
             DBG("OSC cannot connect to " + mOscSendIp);
+            return;
         }
+    m_pOscSpatThread = new OscSpatThread(this);
     } else {
         mOscSpatSender.disconnect();
-        
+        if(m_pOscSpatThread){
+            delete m_pOscSpatThread;
+        }
     }
 }
 
 JUCE_COMPILER_WARNING("this needs to be called in a thread or something")
 void OctogrisAudioProcessor::sendOscSpatValues(){
+    DBG("!");
+    if  (!getOscSpat()){
+        return;
+    }
+        
+        
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
-        int   channel_osc   = m_oAllSources[iCurSrc].getSourceId()-1;
-        float azim_osc      = PercentToHR(m_oAllSources[iCurSrc].getAzimuth01(), ZirkOSC_Azim_Min, ZirkOSC_Azim_Max) /180.;
-        float elev_osc      = PercentToHR(m_oAllSources[iCurSrc].getElevation01(), ZirkOSC_Elev_Min, ZirkOSC_Elev_Max)/180.;
-        float azimspan_osc  = PercentToHR(m_oAllSources[iCurSrc].getAzimuthSpan(), ZirkOSC_AzimSpan_Min,ZirkOSC_AzimSpan_Max)/180.;
-        float elevspan_osc  = PercentToHR(m_oAllSources[iCurSrc].getElevationSpan(), ZirkOSC_ElevSpan_Min, ZirkOSC_Elev_Max)/180.;
-        float gain_osc      = m_oAllSources[iCurSrc].getGain01();
+        JUCE_COMPILER_WARNING("will need to add source numbers")
+        int   channel_osc   = iCurSrc;//m_oAllSources[iCurSrc].getSourceId()-1;
+        JUCE_COMPILER_WARNING("need to make sure these RT coordinates are between -180 and 180 or whatever ZirkOSC sends")
+        FPoint curPoint = getSourceRT(iCurSrc);
+        float azim_osc      = curPoint.x;// //PercentToHR(m_oAllSources[iCurSrc].getAzimuth01(), ZirkOSC_Azim_Min, ZirkOSC_Azim_Max) /180.;
+        float elev_osc      = curPoint.y;//PercentToHR(m_oAllSources[iCurSrc].getElevation01(), ZirkOSC_Elev_Min, ZirkOSC_Elev_Max)/180.;
+        float azimspan_osc  = getSourceD(iCurSrc);//getPercentToHR(m_oAllSources[iCurSrc].getAzimuthSpan(), ZirkOSC_AzimSpan_Min,ZirkOSC_AzimSpan_Max)/180.;
+        JUCE_COMPILER_WARNING("will need to implement elevation span")
+        float elevspan_osc  = 0;//PercentToHR(m_oAllSources[iCurSrc].getElevationSpan(), ZirkOSC_ElevSpan_Min, ZirkOSC_Elev_Max)/180.;
+        float gain_osc      = getSourceD(iCurSrc);//m_oAllSources[iCurSrc].getGain01();
         
         //        lo_send(_OscZirkonium, "/pan/az", "ifffff", channel_osc, azim_osc, elev_osc, azimspan_osc, elevspan_osc, gain_osc);
         OSCAddressPattern oscPattern("/pan/az");
@@ -273,14 +318,15 @@ void OctogrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(elevspan_osc);
         message.addFloat32(gain_osc);
         
-        if (!mOscSender.send(message)) {
+        if (!mOscSpatSender.send(message)) {
             DBG("Error: could not send OSC message.");
         }
+
     }
+}
 
 //==============================================================================
-const String OctogrisAudioProcessor::getName() const
-{
+const String OctogrisAudioProcessor::getName() const {
 	String name(JucePlugin_Name);
 	name << " ";
 	name << mNumberOfSources;
@@ -289,8 +335,7 @@ const String OctogrisAudioProcessor::getName() const
     return name;
 }
 
-int OctogrisAudioProcessor::getNumParameters()
-{
+int OctogrisAudioProcessor::getNumParameters() {
     return kNumberOfParameters;
 }
 

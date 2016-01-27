@@ -230,6 +230,8 @@ typedef struct
 } IndexedAngle;
 int IndexedAngleCompare(const void *a, const void *b);
 
+class OscSpatThread;
+
 //==============================================================================
 class OctogrisAudioProcessor : public AudioProcessor
 {
@@ -283,30 +285,6 @@ public:
     void setStateInformation (const void* data, int sizeInBytes);
 
     //==============================================================================
-	// For editor
-	int getNumberOfSources() const { return mNumberOfSources; }
-	int getParamForSourceX(int index) const { return kSourceX + index * kParamsPerSource; }
-	int getParamForSourceY(int index) const { return kSourceY + index * kParamsPerSource; }
-	int getParamForSourceD(int index) const { return kSourceD + index * kParamsPerSource; }
-	
-	float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
-	float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
-	float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
-	float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
-	
-	int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
-    
-	inline int getParamForSpeakerX(int index) const { return kSpeakerX + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    inline int getParamForSpeakerY(int index) const { return kSpeakerY + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    inline int getParamForSpeakerA(int index) const { return kSpeakerA + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    inline int getParamForSpeakerM(int index) const { return kSpeakerM + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    
-    float getSpeakerX(int index) const { return mParameters.getUnchecked(getParamForSpeakerX(index)); }
-	float getSpeakerY(int index) const { return mParameters.getUnchecked(getParamForSpeakerY(index)); }
-	float getSpeakerA(int index) const { return mParameters.getUnchecked(getParamForSpeakerA(index)); }
-	float getSpeakerM(int index) const { return mParameters.getUnchecked(getParamForSpeakerM(index)); }
-	float getDenormedSpeakerA(int index) const { return denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, getSpeakerA(index)); }
-	
 	bool getApplyFilter() const { return mApplyFilter; }
 	void setApplyFilter(bool s) { mApplyFilter = s; }
 	
@@ -324,7 +302,6 @@ public:
 		
 	int getProcessMode() const { return mProcessMode; }
 	void setProcessMode(int s) { mProcessMode = s; jassert(mProcessMode >= 0 && mProcessMode < kNumberOfModes); }
-	
     
     void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
     bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
@@ -436,6 +413,29 @@ public:
 	uint64_t getHostChangedProperty() { return mHostChangedProperty; }
 	uint64_t getProcessCounter() { return mProcessCounter; }
 	
+    int getNumberOfSources() const { return mNumberOfSources; }
+    int getParamForSourceX(int index) const { return kSourceX + index * kParamsPerSource; }
+    int getParamForSourceY(int index) const { return kSourceY + index * kParamsPerSource; }
+    int getParamForSourceD(int index) const { return kSourceD + index * kParamsPerSource; }
+    
+    float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
+    float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
+    float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
+    float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
+    
+    int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
+    
+    inline int getParamForSpeakerX(int index) const { return kSpeakerX + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    inline int getParamForSpeakerY(int index) const { return kSpeakerY + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    inline int getParamForSpeakerA(int index) const { return kSpeakerA + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    inline int getParamForSpeakerM(int index) const { return kSpeakerM + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    
+    float getSpeakerX(int index) const { return mParameters.getUnchecked(getParamForSpeakerX(index)); }
+    float getSpeakerY(int index) const { return mParameters.getUnchecked(getParamForSpeakerY(index)); }
+    float getSpeakerA(int index) const { return mParameters.getUnchecked(getParamForSpeakerA(index)); }
+    float getSpeakerM(int index) const { return mParameters.getUnchecked(getParamForSpeakerM(index)); }
+    float getDenormedSpeakerA(int index) const { return denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, getSpeakerA(index)); }
+    
 	// convenience functions for gui:
 	//01 here means that the output is normalized to [0,1]
 	FPoint getSourceXY01(int i)	{
@@ -742,6 +742,7 @@ private:
     bool m_bJustSelectedEndPoint;
     bool m_bIsOscSpat;
     OSCSender mOscSpatSender;
+    OscSpatThread* m_pOscSpatThread;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OctogrisAudioProcessor)
 };
