@@ -491,16 +491,14 @@ public:
     
     FPoint getSourceAzimElev(int i) {
         //get source position in pixels
-        FPoint p = getSourceXY(i);
-        //get dome radius and center in pixels
+        FPoint pXY = getSourceXY(i);
+        //get dome radius in pixels
         float fDomeRadius = m_fFieldWidth/2 - kSourceDiameter/2;
-        float fDomeCenter = m_fFieldWidth / 2;
+        //calculate azim and elev
+        float fAzim = atan2f(pXY.x, pXY.y)/M_PI;
+        float fElev = acosf(fDomeRadius / hypotf(pXY.x, pXY.y));
 
-        
-        float r = hypotf(p.x, p.y);
-        float t = atan2f(p.y, p.x);
-        if (t < 0) t += kThetaMax;
-        return FPoint(r, t);
+        return FPoint(fAzim, fElev);
     }
     
     FPoint convertRt2Xy(FPoint p) {

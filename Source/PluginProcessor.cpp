@@ -296,13 +296,14 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         JUCE_COMPILER_WARNING("will need to add source numbers in the editor")
         int   channel_osc   = iCurSrc;//m_oAllSources[iCurSrc].getSourceId()-1;
         
-        JUCE_COMPILER_WARNING("Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle," +
-                              ".5 in the middle. Need to replace getSourceRT by a function that converts the xy (here, 0,0 is bottom left, not center) to azim, elev")
-        FPoint curPoint = getSourceRT(iCurSrc);
+        //Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle, .5 in the middle. And here, 0,0 is actually center... althought I thought it wasn't!
+        FPoint curPoint = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;   //-1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;   //0 is the edge of the dome, .5 is the top
-        cout << "(" << azim_osc << ", " << elev_osc << ")\n";
-        
+        if (iCurSrc==0){
+            FPoint curPoint1 = getSourceAzimElev(iCurSrc);
+            cout << "(" << azim_osc << ", " << elev_osc << ")\n";
+        }
         float azimspan_osc  = getSourceD(iCurSrc);  //min azim span is 0, max is 2
         JUCE_COMPILER_WARNING("will need to implement elevation span")
         float elevspan_osc  = 0;                    //min elev span is 0, max is .5
