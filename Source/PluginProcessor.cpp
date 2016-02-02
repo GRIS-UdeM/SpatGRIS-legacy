@@ -283,6 +283,7 @@ void OctogrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
         mOscSpatSender.disconnect();
         if(m_pOscSpatThread){
             delete m_pOscSpatThread;
+            m_pOscSpatThread = nullptr;
         }
     }
 }
@@ -735,7 +736,6 @@ void OctogrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
     }
     
 }
-
 
 const String OctogrisAudioProcessor::getParameterText (int index)
 {
