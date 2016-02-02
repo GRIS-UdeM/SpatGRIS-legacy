@@ -36,14 +36,14 @@
 class LevelComponent : public Component
 {
 public:
-    LevelComponent(OctogrisAudioProcessor* filter, int index);
+    LevelComponent(SpatGrisAudioProcessor* filter, int index);
     ~LevelComponent();
 
     void paint (Graphics&);
     void refreshIfNeeded();
 	
 private:
-	OctogrisAudioProcessor *mFilter;
+	SpatGrisAudioProcessor *mFilter;
 	int mIndex;
 	float mLevelAdjustment;
 	float mShowLevel;

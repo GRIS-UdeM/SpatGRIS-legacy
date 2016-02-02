@@ -31,7 +31,7 @@
 
 int gIsLeapConnected = NULL;
 
-OctoLeap::OctoLeap(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor):
+OctoLeap::OctoLeap(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
 mFilter(filter),
 mEditor(editor),
 mController(nullptr),
@@ -115,7 +115,7 @@ void OctoLeap::onFrame(const Leap::Controller& controller) {
     }
 }
 
-OctoLeap::Ptr OctoLeap::CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
+OctoLeap::Ptr OctoLeap::CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
     return new OctoLeap(filter, editor);
 }
@@ -123,9 +123,9 @@ OctoLeap::Ptr OctoLeap::CreateLeapComponent(OctogrisAudioProcessor *filter, Octo
 #else
 
 //class Component;
-class OctogrisAudioProcessor;
-class OctogrisAudioProcessorEditor;
-Component * CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
+class SpatGrisAudioProcessor;
+class SpatGrisAudioProcessorEditor;
+Component * CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
 	// not implemented yet on windows
 	return NULL;

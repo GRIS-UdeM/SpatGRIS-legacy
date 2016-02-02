@@ -233,12 +233,12 @@ int IndexedAngleCompare(const void *a, const void *b);
 class OscSpatThread;
 
 //==============================================================================
-class OctogrisAudioProcessor : public AudioProcessor
+class SpatGrisAudioProcessor : public AudioProcessor
 {
 public:
     //==============================================================================
-    OctogrisAudioProcessor();
-    ~OctogrisAudioProcessor();
+    SpatGrisAudioProcessor();
+    ~SpatGrisAudioProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock);
@@ -744,7 +744,7 @@ private:
     OSCSender mOscSpatSender;
     OscSpatThread* m_pOscSpatThread;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OctogrisAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
 
 #endif  // PLUGINPROCESSOR_H_INCLUDED

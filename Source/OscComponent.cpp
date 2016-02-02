@@ -58,7 +58,7 @@ class OscComponent : public HeartbeatComponent, public Button::Listener, public 
 	private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
-    OscComponent(OctogrisAudioProcessor* filter, OctogrisAudioProcessorEditor *editor)
+    OscComponent(SpatGrisAudioProcessor* filter, SpatGrisAudioProcessorEditor *editor)
 	:mFilter(filter)
     ,mEditor(editor)
     ,mOscIpAddress(NULL)
@@ -273,8 +273,8 @@ public:
 
 
 private:
-	OctogrisAudioProcessor *mFilter;
-	OctogrisAudioProcessorEditor *mEditor;
+	SpatGrisAudioProcessor *mFilter;
+	SpatGrisAudioProcessorEditor *mEditor;
 	
 	ScopedPointer<ToggleButton> mReceive;
     ScopedPointer<TextEditor>   mReceiveIp;
@@ -294,7 +294,7 @@ private:
 	
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscComponent)
 };
-HeartbeatComponent * CreateOscComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor){
+HeartbeatComponent * CreateOscComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor){
 	return new OscComponent(filter, editor);
 }
 void updateOscComponent(HeartbeatComponent* oscComponent){

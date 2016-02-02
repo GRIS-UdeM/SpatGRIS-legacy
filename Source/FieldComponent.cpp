@@ -35,7 +35,7 @@ static const float kSpeakerRadius = 10;
 static const float kSpeakerDiameter = kSpeakerRadius * 2;
 
 //==============================================================================
-FieldComponent::FieldComponent(OctogrisAudioProcessor* filter, SourceMover *mover)
+FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover)
 : mFilter(filter)
 , mMover(mover)
 , m_fStartPathX(-1)

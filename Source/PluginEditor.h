@@ -78,7 +78,7 @@ public:
 };
 
 //==============================================================================
-class OctogrisAudioProcessorEditor  : public AudioProcessorEditor,
+class SpatGrisAudioProcessorEditor  : public AudioProcessorEditor,
 									  public Button::Listener,
 									  public ComboBox::Listener,
                                       public TextEditor::Listener,
@@ -86,8 +86,8 @@ class OctogrisAudioProcessorEditor  : public AudioProcessorEditor,
 									  private Timer
 {
 public:
-    OctogrisAudioProcessorEditor (OctogrisAudioProcessor* ownerFilter);
-    ~OctogrisAudioProcessorEditor();
+    SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter);
+    ~SpatGrisAudioProcessorEditor();
 
     //==============================================================================
     void paint(Graphics& g);
@@ -128,7 +128,7 @@ public:
     void setDefaultPendulumEndpoint();
     
 private:
-	OctogrisAudioProcessor *mFilter;
+	SpatGrisAudioProcessor *mFilter;
 	SourceMover mMover;
 	
 	// for memory management:

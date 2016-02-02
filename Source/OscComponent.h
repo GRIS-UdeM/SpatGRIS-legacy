@@ -31,7 +31,7 @@
 
 class OscComponent;
 
-HeartbeatComponent * CreateOscComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor);
+HeartbeatComponent * CreateOscComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor);
 void updateOscComponent(HeartbeatComponent* oscComponent);
 
 #endif  // OSCCOMPONENT_H_INCLUDED

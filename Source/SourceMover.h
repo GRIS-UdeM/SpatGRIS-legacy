@@ -46,7 +46,7 @@ typedef enum
 class SourceMover
 {
 public:
-	SourceMover(OctogrisAudioProcessor *filter);
+	SourceMover(SpatGrisAudioProcessor *filter);
     void updateNumberOfSources();
 	
 	void begin(int s, MoverType mt);
@@ -64,7 +64,7 @@ public:
     }
 	
 private:
-	OctogrisAudioProcessor *mFilter;
+	SpatGrisAudioProcessor *mFilter;
 	MoverType mMoverType;
 	int mSelectedSrc;
 	
