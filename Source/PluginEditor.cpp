@@ -1286,6 +1286,7 @@ void SpatGrisAudioProcessorEditor::resized()
     int fieldSize = jmin(fieldWidth, fieldHeight);
     
     mField->setBounds(kMargin, kMargin, fieldSize, fieldSize);
+    mFilter->setFieldWidth(fieldSize);
 
     m_logoImage.setBounds(15, 15, (float)fieldSize/7, (float)fieldSize/7);
     

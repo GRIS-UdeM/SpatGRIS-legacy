@@ -82,6 +82,13 @@ enum {
     kParamsPerSpeakers
 };
 
+//==============================================================================
+static const float kSourceRadius = 10;
+static const float kSourceDiameter = kSourceRadius * 2;
+static const float kSpeakerRadius = 10;
+static const float kSpeakerDiameter = kSpeakerRadius * 2;
+
+//==============================================================================
 enum
 {
     kTrReady,
@@ -480,6 +487,22 @@ public:
 		return FPoint(r, t);
 	}
     
+    void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
+    
+    FPoint getSourceAzimElev(int i) {
+        //get source position in pixels
+        FPoint p = getSourceXY(i);
+        //get dome radius and center in pixels
+        float fDomeRadius = m_fFieldWidth/2 - kSourceDiameter/2;
+        float fDomeCenter = m_fFieldWidth / 2;
+
+        
+        float r = hypotf(p.x, p.y);
+        float t = atan2f(p.y, p.x);
+        if (t < 0) t += kThetaMax;
+        return FPoint(r, t);
+    }
+    
     FPoint convertRt2Xy(FPoint p) {
         float x = p.x * cosf(p.y);
         float y = p.x * sinf(p.y);
@@ -743,6 +766,7 @@ private:
     bool m_bIsOscSpat;
     OSCSender mOscSpatSender;
     OscSpatThread* m_pOscSpatThread;
+    float m_fFieldWidth;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
