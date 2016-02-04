@@ -17,7 +17,7 @@
 #include "FieldComponent.h"
 
 /*#if JUCE_WINDOWS
- Component * CreateHIDComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
+ Component * CreateHIDComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
  {
  // not implemented yet on windows
  return NULL;
@@ -29,7 +29,7 @@
 
 /** HIDDelegate constructor taking two arguments and initializaing its others components by default */
 
-HIDDelegate::HIDDelegate(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor):
+HIDDelegate::HIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
 mFilter (filter),
 mEditor (editor),
 nbButton(0),
@@ -63,7 +63,7 @@ void HIDDelegate::Handle_DeviceRemovalCallback(void *inContext, IOReturn inResul
 #pragma unused (  inContext, inResult, inSender )
     
 //    printf("(context: %p, result: 0x%08X, sender: %p, device: %p).\n", inContext, inResult, inSender, (void *) inIOHIDDeviceRef);
-    OctogrisAudioProcessorEditor * tempEditor = (OctogrisAudioProcessorEditor*) inContext;
+    SpatGrisAudioProcessorEditor * tempEditor = (SpatGrisAudioProcessorEditor*) inContext;
     tempEditor->uncheckJoystickButton();
     
     //what to do when a joystick get unplugged
@@ -86,7 +86,7 @@ void HIDDelegate::joystickPositionCallback(
         double max          = IOHIDElementGetPhysicalMax(tIOHIDElementRef);
         
         double value = IOHIDValueGetScaledValue(inIOHIDValueRef, kIOHIDValueScaleTypePhysical);
-        OctogrisAudioProcessorEditor* tempEditor = (OctogrisAudioProcessorEditor*) inContext;  //we get the editor from the context
+        SpatGrisAudioProcessorEditor* tempEditor = (SpatGrisAudioProcessorEditor*) inContext;  //we get the editor from the context
         if(tempEditor->getHIDDel() != NULL) {
             if(usagePage==1) {   //axis
                 tempEditor->getHIDDel()->JoystickUsed(usage, value,min,max);  //calling Joystick used the function that will modify the source position
@@ -347,7 +347,7 @@ bool HIDDelegate::getButtonPressedTab(u_int32_t index)
 {
     return buttonPressedTab[index];
 }
-HIDDelegate::Ptr HIDDelegate::CreateHIDDelegate(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
+HIDDelegate::Ptr HIDDelegate::CreateHIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
     return new HIDDelegate(filter, editor);
 }

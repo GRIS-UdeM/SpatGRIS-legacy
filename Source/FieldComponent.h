@@ -40,7 +40,7 @@ typedef enum
 class FieldComponent : public Component
 {
 public:
-    FieldComponent(OctogrisAudioProcessor* filter, SourceMover *mover);
+    FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover);
     ~FieldComponent();
 
     void paint (Graphics&);
@@ -56,7 +56,7 @@ public:
     void clearTrajectoryPath();
     void updatePositionTrace(float p_fX, float p_fY);
 private:
-	OctogrisAudioProcessor *mFilter;
+	SpatGrisAudioProcessor *mFilter;
 	SourceMover *mMover;
 	
 	SelectionType mSelectionType;

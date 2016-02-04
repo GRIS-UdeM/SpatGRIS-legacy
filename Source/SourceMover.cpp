@@ -28,7 +28,7 @@
 #include "FieldComponent.h"
 
 
-SourceMover::SourceMover(OctogrisAudioProcessor *filter)
+SourceMover::SourceMover(SpatGrisAudioProcessor *filter)
 : mFilter(filter)
  ,mMoverType(kVacant)
  ,mSelectedSrc(0)

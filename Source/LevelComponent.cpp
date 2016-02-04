@@ -31,7 +31,7 @@ static const float kMinLevel = -60.f;
 static const float kMaxLevel = 1.f;
 
 //==============================================================================
-LevelComponent::LevelComponent(OctogrisAudioProcessor* filter, int index)
+LevelComponent::LevelComponent(SpatGrisAudioProcessor* filter, int index)
 :
 	mFilter(filter),
 	mIndex(index),

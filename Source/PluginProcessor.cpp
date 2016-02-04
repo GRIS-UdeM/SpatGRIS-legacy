@@ -35,45 +35,44 @@ static const float kLevelReleaseDefault = 100;
 #include <algorithm>
 
 #if JUCE_MSVC
+#include <sstream>
+#include <string>
+#include <windows.h>
+
+template<class T>
+string toString(const T &value) {
+    ostringstream os;
+    os << value;
+    return os.str();
+}
+
 // from https://github.com/objectx/strlcpy/blob/master/strlcpy/strlcpy.c
 size_t strlcpy(char * dst, const char * src, size_t dstsize)
 {
     if (dst == 0 || dstsize == 0) {
-		return 0;
+        return 0;
     }
     if (src == 0) {
-		dst [0] = 0;
-		return 0;
-    }
-    else {
+        dst [0] = 0;
+        return 0;
+    } else {
         size_t	src_len = strlen (src);
         size_t	dstlimit = dstsize - 1;
-
+        
         if (dstlimit < src_len) {
-	    src_len = dstlimit;
+            src_len = dstlimit;
         }
         memcpy (dst, src, src_len);
         dst [src_len] = 0;
         return src_len;
     }
 }
-
-#include <sstream>
-#include <string>
-#include <windows.h>
-
-	template<class T>
-	string toString(const T &value) {
-		ostringstream os;
-		os << value;
-		return os.str();
-	}
 #endif
 
 //==============================================================================
 class OscSpatThread : public Thread {
 public:
-    OscSpatThread(OctogrisAudioProcessor* p_pProcessor)
+    OscSpatThread(SpatGrisAudioProcessor* p_pProcessor)
     : Thread ("OscSpatThread")
     , m_iInterval(25)
     , m_pProcessor(p_pProcessor) {
@@ -101,7 +100,7 @@ public:
     }
 private:
     int m_iInterval;
-    OctogrisAudioProcessor* m_pProcessor;
+    SpatGrisAudioProcessor* m_pProcessor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSpatThread)
 };
 
@@ -115,7 +114,7 @@ int IndexedAngleCompare(const void *a, const void *b)
 }
 
 //==============================================================================
-OctogrisAudioProcessor::OctogrisAudioProcessor()
+SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 :mFilters()
 ,m_bIsRecordingAutomation(false)
 ,m_iSourceLocationChanged(-1)
@@ -242,7 +241,7 @@ OctogrisAudioProcessor::OctogrisAudioProcessor()
     }
 }
 
-OctogrisAudioProcessor::~OctogrisAudioProcessor() {
+SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     Trajectory::Ptr t = getTrajectory();
     if (t){
         t->stop();
@@ -254,7 +253,7 @@ OctogrisAudioProcessor::~OctogrisAudioProcessor() {
 
 
 //==============================================================================
-void OctogrisAudioProcessor::setCalculateLevels(bool c)
+void SpatGrisAudioProcessor::setCalculateLevels(bool c)
 {
 	if (!mCalculateLevels && c)
 		for (int i = 0; i < mNumberOfSpeakers; i++)
@@ -266,7 +265,7 @@ void OctogrisAudioProcessor::setCalculateLevels(bool c)
 	
 }
 
-void OctogrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
+void SpatGrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
     m_bIsOscSpat = p_bIsOscSpat;
     
     if (m_bIsOscSpat){
@@ -283,12 +282,12 @@ void OctogrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
         mOscSpatSender.disconnect();
         if(m_pOscSpatThread){
             delete m_pOscSpatThread;
+            m_pOscSpatThread = nullptr;
         }
     }
 }
 
-JUCE_COMPILER_WARNING("this needs to be called in a thread or something")
-void OctogrisAudioProcessor::sendOscSpatValues(){
+void SpatGrisAudioProcessor::sendOscSpatValues(){
     if  (!getOscSpat()){
         return;
     }
@@ -296,13 +295,14 @@ void OctogrisAudioProcessor::sendOscSpatValues(){
         JUCE_COMPILER_WARNING("will need to add source numbers in the editor")
         int   channel_osc   = iCurSrc;//m_oAllSources[iCurSrc].getSourceId()-1;
         
-        JUCE_COMPILER_WARNING("Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle," +
-                              ".5 in the middle. Need to replace getSourceRT by a function that converts the xy (here, 0,0 is bottom left, not center) to azim, elev")
-        FPoint curPoint = getSourceRT(iCurSrc);
+        //Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle, .5 in the middle. And here, 0,0 is actually center... althought I thought it wasn't!
+        FPoint curPoint = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;   //-1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;   //0 is the edge of the dome, .5 is the top
-        cout << "(" << azim_osc << ", " << elev_osc << ")\n";
-        
+        if (iCurSrc==0){
+            FPoint curPoint1 = getSourceAzimElev(iCurSrc);
+            cout << "(" << azim_osc << ", " << elev_osc << ")\n";
+        }
         float azimspan_osc  = getSourceD(iCurSrc);  //min azim span is 0, max is 2
         JUCE_COMPILER_WARNING("will need to implement elevation span")
         float elevspan_osc  = 0;                    //min elev span is 0, max is .5
@@ -327,7 +327,7 @@ void OctogrisAudioProcessor::sendOscSpatValues(){
 }
 
 //==============================================================================
-const String OctogrisAudioProcessor::getName() const {
+const String SpatGrisAudioProcessor::getName() const {
 	String name(JucePlugin_Name);
 	name << " ";
 	name << mNumberOfSources;
@@ -336,16 +336,16 @@ const String OctogrisAudioProcessor::getName() const {
     return name;
 }
 
-int OctogrisAudioProcessor::getNumParameters() {
+int SpatGrisAudioProcessor::getNumParameters() {
     return kNumberOfParameters;
 }
 
-float OctogrisAudioProcessor::getParameter (int index)
+float SpatGrisAudioProcessor::getParameter (int index)
 {
     return mParameters[index];
 }
 
-void OctogrisAudioProcessor::setParameter (int index, float newValue){
+void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     
     float fOldValue = mParameters.getUnchecked(index);
     
@@ -365,7 +365,7 @@ void OctogrisAudioProcessor::setParameter (int index, float newValue){
 }
 
 
-void OctogrisAudioProcessor::setParameterNotifyingHost (int index, float newValue)
+void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue)
 {
 	mParameters.set(index, newValue);
     
@@ -381,7 +381,7 @@ void OctogrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
     sendParamChangeMessageToListeners(index, newValue);
 }
 
-const String OctogrisAudioProcessor::getParameterName (int index)
+const String SpatGrisAudioProcessor::getParameterName (int index)
 {
    
 	if (index == kSmooth)		return "Smooth Param";
@@ -424,7 +424,7 @@ const String OctogrisAudioProcessor::getParameterName (int index)
     return String::empty;
 }
 
-void OctogrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
+void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
     mInputOutputMode = p_iInputOutputMode-1;
     
@@ -511,7 +511,7 @@ void OctogrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     }
 }
 
-void OctogrisAudioProcessor::updateInputOutputMode (){
+void SpatGrisAudioProcessor::updateInputOutputMode (){
     if (mNumberOfSources == 1 && mNumberOfSpeakers == 2){
         mInputOutputMode =  i1o2;
         return;
@@ -575,15 +575,15 @@ void OctogrisAudioProcessor::updateInputOutputMode (){
     
 }
 
-void OctogrisAudioProcessor::setSrcPlacementMode(int p_i){
+void SpatGrisAudioProcessor::setSrcPlacementMode(int p_i){
     mSrcPlacementMode = p_i;
 }
 
-void OctogrisAudioProcessor::setSpPlacementMode(int p_i){
+void SpatGrisAudioProcessor::setSpPlacementMode(int p_i){
     mSpPlacementMode = p_i;
 }
 
-void OctogrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool bUseDefaultValues){
+void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool bUseDefaultValues){
     
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
@@ -661,7 +661,7 @@ void OctogrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     suspendProcessing (false);
 }
 
-void OctogrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
+void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
     
     //if new number of speakers is same as before, return
     if (p_iNewNumberOfSpeakers == mNumberOfSpeakers){
@@ -695,12 +695,12 @@ void OctogrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     suspendProcessing (false);
 }
 
-void OctogrisAudioProcessor::updateRoutingTemp()
+void SpatGrisAudioProcessor::updateRoutingTemp()
 {
 	mRoutingTemp.setSize(mNumberOfSpeakers, kMaxSize);
 }
 
-void OctogrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise){
+void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise){
 
     float anglePerSp = kThetaMax / getNumberOfSpeakers();
     
@@ -736,36 +736,35 @@ void OctogrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
     
 }
 
-
-const String OctogrisAudioProcessor::getParameterText (int index)
+const String SpatGrisAudioProcessor::getParameterText (int index)
 {
     return String::empty;
 	// return String (getParameter (index), 2);
 }
 
-const String OctogrisAudioProcessor::getInputChannelName (int channelIndex) const
+const String SpatGrisAudioProcessor::getInputChannelName (int channelIndex) const
 {
     return String(channelIndex + 1);
 }
 
-const String OctogrisAudioProcessor::getOutputChannelName (int channelIndex) const
+const String SpatGrisAudioProcessor::getOutputChannelName (int channelIndex) const
 {
     return String(channelIndex + 1);
 }
 
-bool OctogrisAudioProcessor::isInputChannelStereoPair (int index) const
+bool SpatGrisAudioProcessor::isInputChannelStereoPair (int index) const
 {
     return index == 0 && mNumberOfSources == 2;
 	//return false;
 }
 
-bool OctogrisAudioProcessor::isOutputChannelStereoPair (int index) const
+bool SpatGrisAudioProcessor::isOutputChannelStereoPair (int index) const
 {
     return index == 0 && mNumberOfSpeakers == 2;
 	//return false;
 }
 
-bool OctogrisAudioProcessor::acceptsMidi() const
+bool SpatGrisAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -774,7 +773,7 @@ bool OctogrisAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool OctogrisAudioProcessor::producesMidi() const
+bool SpatGrisAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -783,41 +782,41 @@ bool OctogrisAudioProcessor::producesMidi() const
    #endif
 }
 
-bool OctogrisAudioProcessor::silenceInProducesSilenceOut() const
+bool SpatGrisAudioProcessor::silenceInProducesSilenceOut() const
 {
     return false;
 }
 
-double OctogrisAudioProcessor::getTailLengthSeconds() const
+double SpatGrisAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int OctogrisAudioProcessor::getNumPrograms()
+int SpatGrisAudioProcessor::getNumPrograms()
 {
     return 1;
 }
 
-int OctogrisAudioProcessor::getCurrentProgram()
+int SpatGrisAudioProcessor::getCurrentProgram()
 {
     return 1;
 }
 
-void OctogrisAudioProcessor::setCurrentProgram (int index)
+void SpatGrisAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const String OctogrisAudioProcessor::getProgramName (int index)
+const String SpatGrisAudioProcessor::getProgramName (int index)
 {
     return String::empty;
 }
 
-void OctogrisAudioProcessor::changeProgramName (int index, const String& newName)
+void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName)
 {
 }
 
 //==============================================================================
-void OctogrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     
 //	int iSources = getNumInputChannels();//mNumberOfSources;
@@ -853,7 +852,7 @@ void OctogrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
 }
 
-void OctogrisAudioProcessor::reset()
+void SpatGrisAudioProcessor::reset()
 {
 	if (mCalculateLevels)
 		for (int i = 0; i < mNumberOfSpeakers; i++)
@@ -869,19 +868,19 @@ void OctogrisAudioProcessor::reset()
 	Router::instance().reset();
 }
 
-void OctogrisAudioProcessor::releaseResources()
+void SpatGrisAudioProcessor::releaseResources()
 {
 
 }
 
-void OctogrisAudioProcessor::processBlockBypassed (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void SpatGrisAudioProcessor::processBlockBypassed (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	//fprintf(stderr, "pb bypass\n");
 	//for (int c = mNumberOfSources; c < mNumberOfSpeakers; c++)
 	//	buffer.clear(c, 0, buffer.getNumSamples());
 }
 
-void OctogrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	// sanity check for auval
 	if (buffer.getNumChannels() < ((mRoutingMode == 1) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
@@ -1085,7 +1084,7 @@ void OctogrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	mProcessCounter++;
 }
 
-void OctogrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
+void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
 {
 	switch(mProcessMode)
 	{
@@ -1095,7 +1094,7 @@ void OctogrisAudioProcessor::ProcessData(float **inputs, float **outputs, float 
 	}
 }
 
-void OctogrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, float *params, int &p_piLeftSpeaker, int &p_piRightSpeaker,
+void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, float *params, int &p_piLeftSpeaker, int &p_piRightSpeaker,
                                                       float &p_pfDeltaAngleToLeftSpeaker, float &p_pfDeltaAngleToRightSpeaker, int p_iTargetSpeaker)
 {
     int iFirstSpeaker = -1, iLastSpeaker = -1;
@@ -1177,7 +1176,7 @@ void OctogrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 }
 
 
-void OctogrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
+void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 {
 	float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
 	float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
@@ -1188,7 +1187,7 @@ void OctogrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	output[f] += s * output_adj;
 }
 
-void OctogrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
 {
 	const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 	const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
@@ -1474,7 +1473,7 @@ static void Integrate(float x1, float x2, const vector<Area> &areas, int areaCou
     }
 }
 
-void OctogrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
+void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
 {
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
     const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
@@ -1684,7 +1683,7 @@ void OctogrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
     }
 }
 
-void OctogrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
+void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
 {
 	const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds	
 	const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
@@ -1784,14 +1783,14 @@ void OctogrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 }
 
 //==============================================================================
-bool OctogrisAudioProcessor::hasEditor() const
+bool SpatGrisAudioProcessor::hasEditor() const
 {
     return true;
 }
 
-AudioProcessorEditor* OctogrisAudioProcessor::createEditor()
+AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 {
-    return new OctogrisAudioProcessorEditor (this);
+    return new SpatGrisAudioProcessorEditor (this);
 }
 
 //==============================================================================
@@ -1856,7 +1855,7 @@ static inline void readStringData(const void* &data, int &dataLength, const char
 	}
 }
 
-void OctogrisAudioProcessor::storeCurrentLocations(){
+void SpatGrisAudioProcessor::storeCurrentLocations(){
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
         mBufferSrcLocX[i] = mParameters[getParamForSourceX(i)];
         mBufferSrcLocY[i] = mParameters[getParamForSourceY(i)];
@@ -1872,7 +1871,7 @@ void OctogrisAudioProcessor::storeCurrentLocations(){
     }
 }
 //p_iLocToRestore == -1 by default, meaning restore all locations
-void OctogrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
+void SpatGrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
     
     if (p_iLocToRestore == -1){
         for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
@@ -1899,7 +1898,7 @@ void OctogrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
 }
 
 static const int kDataVersion = 1;
-void OctogrisAudioProcessor::getStateInformation (MemoryBlock& destData)
+void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     XmlElement xml ("SPATGRIS_SETTINGS");
     
@@ -1973,7 +1972,7 @@ void OctogrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     copyXmlToBinary (xml, destData);
 }
 
-void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
@@ -2063,5 +2062,5 @@ void OctogrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new OctogrisAudioProcessor();
+    return new SpatGrisAudioProcessor();
 }

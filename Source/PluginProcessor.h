@@ -82,6 +82,13 @@ enum {
     kParamsPerSpeakers
 };
 
+//==============================================================================
+static const float kSourceRadius = 10;
+static const float kSourceDiameter = kSourceRadius * 2;
+static const float kSpeakerRadius = 10;
+static const float kSpeakerDiameter = kSpeakerRadius * 2;
+
+//==============================================================================
 enum
 {
     kTrReady,
@@ -233,12 +240,12 @@ int IndexedAngleCompare(const void *a, const void *b);
 class OscSpatThread;
 
 //==============================================================================
-class OctogrisAudioProcessor : public AudioProcessor
+class SpatGrisAudioProcessor : public AudioProcessor
 {
 public:
     //==============================================================================
-    OctogrisAudioProcessor();
-    ~OctogrisAudioProcessor();
+    SpatGrisAudioProcessor();
+    ~SpatGrisAudioProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock);
@@ -479,6 +486,21 @@ public:
 		if (t < 0) t += kThetaMax;
 		return FPoint(r, t);
 	}
+    
+    void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
+    
+    FPoint getSourceAzimElev(int i) {
+        //get source position in kRadiusMax range
+        FPoint pXY = getSourceXY(i);
+//        //get dome radius in pixels
+//        float fDomeRadius = m_fFieldWidth/2 - kSourceDiameter/2;
+        //calculate azim and elev
+        float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
+        float hypo = hypotf(pXY.x, pXY.y);
+        float fElev = acosf(kRadiusMax / hypo);
+
+        return FPoint(fAzim, fElev);
+    }
     
     FPoint convertRt2Xy(FPoint p) {
         float x = p.x * cosf(p.y);
@@ -743,8 +765,9 @@ private:
     bool m_bIsOscSpat;
     OSCSender mOscSpatSender;
     OscSpatThread* m_pOscSpatThread;
+    float m_fFieldWidth;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OctogrisAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
 
 #endif  // PLUGINPROCESSOR_H_INCLUDED

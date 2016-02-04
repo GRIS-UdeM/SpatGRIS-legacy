@@ -81,7 +81,7 @@ private:
 class OctTabbedComponent : public TabbedComponent
 {
 public:
-    OctTabbedComponent(TabbedButtonBar::Orientation orientation, OctogrisAudioProcessor *filter)
+    OctTabbedComponent(TabbedButtonBar::Orientation orientation, SpatGrisAudioProcessor *filter)
     :
     TabbedComponent(orientation),
     mFilter(filter)
@@ -99,7 +99,7 @@ public:
     void initDone() { mInited = true; }
     
 private:
-    OctogrisAudioProcessor *mFilter;
+    SpatGrisAudioProcessor *mFilter;
     bool mInited;
 };
 
@@ -157,7 +157,7 @@ JUCE_COMPILER_WARNING("this class should be in its own file")
 class ParamSlider : public Slider
 {
 public:
-    ParamSlider(int paramIndex, int paramType, ToggleButton *link, OctogrisAudioProcessor *filter)
+    ParamSlider(int paramIndex, int paramType, ToggleButton *link, SpatGrisAudioProcessor *filter)
     :
     mParamIndex(paramIndex),
     mParamType(paramType),
@@ -330,7 +330,7 @@ public:
 private:
     int mParamIndex, mParamType;
     ToggleButton *mLink;
-    OctogrisAudioProcessor *mFilter;
+    SpatGrisAudioProcessor *mFilter;
     bool mBeganGesture, mMouseDown;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSlider)
@@ -340,7 +340,7 @@ private:
 class SourceUpdateThread : public Thread, public Component
 {
 public:
-    SourceUpdateThread(OctogrisAudioProcessorEditor* p_pEditor)
+    SourceUpdateThread(SpatGrisAudioProcessorEditor* p_pEditor)
     : Thread ("SourceUpdateThread")
     ,m_iInterval(50)
     ,m_pEditor(p_pEditor)
@@ -359,14 +359,14 @@ public:
     
 private:
     int m_iInterval;
-    OctogrisAudioProcessorEditor* m_pEditor;
+    SpatGrisAudioProcessorEditor* m_pEditor;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
 };
 //==================================== JoystickUpdateThread ===================================================================
 //class JoystickUpdateThread : public Thread, public Component {
 //public:
-//    JoystickUpdateThread(OctogrisAudioProcessorEditor* p_pEditor)
+//    JoystickUpdateThread(SpatGrisAudioProcessorEditor* p_pEditor)
 //    : Thread ("JoystickUpdateThread")
 //    ,m_iInterval(25)
 //    ,m_pEditor(p_pEditor)
@@ -384,7 +384,7 @@ private:
 //    }
 //private:
 //    int m_iInterval;
-//    OctogrisAudioProcessorEditor* m_pEditor;
+//    SpatGrisAudioProcessorEditor* m_pEditor;
 //    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JoystickUpdateThread)
 //};
 
@@ -392,7 +392,7 @@ private:
 
 //==================================== EDITOR ===================================================================
 
-OctogrisAudioProcessorEditor::OctogrisAudioProcessorEditor (OctogrisAudioProcessor* ownerFilter):
+SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter):
 AudioProcessorEditor (ownerFilter)
 , mFilter(ownerFilter)
 , mMover(ownerFilter)
@@ -565,7 +565,6 @@ AudioProcessorEditor (ownerFilter)
     
         //only using the combo box in reaper, because other hosts set the inputs and outputs automatically
 		if (mFilter->getIsAllowInputOutputModeSelection()) {
-            
             
             int iMaxSources = mFilter->getNumInputChannels();
             int iMaxSpeakers = mFilter->getNumOutputChannels();
@@ -1133,7 +1132,7 @@ AudioProcessorEditor (ownerFilter)
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
 }
 
-void OctogrisAudioProcessorEditor::updateEndLocationTextEditors(){
+void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
     std::pair<float, float> endLocation = mFilter->getEndLocationXY();
     FPoint pointRT = mFilter->convertXy012Rt(FPoint(endLocation.first, 1-endLocation.second), false);
     pointRT.y *= 360/(2*M_PI);
@@ -1154,7 +1153,7 @@ void OctogrisAudioProcessorEditor::updateEndLocationTextEditors(){
 #endif
 }
 
-void OctogrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
+void SpatGrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
     int iSourceChanged = mFilter->getSourceLocationChanged();
 //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
@@ -1165,7 +1164,7 @@ void OctogrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
     }
 }
 
-void OctogrisAudioProcessorEditor::updateTrajectoryComponents(){
+void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
     int iSelectedTrajectory = mFilter->getTrType();
     //if pendulum is selected
 
@@ -1243,7 +1242,7 @@ void OctogrisAudioProcessorEditor::updateTrajectoryComponents(){
     }
 }
 
-OctogrisAudioProcessorEditor::~OctogrisAudioProcessorEditor()
+SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
 {
     mFilter->setCalculateLevels(false);
     mFilter->removeListener(this);
@@ -1272,7 +1271,7 @@ OctogrisAudioProcessorEditor::~OctogrisAudioProcessorEditor()
 #endif
 }
 
-void OctogrisAudioProcessorEditor::resized()
+void SpatGrisAudioProcessorEditor::resized()
 {
     int w = getWidth();
     int h = getHeight();
@@ -1287,6 +1286,7 @@ void OctogrisAudioProcessorEditor::resized()
     int fieldSize = jmin(fieldWidth, fieldHeight);
     
     mField->setBounds(kMargin, kMargin, fieldSize, fieldSize);
+    mFilter->setFieldWidth(fieldSize);
 
     m_logoImage.setBounds(15, 15, (float)fieldSize/7, (float)fieldSize/7);
     
@@ -1309,7 +1309,7 @@ void OctogrisAudioProcessorEditor::resized()
 }
 
 
-void OctogrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
+void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
 
@@ -1368,7 +1368,7 @@ void OctogrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
 }
 
 
-void OctogrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor){
+void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor){
 
     //remove old stuff
     Component *ct = mSpeakersBox->getContent();
@@ -1433,7 +1433,7 @@ void OctogrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     mSpSelect->setSelectedId(mFilter->getSpSelected());
 }
 
-void OctogrisAudioProcessorEditor::updateMovementModeCombo(){
+void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
     int index = 1;
     mMovementModeCombo->addItem("Independent", index++);
     if (mFilter->getNumberOfSources() > 1){
@@ -1459,7 +1459,7 @@ void OctogrisAudioProcessorEditor::updateMovementModeCombo(){
 }
 
 
-void OctogrisAudioProcessorEditor::setOscLeapSource(int s)
+void SpatGrisAudioProcessorEditor::setOscLeapSource(int s)
 {
     if (s < 0) s = 0;
     if (s >= mFilter->getNumberOfSources()) s = mFilter->getNumberOfSources() - 1;
@@ -1472,7 +1472,7 @@ void OctogrisAudioProcessorEditor::setOscLeapSource(int s)
 
 
 //==============================================================================
-Component* OctogrisAudioProcessorEditor::addLabel(const String &s, int x, int y, int w, int h, Component *into)
+Component* SpatGrisAudioProcessorEditor::addLabel(const String &s, int x, int y, int w, int h, Component *into)
 {
     Label *label = new Label();
     label->setText(s, dontSendNotification);
@@ -1485,7 +1485,7 @@ Component* OctogrisAudioProcessorEditor::addLabel(const String &s, int x, int y,
     return label;
 }
 
-ToggleButton* OctogrisAudioProcessorEditor::addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into)
+ToggleButton* SpatGrisAudioProcessorEditor::addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into)
 {
     ToggleButton *tb = new ToggleButton();
     tb->setButtonText(s);
@@ -1498,7 +1498,7 @@ ToggleButton* OctogrisAudioProcessorEditor::addCheckbox(const String &s, bool v,
     return tb;
 }
 
-TextButton* OctogrisAudioProcessorEditor::addButton(const String &s, int x, int y, int w, int h, Component *into)
+TextButton* SpatGrisAudioProcessorEditor::addButton(const String &s, int x, int y, int w, int h, Component *into)
 {
     TextButton *tb = new TextButton();
     tb->setButtonText(s);
@@ -1511,7 +1511,7 @@ TextButton* OctogrisAudioProcessorEditor::addButton(const String &s, int x, int 
 }
 
 
-TextEditor* OctogrisAudioProcessorEditor::addTextEditor(const String &s, int x, int y, int w, int h, Component *into)
+TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, int y, int w, int h, Component *into)
 {
     TextEditor *te = new TextEditor();
     te->setText(s);
@@ -1522,7 +1522,7 @@ TextEditor* OctogrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
     return te;
 }
 
-Slider* OctogrisAudioProcessorEditor::addParamSlider(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
+Slider* SpatGrisAudioProcessorEditor::addParamSlider(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
 {
     int index ;
     if (paramType == kParamSource) index = mFilter->getParamForSourceD(si);
@@ -1545,7 +1545,7 @@ Slider* OctogrisAudioProcessorEditor::addParamSlider(int paramType, int si, floa
 
 
 //==============================================================================
-void OctogrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textEditor){
+void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textEditor){
     if (&textEditor == mSrcR || &textEditor == mSrcT){
         int src = mSrcSelect->getSelectedId() - 1;
         float r = mSrcR->getText().getFloatValue();
@@ -1614,7 +1614,7 @@ void OctogrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     
 }
 
-void OctogrisAudioProcessorEditor::buttonClicked (Button *button){
+void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
         if (button == mMutes[i]) {
             float v = button->getToggleState() ? 1.f : 0.f;
@@ -1895,7 +1895,7 @@ void OctogrisAudioProcessorEditor::buttonClicked (Button *button){
 	}
 }
 
-void OctogrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
+void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
     int iSelectedSrc    = mFilter->getSrcSelected();
     FPoint pointRT      = mFilter->getSourceRT(iSelectedSrc);
     pointRT.y += M_PI;
@@ -1905,13 +1905,13 @@ void OctogrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
 }
 
 
-void OctogrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor){
+void SpatGrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor){
     m_bIsReturnKeyPressedCalledFromFocusLost = true;
     textEditorReturnKeyPressed(textEditor);
     m_bIsReturnKeyPressedCalledFromFocusLost = false;
 }
 
-void OctogrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
+void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
     if (comboBox == mMovementModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
@@ -1996,7 +1996,7 @@ void OctogrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 }
 
 
-void OctogrisAudioProcessorEditor::updateSourceLocationTextEditor(bool p_bUpdateFilter){
+void SpatGrisAudioProcessorEditor::updateSourceLocationTextEditor(bool p_bUpdateFilter){
     int iSelectedSrc = mSrcSelect->getSelectedId();
     iSelectedSrc = (iSelectedSrc <= 0) ? 1: iSelectedSrc;
     if (p_bUpdateFilter){
@@ -2007,7 +2007,7 @@ void OctogrisAudioProcessorEditor::updateSourceLocationTextEditor(bool p_bUpdate
     mSrcT->setText(String(curPosition.y * 180. / M_PI));
 }
 
-void OctogrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
+void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
     FPoint curPosition = mFilter->getSpeakerRT(mSpSelect->getSelectedId()-1);
     mSpR->setText(String(curPosition.x));
     mSpT->setText(String(curPosition.y * 180. / M_PI));
@@ -2015,7 +2015,7 @@ void OctogrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
 
 
 //==============================================================================
-void OctogrisAudioProcessorEditor::timerCallback()
+void SpatGrisAudioProcessorEditor::timerCallback()
 {
 	switch(mTrStateEditor)	{
 		case kTrWriting: {
@@ -2161,31 +2161,31 @@ void OctogrisAudioProcessorEditor::timerCallback()
     startTimer(kTimerDelay);
 }
 
-void OctogrisAudioProcessorEditor::audioProcessorChanged (AudioProcessor* processor){
+void SpatGrisAudioProcessorEditor::audioProcessorChanged (AudioProcessor* processor){
     mNeedRepaint = true;
 }
 
-//void OctogrisAudioProcessorEditor::readAndUseJoystickValues(){
+//void SpatGrisAudioProcessorEditor::readAndUseJoystickValues(){
 //    mJoystick->readAndUseJoystickValues();
 //}
 
-void OctogrisAudioProcessorEditor::audioProcessorParameterChanged(AudioProcessor* processor, int parameterIndex, float newValue){
+void SpatGrisAudioProcessorEditor::audioProcessorParameterChanged(AudioProcessor* processor, int parameterIndex, float newValue){
     mNeedRepaint = true;
 }
 
 //==============================================================================
-void OctogrisAudioProcessorEditor::paint (Graphics& g)
+void SpatGrisAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (Colours::white);
 }
 #if USE_JOYSTICK
-void OctogrisAudioProcessorEditor::uncheckJoystickButton()
+void SpatGrisAudioProcessorEditor::uncheckJoystickButton()
 {
     mEnableJoystick->setToggleState(false, dontSendNotification);
     buttonClicked(mEnableJoystick);
 }
 #endif
-int OctogrisAudioProcessorEditor::getNbSources()
+int SpatGrisAudioProcessorEditor::getNbSources()
 {
     return mFilter->getNumberOfSources();
 }

@@ -38,9 +38,9 @@ class OctoLeap : public ReferenceCountedObject , public Leap::Listener
 public:
     typedef ReferenceCountedObjectPtr<OctoLeap> Ptr;
     //! Interface to call the builder using the ReferenceCountedObject benefits
-    static OctoLeap::Ptr CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor);
+    static OctoLeap::Ptr CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor);
     //!Builder
-    OctoLeap(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor);
+    OctoLeap(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor);
     //! Called when a Leap Motion is connected to the computer
     virtual void onConnect(const Leap::Controller& controller);
     //! Called when a Leap Motion is disconnected to the computer
@@ -54,8 +54,8 @@ public:
     }
     
 private:
-    OctogrisAudioProcessor *mFilter;
-    OctogrisAudioProcessorEditor *mEditor;
+    SpatGrisAudioProcessor *mFilter;
+    SpatGrisAudioProcessorEditor *mEditor;
         
     ScopedPointer<Leap::Controller> mController;
     

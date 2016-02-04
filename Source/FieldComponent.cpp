@@ -27,15 +27,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "FieldComponent.h"
 
-
-//==============================================================================
-static const float kSourceRadius = 10;
-static const float kSourceDiameter = kSourceRadius * 2;
-static const float kSpeakerRadius = 10;
-static const float kSpeakerDiameter = kSpeakerRadius * 2;
-
-//==============================================================================
-FieldComponent::FieldComponent(OctogrisAudioProcessor* filter, SourceMover *mover)
+FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover)
 : mFilter(filter)
 , mMover(mover)
 , m_fStartPathX(-1)

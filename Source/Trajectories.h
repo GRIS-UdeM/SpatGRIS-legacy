@@ -30,7 +30,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <memory>
 
-class OctogrisAudioProcessor;
+class SpatGrisAudioProcessor;
 class SourceMover;
 
 
@@ -57,7 +57,7 @@ public:
 
 	static int NumberOfTrajectories();
 	static String GetTrajectoryName(int i);
-	static Trajectory::Ptr CreateTrajectory(int i, OctogrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair);
+	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair);
     static std::unique_ptr<std::vector<String>> getTrajectoryPossibleDirections(int p_iTrajectory);
     static std::unique_ptr<AllTrajectoryDirections> getTrajectoryDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
     static std::unique_ptr<std::vector<String>> getTrajectoryPossibleReturns(int p_iTrajectory);
@@ -79,8 +79,8 @@ private:
 	void start();
 	
 protected:
-	Trajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);	
-	OctogrisAudioProcessor *mFilter;
+	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);	
+	SpatGrisAudioProcessor *mFilter;
     SourceMover *mMover;
 	bool mStarted, mStopped;
 	float mDone;
