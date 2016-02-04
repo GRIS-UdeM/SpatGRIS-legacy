@@ -1450,7 +1450,7 @@ void OctogrisAudioProcessorEditor::updateMovementModeCombo(){
     }
     int iCurMode = mFilter->getMovementMode() + 1;
     //iCurMode > mMovementModeCombo->getNumItems() ? mMovementModeCombo->setSelectedId(1) : mMovementModeCombo->setSelectedId(iCurMode);
-    if (mMovementModeCombo->getItemText(iCurMode) == ""){
+    if (mMovementModeCombo->getItemText(iCurMode-1) == ""){
         mMovementModeCombo->setSelectedId(1);
         mFilter->setMovementMode(0);
     } else {
