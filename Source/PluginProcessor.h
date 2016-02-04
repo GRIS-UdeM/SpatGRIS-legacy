@@ -490,13 +490,14 @@ public:
     void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
     
     FPoint getSourceAzimElev(int i) {
-        //get source position in pixels
+        //get source position in kRadiusMax range
         FPoint pXY = getSourceXY(i);
-        //get dome radius in pixels
-        float fDomeRadius = m_fFieldWidth/2 - kSourceDiameter/2;
+//        //get dome radius in pixels
+//        float fDomeRadius = m_fFieldWidth/2 - kSourceDiameter/2;
         //calculate azim and elev
-        float fAzim = atan2f(pXY.x, pXY.y)/M_PI;
-        float fElev = acosf(fDomeRadius / hypotf(pXY.x, pXY.y));
+        float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
+        float hypo = hypotf(pXY.x, pXY.y);
+        float fElev = acosf(kRadiusMax / hypo);
 
         return FPoint(fAzim, fElev);
     }

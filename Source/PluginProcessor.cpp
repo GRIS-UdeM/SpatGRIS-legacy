@@ -35,39 +35,38 @@ static const float kLevelReleaseDefault = 100;
 #include <algorithm>
 
 #if JUCE_MSVC
+#include <sstream>
+#include <string>
+#include <windows.h>
+
+template<class T>
+string toString(const T &value) {
+    ostringstream os;
+    os << value;
+    return os.str();
+}
+
 // from https://github.com/objectx/strlcpy/blob/master/strlcpy/strlcpy.c
 size_t strlcpy(char * dst, const char * src, size_t dstsize)
 {
     if (dst == 0 || dstsize == 0) {
-		return 0;
+        return 0;
     }
     if (src == 0) {
-		dst [0] = 0;
-		return 0;
-    }
-    else {
+        dst [0] = 0;
+        return 0;
+    } else {
         size_t	src_len = strlen (src);
         size_t	dstlimit = dstsize - 1;
-
+        
         if (dstlimit < src_len) {
-	    src_len = dstlimit;
+            src_len = dstlimit;
         }
         memcpy (dst, src, src_len);
         dst [src_len] = 0;
         return src_len;
     }
 }
-
-#include <sstream>
-#include <string>
-#include <windows.h>
-
-	template<class T>
-	string toString(const T &value) {
-		ostringstream os;
-		os << value;
-		return os.str();
-	}
 #endif
 
 //==============================================================================

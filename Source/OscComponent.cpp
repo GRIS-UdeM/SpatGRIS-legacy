@@ -34,7 +34,6 @@ static void osc_err_handler(int num, const char *msg, const char *path){
 					num,
 					msg ? msg : "(null)",
 					path ? path : "(null)");
-
 }
 
 static String getLocalIPAddress(){
@@ -61,7 +60,7 @@ public:
     OscComponent(SpatGrisAudioProcessor* filter, SpatGrisAudioProcessorEditor *editor)
 	:mFilter(filter)
     ,mEditor(editor)
-    ,mOscIpAddress(NULL)
+    ,mOscSendIpAddress(NULL)
     ,mNeedToEnd(false)
 	{
         
@@ -80,11 +79,15 @@ public:
         
         mReceiveIp = new TextEditor();
         mReceiveIp->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
-        mReceiveIp->setText(getLocalIPAddress());
         mReceiveIp->setSize(iw, dh);
         mReceiveIp->setTopLeftPosition(x, y);
-        mReceiveIp->setReadOnly(true);
-        mReceiveIp->setCaretVisible(false);
+        //if local address does not start with 10., put it in the ip receive box. Using 10.x.x.x addresses is problematic at UdeM
+        String ipAddress = getLocalIPAddress();
+        if (!ipAddress.startsWith("10.")){
+            mReceiveIp->setText(ipAddress);
+            mReceiveIp->setReadOnly(true);
+            mReceiveIp->setCaretVisible(false);
+        }
         addAndMakeVisible(mReceiveIp);
         
         x += iw + m;
@@ -158,7 +161,7 @@ public:
     void buttonClicked (Button *button) override{
         try {
             if (button == mReceive){
-                //we're trying to connect
+                //try to connect to receiving port on one of the local ip addresses
                 if (mReceive->getToggleState()) {
                     int p = mReceivePort->getText().getIntValue();
                     if (!connect(p)) {
@@ -187,9 +190,9 @@ public:
             } else if (button == mSend) {
 
                 if (mSend->getToggleState()) {
-                    mOscIpAddress = mSendIp->getText();
+                    mOscSendIpAddress = mSendIp->getText();
                     int iSendPort = mSendPort->getText().getIntValue();
-                    if(!mOscSender.connect(mOscIpAddress, iSendPort)){
+                    if(!mOscSender.connect(mOscSendIpAddress, iSendPort)){
                         DBG("OSC cannot connect");
                         mSend->setToggleState(false, dontSendNotification);
                         mSendIp->setEnabled(true);
@@ -257,7 +260,6 @@ public:
 			}
 			mSource = src;
 		}
-		
 		FPoint p = mFilter->getSourceXY01(src);
 		if (mSourceXY != p) {
             OSCAddressPattern oscPattern(kOscPathSourceXY);
@@ -271,7 +273,6 @@ public:
 		}
 	}
 
-
 private:
 	SpatGrisAudioProcessor *mFilter;
 	SpatGrisAudioProcessorEditor *mEditor;
@@ -284,7 +285,7 @@ private:
 	ScopedPointer<TextEditor> mSendIp;
 	ScopedPointer<TextEditor> mSendPort;
 	OSCSender mOscSender;
-	String mOscIpAddress;
+	String mOscSendIpAddress;
 	
 	bool mNeedToEnd;
 	Time mLastXYTime;
