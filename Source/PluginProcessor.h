@@ -490,14 +490,20 @@ public:
     void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
     
     FPoint getSourceAzimElev(int i) {
-        //get source position in kRadiusMax range
+        //get source position in [-kRadiusMax, kRadiusMax]
         FPoint pXY = getSourceXY(i);
-//        //get dome radius in pixels
-//        float fDomeRadius = m_fFieldWidth/2 - kSourceDiameter/2;
-        //calculate azim and elev
+
+        //calculate azim in range [0,1], and negate it because zirkonium wants -1 on right side
         float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
+        
+        //calculate xy distance from origin, and clamp it to 2 (ie ignore outside of circle)
         float hypo = hypotf(pXY.x, pXY.y);
-        float fElev = acosf(kRadiusMax / hypo);
+        if (hypo > 2){
+            hypo = 2;
+        }
+        float fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
+        fElev /= M_PI_2;                        //making range [0,1]
+        fElev /= 2.;                             //making range [0,.5] because that's what the zirkonium wants
 
         return FPoint(fAzim, fElev);
     }
