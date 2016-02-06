@@ -161,7 +161,7 @@ void FieldComponent::paint (Graphics& g)
 		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
 	}
 	
-    if (processMode == kPanSpanMode){
+    if (processMode == kPanSpanMode || processMode == kOscSpatMode){
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
             float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
             if (hue > 1){

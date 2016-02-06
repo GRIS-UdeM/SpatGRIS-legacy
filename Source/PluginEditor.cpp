@@ -655,6 +655,7 @@ AudioProcessorEditor (ownerFilter)
             mProcessModeCombo->addItem("Free volume", index++);
             mProcessModeCombo->addItem("Pan volume", index++);
             mProcessModeCombo->addItem("Pan span", index++);
+            mProcessModeCombo->addItem("OSC Spatialization", index++);
             mProcessModeCombo->setSelectedId(mFilter->getProcessMode() + 1);
             mProcessModeCombo->setSize(w, dh);
             mProcessModeCombo->setTopLeftPosition(x, y);

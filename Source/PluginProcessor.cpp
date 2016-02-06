@@ -299,10 +299,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         FPoint curPoint = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;   //-1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;   //0 is the edge of the dome, .5 is the top
-        if (iCurSrc==0){
-            FPoint curPoint1 = getSourceAzimElev(iCurSrc);
-            cout << "(" << azim_osc << ", " << elev_osc << ")\n";
-        }
+
         float azimspan_osc  = getSourceD(iCurSrc);  //min azim span is 0, max is 2
         JUCE_COMPILER_WARNING("will need to implement elevation span")
         float elevspan_osc  = 0;                    //min elev span is 0, max is .5
@@ -938,7 +935,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		params[kFilterMid]  = denormalize(kFilterMidMin,  kFilterMidMax,  params[kFilterMid]);
 		params[kFilterFar]  = denormalize(kFilterFarMin,  kFilterFarMax,  params[kFilterFar]);
 	}
-	if (mProcessMode == kPanSpanMode) {
+	if (mProcessMode == kPanSpanMode || mProcessMode == kOscSpatMode) {
 		params[kMaxSpanVolume] = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, params[kMaxSpanVolume]);
 	}
 	if (mRoutingMode == 1) {
@@ -1091,6 +1088,7 @@ void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float 
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
 		case kPanVolumeMode:	ProcessDataPanVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
 		case kPanSpanMode:		ProcessDataPanSpanMode(inputs, outputs, params, sampleRate, frames);	break;
+        case kOscSpatMode:		ProcessDataPanSpanMode(inputs, outputs, params, sampleRate, frames);	break;
 	}
 }
 
