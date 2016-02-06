@@ -1422,7 +1422,6 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
         buttonClicked(mApplySpPlacementButton); 
     }
     
-    
     //speaker position combo box in speakers tab
     int index = 1;
     for (int i = 0; i < iCurSpeakers; i++)
@@ -1449,7 +1448,6 @@ void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
         }
     }
     int iCurMode = mFilter->getMovementMode() + 1;
-    //iCurMode > mMovementModeCombo->getNumItems() ? mMovementModeCombo->setSelectedId(1) : mMovementModeCombo->setSelectedId(iCurMode);
     if (mMovementModeCombo->getItemText(iCurMode-1) == ""){
         mMovementModeCombo->setSelectedId(1);
         mFilter->setMovementMode(0);
