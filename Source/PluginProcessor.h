@@ -302,7 +302,7 @@ public:
 	void setLinkDistances(bool s) { mLinkDistances = s; }
 		
 	int getProcessMode() const { return mProcessMode; }
-	void setProcessMode(int s) { mProcessMode = s; jassert(mProcessMode >= 0 && mProcessMode < kNumberOfModes); }
+    void setProcessMode(int s) ;
     
     void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
     bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
@@ -370,10 +370,7 @@ public:
         mGuiTab = s;
         ++mHostChangedParameter;
     }
-    
-    bool getOscSpat(){ return m_bIsOscSpat;}
-    void setOscSpat(bool p_bIsOscSpat);
-    
+
     void sendOscSpatValues();
     
     int getIsJoystickEnabled() const { return mJoystickEnabled; }
@@ -762,7 +759,7 @@ private:
     bool m_bIsSettingEndPoint;
     std::pair <float, float> m_fEndLocationXY;
     bool m_bJustSelectedEndPoint;
-    bool m_bIsOscSpat;
+
     OSCSender mOscSpatSender;
     OscSpatThread* m_pOscSpatThread;
     float m_fFieldWidth;

@@ -181,7 +181,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mLinkDistances = false;
 	mMovementMode = 0;
 	mShowGridLines = false;
-    m_bIsOscSpat = false;
 	mTrSeparateAutomationMode = false;
     mIsNumberSourcesChanged = false;
     mIsNumberSpeakersChanged = false;
@@ -265,11 +264,11 @@ void SpatGrisAudioProcessor::setCalculateLevels(bool c)
 	
 }
 
-void SpatGrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
-    m_bIsOscSpat = p_bIsOscSpat;
+void SpatGrisAudioProcessor::setProcessMode(int s) {
+    mProcessMode = s;
+    jassert(mProcessMode >= 0 && mProcessMode < kNumberOfModes);
     
-    if (m_bIsOscSpat){
-       
+    if (mProcessMode == kOscSpatMode){
         mOscSpatSender.disconnect();
         JUCE_COMPILER_WARNING("need to do this intelligently")
         //if(!mOscSpatSender.connect(mOscSendIp, mOscSendPort)){
@@ -277,7 +276,7 @@ void SpatGrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
             DBG("OSC cannot connect to " + mOscSendIp);
             return;
         }
-    m_pOscSpatThread = new OscSpatThread(this);
+        m_pOscSpatThread = new OscSpatThread(this);
     } else {
         mOscSpatSender.disconnect();
         if(m_pOscSpatThread){
@@ -288,7 +287,7 @@ void SpatGrisAudioProcessor::setOscSpat(bool p_bIsOscSpat){
 }
 
 void SpatGrisAudioProcessor::sendOscSpatValues(){
-    if  (!getOscSpat()){
+    if  (mProcessMode != kOscSpatMode){
         return;
     }
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
@@ -1902,7 +1901,6 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     
     xml.setAttribute ("kDataVersion", kDataVersion);
     xml.setAttribute ("mShowGridLines", mShowGridLines);
-    xml.setAttribute ("m_bIsOscSpat", m_bIsOscSpat);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
     xml.setAttribute ("mMovementMode", mMovementMode);
     xml.setAttribute ("mLinkDistances", mLinkDistances);
@@ -1984,7 +1982,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 return;
             }
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
-            m_bIsOscSpat        = xmlState->getIntAttribute ("m_bIsOscSpat", m_bIsOscSpat);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
             mMovementMode       = xmlState->getIntAttribute ("mMovementMode", 0);
             mLinkDistances      = xmlState->getIntAttribute ("mLinkDistances", 0);

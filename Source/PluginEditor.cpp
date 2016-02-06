@@ -675,8 +675,6 @@ AudioProcessorEditor (ownerFilter)
             mMaxSpanVolume = ds;
             y += dh + 5;
         }
-        
-        mToggleOscSpat = addCheckbox("OSC spatialization", mFilter->getOscSpat(), x, y, w, dh, box);
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
@@ -1797,9 +1795,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         mFilter->setShowGridLines(button->getToggleState());
         mField->repaint();
     }
-    else if (button == mToggleOscSpat) {
-        mFilter->setOscSpat(button->getToggleState());
-    }
     else if (button == mTrSeparateAutomationMode) {
         mFilter->setIndependentMode(button->getToggleState());
     }
@@ -2087,7 +2082,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         updateOscComponent(mOsc);
 #endif
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
-        mToggleOscSpat->setToggleState(mFilter->getOscSpat(), dontSendNotification);
         mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
         mLinkDistances->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
         mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
