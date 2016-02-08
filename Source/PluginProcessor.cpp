@@ -291,9 +291,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         return;
     }
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
-        JUCE_COMPILER_WARNING("will need to add source numbers in the editor")
-        int   channel_osc   = iCurSrc;//m_oAllSources[iCurSrc].getSourceId()-1;
-        
+        int   channel_osc   = getOscSpat1stSrcId()+iCurSrc;
         //Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle, .5 in the middle. And here, 0,0 is actually center... althought I thought it wasn't!
         FPoint curPoint = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;   //-1 is in the back right and +1 in the back left. 0 is forward

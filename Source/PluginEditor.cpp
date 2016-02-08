@@ -676,7 +676,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 5;
         }
         {
-            mOscSpat1stSrcIdLabel = addLabel("1st source ID", x, y, w*2/3 - 5, dh, box);
+            mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
             mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
             y += dh + 5;
         }
