@@ -675,6 +675,11 @@ AudioProcessorEditor (ownerFilter)
             mMaxSpanVolume = ds;
             y += dh + 5;
         }
+        {
+            mOscSpat1stSrcIdLabel = addLabel("1st source ID", x, y, w*2/3 - 5, dh, box);
+            mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
+            y += dh + 5;
+        }
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
@@ -1102,7 +1107,7 @@ AudioProcessorEditor (ownerFilter)
         
         y += dh;
 #endif      
-#if USE_OSC
+#if USE_TOUCH_OSC
         mOsc = CreateOscComponent(mFilter, this);
         if (mOsc) {
             mOsc->setTopLeftPosition(0, y);
@@ -1161,6 +1166,28 @@ void SpatGrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
         mMover.end(kSourceThread);
         mFilter->setSourceLocationChanged(-1);
     }
+}
+
+void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
+    int iSelectedMode = mFilter->getProcessMode();
+    if (iSelectedMode == kOscSpatMode){
+        mOscSpat1stSrcIdLabel->setVisible(true);
+        mOscSpat1stSrcIdTextEditor->setVisible(true);
+    } else {
+        mOscSpat1stSrcIdLabel->setVisible(false);
+        mOscSpat1stSrcIdTextEditor->setVisible(false);
+    }
+    if (iSelectedMode == kPanVolumeMode){
+        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+            mDistances.getUnchecked(i)->setEnabled(false);
+        }
+    } else {
+        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+            mDistances.getUnchecked(i)->setEnabled(true);
+            mDistances.getUnchecked(i)->valueChanged();
+        }
+    }
+    repaint();
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
@@ -1600,6 +1627,13 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
     }
+    else if (&textEditor == mOscSpat1stSrcIdTextEditor){
+        int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
+        if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
+            mFilter->setOscSpat1stSrcId(i1stSrcId);
+        }
+        mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
+    }
     else {
         printf("unknown TextEditor clicked...\n");
     }
@@ -1940,17 +1974,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     else if (comboBox == mProcessModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
         mFilter->setProcessMode(iSelectedMode);
-        if (iSelectedMode == kPanVolumeMode){
-            for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-                mDistances.getUnchecked(i)->setEnabled(false);
-            }
-        } else {
-            for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-                mDistances.getUnchecked(i)->setEnabled(true);
-                mDistances.getUnchecked(i)->valueChanged();
-            }
-        }
-		repaint();
+        updateProcessModeComponents();
 	}
 	else if (comboBox == mOscLeapSourceCb)
 	{
@@ -2078,7 +2102,9 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mTrDampeningTextEditor->setText(String(mFilter->getTrDampening()));
         mTrDeviationTextEditor->setText(String(mFilter->getTrDeviation()*360));
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
-#if USE_OSC
+        mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
+
+#if USE_TOUCH_OSC
         updateOscComponent(mOsc);
 #endif
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);

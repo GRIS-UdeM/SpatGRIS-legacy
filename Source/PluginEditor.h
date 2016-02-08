@@ -243,6 +243,7 @@ private:
     void updateMovementModeCombo();
     void updateTrajectoryComponents();
     void updateEndLocationTextEditors();
+    void updateProcessModeComponents();
 	
 	Component* addLabel(const String &s, int x, int y, int w, int h, Component *into);
 	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
@@ -259,6 +260,9 @@ private:
     
     LookAndFeel_V2 mV2Feel;
     GrisLookAndFeel mGrisFeel;
+
+    Component *mOscSpat1stSrcIdLabel;
+    TextEditor *mOscSpat1stSrcIdTextEditor;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

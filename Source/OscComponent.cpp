@@ -25,7 +25,7 @@
  */
 
 #include "OscComponent.h"
-#if USE_OSC
+#if USE_TOUCH_OSC
 const String kOscPathSourceXY = "/Octo/SourceXY";
 const String kOscPathSelectSource = "/Octo/Source";
 

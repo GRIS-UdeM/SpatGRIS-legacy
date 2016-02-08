@@ -30,8 +30,8 @@
 #define USE_LEAP 1
 #endif
 
-#ifndef USE_OSC
-#define USE_OSC 1
+#ifndef USE_TOUCH_OSC
+#define USE_TOUCH_OSC 1
 #endif
 
 #if !WIN32
@@ -351,10 +351,13 @@ public:
     void setTrUnits(int i){m_iTrUnits = i - 1;}
 
     float getTrRepeats() const {return m_fTrRepeats;}
-    void setTrRepeats(float i){m_fTrRepeats = i;}
+    void setTrRepeats(float f){m_fTrRepeats = f;}
 
     float getTrDampening() const {return m_fTrDampening;}
-    void setTrDampening(float i){m_fTrDampening = i;}
+    void setTrDampening(float f){m_fTrDampening = f;}
+    
+    int getOscSpat1stSrcId() const{return m_iOscSpat1stSrcId;}
+    void setOscSpat1stSrcId(int i){m_iOscSpat1stSrcId = i;}
 
     float getTrDeviation() const {return m_fTrDeviation;}
     void setTrDeviation(float i){m_fTrDeviation = i;}
@@ -696,6 +699,7 @@ private:
     float m_fTrTurns;
     float m_fTrDeviation;
     int mTrState;
+    float m_iOscSpat1stSrcId;
 
     int mGuiTab;
     int mJoystickEnabled;

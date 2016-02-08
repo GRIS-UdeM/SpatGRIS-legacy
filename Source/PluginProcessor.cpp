@@ -209,6 +209,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_iTrUnits = 1;     //0 = beats, 1 = seconds
     m_fTrRepeats = 1.f;
     m_fTrDampening = 0.f;
+    m_iOscSpat1stSrcId = 1;
     m_fTrTurns = 1.f;
     m_fTrDeviation = 0.f;
     m_fEndLocationXY = make_pair(.5, .5);
@@ -270,8 +271,7 @@ void SpatGrisAudioProcessor::setProcessMode(int s) {
     
     if (mProcessMode == kOscSpatMode){
         mOscSpatSender.disconnect();
-        JUCE_COMPILER_WARNING("need to do this intelligently")
-        //if(!mOscSpatSender.connect(mOscSendIp, mOscSendPort)){
+        JUCE_COMPILER_WARNING("18032 should come from textbox")
         if(!mOscSpatSender.connect("127.0.0.1", 18032)){
             DBG("OSC cannot connect to " + mOscSendIp);
             return;
@@ -302,6 +302,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         float azimspan_osc  = getSourceD(iCurSrc);  //min azim span is 0, max is 2
         JUCE_COMPILER_WARNING("will need to implement elevation span")
         float elevspan_osc  = 0;                    //min elev span is 0, max is .5
+        JUCE_COMPILER_WARNING("will need to implement some kind of gain? or use the speaker attenuation, which makes no sense?")
         float gain_osc      = getSourceD(iCurSrc);//m_oAllSources[iCurSrc].getGain01();
         
         //        lo_send(_OscZirkonium, "/pan/az", "ifffff", channel_osc, azim_osc, elev_osc, azimspan_osc, elevspan_osc, gain_osc);
@@ -1915,13 +1916,11 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mOscSendIp", mOscSendIp);
     xml.setAttribute ("mProcessMode", mProcessMode);
     xml.setAttribute ("mApplyFilter", mApplyFilter);
-    
     xml.setAttribute ("mInputOutputMode", mInputOutputMode);
     xml.setAttribute ("mSrcPlacementMode", mSrcPlacementMode);
     xml.setAttribute ("mSpPlacementMode", mSpPlacementMode);
     xml.setAttribute ("mSrcSelected", mSrcSelected);
     xml.setAttribute ("mSpSelected", mSpSelected);
-    
     xml.setAttribute ("mTrState", mTrState);
     xml.setAttribute ("m_iTrDirection", m_iTrDirection);
     xml.setAttribute ("m_iTrReturn", m_iTrReturn);
@@ -1946,6 +1945,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("kFilterNear", mParameters[kFilterNear]);
     xml.setAttribute ("kFilterMid", mParameters[kFilterMid]);
     xml.setAttribute ("kFilterFar", mParameters[kFilterFar]);
+    xml.setAttribute ("m_iOscSpat1stSrcId", m_iOscSpat1stSrcId);
     
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i) {
 		String srcX = "src" + to_string(i) + "x";
@@ -2025,6 +2025,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mParameters.set(kFilterNear,    static_cast<float>(xmlState->getDoubleAttribute("kFilterNear", normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault))));
             mParameters.set(kFilterMid,     static_cast<float>(xmlState->getDoubleAttribute("kFilterMid", normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault))));
             mParameters.set(kFilterFar,     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
+            m_iOscSpat1stSrcId = xmlState->getIntAttribute("m_iOscSpat1stSrcId", m_iOscSpat1stSrcId);
             for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i){
                 String srcX = "src" + to_string(i) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));
