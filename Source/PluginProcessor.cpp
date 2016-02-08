@@ -292,12 +292,13 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
     }
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
         int   channel_osc   = getOscSpat1stSrcId()+iCurSrc;
-        //Zirkonium expects an azimuth of 0 in front, 1 at back left and -1 at back right. For elevation, 0 at the edge of the cirdle, .5 in the middle. And here, 0,0 is actually center... althought I thought it wasn't!
         FPoint curPoint = getSourceAzimElev(iCurSrc);
-        float azim_osc      = curPoint.x;   //-1 is in the back right and +1 in the back left. 0 is forward
-        float elev_osc      = curPoint.y;   //0 is the edge of the dome, .5 is the top
-
-        float azimspan_osc  = getSourceD(iCurSrc);  //min azim span is 0, max is 2
+        float azim_osc      = curPoint.x;   //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
+        float elev_osc      = curPoint.y;   //For Zirkonium, 0 is the edge of the dome, .5 is the top
+        float azimspan_osc  = 2*getSourceD(iCurSrc);  //min azim span is 0, max is 2. I figure this is radians.
+        if (iCurSrc == 0){
+            DBG(azimspan_osc);
+        }
         JUCE_COMPILER_WARNING("will need to implement elevation span")
         float elevspan_osc  = 0;                    //min elev span is 0, max is .5
         JUCE_COMPILER_WARNING("will need to implement some kind of gain? or use the speaker attenuation, which makes no sense?")

@@ -168,7 +168,9 @@ void FieldComponent::paint (Graphics& g)
                 hue -= 1;
             }
             FPoint rt = mFilter->getSourceRT(i);
-            float r = rt.x;
+            JUCE_COMPILER_WARNING("REPLACE RT.X HERE BY THE SPEAKER ATTENUATION VALUE, JUST TO SEE")
+//            float r = rt.x;
+            float r = 2*mFilter->getSpeakerA(i);
             float angle = mFilter->getSourceD(i) * M_PI;
             float t[2] = { rt.y + angle, rt.y - angle };
             
@@ -204,6 +206,7 @@ void FieldComponent::paint (Graphics& g)
             }
         }
     }
+    
 	// - - - - - - - - - - - -
 	// draw speakers
 	// - - - - - - - - - - - -
