@@ -73,6 +73,16 @@ private:
     float m_fEndPathY;
     bool m_bPathJustStarted;
 
+    inline double degreeToRadian (float degree){
+        return ((degree/360.0)* 2 * M_PI);
+    }
+    
+    Point <float> degreeToXy (Point <float> p, int p_iFieldWidth){
+        float x,y;
+        x = -((p_iFieldWidth - kSourceDiameter)/2) * sinf(degreeToRadian(p.getX())) * cosf(degreeToRadian(p.getY()));
+        y = -((p_iFieldWidth - kSourceDiameter)/2) * cosf(degreeToRadian(p.getX())) * cosf(degreeToRadian(p.getY()));
+        return Point <float> (x, y);
+    }
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

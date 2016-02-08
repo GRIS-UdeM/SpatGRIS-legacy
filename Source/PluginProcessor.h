@@ -497,7 +497,7 @@ public:
         }
         float fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
         fElev /= M_PI_2;                        //making range [0,1]
-        fElev /= 2.;                             //making range [0,.5] because that's what the zirkonium wants
+        fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
 
         return FPoint(fAzim, fElev);
     }

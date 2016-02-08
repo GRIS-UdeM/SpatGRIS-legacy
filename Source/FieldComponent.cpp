@@ -142,35 +142,32 @@ void FieldComponent::paint (Graphics& g)
 	// - - - - - - - - - - - -
 	// draw translucid circles
 	// - - - - - - - - - - - -
-	if (processMode == kFreeVolumeMode)
-	for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-		float sourceDist = mFilter->getDenormedSourceD(i);
-		float reachDist = 1 / (adj_factor * sourceDist);
-		
-		float radius = (reachDist / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter);
-		float diameter = radius * 2;
-		
-		FPoint p = getSourcePoint(i);
-	
-		float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
-		if (hue > 1) hue -= 1;
-	
-		g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
-		g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
-		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
-		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
-	}
-	
-    if (processMode == kPanSpanMode || processMode == kOscSpatMode){
+    if (processMode == kFreeVolumeMode){
+        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+            float sourceDist = mFilter->getDenormedSourceD(i);
+            float reachDist = 1 / (adj_factor * sourceDist);
+            
+            float radius = (reachDist / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter);
+            float diameter = radius * 2;
+            
+            FPoint p = getSourcePoint(i);
+            
+            float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
+            if (hue > 1) hue -= 1;
+            
+            g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
+            g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
+            g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
+            g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
+        }
+    } else if (processMode == kPanSpanMode){
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
             float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
             if (hue > 1){
                 hue -= 1;
             }
             FPoint rt = mFilter->getSourceRT(i);
-            JUCE_COMPILER_WARNING("REPLACE RT.X HERE BY THE SPEAKER ATTENUATION VALUE, JUST TO SEE")
-//            float r = rt.x;
-            float r = 2*mFilter->getSpeakerA(i);
+            float r = rt.x;
             float angle = mFilter->getSourceD(i) * M_PI;
             float t[2] = { rt.y + angle, rt.y - angle };
             
@@ -204,6 +201,113 @@ void FieldComponent::paint (Graphics& g)
                     g.fillPath(p);
                 }
             }
+        }
+    } else if (processMode == kOscSpatMode){
+        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+            float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
+            if (hue > 1){
+                hue -= 1;
+            }
+//            FPoint rt = mFilter->getSourceRT(i);
+//            float r = rt.x;
+//            float fElevationSpan = 2*mFilter->getSpeakerA(i);
+//
+//            float angle = mFilter->getSourceD(i) * M_PI;
+//            float t[2] = { rt.y + angle, rt.y - angle };
+//            
+//            float fs = fieldWidth - kSourceDiameter;
+//            float x = fs*0.25 + kSourceRadius;
+//            float y = fs*0.25 + kSourceRadius;
+//            float w = fs*0.5;
+//            float h = fs*0.5;
+//            float r1 = 0.5*M_PI-t[0];
+//            float r2 = 0.5*M_PI-t[1];
+//            float ir = r+fElevationSpan;//(r >= .999) ? 2 : 0;
+//            
+////            if (r >= .999) {
+//                g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f));
+//                Path p;
+//                p.addPieSegment(x, y, w, h, r1, r2, ir);
+//                g.fillPath(p);
+////            } else {
+////                float front = r * 0.5f + 0.5f;
+////                float back = 1 - front;
+////                {
+////                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * front));
+////                    Path p;
+////                    p.addPieSegment(x, y, w, h, r1, r2, ir);
+////                    g.fillPath(p);
+////                }
+////                {
+////                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * back));
+////                    Path p;
+////                    p.addPieSegment(x, y, w, h, r1 + M_PI, r2 + M_PI, ir);
+////                    g.fillPath(p);
+////                }
+////            }
+            
+            
+            
+            
+            
+
+            float HRElevSpan = 90*mFilter->getSpeakerA(i);  //in zirkosc, this is [0,90]
+            float HRAzimSpan = 360*mFilter->getSourceD(i);  //in zirkosc, this is [0,360]
+            
+//            //return if there is no span arc to paint
+//            if (HRElevSpan == 0.f && HRAzimSpan == 0.f){
+//                return;
+//            }
+            
+            //get current azim+elev in angles
+            FPoint azimElev = mFilter->getSourceAzimElev(i);
+            float HRAzim = azimElev.x * 180/M_PI;
+            float HRElev = azimElev.y * 180/M_PI;
+            
+            //calculate max and min elevation in degrees
+            Point<float> maxElev = {HRAzim, HRElev+HRElevSpan/2};
+            Point<float> minElev = {HRAzim, HRElev-HRElevSpan/2};
+            
+            if(minElev.getY() < 0){
+                maxElev.setY(maxElev.getY() - minElev.getY());
+                minElev.setY(0);
+            }
+            
+            //convert max min elev to xy
+            Point<float> screenMaxElev = degreeToXy(maxElev, fieldWidth);
+            Point<float> screenMinElev = degreeToXy(minElev, fieldWidth);
+            
+            //form minmax elev, calculate minmax radius
+            float maxRadius = sqrtf(screenMaxElev.getX()*screenMaxElev.getX() + screenMaxElev.getY()*screenMaxElev.getY());
+            float minRadius = sqrtf(screenMinElev.getX()*screenMinElev.getX() + screenMinElev.getY()*screenMinElev.getY());
+            
+            //drawing the path for spanning
+            Path myPath;
+            float x = screenMinElev.getX();
+            float y = screenMinElev.getY();
+            float _ZirkOSC_Center_X = fieldWidth/2;
+            float _ZirkOSC_Center_Y = fieldWidth/2;
+            myPath.startNewSubPath(_ZirkOSC_Center_X+x,_ZirkOSC_Center_Y+y);
+            
+            //half first arc center
+            myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim), degreeToRadian(-HRAzim + HRAzimSpan/2 ));
+            
+            if (maxElev.getY()> 90.f) { // if we are over the top of the dome we draw the adjacent angle
+                myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, maxRadius, maxRadius, 0.0, M_PI+degreeToRadian(-HRAzim + HRAzimSpan/2), M_PI+degreeToRadian(-HRAzim - HRAzimSpan/2));
+            } else {
+                myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, maxRadius, maxRadius, 0.0, degreeToRadian(-HRAzim+HRAzimSpan/2), degreeToRadian(-HRAzim-HRAzimSpan/2));
+            }
+            myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim-HRAzimSpan/2), degreeToRadian(-HRAzim));
+            myPath.closeSubPath();
+            
+            g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
+            g.fillPath(myPath);
+            g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
+            PathStrokeType strokeType = PathStrokeType(2.5);
+            g.strokePath(myPath, strokeType);
+
+            
+            
         }
     }
     
