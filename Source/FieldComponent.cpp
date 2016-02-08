@@ -264,7 +264,12 @@ void FieldComponent::paint (Graphics& g)
 		g.setColour(Colours::red);
 		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
 		
-		String s; s << i+1;
+		String s;
+        if (mFilter->getProcessMode() == kOscSpatMode){
+            s << mFilter->getOscSpat1stSrcId()+i;
+        } else {
+            s << i+1;
+        }
 	
 		g.setColour(Colours::black);
 		g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter,

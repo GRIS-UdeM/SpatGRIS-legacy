@@ -678,6 +678,7 @@ AudioProcessorEditor (ownerFilter)
         {
             mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
             mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
+            mOscSpat1stSrcIdTextEditor->addListener(this);
             y += dh + 5;
         }
     }
@@ -1631,6 +1632,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
         if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
             mFilter->setOscSpat1stSrcId(i1stSrcId);
+            repaint();
         }
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
     }
