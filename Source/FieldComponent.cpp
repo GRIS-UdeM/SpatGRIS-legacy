@@ -208,48 +208,6 @@ void FieldComponent::paint (Graphics& g)
             if (hue > 1){
                 hue -= 1;
             }
-//            FPoint rt = mFilter->getSourceRT(i);
-//            float r = rt.x;
-//            float fElevationSpan = 2*mFilter->getSpeakerA(i);
-//
-//            float angle = mFilter->getSourceD(i) * M_PI;
-//            float t[2] = { rt.y + angle, rt.y - angle };
-//            
-//            float fs = fieldWidth - kSourceDiameter;
-//            float x = fs*0.25 + kSourceRadius;
-//            float y = fs*0.25 + kSourceRadius;
-//            float w = fs*0.5;
-//            float h = fs*0.5;
-//            float r1 = 0.5*M_PI-t[0];
-//            float r2 = 0.5*M_PI-t[1];
-//            float ir = r+fElevationSpan;//(r >= .999) ? 2 : 0;
-//            
-////            if (r >= .999) {
-//                g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f));
-//                Path p;
-//                p.addPieSegment(x, y, w, h, r1, r2, ir);
-//                g.fillPath(p);
-////            } else {
-////                float front = r * 0.5f + 0.5f;
-////                float back = 1 - front;
-////                {
-////                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * front));
-////                    Path p;
-////                    p.addPieSegment(x, y, w, h, r1, r2, ir);
-////                    g.fillPath(p);
-////                }
-////                {
-////                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * back));
-////                    Path p;
-////                    p.addPieSegment(x, y, w, h, r1 + M_PI, r2 + M_PI, ir);
-////                    g.fillPath(p);
-////                }
-////            }
-            
-            
-            
-            
-            
 
             float HRElevSpan = 90*mFilter->getSpeakerA(i);  //in zirkosc, this is [0,90]
             float HRAzimSpan = 360*mFilter->getSourceD(i);  //in zirkosc, this is [0,360]
@@ -258,9 +216,7 @@ void FieldComponent::paint (Graphics& g)
             FPoint azimElev = mFilter->getSourceAzimElev(i);
             float HRAzim = azimElev.x * 180;   //in zirkosc [-180,180]
             float HRElev = azimElev.y * 180;   //in zirkosc [0,89.9999]
-            if (i == 0){
-                cout << azimElev.x << "\t" << HRAzim << "\t" << azimElev.y << "\t" << HRElev << newLine;
-            }
+ 
             //calculate max and min elevation in degrees
             Point<float> maxElev = {HRAzim, HRElev+HRElevSpan/2};
             Point<float> minElev = {HRAzim, HRElev-HRElevSpan/2};
@@ -302,9 +258,6 @@ void FieldComponent::paint (Graphics& g)
             g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
             PathStrokeType strokeType = PathStrokeType(2.5);
             g.strokePath(myPath, strokeType);
-
-            
-            
         }
     }
     

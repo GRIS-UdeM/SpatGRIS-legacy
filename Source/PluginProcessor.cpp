@@ -917,6 +917,10 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
             if (done) mTrajectory = NULL;
 		}
 	}
+    
+    if (mProcessMode != kOscSpatMode) {
+        return;
+    }
 	
 	// cache values
 	float params[kNumberOfParameters];
@@ -931,7 +935,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		params[kFilterMid]  = denormalize(kFilterMidMin,  kFilterMidMax,  params[kFilterMid]);
 		params[kFilterFar]  = denormalize(kFilterFarMin,  kFilterFarMax,  params[kFilterFar]);
 	}
-	if (mProcessMode == kPanSpanMode || mProcessMode == kOscSpatMode) {
+	if (mProcessMode == kPanSpanMode) {
 		params[kMaxSpanVolume] = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, params[kMaxSpanVolume]);
 	}
 	if (mRoutingMode == 1) {
@@ -990,8 +994,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	
 	// process data
     unsigned int numFramesToDo;
-	while(1)
-	{
+	while(1) {
         //we process either kChunkSize frames or whatever is left in inFramesToProcess
 		numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
 		
@@ -1077,14 +1080,11 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	mProcessCounter++;
 }
 
-void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
-{
-	switch(mProcessMode)
-	{
+void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+	switch(mProcessMode) {
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
 		case kPanVolumeMode:	ProcessDataPanVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
 		case kPanSpanMode:		ProcessDataPanSpanMode(inputs, outputs, params, sampleRate, frames);	break;
-        case kOscSpatMode:		ProcessDataPanSpanMode(inputs, outputs, params, sampleRate, frames);	break;
 	}
 }
 

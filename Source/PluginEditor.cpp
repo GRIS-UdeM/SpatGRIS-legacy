@@ -485,7 +485,7 @@ AudioProcessorEditor (ownerFilter)
         int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
         
         mLinkDistances = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w/3, dh, ct);
-        addLabel("Surface/Span", x+w/3, y, w*2/3, dh, ct);
+        addLabel("Surface/Azim Span", x+w/3, y, w*2/3, dh, ct);
         
         mSrcSelect = new ComboBox();
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelect);
@@ -514,7 +514,7 @@ AudioProcessorEditor (ownerFilter)
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
         addLabel("Mute", x, y, muteWidth, dh, ct);
-        addLabel("Attenuation (dB)", x+muteWidth, y, w*2/3 - muteWidth, dh, ct);
+        addLabel("Attenuation (dB)/Elev Span", x+muteWidth, y, w*2/3 - muteWidth, dh, ct);
         addLabel("Level", x+w*2/3, y, w/3, dh, ct);
         
         mSpSelect = new ComboBox();
