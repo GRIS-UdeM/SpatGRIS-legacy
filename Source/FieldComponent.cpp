@@ -254,16 +254,13 @@ void FieldComponent::paint (Graphics& g)
             float HRElevSpan = 90*mFilter->getSpeakerA(i);  //in zirkosc, this is [0,90]
             float HRAzimSpan = 360*mFilter->getSourceD(i);  //in zirkosc, this is [0,360]
             
-//            //return if there is no span arc to paint
-//            if (HRElevSpan == 0.f && HRAzimSpan == 0.f){
-//                return;
-//            }
-            
             //get current azim+elev in angles
             FPoint azimElev = mFilter->getSourceAzimElev(i);
-            float HRAzim = azimElev.x * 180/M_PI;
-            float HRElev = azimElev.y * 180/M_PI;
-            
+            float HRAzim = azimElev.x * 180;   //in zirkosc [-180,180]
+            float HRElev = azimElev.y * 180;   //in zirkosc [0,89.9999]
+            if (i == 0){
+                cout << azimElev.x << "\t" << HRAzim << "\t" << azimElev.y << "\t" << HRElev << newLine;
+            }
             //calculate max and min elevation in degrees
             Point<float> maxElev = {HRAzim, HRElev+HRElevSpan/2};
             Point<float> minElev = {HRAzim, HRElev-HRElevSpan/2};
