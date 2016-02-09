@@ -292,14 +292,17 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
     }
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
         int   channel_osc   = getOscSpat1stSrcId()+iCurSrc-1;   //in gui the range is 1-99, for zirkonium it actually starts at 0 (or potentially lower, but Zirkosc uses 0 as starting channel)
-        FPoint curPoint = getSourceAzimElev(iCurSrc);
+        FPoint curPoint     = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;   //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;   //For Zirkonium, 0 is the edge of the dome, .5 is the top
         float azimspan_osc  = 2*getSourceD(iCurSrc);  //min azim span is 0, max is 2. I figure this is radians.
+        if (iCurSrc == 0){
+            DBG(azimspan_osc);
+        }
         JUCE_COMPILER_WARNING("will need to implement elevation span")
-        float elevspan_osc  = 0;                    //min elev span is 0, max is .5
+        float elevspan_osc  = 0;    //min elev span is 0, max is .5
         JUCE_COMPILER_WARNING("will need to implement some kind of gain? or use the speaker attenuation, which makes no sense?")
-        float gain_osc      = getSourceD(iCurSrc);//m_oAllSources[iCurSrc].getGain01();
+        float gain_osc      = 1;    //getSourceD(iCurSrc);//m_oAllSources[iCurSrc].getGain01();
         
         //        lo_send(_OscZirkonium, "/pan/az", "ifffff", channel_osc, azim_osc, elev_osc, azimspan_osc, elevspan_osc, gain_osc);
         OSCAddressPattern oscPattern("/pan/az");
