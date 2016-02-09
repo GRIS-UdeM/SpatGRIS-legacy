@@ -291,7 +291,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         return;
     }
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
-        int   channel_osc   = getOscSpat1stSrcId()+iCurSrc;
+        int   channel_osc   = getOscSpat1stSrcId()+iCurSrc-1;   //in gui the range is 1-99, for zirkonium it actually starts at 0 (or potentially lower, but Zirkosc uses 0 as starting channel)
         FPoint curPoint = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;   //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;   //For Zirkonium, 0 is the edge of the dome, .5 is the top
