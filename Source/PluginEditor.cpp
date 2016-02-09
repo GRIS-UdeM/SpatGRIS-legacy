@@ -675,12 +675,15 @@ AudioProcessorEditor (ownerFilter)
             mMaxSpanVolume = ds;
             y += dh + 5;
         }
-        {
-            mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
-            mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
-            mOscSpat1stSrcIdTextEditor->addListener(this);
-            y += dh + 5;
-        }
+        mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
+        mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
+        mOscSpat1stSrcIdTextEditor->addListener(this);
+        y += dh + 5;
+        
+        mOscSpatPortLabel       = addLabel("OSC Spat port:", x, y, w*2/3 - 5, dh, box);
+        mOscSpatPortTextEditor  = addTextEditor(String(mFilter->getOscSpatPort()), x + w*2/3, y, w/3, dh, box);
+        mOscSpatPortTextEditor->addListener(this);
+        y += dh + 5;
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
@@ -1174,9 +1177,13 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     if (iSelectedMode == kOscSpatMode){
         mOscSpat1stSrcIdLabel->setVisible(true);
         mOscSpat1stSrcIdTextEditor->setVisible(true);
+        mOscSpatPortLabel->setVisible(true);
+        mOscSpatPortTextEditor->setVisible(true);
     } else {
         mOscSpat1stSrcIdLabel->setVisible(false);
         mOscSpat1stSrcIdTextEditor->setVisible(false);
+        mOscSpatPortLabel->setVisible(false);
+        mOscSpatPortTextEditor->setVisible(false);
     }
     if (iSelectedMode == kPanVolumeMode){
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
@@ -1635,6 +1642,13 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
             repaint();
         }
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
+    }
+    else if (&textEditor == mOscSpatPortTextEditor){
+        int iPort = mOscSpatPortTextEditor->getText().getIntValue();
+        if (iPort >= 1 && iPort <= 100000){
+            mFilter->setOscSpatPort(iPort);
+        }
+        mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
     }
     else {
         printf("unknown TextEditor clicked...\n");
@@ -2105,6 +2119,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mTrDeviationTextEditor->setText(String(mFilter->getTrDeviation()*360));
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
+        mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
 
 #if USE_TOUCH_OSC
         updateOscComponent(mOsc);

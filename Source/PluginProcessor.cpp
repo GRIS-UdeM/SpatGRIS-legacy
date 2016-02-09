@@ -210,6 +210,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_fTrRepeats = 1.f;
     m_fTrDampening = 0.f;
     m_iOscSpat1stSrcId = 1;
+    m_iOscSpatPort = 18032;
     m_fTrTurns = 1.f;
     m_fTrDeviation = 0.f;
     m_fEndLocationXY = make_pair(.5, .5);
@@ -1942,6 +1943,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("kFilterMid", mParameters[kFilterMid]);
     xml.setAttribute ("kFilterFar", mParameters[kFilterFar]);
     xml.setAttribute ("m_iOscSpat1stSrcId", m_iOscSpat1stSrcId);
+    xml.setAttribute ("m_iOscSpatPort", m_iOscSpatPort);
     
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i) {
 		String srcX = "src" + to_string(i) + "x";
@@ -2021,7 +2023,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mParameters.set(kFilterNear,    static_cast<float>(xmlState->getDoubleAttribute("kFilterNear", normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault))));
             mParameters.set(kFilterMid,     static_cast<float>(xmlState->getDoubleAttribute("kFilterMid", normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault))));
             mParameters.set(kFilterFar,     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
-            m_iOscSpat1stSrcId = xmlState->getIntAttribute("m_iOscSpat1stSrcId", m_iOscSpat1stSrcId);
+            m_iOscSpat1stSrcId  = xmlState->getIntAttribute("m_iOscSpat1stSrcId",   m_iOscSpat1stSrcId);
+            m_iOscSpatPort      = xmlState->getIntAttribute("m_iOscSpatPort",       m_iOscSpatPort);
             for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i){
                 String srcX = "src" + to_string(i) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));

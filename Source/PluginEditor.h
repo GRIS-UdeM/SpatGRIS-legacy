@@ -261,8 +261,11 @@ private:
     LookAndFeel_V2 mV2Feel;
     GrisLookAndFeel mGrisFeel;
 
-    Component *mOscSpat1stSrcIdLabel;
+    Component  *mOscSpat1stSrcIdLabel;
     TextEditor *mOscSpat1stSrcIdTextEditor;
+    
+    Component  *mOscSpatPortLabel;
+    TextEditor *mOscSpatPortTextEditor;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

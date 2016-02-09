@@ -358,6 +358,9 @@ public:
     
     int getOscSpat1stSrcId() const{return m_iOscSpat1stSrcId;}
     void setOscSpat1stSrcId(int i){m_iOscSpat1stSrcId = i;}
+    
+    int getOscSpatPort() const{return m_iOscSpatPort;}
+    void setOscSpatPort(int i){m_iOscSpatPort = i;}
 
     float getTrDeviation() const {return m_fTrDeviation;}
     void setTrDeviation(float i){m_fTrDeviation = i;}
@@ -691,15 +694,16 @@ private:
     int m_iTrDirection;
     int m_iTrReturn;
     
-    int m_iTrSrcSelect;
-    float m_fTrDuration;
-    int m_iTrUnits; //0 = beats, 1 = seconds
-    float m_fTrRepeats;
-    float m_fTrDampening;
-    float m_fTrTurns;
-    float m_fTrDeviation;
-    int mTrState;
-    float m_iOscSpat1stSrcId;
+    int     m_iTrSrcSelect;
+    float   m_fTrDuration;
+    int     m_iTrUnits; //0 = beats, 1 = seconds
+    float   m_fTrRepeats;
+    float   m_fTrDampening;
+    float   m_fTrTurns;
+    float   m_fTrDeviation;
+    int     mTrState;
+    float   m_iOscSpat1stSrcId;
+    int     m_iOscSpatPort;
 
     int mGuiTab;
     int mJoystickEnabled;
