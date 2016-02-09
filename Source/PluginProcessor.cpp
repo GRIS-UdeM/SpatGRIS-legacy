@@ -300,7 +300,8 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
             DBG(azimspan_osc);
         }
         JUCE_COMPILER_WARNING("will need to implement elevation span")
-        float elevspan_osc  = 0;    //min elev span is 0, max is .5
+        float elevspan_osc  = getSpeakerA(iCurSrc)/2;    //min elev span is 0, max is .5        
+        
         JUCE_COMPILER_WARNING("will need to implement some kind of gain? or use the speaker attenuation, which makes no sense?")
         float gain_osc      = 1;    //getSourceD(iCurSrc);//m_oAllSources[iCurSrc].getGain01();
         
