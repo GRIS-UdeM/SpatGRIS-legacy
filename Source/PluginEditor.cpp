@@ -478,14 +478,14 @@ AudioProcessorEditor (ownerFilter)
         addAndMakeVisible(mSourcesBox);
         mComponents.add(mSourcesBox);
         
-        mSourcesBoxLabel = addLabel("Surface:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
+        mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
 
         Component *ct = mSourcesBox->getContent();
         
         int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
         
-        mLinkDistances = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w/3, dh, ct);
-        addLabel("Surface/Azim Span", x+w/3, y, w*2/3, dh, ct);
+        mLinkDistances = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, ct);
+        addLabel("Surface/Azim Span", x+w*3/12, y, w*9/12, dh, ct);
         
         mSrcSelect = new ComboBox();
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelect);
@@ -1363,11 +1363,11 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     y += dh + 5;
     for (int i = 0; i < iCurSources; i++){
         String s; s << i+1; s << ":";
-        Component *label = addLabel(s, x, y, w/3, dh, ct);
+        Component *label = addLabel(s, x, y, w*3/12, dh, ct);
         mLabels.add(label);
         
         float distance = mFilter->getSourceD(i);
-        Slider *slider = addParamSlider(kParamSource, i, distance, x + w/3, y, w*2/3, dh, ct);
+        Slider *slider = addParamSlider(kParamSource, i, distance, x + w*3/12, y, w*9/12, dh, ct);
         
         if (bIsFreeVolumeMode){
             slider->setEnabled(false);

@@ -110,8 +110,9 @@ void FieldComponent::paint (Graphics& g)
 	// draw back circles
 	// - - - - - - - - - - - -
 	g.setColour(Colours::white);
-	for (float i = 1; i <= kRadiusMax; i += 1) {
-		float w = (i / kRadiusMax) * (fieldWidth - kSourceDiameter);
+    float iCurRadius = (processMode == kOscSpatMode) ? kRadiusMax : 1;
+	for (; iCurRadius <= kRadiusMax; iCurRadius += 1) {
+		float w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
 		float x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 	}
@@ -264,22 +265,23 @@ void FieldComponent::paint (Graphics& g)
 	// - - - - - - - - - - - -
 	// draw speakers
 	// - - - - - - - - - - - -
-	for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
-		const float radius = kSpeakerRadius, diameter = kSpeakerDiameter;
-		FPoint p = getSpeakerPoint(i);
-		g.setColour(Colour::fromHSV(2.f/3.f, 0, 0.5, 1));
-		g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
-		
-		g.setColour(Colours::white);
-		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
-		
-		String s; s << i+1;
-		g.setColour(Colours::black);
-		g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
-		g.setColour(Colours::white);
-		g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
-	}
-    
+    if (processMode != kOscSpatMode){
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
+            const float radius = kSpeakerRadius, diameter = kSpeakerDiameter;
+            FPoint p = getSpeakerPoint(i);
+            g.setColour(Colour::fromHSV(2.f/3.f, 0, 0.5, 1));
+            g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
+            
+            g.setColour(Colours::white);
+            g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
+            
+            String s; s << i+1;
+            g.setColour(Colours::black);
+            g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
+            g.setColour(Colours::white);
+            g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
+        }
+    }
     // - - - - - - - - - - - -
     //draw line and circle for selected source
     // - - - - - - - - - - - -
@@ -305,7 +307,7 @@ void FieldComponent::paint (Graphics& g)
 		if (hue > 1) hue -= 1;
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
-		if (processMode != kFreeVolumeMode) {
+		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
 			FPoint rt = mFilter->getSourceRT(i);
 			float r = rt.x;
 			float t = rt.y;
