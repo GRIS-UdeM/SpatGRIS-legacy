@@ -1647,6 +1647,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         int iPort = mOscSpatPortTextEditor->getText().getIntValue();
         if (iPort >= 1 && iPort <= 100000){
             mFilter->setOscSpatPort(iPort);
+            mFilter->connectOscSpat();
         }
         mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
     }

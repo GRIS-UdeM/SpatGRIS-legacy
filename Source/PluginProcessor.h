@@ -378,6 +378,7 @@ public:
     }
 
     void sendOscSpatValues();
+    void connectOscSpat();
     
     int getIsJoystickEnabled() const { return mJoystickEnabled; }
     void setIsJoystickEnabled(int s) { mJoystickEnabled = s; }
