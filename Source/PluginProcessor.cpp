@@ -918,7 +918,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		}
 	}
     
-    if (mProcessMode != kOscSpatMode) {
+    if (mProcessMode == kOscSpatMode) {
         return;
     }
 	
