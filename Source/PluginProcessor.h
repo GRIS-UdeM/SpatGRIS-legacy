@@ -40,6 +40,9 @@
 #endif
 #endif
 
+static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
+static const bool s_bUseNewGui = true;
+
 
 #ifndef M_PI // for visual studio 2010
 #define M_PI 3.14159265358979323846264338327950288
@@ -125,9 +128,6 @@ enum
 };
 
 #define kNumberOfParameters (kConstantParameters + kConstantOffset)
-
-static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
-static const bool s_bUseNewGui = false;
 
 //these have to start at 0 because of backwards-compatibility
 enum InputOutputModes {

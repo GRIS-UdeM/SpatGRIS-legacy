@@ -4,3 +4,15 @@ some notes on osc.
     * Octogris, for the ipad connection, has a sending connection to the address/port specified in the
     relevant text boxes, and a receiving connection from the "default" local adress (obtained with
     getLocalIPAddress())
+--------- 2016-02-10 -----------------
+WHAT IS NEXT?
+* attendre réponse de robert pour l'interface
+* review juce compiler warnings
+* version windows
+* en mode internal routing, désactiver les components inutiles(dans studio)
+* usiliser mode HRTF avec zirkonium
+* GUI
+    * utiliser nouvelle interface juce
+    * utiliser nouvelle interface commune
+    * avoir une texture en background
+
