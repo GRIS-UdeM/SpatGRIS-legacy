@@ -6,13 +6,19 @@ some notes on osc.
     getLocalIPAddress())
 --------- 2016-02-10 -----------------
 WHAT IS NEXT?
-* attendre réponse de robert pour l'interface
 * review juce compiler warnings
 * version windows
 * en mode internal routing, désactiver les components inutiles(dans studio)
-* usiliser mode HRTF avec zirkonium
+* utiliser mode HRTF avec zirkonium
 * GUI
-    * utiliser nouvelle interface juce
-    * utiliser nouvelle interface commune
     * avoir une texture en background
+    * try different fonts
 
+RASPBERRY PI
+one shot
+loop avec noir (genre 1h)
+32g minimum carte micro sd classe 10
+250mg 1 min
+debrancher apres avoir lance le signal (ideal, mais pour línstant le son sort de la)
+loop de quelques videos en sequences (jusqua 6)
+audio sort du mac a un gain de 1?

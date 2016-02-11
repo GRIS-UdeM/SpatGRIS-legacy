@@ -509,7 +509,7 @@ AudioProcessorEditor (ownerFilter)
         
         int x = 0, y = 0, w = kRightColumnWidth;
         
-        mSpeakersBoxLabel = addLabel("Speaker attenuation:", 0, 0, kRightColumnWidth, kDefaultLabelHeight, this);
+        mSpeakersBoxLabel = addLabel("Output parameters:", 0, 0, kRightColumnWidth, kDefaultLabelHeight, this);
 
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
