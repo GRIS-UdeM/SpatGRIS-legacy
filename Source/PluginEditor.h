@@ -142,16 +142,17 @@ private:
     bool m_bLoadingPreset;
     uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
-	Array<Slider*> mDistances;
-	Array<Component*> mLabels;
-	Array<Slider*> mAttenuations;
+    Slider*  mSurfaceOrPanSlider;
+	ToggleButton *mLinkSurfaceOrPan;
+    Component    *mSurfaceOrPanLabel;
+    Array<Slider*> mAttenuations;
 	Array<ToggleButton*> mMutes;
 	Array<LevelComponent*> mLevels;
     ToggleButton *mEnableJoystick;
     ToggleButton *mEnableLeap;
 	ToggleButton *mShowGridLines;
     ToggleButton *mTrSeparateAutomationMode;
-	ToggleButton *mLinkDistances;
+
     ToggleButton *mApplyFilter;
 	ComboBox *mMovementModeCombo;
     ComboBox *mInputOutputModeCombo;

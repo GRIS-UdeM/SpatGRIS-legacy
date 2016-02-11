@@ -298,8 +298,8 @@ public:
 	int getMovementMode() const { return mMovementMode; }
 	void setMovementMode(int s) { mMovementMode = s; }
 	
-	bool getLinkDistances() const { return mLinkDistances; }
-	void setLinkDistances(bool s) { mLinkDistances = s; }
+	bool getLinkDistances() const { return mLinkSurfaceOrPan; }
+	void setLinkDistances(bool s) { mLinkSurfaceOrPan = s; }
 		
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
@@ -677,7 +677,7 @@ private:
 	Array<float> mLevels;
 	
 	bool mApplyFilter;
-	bool mLinkDistances;
+	bool mLinkSurfaceOrPan;
 	int mMovementMode;
 	bool mShowGridLines;
     bool mTrSeparateAutomationMode;

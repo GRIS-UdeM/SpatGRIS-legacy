@@ -177,7 +177,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
 	mCalculateLevels = 0;
 	mApplyFilter = true;
-	mLinkDistances = false;
+	mLinkSurfaceOrPan = false;
 	mMovementMode = 0;
 	mShowGridLines = false;
 	mTrSeparateAutomationMode = false;
@@ -1900,7 +1900,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mShowGridLines", mShowGridLines);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
     xml.setAttribute ("mMovementMode", mMovementMode);
-    xml.setAttribute ("mLinkDistances", mLinkDistances);
+    xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
     xml.setAttribute ("mGuiWidth", mGuiWidth);
     xml.setAttribute ("mGuiHeight", mGuiHeight);
     xml.setAttribute ("mGuiTab", mGuiTab);
@@ -1981,7 +1981,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
             mMovementMode       = xmlState->getIntAttribute ("mMovementMode", 0);
-            mLinkDistances      = xmlState->getIntAttribute ("mLinkDistances", 0);
+            mLinkSurfaceOrPan      = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
             mGuiWidth           = xmlState->getIntAttribute ("mGuiWidth", kDefaultWidth);
             mGuiHeight          = xmlState->getIntAttribute ("mGuiHeight", kDefaultHeight);
             mGuiTab             = xmlState->getIntAttribute ("mGuiTab", 0);

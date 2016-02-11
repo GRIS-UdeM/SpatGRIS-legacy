@@ -449,7 +449,6 @@ AudioProcessorEditor (ownerFilter)
 
     mComponents.add(m_VersionLabel);
 
-    
     // param box
     Colour tabBg;
     if (s_bUseNewGui){
@@ -473,19 +472,32 @@ AudioProcessorEditor (ownerFilter)
     
     // sources
     {
+        int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
+        //SOURCE PARAMETER BOX
         mSourcesBox = new Box(true);
         mSourcesBox->setBackgroundColor(tabBg);
         addAndMakeVisible(mSourcesBox);
         mComponents.add(mSourcesBox);
-        
+        Component *boxContent = mSourcesBox->getContent();
+        //main box label
         mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
-
-        Component *ct = mSourcesBox->getContent();
+        //add surface/pan slider
+        mLinkSurfaceOrPan = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
+        mSurfaceOrPanLabel = addLabel("Surface", x+w*3/12, y, w*9/12, dh, boxContent);
+        if (mFilter->getProcessMode() == kPanSpanMode){
+            static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
+        }
+        y += dh + 5;
         
-        int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
+        int iSelSrc = mFilter->getSrcSelected();
+        float distance = mFilter->getSourceD(iSelSrc);
+        mSurfaceOrPanSlider = addParamSlider(kParamSource, iSelSrc, distance, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 5;
+        if (mFilter->getProcessMode() == kPanVolumeMode){
+            mSurfaceOrPanSlider->setEnabled(false);
+        }
+        boxContent->setSize(w, y);
         
-        mLinkDistances = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, ct);
-        addLabel("Surface/Azim Span", x+w*3/12, y, w*9/12, dh, ct);
         
         mSrcSelect = new ComboBox();
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelect);
@@ -1186,14 +1198,20 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mOscSpatPortTextEditor->setVisible(false);
     }
     if (iSelectedMode == kPanVolumeMode){
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-            mDistances.getUnchecked(i)->setEnabled(false);
-        }
+        mSurfaceOrPanSlider->setEnabled(false);
     } else {
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-            mDistances.getUnchecked(i)->setEnabled(true);
-            mDistances.getUnchecked(i)->valueChanged();
-        }
+        mSurfaceOrPanSlider->setEnabled(true);
+        mSurfaceOrPanSlider->valueChanged();
+    }
+    if (mFilter->getProcessMode() == kPanSpanMode){
+        mSurfaceOrPanLabel->setEnabled(true);
+        static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
+    } else if (mFilter->getProcessMode() == kFreeVolumeMode){
+        mSurfaceOrPanLabel->setEnabled(true);
+        static_cast<Label*>(mSurfaceOrPanLabel)->setText("Surface", dontSendNotification);
+    } else {
+        mSurfaceOrPanSlider->setEnabled(false);
+        mSurfaceOrPanLabel->setEnabled(false);
     }
     repaint();
 }
@@ -1345,46 +1363,11 @@ void SpatGrisAudioProcessorEditor::resized()
 
 void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
-    int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
-
-    Component *ct = mSourcesBox->getContent();
-    
-    //remove old stuff
-    for (int iCurLevelComponent = 0; iCurLevelComponent < mDistances.size(); ++iCurLevelComponent){
-        ct->removeChildComponent(mDistances.getUnchecked(iCurLevelComponent));
-        ct->removeChildComponent(mLabels.getUnchecked(iCurLevelComponent));
-    }
-    mDistances.clear();
-    mLabels.clear();
-
     if (!p_bCalledFromConstructor){
         mSrcSelect->clear(dontSendNotification);
         mMovementModeCombo->clear(dontSendNotification);
         updateMovementModeCombo();
     }
-
-    //put new stuff
-    int iCurSources = mFilter->getNumberOfSources();
-    
-    bool bIsFreeVolumeMode = mFilter->getProcessMode() == kPanVolumeMode;
-    y += dh + 5;
-    for (int i = 0; i < iCurSources; i++){
-        String s; s << i+1; s << ":";
-        Component *label = addLabel(s, x, y, w*3/12, dh, ct);
-        mLabels.add(label);
-        
-        float distance = mFilter->getSourceD(i);
-        Slider *slider = addParamSlider(kParamSource, i, distance, x + w*3/12, y, w*9/12, dh, ct);
-        
-        if (bIsFreeVolumeMode){
-            slider->setEnabled(false);
-        }
-        mDistances.add(slider);
-        
-        y += dh + 5;
-    }
-    
-    ct->setSize(w, y);
     
     mMover.updateNumberOfSources();
     
@@ -1394,6 +1377,7 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     //source position combobox in source tab
     int index = 1;
+    int iCurSources = mFilter->getNumberOfSources();
     for (int i = 0; i < iCurSources; i++){
         String s; s << i+1;
         mSrcSelect->addItem(s, index++);
@@ -1564,7 +1548,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSlider(int paramType, int si, floa
     if (paramType == kParamSource)
         v = 1.f - v;
     
-    ParamSlider *ds = new ParamSlider(index, paramType, (paramType == kParamSource) ? mLinkDistances : NULL, mFilter);
+    ParamSlider *ds = new ParamSlider(index, paramType, (paramType == kParamSource) ? mLinkSurfaceOrPan : NULL, mFilter);
     ds->setRange(0, 1);
     ds->setValue(v);
     ds->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
@@ -1657,7 +1641,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     
     //if called from actually pressing enter, put focus on something else
     if (!m_bIsReturnKeyPressedCalledFromFocusLost){
-        mLinkDistances->grabKeyboardFocus();
+        mLinkSurfaceOrPan->grabKeyboardFocus();
     }
     
 }
@@ -1849,7 +1833,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mTrSeparateAutomationMode) {
         mFilter->setIndependentMode(button->getToggleState());
     }
-    else if (button == mLinkDistances) {
+    else if (button == mLinkSurfaceOrPan) {
         mFilter->setLinkDistances(button->getToggleState());
     }
     else if (button == mApplyFilter) {
@@ -2127,7 +2111,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #endif
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
         mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
-        mLinkDistances->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
+        mLinkSurfaceOrPan->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
         mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
     }
     
@@ -2172,9 +2156,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         updateSourceLocationTextEditor(false);
         updateSpeakerLocationTextEditor();
         
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-			mDistances.getUnchecked(i)->setValue(1.f - mFilter->getSourceD(i), dontSendNotification);
-        }
+		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(mFilter->getSrcSelected()), dontSendNotification);
         
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
 			mAttenuations.getUnchecked(i)->setValue(mFilter->getSpeakerA(i), dontSendNotification);
