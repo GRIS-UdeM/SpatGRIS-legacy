@@ -17,8 +17,8 @@ WHAT IS NEXT?
 RASPBERRY PI
 one shot
 loop avec noir (genre 1h)
+loop de quelques videos en sequences (jusqua 6)
 32g minimum carte micro sd classe 10
 250mg 1 min
 debrancher apres avoir lance le signal (ideal, mais pour línstant le son sort de la)
-loop de quelques videos en sequences (jusqua 6)
 audio sort du mac a un gain de 1?
