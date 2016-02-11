@@ -327,6 +327,12 @@ public:
         return value;
     }
     
+    //examples of pParamIndex and pParamType are kParamSource, iSelSrc
+    void setParamIndexAndType(int pParamIndex, int pParamType){
+        mParamIndex = pParamIndex;
+        mParamType = pParamType;
+    }
+    
 private:
     int mParamIndex, mParamType;
     ToggleButton *mLink;
