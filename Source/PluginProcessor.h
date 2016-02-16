@@ -26,15 +26,16 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
-#ifndef USE_LEAP
-#define USE_LEAP 1
-#endif
-
 #ifndef USE_TOUCH_OSC
 #define USE_TOUCH_OSC 1
 #endif
 
-#if !WIN32
+#if WIN32
+#define M_PI 3.14159265358979323846264338327950288
+#elif
+#ifndef USE_LEAP
+#define USE_LEAP 1
+#endif
 #ifndef USE_JOYSTICK
 #define USE_JOYSTICK 1
 #endif
@@ -43,10 +44,6 @@
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
 static const bool s_bUseNewGui = true;
 
-
-#ifndef M_PI // for visual studio 2010
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 #include <stdint.h>
 
@@ -500,7 +497,7 @@ public:
             hypo = 2;
         }
         float fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
-        fElev /= M_PI_2;                        //making range [0,1]
+        fElev /= (M_PI/2);                        //making range [0,1]
         fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
 
         return FPoint(fAzim, fElev);
