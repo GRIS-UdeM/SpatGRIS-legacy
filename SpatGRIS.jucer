@@ -114,46 +114,19 @@
         <MODULEPATH id="juce_osc" path="../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
-            aaxFolder="C:\SDKs\AAX_SDK_2p1p1" vst3Folder="c:\SDKs\VST3 SDK"
-            externalLibraries="Leap.lib">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="Octogris2" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="Octogris2" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
-        <CONFIGURATION name="Release_x64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       targetName="Octogris2" optimisation="3" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x64"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
-        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
-        <MODULEPATH id="juce_graphics" path="../../juce"/>
-        <MODULEPATH id="juce_events" path="../../juce"/>
-        <MODULEPATH id="juce_data_structures" path="../../juce"/>
-        <MODULEPATH id="juce_core" path="../../juce"/>
-        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
-        <MODULEPATH id="juce_osc" path="../../juce"/>
-      </MODULEPATHS>
-    </VS2010>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
             vst3Folder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
             externalLibraries="Leap.lib">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="SpatGRIS_x86" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
+                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
                        libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="SpatGRIS_x86" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
+        <CONFIGURATION name="Release_x86" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
+                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86" useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Release_x64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       optimisation="3" targetName="SpatGRIS_x64" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x64"/>
+                       optimisation="3" targetName="SpatGRIS" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
+                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x64" useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../juce"/>
