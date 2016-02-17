@@ -481,14 +481,13 @@ AudioProcessorEditor (ownerFilter)
         Component *boxContent = mSourcesBox->getContent();
         //main box label
         mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
-        //add surface/pan slider
-        mLinkSurfaceOrPan = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
+        //add surface/pan label, slider, and link button
         mSurfaceOrPanLabel = addLabel("Surface", x+w*3/12, y, w*9/12, dh, boxContent);
         if (mFilter->getProcessMode() == kPanSpanMode){
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
         }
         y += dh + 5;
-        
+        mLinkSurfaceOrPan = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
         int iSelSrc = mFilter->getSrcSelected();
         float distance = mFilter->getSourceD(iSelSrc);
         mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, distance, x + w*3/12, y, w*9/12, dh, boxContent);
