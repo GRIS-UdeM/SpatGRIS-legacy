@@ -2170,7 +2170,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         //asdf
         static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
         JUCE_COMPILER_WARNING("asdf this is where we set the slider to the value in processor")
-		mSurfaceOrPanSlider->setValue(mFilter->getSourceD(iSelSrc), dontSendNotification);
+		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
         
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
 			mAttenuations.getUnchecked(i)->setValue(mFilter->getSpeakerA(i), dontSendNotification);
