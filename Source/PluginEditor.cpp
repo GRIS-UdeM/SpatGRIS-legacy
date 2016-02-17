@@ -481,21 +481,95 @@ AudioProcessorEditor (ownerFilter)
         Component *boxContent = mSourcesBox->getContent();
         //main box label
         mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
-        //add surface/pan label, slider, and link button
         y += 5;
+        int iSelSrc = mFilter->getSrcSelected();
+        
+        //--------------------- surface/pan -----------------------
+        //add surface/pan label
         mSurfaceOrPanLabel = addLabel("Surface", x+w*3/12, y, w*9/12, dh, boxContent);
         if (mFilter->getProcessMode() == kPanSpanMode){
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
         }
         y += dh;
-        mSurfaceOrPanLinkButton = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
-        int iSelSrc = mFilter->getSrcSelected();
-        float distance = mFilter->getSourceD(iSelSrc);
-        mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, distance, x + w*3/12, y, w*9/12, dh, boxContent);
-        y += dh + 5;
+        //add surface/pan link button
+        mSurfaceOrPanLinkButton = addCheckbox("Link", mFilter->getLinkDistance(), x, y, w*3/12, dh, boxContent);
+        //add surface/pan slider
+        float fCurDistance = mFilter->getSourceD(iSelSrc);
+        mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
         if (mFilter->getProcessMode() == kPanVolumeMode){
+            mSurfaceOrPanLabel->setEnabled(false);
             mSurfaceOrPanSlider->setEnabled(false);
+            mSurfaceOrPanLinkButton->setEnabled(false);
         }
+        y += dh + 5;
+        
+        //--------------------- azimuth -----------------------
+        //add azimuth label
+        mAzimuthLabel = addLabel("Azimuth", x+w*3/12, y, w*9/12, dh, boxContent);
+        y += dh;
+        //add azimuth link button
+        mAzimuthLinkButton = addCheckbox("Link", mFilter->getLinkAzimuth(), x, y, w*3/12, dh, boxContent);
+        //add azimuth slider
+        float fCurAzim = mFilter->getSourceAzimElev(iSelSrc).x;
+        mAzimuthSlider = addParamSliderGRIS(kParamAzimuth, iSelSrc, fCurAzim, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 5;
+        
+        //--------------------- elevation -----------------------
+        //add azimuth label
+        mElevationLabel = addLabel("Elevation", x+w*3/12, y, w*9/12, dh, boxContent);
+        y += dh;
+        //add azimuth link button
+        mElevationLinkButton = addCheckbox("Link", mFilter->getLinkElevation(), x, y, w*3/12, dh, boxContent);
+        //add azimuth slider
+        float fCurElev = mFilter->getSourceAzimElev(iSelSrc).y;
+        mElevationSlider = addParamSliderGRIS(kParamElevation, iSelSrc, fCurElev, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 5;
+
+        //--------------------- azim span -----------------------
+        //add azimuth label
+        mAzimSpanLabel = addLabel("Azimuth Span", x+w*3/12, y, w*9/12, dh, boxContent);
+        y += dh;
+        //add azimuth link button
+        mAzimSpanLinkButton = addCheckbox("Link", mFilter->getLinkAzimSpan(), x, y, w*3/12, dh, boxContent);
+        //add azimuth slider
+        float fCurAzimSpan = mFilter->getSourceAzimSpan(iSelSrc).y;
+        mAzimSpanSlider = addParamSliderGRIS(kParamAzimSpan, iSelSrc, fCurAzimSpan, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 5;
+        
+        //--------------------- elev span -----------------------
+        //add azimuth label
+        mElevSpanLabel = addLabel("Elevation Span", x+w*3/12, y, w*9/12, dh, boxContent);
+        y += dh;
+        //add azimuth link button
+        mElevSpanLinkButton = addCheckbox("Link", mFilter->getLinkElevSpan(), x, y, w*3/12, dh, boxContent);
+        //add azimuth slider
+        float fCurElevSpan = mFilter->getSourceElevSpan(iSelSrc).y;
+        mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, iSelSrc, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 5;
+
+
+
+        
+        JUCE_COMPILER_WARNING("this should probably in its own 'update source sliders' function")
+        if (mFilter->getProcessMode() != kOscSpatMode){
+            mAzimuthLabel->setEnabled(false);
+            mAzimuthSlider->setEnabled(false);
+            mAzimuthLinkButton->setEnabled(false);
+
+            mElevationLabel->setEnabled(false);
+            mElevationSlider->setEnabled(false);
+            mElevationLinkButton->setEnabled(false);
+
+            mAzimSpanLabel->setEnabled(false);
+            mAzimSpanSlider->setEnabled(false);
+            mAzimSpanLinkButton->setEnabled(false);
+
+            mElevSpanLabel->setEnabled(false);
+            mElevSpanSlider->setEnabled(false);
+            mElevSpanLinkButton->setEnabled(false);
+        }
+
+        
         boxContent->setSize(w, y);
         
         
@@ -1844,7 +1918,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         mFilter->setIndependentMode(button->getToggleState());
     }
     else if (button == mSurfaceOrPanLinkButton) {
-        mFilter->setLinkDistances(button->getToggleState());
+        mFilter->setLinkDistance(button->getToggleState());
     }
     else if (button == mApplyFilter) {
         mFilter->setApplyFilter(button->getToggleState());
@@ -2121,7 +2195,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #endif
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
         mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
-        mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
+        mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(), dontSendNotification);
         mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
     }
     

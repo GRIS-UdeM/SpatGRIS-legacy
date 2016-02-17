@@ -296,8 +296,8 @@ public:
 	int getMovementMode() const { return mMovementMode; }
 	void setMovementMode(int s) { mMovementMode = s; }
 	
-	bool getLinkDistances() const { return mLinkSurfaceOrPan; }
-	void setLinkDistances(bool s) { mLinkSurfaceOrPan = s; }
+	bool getLinkDistance() const { return mLinkSurfaceOrPan; }
+	void setLinkDistance(bool s) { mLinkSurfaceOrPan = s; }
 		
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
