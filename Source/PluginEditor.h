@@ -66,7 +66,7 @@ enum placement{
 };
 
 class MiniProgressBar;
-class ParamSlider;
+class ParamSliderGRIS;
 class OctTabbedComponent;
 class HIDDelegate;
 class OctoLeap;
@@ -250,7 +250,7 @@ private:
 	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
 	TextButton* addButton(const String &s, int x, int y, int w, int h, Component *into);
     TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
-	Slider* addParamSlider(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
+	Slider* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
     
     SourceUpdateThread*     m_pSourceUpdateThread;
 //    JoystickUpdateThread*   m_pJoystickUpdateThread;

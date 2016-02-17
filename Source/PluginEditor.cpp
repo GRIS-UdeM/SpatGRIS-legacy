@@ -152,12 +152,12 @@ private:
 };
 
 
-//================================================== PARAMSLIDER ======================================================
+//================================================== ParamSliderGRIS ======================================================
 JUCE_COMPILER_WARNING("this class should be in its own file")
-class ParamSlider : public Slider
+class ParamSliderGRIS : public Slider
 {
 public:
-    ParamSlider(int paramIndex, int paramType, ToggleButton *link, SpatGrisAudioProcessor *filter)
+    ParamSliderGRIS(int paramIndex, int paramType, ToggleButton *link, SpatGrisAudioProcessor *filter)
     :
     mParamIndex(paramIndex),
     mParamType(paramType),
@@ -339,7 +339,7 @@ private:
     SpatGrisAudioProcessor *mFilter;
     bool mBeganGesture, mMouseDown;
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSlider)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSliderGRIS)
 };
 
 //==================================== SourceUpdateThread ===================================================================
@@ -497,10 +497,12 @@ AudioProcessorEditor (ownerFilter)
         
         int iSelSrc = mFilter->getSrcSelected();
         float distance = mFilter->getSourceD(iSelSrc);
-        mSurfaceOrPanSlider = addParamSlider(kParamSource, iSelSrc, distance, x + w*3/12, y, w*9/12, dh, boxContent);
+        mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, distance, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 5;
         if (mFilter->getProcessMode() == kPanVolumeMode){
             mSurfaceOrPanSlider->setEnabled(false);
+        } else {
+            mSurfaceOrPanSlider->setEnabled(true);
         }
         boxContent->setSize(w, y);
         
@@ -569,7 +571,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Param smoothing (ms):", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamSmooth, kSmooth, mFilter->getParameter(kSmooth), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamSmooth, kSmooth, mFilter->getParameter(kSmooth), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mSmoothing = ds;
             y += dh + 5;
@@ -654,7 +656,7 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Routing volume (dB):", x, y, w, dh, box);
         y += dh + 5;
         {
-            Slider *ds = addParamSlider(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mRoutingVolume = ds;
             y += dh + 5;
@@ -688,7 +690,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Max span volume (dB):", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamMaxSpanVolume, kMaxSpanVolume, mFilter->getParameter(kMaxSpanVolume), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamMaxSpanVolume, kMaxSpanVolume, mFilter->getParameter(kMaxSpanVolume), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mMaxSpanVolume = ds;
             y += dh + 5;
@@ -877,7 +879,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Volume center (dB):", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamVolumeNear, kVolumeNear, mFilter->getParameter(kVolumeNear), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamVolumeNear, kVolumeNear, mFilter->getParameter(kVolumeNear), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeNear = ds;
             y += dh + 5;
@@ -887,7 +889,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Filter center:", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamFilterNear, kFilterNear, mFilter->getParameter(kFilterNear), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamFilterNear, kFilterNear, mFilter->getParameter(kFilterNear), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterNear = ds;
             y += dh + 5;
@@ -906,7 +908,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Volume speakers (dB):", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamVolumeMid, kVolumeMid, mFilter->getParameter(kVolumeMid), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamVolumeMid, kVolumeMid, mFilter->getParameter(kVolumeMid), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeMid = ds;
             y += dh + 5;
@@ -916,7 +918,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Filter speakers:", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamFilterMid, kFilterMid, mFilter->getParameter(kFilterMid), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamFilterMid, kFilterMid, mFilter->getParameter(kFilterMid), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterMid = ds;
             y += dh + 5;
@@ -931,7 +933,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Volume far (dB):", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamVolumeFar, kVolumeFar, mFilter->getParameter(kVolumeFar), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamVolumeFar, kVolumeFar, mFilter->getParameter(kVolumeFar), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeFar = ds;
             y += dh + 5;
@@ -941,7 +943,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Filter far:", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamFilterFar, kFilterFar, mFilter->getParameter(kFilterFar), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamFilterFar, kFilterFar, mFilter->getParameter(kFilterFar), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterFar = ds;
             y += dh + 5;
@@ -1207,6 +1209,8 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSurfaceOrPanSlider->setEnabled(false);
     } else {
         mSurfaceOrPanSlider->setEnabled(true);
+        int iSelSrc = mFilter->getSrcSelected();
+        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), iSelSrc);
         mSurfaceOrPanSlider->valueChanged();
     }
     if (mFilter->getProcessMode() == kPanSpanMode){
@@ -1424,7 +1428,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
         mMutes.add(mute);
         
         float att = mFilter->getSpeakerA(i);
-        Slider *slider = addParamSlider(kParamSpeaker, i, att, x+muteWidth, y, w*2/3 - muteWidth, dh, ct);
+        Slider *slider = addParamSliderGRIS(kParamSpeaker, i, att, x+muteWidth, y, w*2/3 - muteWidth, dh, ct);
         
         slider->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
         mAttenuations.add(slider);
@@ -1544,7 +1548,7 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
     return te;
 }
 
-Slider* SpatGrisAudioProcessorEditor::addParamSlider(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
+Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
 {
     int index ;
     if (paramType == kParamSource) index = mFilter->getParamForSourceD(si);
@@ -1554,7 +1558,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSlider(int paramType, int si, floa
     if (paramType == kParamSource)
         v = 1.f - v;
     
-    ParamSlider *ds = new ParamSlider(index, paramType, (paramType == kParamSource) ? mLinkSurfaceOrPan : NULL, mFilter);
+    ParamSliderGRIS *ds = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mLinkSurfaceOrPan : NULL, mFilter);
     ds->setRange(0, 1);
     ds->setValue(v);
     ds->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
@@ -2162,6 +2166,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         updateSourceLocationTextEditor(false);
         updateSpeakerLocationTextEditor();
         
+        int iSelSrc = mFilter->getSrcSelected();
+        float fPan = 1.f - mFilter->getSourceD(mFilter->getSrcSelected());
+        cout << "src " << iSelSrc << ", pan " << fPan << newLine;
+
+        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), iSelSrc);
 		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(mFilter->getSrcSelected()), dontSendNotification);
         
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
