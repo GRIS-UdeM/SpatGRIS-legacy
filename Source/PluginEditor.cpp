@@ -488,7 +488,7 @@ AudioProcessorEditor (ownerFilter)
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
         }
         y += dh;
-        mLinkSurfaceOrPan = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
+        mSurfaceOrPanLinkButton = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
         int iSelSrc = mFilter->getSrcSelected();
         float distance = mFilter->getSourceD(iSelSrc);
         mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, distance, x + w*3/12, y, w*9/12, dh, boxContent);
@@ -1558,7 +1558,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
         index = si;
     }
     
-    ParamSliderGRIS *ds = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mLinkSurfaceOrPan : NULL, mFilter);
+    ParamSliderGRIS *ds = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mSurfaceOrPanLinkButton : NULL, mFilter);
     ds->setRange(0, 1);
     ds->setValue(v);
     ds->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
@@ -1651,7 +1651,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     
     //if called from actually pressing enter, put focus on something else
     if (!m_bIsReturnKeyPressedCalledFromFocusLost){
-        mLinkSurfaceOrPan->grabKeyboardFocus();
+        mSurfaceOrPanLinkButton->grabKeyboardFocus();
     }
     
 }
@@ -1843,7 +1843,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mTrSeparateAutomationMode) {
         mFilter->setIndependentMode(button->getToggleState());
     }
-    else if (button == mLinkSurfaceOrPan) {
+    else if (button == mSurfaceOrPanLinkButton) {
         mFilter->setLinkDistances(button->getToggleState());
     }
     else if (button == mApplyFilter) {
@@ -2121,7 +2121,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #endif
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
         mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
-        mLinkSurfaceOrPan->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
+        mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistances(), dontSendNotification);
         mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
     }
     
