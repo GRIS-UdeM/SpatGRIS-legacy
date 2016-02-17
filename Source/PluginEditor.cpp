@@ -180,17 +180,17 @@ public:
             double newVal;
             switch(mParamType)
             {
-                case kParamSource: newVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance); break;
-                case kParamSpeaker: newVal = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation); break;
-                case kParamSmooth: newVal = normalize(kSmoothMin, kSmoothMax, kSmoothDefault); break;
-                case kParamVolumeFar: newVal = normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault); break;
-                case kParamVolumeMid: newVal = normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault); break;
-                case kParamVolumeNear: newVal = normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault); break;
-                case kParamFilterFar: newVal = normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault); break;
-                case kParamFilterMid: newVal = normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault); break;
-                case kParamFilterNear: newVal = normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault); break;
-                case kParamMaxSpanVolume: newVal = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault); break;
-				case kParamRoutingVolume: newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
+                case kParamSource:          newVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance); break;
+                case kParamSpeaker:         newVal = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation); break;
+                case kParamSmooth:          newVal = normalize(kSmoothMin, kSmoothMax, kSmoothDefault); break;
+                case kParamVolumeFar:       newVal = normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault); break;
+                case kParamVolumeMid:       newVal = normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault); break;
+                case kParamVolumeNear:      newVal = normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault); break;
+                case kParamFilterFar:       newVal = normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault); break;
+                case kParamFilterMid:       newVal = normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault); break;
+                case kParamFilterNear:      newVal = normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault); break;
+                case kParamMaxSpanVolume:   newVal = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault); break;
+				case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
             }
             
             if (mParamType == kParamSource && mLink->getToggleState())

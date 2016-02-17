@@ -141,9 +141,25 @@ private:
     bool m_bLoadingPreset;
     uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
+    
     Slider*  mSurfaceOrPanSlider;
-	ToggleButton *mLinkSurfaceOrPan;
+    Slider*  mAzimuthSlider;
+    Slider*  mElevationSlider;
+    Slider*  mAzimSpanSlider;
+    Slider*  mElevSpanSlider;
+	
+    ToggleButton *mSurfaceOrPanLinkButton;
+    ToggleButton *mAzimuthLinkButton;
+    ToggleButton *mElevationLinkButton;
+    ToggleButton *mAzimSpanLinkButton;
+    ToggleButton *mElevSpanLinkButton;
+    
     Component    *mSurfaceOrPanLabel;
+    Component    *mAzimuthLabel;
+    Component    *mElevationLabel;
+    Component    *mAzimSpanLabel;
+    Component    *mElevSpanLabel;
+    
     Array<Slider*> mAttenuations;
 	Array<ToggleButton*> mMutes;
 	Array<LevelComponent*> mLevels;
