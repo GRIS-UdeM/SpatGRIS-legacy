@@ -482,11 +482,12 @@ AudioProcessorEditor (ownerFilter)
         //main box label
         mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
         //add surface/pan label, slider, and link button
+        y += 5;
         mSurfaceOrPanLabel = addLabel("Surface", x+w*3/12, y, w*9/12, dh, boxContent);
         if (mFilter->getProcessMode() == kPanSpanMode){
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
         }
-        y += dh + 5;
+        y += dh;
         mLinkSurfaceOrPan = addCheckbox("Link", mFilter->getLinkDistances(), x, y, w*3/12, dh, boxContent);
         int iSelSrc = mFilter->getSrcSelected();
         float distance = mFilter->getSourceD(iSelSrc);
@@ -518,9 +519,9 @@ AudioProcessorEditor (ownerFilter)
         
         int dh = kDefaultLabelHeight;
         
-        int x = 0, y = 0, w = kRightColumnWidth;
+        int x = 0, y = 5, w = kRightColumnWidth;
         
-        mSpeakersBoxLabel = addLabel("Output parameters:", 0, 0, kRightColumnWidth, kDefaultLabelHeight, this);
+        mSpeakersBoxLabel = addLabel("Output parameters:", x, y, kRightColumnWidth, kDefaultLabelHeight, this);
 
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
