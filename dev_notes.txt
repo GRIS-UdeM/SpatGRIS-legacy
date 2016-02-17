@@ -13,4 +13,7 @@ WHAT IS NEXT?
 * GUI
     * avoir une texture en background
     * try different fonts
-
+--------- 2016-02-17 -------------
+ok. so 2 problems
+1- compared to octogris, spatgris surface (free volume) and span (pan span) are reversed.
+2- only for source 1, setting volume (or pan) and reading it is reversed

@@ -298,7 +298,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         FPoint curPoint     = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;                       //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;                       //For Zirkonium, 0 is the edge of the dome, .5 is the top
-        float azimspan_osc  = 2*(1-getSourceD(iCurSrc));        //min azim span is 0, max is 2. I figure this is radians.
+        float azimspan_osc  = 2*getSourceD(iCurSrc);        //min azim span is 0, max is 2. I figure this is radians.
         float elevspan_osc  = getSpeakerA(iCurSrc)/2;           //min elev span is 0, max is .5
         float gain_osc      = 1;                                //gain is just locked to max value
         

@@ -243,22 +243,15 @@ public:
         mBeganGesture = false;
     }
     
-    void valueChanged()
-    {
-        if (mMouseDown && !mBeganGesture)
-        {
+    void valueChanged() {
+        if (mMouseDown && !mBeganGesture) {
             //fprintf(stderr, "paremslider :: beginParameter\n");
-            
-            if (mParamType == kParamSource && mLink->getToggleState())
-            {
-                for (int i = 0; i < mFilter->getNumberOfSources(); i++)
-                {
+            if (mParamType == kParamSource && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
                     mFilter->beginParameterChangeGesture(paramIndex);
                 }
-            }
-            else
-            {
+            } else {
                 mFilter->beginParameterChangeGesture(mParamIndex);
             }
             
@@ -266,6 +259,7 @@ public:
         }
         
         if (mParamType == kParamSource) {
+            JUCE_COMPILER_WARNING("we only get here for src 1")
             const float newVal = 1.f - (float)getValue();
             
             if (mLink->getToggleState()) {
@@ -327,7 +321,7 @@ public:
         return value;
     }
     
-    //examples of pParamIndex and pParamType are kParamSource, iSelSrc
+    //examples the paramIndex is the number used for processor->getparameter() and the type is something like source or speaker
     void setParamIndexAndType(int pParamIndex, int pParamType){
         mParamIndex = pParamIndex;
         mParamType = pParamType;
@@ -501,8 +495,6 @@ AudioProcessorEditor (ownerFilter)
         y += dh + 5;
         if (mFilter->getProcessMode() == kPanVolumeMode){
             mSurfaceOrPanSlider->setEnabled(false);
-        } else {
-            mSurfaceOrPanSlider->setEnabled(true);
         }
         boxContent->setSize(w, y);
         
@@ -1210,7 +1202,9 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     } else {
         mSurfaceOrPanSlider->setEnabled(true);
         int iSelSrc = mFilter->getSrcSelected();
-        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), iSelSrc);
+        //asdf
+        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
+        JUCE_COMPILER_WARNING("valueChanged is called every time the slider is changed, and will update the processor")
         mSurfaceOrPanSlider->valueChanged();
     }
     if (mFilter->getProcessMode() == kPanSpanMode){
@@ -1551,12 +1545,18 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
 Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
 {
     int index ;
-    if (paramType == kParamSource) index = mFilter->getParamForSourceD(si);
-    else if (paramType == kParamSpeaker) index = mFilter->getParamForSpeakerA(si);
-    else index = si;
-    
-    if (paramType == kParamSource)
+    //if we're adding a slider for a source, this slider will control the SourceD.
+    if (paramType == kParamSource){
+        index = mFilter->getParamForSourceD(si);
+        //and the processor's sourceD is reversed from the editor's
         v = 1.f - v;
+    } else if (paramType == kParamSpeaker) {
+        //if the slider is for a speaker, it will control speakerA.
+        index = mFilter->getParamForSpeakerA(si);
+    } else {
+        //otherwise, it controls directly the slider index (whatever that is)
+        index = si;
+    }
     
     ParamSliderGRIS *ds = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mLinkSurfaceOrPan : NULL, mFilter);
     ds->setRange(0, 1);
@@ -2167,11 +2167,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         updateSpeakerLocationTextEditor();
         
         int iSelSrc = mFilter->getSrcSelected();
-        float fPan = 1.f - mFilter->getSourceD(mFilter->getSrcSelected());
-        cout << "src " << iSelSrc << ", pan " << fPan << newLine;
-
-        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), iSelSrc);
-		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(mFilter->getSrcSelected()), dontSendNotification);
+        //asdf
+        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
+        JUCE_COMPILER_WARNING("asdf this is where we set the slider to the value in processor")
+		mSurfaceOrPanSlider->setValue(mFilter->getSourceD(iSelSrc), dontSendNotification);
         
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
 			mAttenuations.getUnchecked(i)->setValue(mFilter->getSpeakerA(i), dontSendNotification);

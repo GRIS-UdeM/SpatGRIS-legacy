@@ -41,8 +41,7 @@ class SourceUpdateThread;
 //class JoystickUpdateThread;
 class Box;
 
-enum
-{
+enum paramTypes {
 	kParamSource,
 	kParamSpeaker,
 	kParamSmooth,

@@ -169,7 +169,7 @@ void FieldComponent::paint (Graphics& g)
             }
             FPoint rt = mFilter->getSourceRT(i);
             float r = rt.x;
-            float angle = (1-mFilter->getSourceD(i)) * M_PI;
+            float angle = mFilter->getSourceD(i) * M_PI;
             float t[2] = { rt.y + angle, rt.y - angle };
             
             float fs = fieldWidth - kSourceDiameter;
@@ -211,7 +211,7 @@ void FieldComponent::paint (Graphics& g)
             }
 
             float HRElevSpan = 90*mFilter->getSpeakerA(i);  //in zirkosc, this is [0,90]
-            float HRAzimSpan = 360*(1-mFilter->getSourceD(i));  //in zirkosc, this is [0,360]
+            float HRAzimSpan = 360*mFilter->getSourceD(i);  //in zirkosc, this is [0,360]
             
             //get current azim+elev in angles
             FPoint azimElev = mFilter->getSourceAzimElev(i);
