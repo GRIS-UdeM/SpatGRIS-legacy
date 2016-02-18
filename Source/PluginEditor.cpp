@@ -169,17 +169,14 @@ public:
         jassert(mLink || mParamType != kParamSource);
     }
     
-    void mouseDown (const MouseEvent &e)
-    {
+    void mouseDown (const MouseEvent &e) {
         mBeganGesture = false;
         mMouseDown = true;
         
         bool resetToDefault = e.mods.isAltDown();
-        if (resetToDefault)
-        {
+        if (resetToDefault) {
             double newVal;
-            switch(mParamType)
-            {
+            switch(mParamType) {
                 case kParamSource:          newVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance); break;
                 case kParamSpeaker:         newVal = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation); break;
                 case kParamSmooth:          newVal = normalize(kSmoothMin, kSmoothMax, kSmoothDefault); break;
@@ -192,26 +189,20 @@ public:
                 case kParamMaxSpanVolume:   newVal = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault); break;
 				case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
             }
-            
-            if (mParamType == kParamSource && mLink->getToggleState())
-            {
-                for (int i = 0; i < mFilter->getNumberOfSources(); i++)
-                {
+             
+            if (mParamType == kParamSource && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 if (mFilter->getParameter(mParamIndex) != newVal){
                     mFilter->setParameterNotifyingHost(mParamIndex, newVal);
                 }
             }
-        }
-        else
-        {
+        } else {
             Slider::mouseDown(e);
         }
     }
@@ -259,7 +250,6 @@ public:
         }
         
         if (mParamType == kParamSource) {
-            JUCE_COMPILER_WARNING("we only get here for src 1")
             const float newVal = 1.f - (float)getValue();
             
             if (mLink->getToggleState()) {

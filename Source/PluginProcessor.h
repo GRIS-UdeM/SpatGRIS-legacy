@@ -64,13 +64,14 @@ using namespace std;
 //==============================================================================
 
 // x, y, distance
+JUCE_COMPILER_WARNING("need to implement kSourceAzimSpan and elev here")
 enum sourceParameters{
     kSourceX = 0,
     kSourceY,
     kSourceD,
     kSourceAzimSpan,
-    kParamsPerSource,
-    kSourceElevSpan,
+    kParamsPerSource
+    //kSourceElevSpan
 };
 
 // x, y, attenuation, mute
@@ -180,6 +181,10 @@ static const float kMaxSpanVolumeDefault = 0;
 static const float kRoutingVolumeMin = -120;
 static const float kRoutingVolumeMax = 6;
 static const float kRoutingVolumeDefault = 0;
+
+static const float kSpanMin = 0;
+static const float kSpanMax = 2;
+static const float kSpanDefault = 0;
 
 static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
@@ -431,7 +436,7 @@ public:
     float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
     float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
     float getSourceAzimSpan(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
-    float getSourceElevSpan(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
+    float getSourceElevSpan(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
     
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
     

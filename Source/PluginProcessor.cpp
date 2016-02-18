@@ -1478,8 +1478,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
     const int sourceParameters = mNumberOfSources * kParamsPerSource;
     const int speakerParameters = mNumberOfSpeakers * kParamsPerSpeakers;
     
-    for (int iCurParamId= 0; iCurParamId < (kNumberOfParameters - kConstantParameters); iCurParamId++)
-    {
+    for (int iCurParamId= 0; iCurParamId < (kNumberOfParameters - kConstantParameters); iCurParamId++){
         bool isSpeakerXY = (iCurParamId >= sourceParameters && iCurParamId < (sourceParameters + speakerParameters) && ((iCurParamId - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
         if (isSpeakerXY) continue;
         
