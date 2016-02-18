@@ -178,6 +178,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mCalculateLevels = 0;
 	mApplyFilter = true;
 	mLinkSurfaceOrPan = false;
+    mLinkAzimSpan = false;
+    mLinkElevSpan = false;
 	mMovementMode = 0;
 	mShowGridLines = false;
 	mTrSeparateAutomationMode = false;
@@ -298,7 +300,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         FPoint curPoint     = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;                       //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;                       //For Zirkonium, 0 is the edge of the dome, .5 is the top
-        float azimspan_osc  = 2*getSourceD(iCurSrc);        //min azim span is 0, max is 2. I figure this is radians.
+        float azimspan_osc  = 2*getSourceD(iCurSrc);            //min azim span is 0, max is 2. I figure this is radians.
         float elevspan_osc  = getSpeakerA(iCurSrc)/2;           //min elev span is 0, max is .5
         float gain_osc      = 1;                                //gain is just locked to max value
         
@@ -1188,10 +1190,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 	const float sm_n = 1 - sm_o;
 	
 	// ramp all the parameters, except constant ones and speaker thetas
-	const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;//const int sourceParameters = mNumberOfSources * kParamsPerSource;
-	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;//const int speakerParameters = mNumberOfSpeakers * kParamsPerSpeakers;
-	for (int i = 0; i < (kNumberOfParameters - kConstantParameters); i++)
-	{
+    const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
+	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+    for (int i = 0; i < (kNumberOfParameters - kConstantParameters); i++) {
 		bool isSpeakerXY = (i >= sourceParameters && i < (sourceParameters + speakerParameters) && ((i - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
 		if (isSpeakerXY) continue;
 	
@@ -1901,6 +1902,8 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
     xml.setAttribute ("mMovementMode", mMovementMode);
     xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
+    xml.setAttribute ("mLinkAzimSpan", mLinkAzimSpan);
+    xml.setAttribute ("mLinkElevSpan", mLinkElevSpan);
     xml.setAttribute ("mGuiWidth", mGuiWidth);
     xml.setAttribute ("mGuiHeight", mGuiHeight);
     xml.setAttribute ("mGuiTab", mGuiTab);
@@ -1981,7 +1984,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
             mMovementMode       = xmlState->getIntAttribute ("mMovementMode", 0);
-            mLinkSurfaceOrPan      = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
+            mLinkSurfaceOrPan   = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
+            mLinkAzimSpan       = xmlState->getIntAttribute ("mLinkAzimSpan", 0);
+            mLinkElevSpan       = xmlState->getIntAttribute ("mLinkElevSpan", 0);
             mGuiWidth           = xmlState->getIntAttribute ("mGuiWidth", kDefaultWidth);
             mGuiHeight          = xmlState->getIntAttribute ("mGuiHeight", kDefaultHeight);
             mGuiTab             = xmlState->getIntAttribute ("mGuiTab", 0);

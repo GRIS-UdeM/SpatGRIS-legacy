@@ -64,17 +64,17 @@ using namespace std;
 //==============================================================================
 
 // x, y, distance
-enum {
+enum sourceParameters{
     kSourceX = 0,
     kSourceY,
     kSourceD,
-    kSourceUnused,
-    kParamsPerSource
+    kSourceAzimSpan,
+    kParamsPerSource,
+    kSourceElevSpan,
 };
 
-
 // x, y, attenuation, mute
-enum {
+enum speakerParameters{
     kSpeakerX = 0,
     kSpeakerY,
     kSpeakerA,
@@ -88,7 +88,6 @@ static const float kSourceRadius = 10;
 static const float kSourceDiameter = kSourceRadius * 2;
 static const float kSpeakerRadius = 10;
 static const float kSpeakerDiameter = kSpeakerRadius * 2;
-
 //==============================================================================
 enum
 {
@@ -298,7 +297,13 @@ public:
 	
 	bool getLinkDistance() const { return mLinkSurfaceOrPan; }
 	void setLinkDistance(bool s) { mLinkSurfaceOrPan = s; }
-		
+
+    bool getLinkAzimSpan() const { return mLinkAzimSpan; }
+    void setLinkAzimSpan(bool s) { mLinkAzimSpan = s; }
+
+    bool getLinkElevSpan() const { return mLinkElevSpan; }
+    void setLinkElevSpan(bool s) { mLinkElevSpan = s; }
+    
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
     
@@ -425,6 +430,8 @@ public:
     float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
     float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
     float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
+    float getSourceAzimSpan(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
+    float getSourceElevSpan(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
     
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
     
@@ -658,8 +665,6 @@ public:
     void    setOldSrcLocRT(int id, FPoint pointRT){
         mOldSrcLocRT[id] = pointRT;
     }
-
-    
 	
 private:
 
@@ -676,6 +681,8 @@ private:
 	
 	bool mApplyFilter;
 	bool mLinkSurfaceOrPan;
+    bool mLinkAzimSpan;
+    bool mLinkElevSpan;
 	int mMovementMode;
 	bool mShowGridLines;
     bool mTrSeparateAutomationMode;

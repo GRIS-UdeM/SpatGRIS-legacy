@@ -503,62 +503,55 @@ AudioProcessorEditor (ownerFilter)
         }
         y += dh + 5;
         
-        //--------------------- azimuth -----------------------
-        //add azimuth label
-        mAzimuthLabel = addLabel("Azimuth", x+w*3/12, y, w*9/12, dh, boxContent);
-        y += dh;
-        //add azimuth link button
-        mAzimuthLinkButton = addCheckbox("Link", mFilter->getLinkAzimuth(), x, y, w*3/12, dh, boxContent);
-        //add azimuth slider
-        float fCurAzim = mFilter->getSourceAzimElev(iSelSrc).x;
-        mAzimuthSlider = addParamSliderGRIS(kParamAzimuth, iSelSrc, fCurAzim, x + w*3/12, y, w*9/12, dh, boxContent);
-        y += dh + 5;
-        
-        //--------------------- elevation -----------------------
-        //add azimuth label
-        mElevationLabel = addLabel("Elevation", x+w*3/12, y, w*9/12, dh, boxContent);
-        y += dh;
-        //add azimuth link button
-        mElevationLinkButton = addCheckbox("Link", mFilter->getLinkElevation(), x, y, w*3/12, dh, boxContent);
-        //add azimuth slider
-        float fCurElev = mFilter->getSourceAzimElev(iSelSrc).y;
-        mElevationSlider = addParamSliderGRIS(kParamElevation, iSelSrc, fCurElev, x + w*3/12, y, w*9/12, dh, boxContent);
-        y += dh + 5;
+//        //--------------------- azimuth -----------------------
+//        //add azimuth label
+//        mAzimuthLabel = addLabel("Azimuth", x+w*3/12, y, w*9/12, dh, boxContent);
+//        y += dh;
+//        //add azimuth slider
+//        float fCurAzim = mFilter->getSourceAzimElev(iSelSrc).x;
+//        mAzimuthSlider = addParamSliderGRIS(kParamAzimuth, iSelSrc, fCurAzim, x + w*3/12, y, w*9/12, dh, boxContent);
+//        y += dh + 5;
+//        
+//        //--------------------- elevation -----------------------
+//        //add azimuth label
+//        mElevationLabel = addLabel("Elevation", x+w*3/12, y, w*9/12, dh, boxContent);
+//        y += dh;
+//        //add azimuth slider
+//        float fCurElev = mFilter->getSourceAzimElev(iSelSrc).y;
+//        mElevationSlider = addParamSliderGRIS(kParamElevation, iSelSrc, fCurElev, x + w*3/12, y, w*9/12, dh, boxContent);
+//        y += dh + 5;
 
         //--------------------- azim span -----------------------
-        //add azimuth label
+        //add azimSpan label
         mAzimSpanLabel = addLabel("Azimuth Span", x+w*3/12, y, w*9/12, dh, boxContent);
         y += dh;
-        //add azimuth link button
+        //add azimSpan link button
         mAzimSpanLinkButton = addCheckbox("Link", mFilter->getLinkAzimSpan(), x, y, w*3/12, dh, boxContent);
-        //add azimuth slider
-        float fCurAzimSpan = mFilter->getSourceAzimSpan(iSelSrc).y;
+        //add azimSpan slider
+        float fCurAzimSpan = mFilter->getSourceAzimSpan(iSelSrc);
         mAzimSpanSlider = addParamSliderGRIS(kParamAzimSpan, iSelSrc, fCurAzimSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 5;
         
         //--------------------- elev span -----------------------
-        //add azimuth label
+        //add elevSpan label
         mElevSpanLabel = addLabel("Elevation Span", x+w*3/12, y, w*9/12, dh, boxContent);
         y += dh;
-        //add azimuth link button
+        //add elevSpan link button
         mElevSpanLinkButton = addCheckbox("Link", mFilter->getLinkElevSpan(), x, y, w*3/12, dh, boxContent);
-        //add azimuth slider
-        float fCurElevSpan = mFilter->getSourceElevSpan(iSelSrc).y;
+        //add elevSpan slider
+        float fCurElevSpan = mFilter->getSourceElevSpan(iSelSrc);
         mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, iSelSrc, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 5;
-
-
-
         
         JUCE_COMPILER_WARNING("this should probably in its own 'update source sliders' function")
         if (mFilter->getProcessMode() != kOscSpatMode){
-            mAzimuthLabel->setEnabled(false);
-            mAzimuthSlider->setEnabled(false);
-            mAzimuthLinkButton->setEnabled(false);
-
-            mElevationLabel->setEnabled(false);
-            mElevationSlider->setEnabled(false);
-            mElevationLinkButton->setEnabled(false);
+//            mAzimuthLabel->setEnabled(false);
+//            mAzimuthSlider->setEnabled(false);
+//            mAzimuthLinkButton->setEnabled(false);
+//
+//            mElevationLabel->setEnabled(false);
+//            mElevationSlider->setEnabled(false);
+//            mElevationLinkButton->setEnabled(false);
 
             mAzimSpanLabel->setEnabled(false);
             mAzimSpanSlider->setEnabled(false);

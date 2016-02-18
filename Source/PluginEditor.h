@@ -52,7 +52,9 @@ enum paramTypes {
 	kParamFilterMid,
 	kParamFilterNear,
 	kParamMaxSpanVolume,
-	kParamRoutingVolume
+	kParamRoutingVolume,
+    kParamAzimSpan,
+    kParamElevSpan,
 };
 
 enum placement{
@@ -142,23 +144,24 @@ private:
     uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
     
-    Slider*  mSurfaceOrPanSlider;
-    Slider*  mAzimuthSlider;
-    Slider*  mElevationSlider;
-    Slider*  mAzimSpanSlider;
-    Slider*  mElevSpanSlider;
-	
-    ToggleButton *mSurfaceOrPanLinkButton;
-    ToggleButton *mAzimuthLinkButton;
-    ToggleButton *mElevationLinkButton;
-    ToggleButton *mAzimSpanLinkButton;
-    ToggleButton *mElevSpanLinkButton;
+    Slider          *mSurfaceOrPanSlider;
+    ToggleButton    *mSurfaceOrPanLinkButton;
+    Component       *mSurfaceOrPanLabel;
+
+//    Slider          *mAzimuthSlider;
+//    ToggleButton    *mAzimuthLinkButton;
+//    Component       *mAzimuthLabel;
+//    Slider          *mElevationSlider;
+//    ToggleButton    *mElevationLinkButton;
+//    Component       *mElevationLabel;
     
-    Component    *mSurfaceOrPanLabel;
-    Component    *mAzimuthLabel;
-    Component    *mElevationLabel;
-    Component    *mAzimSpanLabel;
-    Component    *mElevSpanLabel;
+    Slider          *mAzimSpanSlider;
+    ToggleButton    *mAzimSpanLinkButton;
+    Component       *mAzimSpanLabel;
+    
+    Slider          *mElevSpanSlider;
+    ToggleButton    *mElevSpanLinkButton;
+    Component       *mElevSpanLabel;
     
     Array<Slider*> mAttenuations;
 	Array<ToggleButton*> mMutes;
