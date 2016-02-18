@@ -1248,31 +1248,53 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mOscSpat1stSrcIdTextEditor->setVisible(true);
         mOscSpatPortLabel->setVisible(true);
         mOscSpatPortTextEditor->setVisible(true);
+        
+        mAzimSpanSlider->setEnabled(true);
+        mAzimSpanLabel->setEnabled(true);
+        mAzimSpanLinkButton->setEnabled(true);
+        mElevSpanSlider->setEnabled(true);
+        mElevSpanLabel->setEnabled(true);
+        mElevSpanLinkButton->setEnabled(true);
     } else {
         mOscSpat1stSrcIdLabel->setVisible(false);
         mOscSpat1stSrcIdTextEditor->setVisible(false);
         mOscSpatPortLabel->setVisible(false);
         mOscSpatPortTextEditor->setVisible(false);
+
+        mAzimSpanSlider->setEnabled(false);
+        mAzimSpanLabel->setEnabled(false);
+        mAzimSpanLinkButton->setEnabled(false);
+        mElevSpanSlider->setEnabled(false);
+        mElevSpanLabel->setEnabled(false);
+        mElevSpanLinkButton->setEnabled(false);
+
     }
     if (iSelectedMode == kPanVolumeMode){
         mSurfaceOrPanSlider->setEnabled(false);
+        mSurfaceOrPanLabel->setEnabled(false);
+        mSurfaceOrPanLinkButton->setEnabled(false);
     } else {
         mSurfaceOrPanSlider->setEnabled(true);
+        mSurfaceOrPanLabel->setEnabled(true);
+        mSurfaceOrPanLinkButton->setEnabled(true);
         int iSelSrc = mFilter->getSrcSelected();
-        //asdf
         static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
-        JUCE_COMPILER_WARNING("valueChanged is called every time the slider is changed, and will update the processor")
         mSurfaceOrPanSlider->valueChanged();
     }
     if (mFilter->getProcessMode() == kPanSpanMode){
         mSurfaceOrPanLabel->setEnabled(true);
+        mSurfaceOrPanSlider->setEnabled(true);
+        mSurfaceOrPanLinkButton->setEnabled(true);
         static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
     } else if (mFilter->getProcessMode() == kFreeVolumeMode){
         mSurfaceOrPanLabel->setEnabled(true);
+        mSurfaceOrPanSlider->setEnabled(true);
+        mSurfaceOrPanLinkButton->setEnabled(true);
         static_cast<Label*>(mSurfaceOrPanLabel)->setText("Surface", dontSendNotification);
     } else {
         mSurfaceOrPanSlider->setEnabled(false);
         mSurfaceOrPanLabel->setEnabled(false);
+        mSurfaceOrPanLinkButton->setEnabled(false);
     }
     repaint();
 }
