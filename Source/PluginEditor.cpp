@@ -63,7 +63,7 @@ public:
     MiniProgressBar() : mValue(0) {}
     void paint(Graphics &g)
     {
-        Rectangle<int> box = getLocalBounds();
+        juce::Rectangle<int> box = getLocalBounds();
         
         g.setColour(Colours::black);
         g.fillRect(box);
@@ -127,7 +127,7 @@ public:
     }
     
     void paint(Graphics &g) {
-        const Rectangle<int> &box = getLocalBounds();
+        const juce::Rectangle<int> &box = getLocalBounds();
         g.setColour(mBgColour);
         g.fillRect(box);
         g.setColour(Colours::black);
@@ -1506,7 +1506,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
         slider->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
         mAttenuations.add(slider);
         
-        Rectangle<int> level(x+w*2/3, y + 3, w/3 - 10, dh - 6);
+        juce::Rectangle<int> level(x+w*2/3, y + 3, w/3 - 10, dh - 6);
         
         LevelComponent *lc = new LevelComponent(mFilter, i);
         lc->setBounds(level);

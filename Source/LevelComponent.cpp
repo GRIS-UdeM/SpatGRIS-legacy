@@ -89,6 +89,6 @@ void LevelComponent::paint (Graphics& g)
 	
 	g.fillAll (Colours::black);
 	g.setColour (Colour::fromHSV(hue, 1, 1, 1));
-	Rectangle<int> r(0, 0, getWidth() * (level - kMinLevel) / (kMaxLevel - kMinLevel), getHeight());
+	juce::Rectangle<int> r(0, 0, getWidth() * (level - kMinLevel) / (kMaxLevel - kMinLevel), getHeight());
 	g.fillRect(r);
 }
