@@ -166,7 +166,7 @@ public:
     mBeganGesture(false),
     mMouseDown(false)
     {
-        jassert(mLink || mParamType != kParamSource);
+        jassert(mLink || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
     }
     
     void mouseDown (const MouseEvent &e) {
@@ -214,20 +214,24 @@ public:
         //fprintf(stderr, "paremslider :: mouseUp\n");
         Slider::mouseUp(e);
         
-        if (mBeganGesture)
-        {
+        if (mBeganGesture){
             //fprintf(stderr, "paremslider :: endParameter\n");
-            
-            if (mParamType == kParamSource && mLink->getToggleState())
-            {
-                for (int i = 0; i < mFilter->getNumberOfSources(); i++)
-                {
+            if (mParamType == kParamSource && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++){
                     int paramIndex = mFilter->getParamForSourceD(i);
                     mFilter->endParameterChangeGesture(paramIndex);
                 }
-            }
-            else
-            {
+            } else if (mParamType == kParamAzimSpan && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++){
+                    int paramIndex = mFilter->getParamForSourceAzimSpan(i);
+                    mFilter->endParameterChangeGesture(paramIndex);
+                }
+            } else if (mParamType == kParamElevSpan && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++){
+                    int paramIndex = mFilter->getParamForSourceElevSpan(i);
+                    mFilter->endParameterChangeGesture(paramIndex);
+                }
+            } else {
                 mFilter->endParameterChangeGesture(mParamIndex);
             }
         }
@@ -244,6 +248,16 @@ public:
                     int paramIndex = mFilter->getParamForSourceD(i);
                     mFilter->beginParameterChangeGesture(paramIndex);
                 }
+            } else if (mParamType == kParamAzimSpan && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceAzimSpan(i);
+                    mFilter->beginParameterChangeGesture(paramIndex);
+                }
+            } else if (mParamType == kParamElevSpan && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceElevSpan(i);
+                    mFilter->beginParameterChangeGesture(paramIndex);
+                }
             } else {
                 mFilter->beginParameterChangeGesture(mParamIndex);
             }
@@ -253,10 +267,35 @@ public:
         
         if (mParamType == kParamSource) {
             const float newVal = 1.f - (float)getValue();
-            
             if (mLink->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
+                    if (mFilter->getParameter(paramIndex) != newVal)
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                }
+            } else {
+                if (mFilter->getParameter(mParamIndex) != newVal){
+                    mFilter->setParameterNotifyingHost(mParamIndex, newVal);
+                }
+            }
+        } else if (mParamType == kParamAzimSpan) {
+            const float newVal = (float)getValue();
+            if (mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceAzimSpan(i);
+                    if (mFilter->getParameter(paramIndex) != newVal)
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                }
+            } else {
+                if (mFilter->getParameter(mParamIndex) != newVal){
+                    mFilter->setParameterNotifyingHost(mParamIndex, newVal);
+                }
+            }
+        } else if (mParamType == kParamElevSpan) {
+            const float newVal = (float)getValue();
+            if (mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceElevSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal)
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
                 }
@@ -1643,7 +1682,16 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
         index = si;
     }
     
-    ParamSliderGRIS *ds = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mSurfaceOrPanLinkButton : NULL, mFilter);
+    ParamSliderGRIS *ds;// = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mSurfaceOrPanLinkButton : NULL, mFilter);
+    if (paramType == kParamSource){
+        ds = new ParamSliderGRIS(index, paramType, mSurfaceOrPanLinkButton, mFilter);
+    } else if (paramType == kParamAzimSpan){
+        ds = new ParamSliderGRIS(index, paramType, mAzimSpanLinkButton, mFilter);
+    } else if (paramType == kParamElevSpan){
+        ds = new ParamSliderGRIS(index, paramType, mElevSpanLinkButton, mFilter);
+    } else {
+        ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
+    }
     ds->setRange(0, 1);
     ds->setValue(v);
     ds->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
@@ -1736,6 +1784,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     
     //if called from actually pressing enter, put focus on something else
     if (!m_bIsReturnKeyPressedCalledFromFocusLost){
+        JUCE_COMPILER_WARNING("test having the main component grab the focus instead of this button")
         mSurfaceOrPanLinkButton->grabKeyboardFocus();
     }
     
@@ -1930,6 +1979,12 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (button == mSurfaceOrPanLinkButton) {
         mFilter->setLinkDistance(button->getToggleState());
+    }
+    else if (button == mAzimSpanLinkButton) {
+        mFilter->setLinkAzimSpan(button->getToggleState());
+    }
+    else if (button == mElevSpanLinkButton) {
+        mFilter->setLinkElevSpan(button->getToggleState());
     }
     else if (button == mApplyFilter) {
         mFilter->setApplyFilter(button->getToggleState());
@@ -2207,6 +2262,8 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
         mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
         mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(), dontSendNotification);
+        mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(), dontSendNotification);
+        mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(), dontSendNotification);
         mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
     }
     
