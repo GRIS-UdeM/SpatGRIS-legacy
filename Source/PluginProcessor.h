@@ -64,14 +64,13 @@ using namespace std;
 //==============================================================================
 
 // x, y, distance
-JUCE_COMPILER_WARNING("need to implement kSourceAzimSpan and elev here")
 enum sourceParameters{
     kSourceX = 0,
     kSourceY,
     kSourceD,
     kSourceAzimSpan,
+    kSourceElevSpan,
     kParamsPerSource
-    //kSourceElevSpan
 };
 
 // x, y, attenuation, mute
@@ -83,6 +82,24 @@ enum speakerParameters{
     kSpeakerUnused,
     kParamsPerSpeakers
 };
+
+
+#define kConstantOffset (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
+
+enum constantParameters{
+	kSmooth =				0 + kConstantOffset,
+	kVolumeNear =			1 + kConstantOffset,
+	kVolumeMid =			2 + kConstantOffset,
+	kVolumeFar =			3 + kConstantOffset,
+	kFilterNear =			4 + kConstantOffset,
+	kFilterMid =			5 + kConstantOffset,
+	kFilterFar =			6 + kConstantOffset,
+	kMaxSpanVolume =		7 + kConstantOffset,
+	kRoutingVolume =		8 + kConstantOffset,
+	kConstantParameters =	9
+};
+
+#define kNumberOfParameters (kConstantParameters + kConstantOffset)
 
 //==============================================================================
 static const float kSourceRadius = 10;
@@ -108,24 +125,6 @@ enum AllTrajectoryTypes {
     ClosestSpeakerTarget,
     TotalNumberTrajectories
 };
-
-#define kConstantOffset (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
-
-enum
-{
-	kSmooth =				0 + kConstantOffset,
-	kVolumeNear =			1 + kConstantOffset,
-	kVolumeMid =			2 + kConstantOffset,
-	kVolumeFar =			3 + kConstantOffset,
-	kFilterNear =			4 + kConstantOffset,
-	kFilterMid =			5 + kConstantOffset,
-	kFilterFar =			6 + kConstantOffset,
-	kMaxSpanVolume =		7 + kConstantOffset,
-	kRoutingVolume =		8 + kConstantOffset,
-	kConstantParameters =	9
-};
-
-#define kNumberOfParameters (kConstantParameters + kConstantOffset)
 
 //these have to start at 0 because of backwards-compatibility
 enum InputOutputModes {
@@ -430,13 +429,15 @@ public:
     int getParamForSourceX(int index) const { return kSourceX + index * kParamsPerSource; }
     int getParamForSourceY(int index) const { return kSourceY + index * kParamsPerSource; }
     int getParamForSourceD(int index) const { return kSourceD + index * kParamsPerSource; }
+    int getParamForSourceAzimSpan(int index) const { return kSourceAzimSpan + index * kParamsPerSource; }
+    int getParamForSourceElevSpan(int index) const { return kSourceElevSpan + index * kParamsPerSource; }
     
     float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
     float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
     float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
     float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
     float getSourceAzimSpan(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
-    float getSourceElevSpan(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
+    float getSourceElevSpan(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
     
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
     

@@ -1624,16 +1624,20 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
 Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
 {
     int index ;
-    //if we're adding a slider for a source, this slider will control the SourceD.
+    //if we're adding a slider for a paramType == kParamSource, this slider will control the SourceD.
     if (paramType == kParamSource){
         index = mFilter->getParamForSourceD(si);
         //and the processor's sourceD is reversed from the editor's
         v = 1.f - v;
     } else if (paramType == kParamSpeaker) {
-        //if the slider is for a speaker, it will control speakerA.
+        //if the slider is paramType == kParamSpeaker, it will control speakerA.
         index = mFilter->getParamForSpeakerA(si);
+    } else if (paramType == kParamAzimSpan){
+        index = mFilter->getParamForSourceAzimSpan(si);
+    } else if (paramType == kParamElevSpan){
+        index = mFilter->getParamForSourceElevSpan(si);
     } else {
-        //otherwise, it controls directly the slider index (whatever that is)
+        //otherwise, it controls directly the constantParameter
         index = si;
     }
     

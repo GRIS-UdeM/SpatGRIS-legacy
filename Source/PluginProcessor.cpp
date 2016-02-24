@@ -395,9 +395,11 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
 		s << (index / kParamsPerSource + 1);
 		switch(index % kParamsPerSource)
 		{
-			case kSourceX: s << " - X"; break;
-			case kSourceY: s << " - Y"; break;
-			case kSourceD: s << " - S"; break;
+			case kSourceX:          s << " - X"; break;
+			case kSourceY:          s << " - Y"; break;
+			case kSourceD:          s << " - S"; break;
+            case kSourceAzimSpan:   s << " -AS"; break;
+            case kSourceElevSpan:   s << " -ES"; break;
             default: return String::empty;
 
 		}
@@ -1475,8 +1477,10 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
     const float sm_n = 1 - sm_o;
     
     // ramp all the parameters, except constant ones and speaker thetas
-    const int sourceParameters = mNumberOfSources * kParamsPerSource;
-    const int speakerParameters = mNumberOfSpeakers * kParamsPerSpeakers;
+    const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
+    const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+//    const int sourceParameters = mNumberOfSources * kParamsPerSource;
+//    const int speakerParameters = mNumberOfSpeakers * kParamsPerSpeakers;
     
     for (int iCurParamId= 0; iCurParamId < (kNumberOfParameters - kConstantParameters); iCurParamId++){
         bool isSpeakerXY = (iCurParamId >= sourceParameters && iCurParamId < (sourceParameters + speakerParameters) && ((iCurParamId - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
