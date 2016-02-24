@@ -174,6 +174,7 @@ public:
         mMouseDown = true;
         
         bool resetToDefault = e.mods.isAltDown();
+        //IF WE NEED TO RESET SLIDER TO DEFAULT VALUE
         if (resetToDefault) {
             double newVal;
             switch(mParamType) {
@@ -192,6 +193,7 @@ public:
              
             if (mParamType == kParamSource && mLink->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    JUCE_COMPILER_WARNING("NEED TO ADD SOMETHING SIMILAR to reseT  AZIM SPAN AND ELEV SPAN TO THEIR DEFAULT VALUES")
                     int paramIndex = mFilter->getParamForSourceD(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
@@ -2250,9 +2252,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         updateSpeakerLocationTextEditor();
         
         int iSelSrc = mFilter->getSrcSelected();
-        //asdf
+
         static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
-        JUCE_COMPILER_WARNING("asdf this is where we set the slider to the value in processor")
+        static_cast<ParamSliderGRIS*>(mAzimSpanSlider)->setParamIndexAndType(mFilter->getParamForSourceAzimSpan(iSelSrc), kParamAzimSpan);
+        static_cast<ParamSliderGRIS*>(mElevSpanSlider)->setParamIndexAndType(mFilter->getParamForSourceElevSpan(iSelSrc), kParamElevSpan);
+
 		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
         
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){

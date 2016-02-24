@@ -752,6 +752,8 @@ private:
     float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocD[JucePlugin_MaxNumInputChannels];
+    float mBufferSrcLocAS[JucePlugin_MaxNumInputChannels];
+    float mBufferSrcLocES[JucePlugin_MaxNumInputChannels];
     
     float mBufferSpLocX[JucePlugin_MaxNumOutputChannels];
     float mBufferSpLocY[JucePlugin_MaxNumOutputChannels];
