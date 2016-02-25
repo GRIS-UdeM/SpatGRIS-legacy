@@ -300,8 +300,8 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         FPoint curPoint     = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;                       //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
         float elev_osc      = curPoint.y;                       //For Zirkonium, 0 is the edge of the dome, .5 is the top
-        float azimspan_osc  = 2*getSourceAzimSpan(iCurSrc);            //min azim span is 0, max is 2. I figure this is radians.
-        float elevspan_osc  = getSourceElevSpan(iCurSrc)/2;           //min elev span is 0, max is .5
+        float azimspan_osc  = 2*getSourceAzimSpan01(iCurSrc);     //min azim span is 0, max is 2. I figure this is radians.
+        float elevspan_osc  = getSourceElevSpan01(iCurSrc)/2;     //min elev span is 0, max is .5
         float gain_osc      = 1;                                //gain is just locked to max value
         
         OSCAddressPattern oscPattern("/pan/az");
@@ -1958,6 +1958,10 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
         xml.setAttribute (srcY, mParameters[getParamForSourceY(i)]);
         String srcD = "src" + to_string(i) + "d";
         xml.setAttribute (srcD, mParameters[getParamForSourceD(i)]);
+        String srcAS = "src" + to_string(i) + "AS";
+        xml.setAttribute (srcAS, mParameters[getParamForSourceAzimSpan(i)]);
+        String srcES = "src" + to_string(i) + "ES";
+        xml.setAttribute (srcES, mParameters[getParamForSourceElevSpan(i)]);
     }
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i) {
         String spkX = "spk" + to_string(i) + "x";
@@ -2044,6 +2048,10 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mOldSrcLocRT[i] = convertXy012Rt(curPoint);
                 String srcD = "src" + to_string(i) + "d";
                 mParameters.set(getParamForSourceD(i), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
+                String srcAS = "src" + to_string(i) + "AS";
+                mParameters.set(getParamForSourceAzimSpan(i), static_cast<float>(xmlState->getDoubleAttribute(srcAS, 0)));
+                String srcES = "src" + to_string(i) + "ES";
+                mParameters.set(getParamForSourceElevSpan(i), static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
             }
             for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i){
                 String spkX = "spk" + to_string(i) + "x";

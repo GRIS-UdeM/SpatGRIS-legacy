@@ -436,8 +436,8 @@ public:
     float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
     float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
     float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
-    float getSourceAzimSpan(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
-    float getSourceElevSpan(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
+    float getSourceAzimSpan01(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
+    float getSourceElevSpan01(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
     
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
     

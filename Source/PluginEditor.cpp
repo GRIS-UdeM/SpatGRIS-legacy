@@ -189,21 +189,35 @@ public:
                 case kParamFilterNear:      newVal = normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault); break;
                 case kParamMaxSpanVolume:   newVal = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault); break;
 				case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
+                case kParamAzimSpan:        newVal = 0; break;
+                case kParamElevSpan:        newVal = 0; break;
             }
-             
+            
             if (mParamType == kParamSource && mLink->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-                    JUCE_COMPILER_WARNING("NEED TO ADD SOMETHING SIMILAR to reseT  AZIM SPAN AND ELEV SPAN TO THEIR DEFAULT VALUES")
                     int paramIndex = mFilter->getParamForSourceD(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
                     }
                 }
-            } else {
-                if (mFilter->getParameter(mParamIndex) != newVal){
-                    mFilter->setParameterNotifyingHost(mParamIndex, newVal);
+            } else if (mParamType == kParamAzimSpan && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceAzimSpan(i);
+                    if (mFilter->getParameter(paramIndex) != newVal){
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                    }
                 }
+            } else if (mParamType == kParamElevSpan && mLink->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceElevSpan(i);
+                    if (mFilter->getParameter(paramIndex) != newVal){
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                    }
+                }
+            } else if (mFilter->getParameter(mParamIndex) != newVal){
+                mFilter->setParameterNotifyingHost(mParamIndex, newVal);
             }
+            
         } else {
             Slider::mouseDown(e);
         }
@@ -311,46 +325,46 @@ public:
         }
     }
     
-    String getTextFromValue (double value)
-    {
-        switch(mParamType)
-        {
-            case kParamSource: value = denormalize(kSourceMinDistance, kSourceMaxDistance, value); break;
-            case kParamSpeaker: value = denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
-            case kParamSmooth: value = denormalize(kSmoothMin, kSmoothMax, value); break;
-            case kParamVolumeFar: value = denormalize(kVolumeFarMin, kVolumeFarMax, value); break;
-            case kParamVolumeMid: value = denormalize(kVolumeMidMin, kVolumeMidMax, value); break;
-            case kParamVolumeNear: value = denormalize(kVolumeNearMin, kVolumeNearMax, value); break;
-            case kParamFilterFar: value = denormalize(-100, 0, value); break;
-            case kParamFilterMid: value = denormalize(-100, 0, value); break;
-            case kParamFilterNear: value = denormalize(-100, 0, value); break;
-            case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
-			case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
-        }
-        
-        if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));
-        return String(value, 1);
-    }
-    
-    double getValueFromText (const String& text)
-    {
-        double value = Slider::getValueFromText(text);
-        switch(mParamType)
-        {
-            case kParamSource: value = normalize(kSourceMinDistance, kSourceMaxDistance, value); break;
-            case kParamSpeaker: value = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
-            case kParamSmooth: value = normalize(kSmoothMin, kSmoothMax, value); break;
-            case kParamVolumeFar: value = normalize(kVolumeFarMin, kVolumeFarMax, value); break;
-            case kParamVolumeMid: value = normalize(kVolumeMidMin, kVolumeMidMax, value); break;
-            case kParamVolumeNear: value = normalize(kVolumeNearMin, kVolumeNearMax, value); break;
-            case kParamFilterFar: value = normalize(-100, 0, value); break;
-            case kParamFilterMid: value = normalize(-100, 0, value); break;
-            case kParamFilterNear: value = normalize(-100, 0, value); break;
-            case kParamMaxSpanVolume: value = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
-			case kParamRoutingVolume: value = normalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
-        }
-        return value;
-    }
+//    String getTextFromValue (double value)
+//    {
+//        switch(mParamType)
+//        {
+//            case kParamSource: value = denormalize(kSourceMinDistance, kSourceMaxDistance, value); break;
+//            case kParamSpeaker: value = denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
+//            case kParamSmooth: value = denormalize(kSmoothMin, kSmoothMax, value); break;
+//            case kParamVolumeFar: value = denormalize(kVolumeFarMin, kVolumeFarMax, value); break;
+//            case kParamVolumeMid: value = denormalize(kVolumeMidMin, kVolumeMidMax, value); break;
+//            case kParamVolumeNear: value = denormalize(kVolumeNearMin, kVolumeNearMax, value); break;
+//            case kParamFilterFar: value = denormalize(-100, 0, value); break;
+//            case kParamFilterMid: value = denormalize(-100, 0, value); break;
+//            case kParamFilterNear: value = denormalize(-100, 0, value); break;
+//            case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
+//			case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
+//        }
+//        
+//        if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));
+//        return String(value, 1);
+//    }
+//    
+//    double getValueFromText (const String& text)
+//    {
+//        double value = Slider::getValueFromText(text);
+//        switch(mParamType)
+//        {
+//            case kParamSource: value = normalize(kSourceMinDistance, kSourceMaxDistance, value); break;
+//            case kParamSpeaker: value = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
+//            case kParamSmooth: value = normalize(kSmoothMin, kSmoothMax, value); break;
+//            case kParamVolumeFar: value = normalize(kVolumeFarMin, kVolumeFarMax, value); break;
+//            case kParamVolumeMid: value = normalize(kVolumeMidMin, kVolumeMidMax, value); break;
+//            case kParamVolumeNear: value = normalize(kVolumeNearMin, kVolumeNearMax, value); break;
+//            case kParamFilterFar: value = normalize(-100, 0, value); break;
+//            case kParamFilterMid: value = normalize(-100, 0, value); break;
+//            case kParamFilterNear: value = normalize(-100, 0, value); break;
+//            case kParamMaxSpanVolume: value = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
+//			case kParamRoutingVolume: value = normalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
+//        }
+//        return value;
+//    }
     
     //examples the paramIndex is the number used for processor->getparameter() and the type is something like source or speaker
     void setParamIndexAndType(int pParamIndex, int pParamType){
@@ -540,7 +554,7 @@ AudioProcessorEditor (ownerFilter)
         //add azimSpan link button
         mAzimSpanLinkButton = addCheckbox("Link", mFilter->getLinkAzimSpan(), x, y, w*3/12, dh, boxContent);
         //add azimSpan slider
-        float fCurAzimSpan = mFilter->getSourceAzimSpan(iSelSrc);
+        float fCurAzimSpan = mFilter->getSourceAzimSpan01(iSelSrc);
         mAzimSpanSlider = addParamSliderGRIS(kParamAzimSpan, iSelSrc, fCurAzimSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
         //--------------------- elev span -----------------------
@@ -550,7 +564,7 @@ AudioProcessorEditor (ownerFilter)
         //add elevSpan link button
         mElevSpanLinkButton = addCheckbox("Link", mFilter->getLinkElevSpan(), x, y, w*3/12, dh, boxContent);
         //add elevSpan slider
-        float fCurElevSpan = mFilter->getSourceElevSpan(iSelSrc);
+        float fCurElevSpan = mFilter->getSourceElevSpan01(iSelSrc);
         mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, iSelSrc, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
         
