@@ -2301,6 +2301,9 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         static_cast<ParamSliderGRIS*>(mElevSpanSlider)->setParamIndexAndType(mFilter->getParamForSourceElevSpan(iSelSrc), kParamElevSpan);
 
 		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
+        mAzimSpanSlider->setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
+        mElevSpanSlider->setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
+
         
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
 			mAttenuations.getUnchecked(i)->setValue(mFilter->getSpeakerA(i), dontSendNotification);
