@@ -325,46 +325,46 @@ public:
         }
     }
     
-//    String getTextFromValue (double value)
-//    {
-//        switch(mParamType)
-//        {
-//            case kParamSource: value = denormalize(kSourceMinDistance, kSourceMaxDistance, value); break;
-//            case kParamSpeaker: value = denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
-//            case kParamSmooth: value = denormalize(kSmoothMin, kSmoothMax, value); break;
-//            case kParamVolumeFar: value = denormalize(kVolumeFarMin, kVolumeFarMax, value); break;
-//            case kParamVolumeMid: value = denormalize(kVolumeMidMin, kVolumeMidMax, value); break;
-//            case kParamVolumeNear: value = denormalize(kVolumeNearMin, kVolumeNearMax, value); break;
-//            case kParamFilterFar: value = denormalize(-100, 0, value); break;
-//            case kParamFilterMid: value = denormalize(-100, 0, value); break;
-//            case kParamFilterNear: value = denormalize(-100, 0, value); break;
-//            case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
-//			case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
-//        }
-//        
-//        if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));
-//        return String(value, 1);
-//    }
-//    
-//    double getValueFromText (const String& text)
-//    {
-//        double value = Slider::getValueFromText(text);
-//        switch(mParamType)
-//        {
-//            case kParamSource: value = normalize(kSourceMinDistance, kSourceMaxDistance, value); break;
-//            case kParamSpeaker: value = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
-//            case kParamSmooth: value = normalize(kSmoothMin, kSmoothMax, value); break;
-//            case kParamVolumeFar: value = normalize(kVolumeFarMin, kVolumeFarMax, value); break;
-//            case kParamVolumeMid: value = normalize(kVolumeMidMin, kVolumeMidMax, value); break;
-//            case kParamVolumeNear: value = normalize(kVolumeNearMin, kVolumeNearMax, value); break;
-//            case kParamFilterFar: value = normalize(-100, 0, value); break;
-//            case kParamFilterMid: value = normalize(-100, 0, value); break;
-//            case kParamFilterNear: value = normalize(-100, 0, value); break;
-//            case kParamMaxSpanVolume: value = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
-//			case kParamRoutingVolume: value = normalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
-//        }
-//        return value;
-//    }
+    String getTextFromValue (double value)
+    {
+        switch(mParamType)
+        {
+            case kParamSource: value = denormalize(kSourceMinDistance, kSourceMaxDistance, value); break;
+            case kParamSpeaker: value = denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
+            case kParamSmooth: value = denormalize(kSmoothMin, kSmoothMax, value); break;
+            case kParamVolumeFar: value = denormalize(kVolumeFarMin, kVolumeFarMax, value); break;
+            case kParamVolumeMid: value = denormalize(kVolumeMidMin, kVolumeMidMax, value); break;
+            case kParamVolumeNear: value = denormalize(kVolumeNearMin, kVolumeNearMax, value); break;
+            case kParamFilterFar: value = denormalize(-100, 0, value); break;
+            case kParamFilterMid: value = denormalize(-100, 0, value); break;
+            case kParamFilterNear: value = denormalize(-100, 0, value); break;
+            case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
+			case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
+        }
+        
+        if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));
+        return String(value, 1);
+    }
+    
+    double getValueFromText (const String& text)
+    {
+        double value = Slider::getValueFromText(text);
+        switch(mParamType)
+        {
+            case kParamSource: value = normalize(kSourceMinDistance, kSourceMaxDistance, value); break;
+            case kParamSpeaker: value = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
+            case kParamSmooth: value = normalize(kSmoothMin, kSmoothMax, value); break;
+            case kParamVolumeFar: value = normalize(kVolumeFarMin, kVolumeFarMax, value); break;
+            case kParamVolumeMid: value = normalize(kVolumeMidMin, kVolumeMidMax, value); break;
+            case kParamVolumeNear: value = normalize(kVolumeNearMin, kVolumeNearMax, value); break;
+            case kParamFilterFar: value = normalize(-100, 0, value); break;
+            case kParamFilterMid: value = normalize(-100, 0, value); break;
+            case kParamFilterNear: value = normalize(-100, 0, value); break;
+            case kParamMaxSpanVolume: value = normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
+			case kParamRoutingVolume: value = normalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
+        }
+        return value;
+    }
     
     //examples the paramIndex is the number used for processor->getparameter() and the type is something like source or speaker
     void setParamIndexAndType(int pParamIndex, int pParamType){
