@@ -489,7 +489,7 @@ AudioProcessorEditor (ownerFilter)
     
     m_VersionLabel->setText("SpatGRIS" + version,  dontSendNotification);
     m_VersionLabel->setJustificationType(Justification(Justification::right));
-    m_VersionLabel->setColour(Label::textColourId, Colours::whitesmoke);
+    m_VersionLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
     addAndMakeVisible(m_VersionLabel);
 
     mComponents.add(m_VersionLabel);
@@ -526,6 +526,8 @@ AudioProcessorEditor (ownerFilter)
         Component *boxContent = mSourcesBox->getContent();
         //main box label
         mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
+        mSourcesBoxLabel->setColour(Label::textColourId, Colours::black);
+
         y += 5;
         int iSelSrc = mFilter->getSrcSelected();
         
@@ -606,6 +608,7 @@ AudioProcessorEditor (ownerFilter)
         int x = 0, y = 5, w = kRightColumnWidth;
         
         mSpeakersBoxLabel = addLabel("Output parameters:", x, y, kRightColumnWidth, kDefaultLabelHeight, this);
+        mSpeakersBoxLabel->setColour(Label::textColourId, Colours::black);
 
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
@@ -1607,6 +1610,7 @@ Component* SpatGrisAudioProcessorEditor::addLabel(const String &s, int x, int y,
     label->setMinimumHorizontalScale(1);
     label->setTopLeftPosition(x, y);
     into->addAndMakeVisible(label);
+    label->setColour(Label::textColourId, mGrisFeel.getFontColour());
     mComponents.add(label);
     return label;
 }
