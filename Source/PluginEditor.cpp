@@ -665,8 +665,8 @@ AudioProcessorEditor (ownerFilter)
         //only using the combo box in reaper, because other hosts set the inputs and outputs automatically
 		if (mFilter->getIsAllowInputOutputModeSelection()) {
             
-            int iMaxSources = mFilter->getNumInputChannels();
-            int iMaxSpeakers = mFilter->getNumOutputChannels();
+            int iMaxSources = mFilter->getTotalNumInputChannels();
+            int iMaxSpeakers = mFilter->getTotalNumOutputChannels();
 
             addLabel("Input/Output mode:", x, y, w, dh, box);
             y += dh + 5;
