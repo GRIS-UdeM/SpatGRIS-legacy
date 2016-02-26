@@ -823,24 +823,28 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 //	DBG("iSpeakers = " << iSpeakers);
 
     //set sources and speakers
+//    if (m_bAllowInputOutputModeSelection) {
+//        JUCE_COMPILER_WARNING("fix this mess")
+//        PluginHostType host;
+//        if (host.isLogic() || host.isDigitalPerformer()){
+//            setNumberOfSources(getTotalNumInputChannels(), true);
+//            setNumberOfSpeakers(getTotalNumOutputChannels(), true);
+//        } else {
+//            setNumberOfSources(mNumberOfSources, true);
+//            setNumberOfSpeakers(mNumberOfSpeakers, true);
+//        }
+//        updateInputOutputMode();
+//    } else {
+//        setNumberOfSources(getTotalNumInputChannels(), true);
+//        setNumberOfSpeakers(getTotalNumOutputChannels(), true);
+//    }
+    setNumberOfSources(getTotalNumInputChannels(), true);
+    setNumberOfSpeakers(getTotalNumOutputChannels(), true);
     if (m_bAllowInputOutputModeSelection) {
-        JUCE_COMPILER_WARNING("fix this mess")
-        PluginHostType host;
-        if (host.isLogic() || host.isDigitalPerformer()){
-            setNumberOfSources(getTotalNumInputChannels(), true);
-            setNumberOfSpeakers(getTotalNumOutputChannels(), true);
-        } else {
-            setNumberOfSources(mNumberOfSources, true);
-            setNumberOfSpeakers(mNumberOfSpeakers, true);
-        }
         updateInputOutputMode();
-    } else {
-        int sources = getTotalNumInputChannels();
-        int speakers = getTotalNumOutputChannels();
-        setNumberOfSources(sources, true);
-        setNumberOfSpeakers(speakers, true);
     }
-	
+    
+    
 	int sr = sampleRate;
 
     for (int i = 0; i < mNumberOfSources; i++)
