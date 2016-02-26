@@ -54,12 +54,12 @@
 		AAAC67D4263DA75F7C541EE3 /* juce_gui_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE7E5DF6F838ED6446019124 /* juce_gui_basics.mm */; };
 		ADE606E9654B3EF899191559 /* PluginEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E3B03A738441659AEC9376 /* PluginEditor.cpp */; };
 		B0B72164C8A3ED7CD83D2858 /* juce_osc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8C6565CAF670C7129B196DF /* juce_osc.cpp */; };
+		B12492E51C80ADDB00CD512B /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 96508569D95E3978172EFA00 /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		B378F196776FD008F0ED4EA2 /* AUBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 965B3F877D7BEA87D4489B8B /* AUBuffer.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		B6B84F39203CE00BE267B359 /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F46516B5ACBA00B9606D180 /* CAVectorUnit.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		B6D7952F46E362B1A5B4BE2F /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8B94EB70412EFA7441864D8 /* juce_core.mm */; };
 		B828E9BEE9F48C378BCA38A5 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5CB7F23EA32F2990DCF91B5 /* AudioUnit.framework */; };
 		BE62077DCA4E9369F7DD4279 /* juce_gui_extra.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4E4E7AD0BE333D04C0D045BA /* juce_gui_extra.mm */; };
-		BF12782E1C7654F3002D1746 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 96508569D95E3978172EFA00 /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C4750964DD1B873F9E9AD4B7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44D25271EC9597977FE3FDBA /* AudioToolbox.framework */; };
 		C72CDAE6D0444EBF03BAB310 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 716AD15B4009D703C7B9E228 /* Accelerate.framework */; };
 		C7D798D0C0993075C863F167 /* juce_audio_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = A042CFD6471914C30F26EF0D /* juce_audio_basics.mm */; };
@@ -85,13 +85,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		BF12782D1C7654EA002D1746 /* CopyFiles */ = {
+		B12492E41C80ADD500CD512B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				BF12782E1C7654F3002D1746 /* libLeap.dylib in CopyFiles */,
+				B12492E51C80ADDB00CD512B /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2655,7 +2655,7 @@
 				AFBAB6135653C9B7B9F10AA5 /* Sources */,
 				AE1FAB299C5E8BE3F6E82000 /* Frameworks */,
 				ACB59ACAAF55A1838119385D /* Post-build script */,
-				BF12782D1C7654EA002D1746 /* CopyFiles */,
+				B12492E41C80ADD500CD512B /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2673,7 +2673,7 @@
 		46CB48D29713829397AFADF0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0440;
 			};
 			buildConfigurationList = 465764387A5B1C8F5EA3A7C6 /* Build configuration list for PBXProject "SpatGRIS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2908,7 +2908,6 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = SpatGRIS;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;

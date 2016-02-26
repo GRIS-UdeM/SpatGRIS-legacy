@@ -104,6 +104,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\SpatGRIS.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_x86|Win32'">
     <Midl>
@@ -149,6 +152,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\SpatGRIS.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_x64|x64'">
     <Midl>
@@ -193,6 +199,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\SpatGRIS.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\HIDManager\HID_Config_Utilities.cpp"/>
