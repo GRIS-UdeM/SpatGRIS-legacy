@@ -238,7 +238,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     }
 
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
-        mParameters.set(getParamForSpeakerA(i), normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation));
         mParameters.set(getParamForSpeakerM(i), 0);
     }
 }
@@ -972,7 +971,6 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	for (int o = 0; o < mNumberOfSpeakers; o++)
 	{
 		outputs[o] = (mRoutingMode == 1) ? mRoutingTemp.getWritePointer(o) : buffer.getWritePointer(o);
-		params[getParamForSpeakerA(o)] = denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, params[getParamForSpeakerA(o)]);
         
 		if (mProcessMode == kFreeVolumeMode)
 		{
@@ -1180,8 +1178,9 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 {
 	float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-	float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
-	float a = dbToLinear(output_a[f]);
+//	float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
+//	float a = dbToLinear(output_a[f]);
+    float a = dbToLinear(kSpeakerDefaultAttenuation);
 	float m = 1 - output_m[f];
 	float output_adj = a * m;
 	float *output = outputs[o];
@@ -1722,11 +1721,11 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 		float output_adj[kChunkSize];
 		{
 			float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-			float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
+            //asdf
+			//float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
 			
-			for (unsigned int f = 0; f < frames; f++)
-			{
-				float a = dbToLinear(output_a[f]);
+			for (unsigned int f = 0; f < frames; f++){
+				float a = dbToLinear(kSpeakerDefaultAttenuation);
 				float m = 1 - output_m[f];
 				output_adj[f] = a * m;
 			}
@@ -1868,7 +1867,6 @@ void SpatGrisAudioProcessor::storeCurrentLocations(){
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++) {
         mBufferSpLocX[i] =  mParameters[getParamForSpeakerX(i)];
         mBufferSpLocY[i] = mParameters[getParamForSpeakerY(i)];
-        mBufferSpLocA[i] = mParameters[getParamForSpeakerA(i)];
         mBufferSpLocM[i] = mParameters[getParamForSpeakerM(i)];
     }
 }
@@ -1894,7 +1892,6 @@ void SpatGrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++) {
         mParameters.set(getParamForSpeakerX(i), mBufferSpLocX[i]);
         mParameters.set(getParamForSpeakerY(i), mBufferSpLocY[i]);
-        mParameters.set(getParamForSpeakerA(i), mBufferSpLocA[i]);
 		mParameters.set(getParamForSpeakerM(i), mBufferSpLocM[i]);
     }
 }
@@ -1971,8 +1968,6 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
         xml.setAttribute (spkX, mParameters[getParamForSpeakerX(i)]);
         String spkY = "spk" + to_string(i) + "y";
         xml.setAttribute (spkY, mParameters[getParamForSpeakerY(i)]);
-        String spkA = "spk" + to_string(i) + "a";
-        xml.setAttribute (spkA, mParameters[getParamForSpeakerA(i)]);
         String spkM = "spk" + to_string(i) + "m";
         xml.setAttribute (spkM, mParameters[getParamForSpeakerM(i)]);
     }
@@ -2061,8 +2056,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mParameters.set(getParamForSpeakerX(i), static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));
                 String spkY = "spk" + to_string(i) + "y";
                 mParameters.set(getParamForSpeakerY(i), static_cast<float>(xmlState->getDoubleAttribute(spkY, 0)));
-                String spkA = "spk" + to_string(i) + "a";
-                mParameters.set(getParamForSpeakerA(i), static_cast<float>(xmlState->getDoubleAttribute(spkA, normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation))));
                 String spkM = "spk" + to_string(i) + "m";
                 mParameters.set(getParamForSpeakerM(i), static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
             }

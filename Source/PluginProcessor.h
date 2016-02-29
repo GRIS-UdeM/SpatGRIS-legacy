@@ -77,9 +77,9 @@ enum sourceParameters{
 enum speakerParameters{
     kSpeakerX = 0,
     kSpeakerY,
-    kSpeakerA,
+    kSpeakerUnused1,
     kSpeakerM,
-    kSpeakerUnused,
+    kSpeakerUnused2,
     kParamsPerSpeakers
 };
 
@@ -139,8 +139,6 @@ static const float kSourceMinDistance = 2.5 * 0.5;
 static const float kSourceMaxDistance = 20 * 0.5;
 static const float kSourceDefaultDistance = 5 * 0.5;
 
-static const float kSpeakerMinAttenuation = -70;
-static const float kSpeakerMaxAttenuation = 20;
 static const float kSpeakerDefaultAttenuation = 0;
 
 static const float kSmoothMin = 1;
@@ -443,14 +441,11 @@ public:
     
     inline int getParamForSpeakerX(int index) const { return kSpeakerX + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
     inline int getParamForSpeakerY(int index) const { return kSpeakerY + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    inline int getParamForSpeakerA(int index) const { return kSpeakerA + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
     inline int getParamForSpeakerM(int index) const { return kSpeakerM + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
     
     float getSpeakerX(int index) const { return mParameters.getUnchecked(getParamForSpeakerX(index)); }
     float getSpeakerY(int index) const { return mParameters.getUnchecked(getParamForSpeakerY(index)); }
-    float getSpeakerA(int index) const { return mParameters.getUnchecked(getParamForSpeakerA(index)); }
     float getSpeakerM(int index) const { return mParameters.getUnchecked(getParamForSpeakerM(index)); }
-    float getDenormedSpeakerA(int index) const { return denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, getSpeakerA(index)); }
     
 	// convenience functions for gui:
 	//01 here means that the output is normalized to [0,1]
@@ -757,7 +752,6 @@ private:
     
     float mBufferSpLocX[JucePlugin_MaxNumOutputChannels];
     float mBufferSpLocY[JucePlugin_MaxNumOutputChannels];
-    float mBufferSpLocA[JucePlugin_MaxNumOutputChannels];
     float mBufferSpLocM[JucePlugin_MaxNumOutputChannels];
     
     void setNumberOfSources(int p_iNewNumberOfSources, bool bUseDefaultValues);

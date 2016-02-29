@@ -43,7 +43,7 @@ class Box;
 
 enum paramTypes {
 	kParamSource,
-	kParamSpeaker,
+	kParamUnused,
 	kParamSmooth,
 	kParamVolumeFar,
 	kParamVolumeMid,
@@ -163,7 +163,6 @@ private:
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
     
-    Array<Slider*> mAttenuations;
 	Array<ToggleButton*> mMutes;
 	Array<LevelComponent*> mLevels;
     ToggleButton *mEnableJoystick;

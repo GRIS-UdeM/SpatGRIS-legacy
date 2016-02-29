@@ -179,7 +179,6 @@ public:
             double newVal;
             switch(mParamType) {
                 case kParamSource:          newVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance); break;
-                case kParamSpeaker:         newVal = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, kSpeakerDefaultAttenuation); break;
                 case kParamSmooth:          newVal = normalize(kSmoothMin, kSmoothMax, kSmoothDefault); break;
                 case kParamVolumeFar:       newVal = normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault); break;
                 case kParamVolumeMid:       newVal = normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault); break;
@@ -330,7 +329,6 @@ public:
         switch(mParamType)
         {
             case kParamSource: value = denormalize(kSourceMinDistance, kSourceMaxDistance, value); break;
-            case kParamSpeaker: value = denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
             case kParamSmooth: value = denormalize(kSmoothMin, kSmoothMax, value); break;
             case kParamVolumeFar: value = denormalize(kVolumeFarMin, kVolumeFarMax, value); break;
             case kParamVolumeMid: value = denormalize(kVolumeMidMin, kVolumeMidMax, value); break;
@@ -352,7 +350,6 @@ public:
         switch(mParamType)
         {
             case kParamSource: value = normalize(kSourceMinDistance, kSourceMaxDistance, value); break;
-            case kParamSpeaker: value = normalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, value); break;
             case kParamSmooth: value = normalize(kSmoothMin, kSmoothMax, value); break;
             case kParamVolumeFar: value = normalize(kVolumeFarMin, kVolumeFarMax, value); break;
             case kParamVolumeMid: value = normalize(kVolumeMidMin, kVolumeMidMax, value); break;
@@ -613,8 +610,7 @@ AudioProcessorEditor (ownerFilter)
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
         addLabel("Mute", x, y, muteWidth, dh, ct);
-        addLabel("Attenuation (dB)/Elev Span", x+muteWidth, y, w*2/3 - muteWidth, dh, ct);
-        addLabel("Level", x+w*2/3, y, w/3, dh, ct);
+        addLabel("Level", x+muteWidth, y, w/3, dh, ct);
         
         mSpSelect = new ComboBox();
         mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelect);
@@ -1505,13 +1501,11 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     Component *ct = mSpeakersBox->getContent();
     for (int iCurLevelComponent = 0; iCurLevelComponent < mLevels.size(); ++iCurLevelComponent){
         ct->removeChildComponent(mMutes.getUnchecked(iCurLevelComponent));
-        ct->removeChildComponent(mAttenuations.getUnchecked(iCurLevelComponent));
         ct->removeChildComponent(mLevels.getUnchecked(iCurLevelComponent));
         
         mComponents.removeObject(mLevels.getUnchecked(iCurLevelComponent));
     }
     mMutes.clear();
-    mAttenuations.clear();
     mLevels.clear();
     mSpSelect->clear();
     
@@ -1529,14 +1523,8 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
 		float fMute = mFilter->getSpeakerM(i);
 		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
         mMutes.add(mute);
-        
-        float att = mFilter->getSpeakerA(i);
-        Slider *slider = addParamSliderGRIS(kParamSpeaker, i, att, x+muteWidth, y, w*2/3 - muteWidth, dh, ct);
-        
-        slider->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
-        mAttenuations.add(slider);
-        
-        juce::Rectangle<int> level(x+w*2/3, y + 3, w/3 - 10, dh - 6);
+        const int muteWidth = 50;
+        juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
         
         LevelComponent *lc = new LevelComponent(mFilter, i);
         lc->setBounds(level);
@@ -1660,9 +1648,6 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
         index = mFilter->getParamForSourceD(si);
         //and the processor's sourceD is reversed from the editor's
         v = 1.f - v;
-    } else if (paramType == kParamSpeaker) {
-        //if the slider is paramType == kParamSpeaker, it will control speakerA.
-        index = mFilter->getParamForSpeakerA(si);
     } else if (paramType == kParamAzimSpan){
         index = mFilter->getParamForSourceAzimSpan(si);
     } else if (paramType == kParamElevSpan){
@@ -2308,9 +2293,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mAzimSpanSlider->setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
         mElevSpanSlider->setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
 
-        
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-			mAttenuations.getUnchecked(i)->setValue(mFilter->getSpeakerA(i), dontSendNotification);
 			mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
         }
     }
