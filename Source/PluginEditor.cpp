@@ -1839,10 +1839,11 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (mFilter->getIsAllowInputOutputModeSelection() && button == mApplyInputOutputModeButton) {
         int iSelectedMode = mInputOutputModeCombo->getSelectedId();
+
         mFilter->setInputOutputMode(iSelectedMode);
-        
 		updateSources(false);
 		updateSpeakers(false);
+
         if (m_bLoadingPreset){
             mFilter->restoreCurrentLocations();
             m_bLoadingPreset = false;

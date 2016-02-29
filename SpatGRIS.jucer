@@ -18,7 +18,7 @@
     <GROUP id="{B76B0FE8-BBC6-AA42-5E09-44DABB7BB441}" name="Resources">
       <FILE id="NATXje" name="logoGris.png" compile="0" resource="1" file="logoGris.png"/>
     </GROUP>
-    <FILE id="Rh67hJ" name="libLeap.dylib" compile="0" resource="1" file="Builds/MacOSX/libLeap.dylib"/>
+    <FILE id="oQBaSA" name="libLeap.dylib" compile="0" resource="1" file="libLeap.dylib"/>
     <GROUP id="{86F10CED-1EF2-11AE-6DFA-1E8A090A7A24}" name="HIDManager">
       <FILE id="RebHZI" name="HID_Config_Utilities.cpp" compile="1" resource="0"
             file="HIDManager/HID_Config_Utilities.cpp"/>

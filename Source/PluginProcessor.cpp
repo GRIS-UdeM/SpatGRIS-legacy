@@ -837,8 +837,14 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 //        setNumberOfSources(getTotalNumInputChannels(), true);
 //        setNumberOfSpeakers(getTotalNumOutputChannels(), true);
 //    }
-    setNumberOfSources(getTotalNumInputChannels(), true);
-    setNumberOfSpeakers(getTotalNumOutputChannels(), true);
+    
+    if (m_bAllowInputOutputModeSelection) {
+        setNumberOfSources(mNumberOfSources, true);
+        setNumberOfSpeakers(mNumberOfSpeakers, true);
+    } else {
+        setNumberOfSources(getTotalNumInputChannels(), true);
+        setNumberOfSpeakers(getTotalNumOutputChannels(), true);
+    }
     if (m_bAllowInputOutputModeSelection) {
         updateInputOutputMode();
     }
