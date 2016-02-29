@@ -611,6 +611,13 @@ AudioProcessorEditor (ownerFilter)
         const int muteWidth = 50;
         addLabel("Mute", x, y, muteWidth, dh, ct);
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
+        addLabel("Routing volume (dB):", x+muteWidth+w/3, y, w/3, dh, ct);
+        y += dh + 5;
+        mRoutingVolume = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/3, dh, ct);
+        mRoutingVolume->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);        
+        y += dh + 5;
+
+        
         
         mSpSelect = new ComboBox();
         mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelect);
@@ -728,14 +735,7 @@ AudioProcessorEditor (ownerFilter)
             mRoutingMode = cb;
         }
         
-        addLabel("Routing volume (dB):", x, y, w, dh, box);
-        y += dh + 5;
-        {
-            Slider *ds = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x, y, w, dh, box);
-            ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
-            mRoutingVolume = ds;
-            y += dh + 5;
-        }
+
         //-----------------------------
         // start 3rd column
         y = kMargin;
