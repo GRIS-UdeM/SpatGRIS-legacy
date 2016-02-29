@@ -28,7 +28,8 @@
 #define FIELDCOMPONENT_H_INCLUDED
 
 #include "PluginProcessor.h"
-#include "SourceMover.h"
+class SourceMover;
+class GrisLookAndFeel;
 
 typedef enum
 {
@@ -83,6 +84,8 @@ private:
         y = -((p_iFieldWidth - kSourceDiameter)/2) * cosf(degreeToRadian(p.getX())) * cosf(degreeToRadian(p.getY()));
         return Point <float> (x, y);
     }
+    
+    GrisLookAndFeel *mGrisFeel;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

@@ -26,6 +26,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "FieldComponent.h"
+#include "GrisLookAndFeel.h"
+#include "SourceMover.h"
 
 FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover)
 : mFilter(filter)
@@ -103,8 +105,9 @@ void FieldComponent::paint (Graphics& g)
 	int fieldHeight = getHeight();
 	int processMode = mFilter->getProcessMode();
 	
-	uint8 grey = 80;
-	g.setColour(Colour(grey, grey, grey));
+//	uint8 grey = 80;
+//	g.setColour(Colour(grey, grey, grey));
+    g.setColour(mGrisFeel->getFieldColor());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
 	// - - - - - - - - - - - -
 	// draw back circles

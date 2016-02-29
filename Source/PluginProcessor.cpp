@@ -844,7 +844,6 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         updateInputOutputMode();
     }
     
-    
 	int sr = sampleRate;
 
     for (int i = 0; i < mNumberOfSources; i++)
