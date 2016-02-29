@@ -167,6 +167,7 @@ public:
     mMouseDown(false)
     {
         jassert(mLink || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
+        
     }
     
     void mouseDown (const MouseEvent &e) {
@@ -613,8 +614,9 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
         addLabel("Routing volume (dB):", x+muteWidth+w/3, y, w/3, dh, ct);
         y += dh + 5;
-        mRoutingVolume = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/3, dh, ct);
-        mRoutingVolume->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);        
+        mRoutingVolume = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/3, 200, ct);
+        mRoutingVolume->setTextBoxStyle(Slider::TextBoxAbove, false, 40, dh);
+        mRoutingVolume->setSliderStyle(Slider::LinearVertical);
         y += dh + 5;
 
         
