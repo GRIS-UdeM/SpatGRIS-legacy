@@ -28,8 +28,9 @@
 #define FIELDCOMPONENT_H_INCLUDED
 
 #include "PluginProcessor.h"
+#include "GrisLookAndFeel.h"
 class SourceMover;
-class GrisLookAndFeel;
+
 
 typedef enum
 {
@@ -85,7 +86,7 @@ private:
         return Point <float> (x, y);
     }
     
-    GrisLookAndFeel *mGrisFeel;
+    GrisLookAndFeel mGrisFeel;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };
