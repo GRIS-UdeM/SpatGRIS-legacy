@@ -612,9 +612,9 @@ AudioProcessorEditor (ownerFilter)
         const int muteWidth = 50;
         addLabel("Mute", x, y, muteWidth, dh, ct);
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
-        addLabel("Routing volume (dB):", x+muteWidth+w/3, y, w/3, dh, ct);
-        y += dh + 5;
-        mRoutingVolume = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/3, 200, ct);
+        addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
+        y += 2*dh + 5;
+        mRoutingVolume = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
         mRoutingVolume->setTextBoxStyle(Slider::TextBoxAbove, false, 40, dh);
         mRoutingVolume->setSliderStyle(Slider::LinearVertical);
         y += dh + 5;
@@ -1172,6 +1172,7 @@ AudioProcessorEditor (ownerFilter)
         mEnableLeap->setTopLeftPosition(x, y);
         mEnableLeap->addListener(this);
         mEnableLeap->setToggleState(false, dontSendNotification);
+        mEnableLeap->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
         box->addAndMakeVisible(mEnableLeap);
         mComponents.add(mEnableLeap);
         
@@ -1194,6 +1195,7 @@ AudioProcessorEditor (ownerFilter)
         mEnableJoystick->setTopLeftPosition(x, y);
         mEnableJoystick->addListener(this);
         mEnableJoystick->setToggleState(false, dontSendNotification);
+        mEnableJoystick->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
         box->addAndMakeVisible(mEnableJoystick);
         mComponents.add(mEnableJoystick);
         
@@ -1524,6 +1526,8 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
         
 		float fMute = mFilter->getSpeakerM(i);
 		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
+        mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
+
         mMutes.add(mute);
         const int muteWidth = 50;
         juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
@@ -1614,6 +1618,7 @@ ToggleButton* SpatGrisAudioProcessorEditor::addCheckbox(const String &s, bool v,
     tb->addListener(this);
     tb->setToggleState(v, dontSendNotification);
     into->addAndMakeVisible(tb);
+    tb->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
     mComponents.add(tb);
     return tb;
 }

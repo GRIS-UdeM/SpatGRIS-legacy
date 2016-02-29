@@ -73,6 +73,7 @@ public:
 		mReceive->setTopLeftPosition(x, y);
 		mReceive->addListener(this);
 		mReceive->setToggleState(mFilter->getOscReceiveEnabled(), dontSendNotification);
+        mReceive->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
 		addAndMakeVisible(mReceive);
 		
         x += cw + m;
@@ -107,6 +108,7 @@ public:
 		mSend->setTopLeftPosition(x, y);
 		mSend->addListener(this);
 		mSend->setToggleState(mFilter->getOscSendEnabled(), dontSendNotification);
+        mSend->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
 		addAndMakeVisible(mSend);
 		
 		x += cw + m;
@@ -292,6 +294,8 @@ private:
 	
 	FPoint mSourceXY;
 	int mSource;
+    
+    GrisLookAndFeel mGrisFeel;
 	
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscComponent)
 };
