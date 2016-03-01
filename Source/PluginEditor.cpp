@@ -668,19 +668,15 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
     
         if (mFilter->getIsAllowInputOutputModeSelection()) {
-           
-            updateInputOutputCombo();
-
             addLabel("Input/Output mode:", x, y, w, dh, box);
             y += dh + 5;
             
             mInputOutputModeCombo = new ComboBox();
-            
-            
             mInputOutputModeCombo->setSize(w - iButtonW, dh);
             mInputOutputModeCombo->setTopLeftPosition(x, y);
             box->addAndMakeVisible(mInputOutputModeCombo);
             mComponents.add(mInputOutputModeCombo);
+            updateInputOutputCombo();
             
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
             y += dh + 5;
@@ -1214,6 +1210,8 @@ AudioProcessorEditor (ownerFilter)
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
+    mInputOutputModeCombo->clear();
+    //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
     int iMaxSpeakers = mFilter->getTotalNumOutputChannels();
 
@@ -1240,8 +1238,15 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
     
     if (iMaxSources >=8 && iMaxSpeakers >=8)  { mInputOutputModeCombo->addItem("8x8",  i8o8+1);  }
     if (iMaxSources >=8 && iMaxSpeakers >=16) { mInputOutputModeCombo->addItem("8x16", i8o16+1); }
-    
+
+    //then select the current mode, if it is valid. otherwise change it in mFilter
     int mode = mFilter->getInputOutputMode();
+    if (mode > mInputOutputModeCombo->getNumItems()){
+        int last = mInputOutputModeCombo->getNumItems();
+        int id = mInputOutputModeCombo->getItemId(last-1);
+        mFilter->setInputOutputMode(id);
+    }
+    
     mInputOutputModeCombo->setSelectedId(mode);
 
 }
@@ -2208,6 +2213,14 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mTrEndPointLabel->setVisible(false);
         mFilter->setJustSelectedEndPoint(false);
     }
+    //check if the inputOutput mode was changed by mFilter->prepareToPlay()
+    int iCurInOutMode = mFilter->getInputOutputMode();
+    if (mInputOutputModeCombo->getSelectedId() != iCurInOutMode){
+        cout << "timerCallBack: iCurInOutMode = " << iCurInOutMode << newLine;
+        mInputOutputModeCombo->setSelectedId(iCurInOutMode);
+        updateInputOutputCombo();
+    }
+    
 		
 	uint64_t hcp = mFilter->getHostChangedProperty();
 	if (hcp != mHostChangedProperty) {

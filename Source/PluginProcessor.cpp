@@ -195,7 +195,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mProcessMode = kPanVolumeMode;
 	mRoutingMode = 0;
     //version 9
-    mInputOutputMode = i8o16;  //by default we have 8 inputs and 16 outputs
+//    mInputOutputMode = i8o16;  //by default we have 8 inputs and 16 outputs
+    updateInputOutputMode();
     mSrcPlacementMode = 1;
     mSrcSelected = 0;
     
@@ -812,47 +813,34 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 }
 
 //==============================================================================
-void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
-    
-//	int iSources = getNumInputChannels();//mNumberOfSources;
-//	int iSpeakers = getNumOutputChannels();//mNumberOfSpeakers;
-//	DBG("PREPARE TO PLAY");
-//	DBG("iSources = " << iSources);
-//	DBG("iSpeakers = " << iSpeakers);
-
-    //set sources and speakers
-//    if (m_bAllowInputOutputModeSelection) {
-//        JUCE_COMPILER_WARNING("fix this mess")
-//        PluginHostType host;
-//        if (host.isLogic() || host.isDigitalPerformer()){
-//            setNumberOfSources(getTotalNumInputChannels(), true);
-//            setNumberOfSpeakers(getTotalNumOutputChannels(), true);
-//        } else {
-//            setNumberOfSources(mNumberOfSources, true);
-//            setNumberOfSpeakers(mNumberOfSpeakers, true);
-//        }
-//        updateInputOutputMode();
-//    } else {
-//        setNumberOfSources(getTotalNumInputChannels(), true);
-//        setNumberOfSpeakers(getTotalNumOutputChannels(), true);
-//    }
-    
+void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     if (m_bAllowInputOutputModeSelection) {
+        //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
+
+        int iTotalSources = getTotalNumInputChannels();
+        if (iTotalSources < mNumberOfSources){
+            mNumberOfSources = iTotalSources;
+        }
+        int iTotalSpeakers = getTotalNumOutputChannels();
+        if (iTotalSpeakers < mNumberOfSpeakers) {
+            mNumberOfSpeakers = iTotalSpeakers;
+        }
+        
+        cout << "PREPARE: iTotalSources:" << iTotalSources << ", iTotalSpeakers: " << iTotalSpeakers << newLine;
+        
+        //apply current mNumberOfSources and mNumberOfSpeakers
         setNumberOfSources(mNumberOfSources, true);
         setNumberOfSpeakers(mNumberOfSpeakers, true);
+        //and update mInputOuputMode if needed
         updateInputOutputMode();
     } else {
-        sdfg
+        //this is basically only done in unknown daws and in AUeval (or whatever)
         setNumberOfSources(getTotalNumInputChannels(), true);
         setNumberOfSpeakers(getTotalNumOutputChannels(), true);
     }
     
-	int sr = sampleRate;
-
-    for (int i = 0; i < mNumberOfSources; i++)
-    {
-        mFilters[i].setSampleRate(sr);
+    for (int i = 0; i < mNumberOfSources; i++) {
+        mFilters[i].setSampleRate(static_cast<int>(sampleRate));
     }
 }
 

@@ -689,8 +689,6 @@ private:
     bool mTrSeparateAutomationMode;
     int mGuiWidth;
     int mGuiHeight;
-
-    //version 9
     int mInputOutputMode;
     int mSrcPlacementMode;
     int mSrcSelected;
