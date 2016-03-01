@@ -238,7 +238,7 @@ private:
         if (text != nil)
             [alert addAction: [UIAlertAction actionWithTitle: text
                                                        style: UIAlertActionStyleDefault
-                                                     handler: ^(UIAlertAction* action) { this->buttonClicked (index); }]];
+                                                     handler: ^(UIAlertAction*) { this->buttonClicked (index); }]];
     }
    #else
     UIAlertView* alert;
@@ -363,10 +363,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 String SystemClipboard::getTextFromClipboard()
 {
-    if (NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"])
-        return nsStringToJuce (text);
-
-    return String();
+    return nsStringToJuce ([[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"]);
 }
 
 //==============================================================================
