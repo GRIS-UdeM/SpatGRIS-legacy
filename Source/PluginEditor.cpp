@@ -2285,6 +2285,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mVolumeMid->setValue(mFilter->getParameter(kVolumeMid));
         mVolumeNear->setValue(mFilter->getParameter(kVolumeNear));
         mMaxSpanVolume->setValue(mFilter->getParameter(kMaxSpanVolume));
+        mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
         
         mFilterNear->setValue(mFilter->getParameter(kFilterNear));
         mFilterMid->setValue(mFilter->getParameter(kFilterMid));
