@@ -1692,6 +1692,7 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\GrisCommonFiles\Fonts\sinkin-sans\SinkinSans-400Regular.otf"/>
     <None Include="..\..\logoGris.png"/>
     <None Include="..\..\libLeap.dylib"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_basics\juce_module_info"/>
