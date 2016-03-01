@@ -669,18 +669,15 @@ AudioProcessorEditor (ownerFilter)
     
         if (mFilter->getIsAllowInputOutputModeSelection()) {
            
-            updateInputOutputCombo();
-
             addLabel("Input/Output mode:", x, y, w, dh, box);
             y += dh + 5;
             
             mInputOutputModeCombo = new ComboBox();
-            
-            
             mInputOutputModeCombo->setSize(w - iButtonW, dh);
             mInputOutputModeCombo->setTopLeftPosition(x, y);
             box->addAndMakeVisible(mInputOutputModeCombo);
             mComponents.add(mInputOutputModeCombo);
+            updateInputOutputCombo();
             
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
             y += dh + 5;
@@ -1214,6 +1211,7 @@ AudioProcessorEditor (ownerFilter)
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
+    mInputOutputModeCombo->clear();
     int iMaxSources = mFilter->getTotalNumInputChannels();
     int iMaxSpeakers = mFilter->getTotalNumOutputChannels();
 

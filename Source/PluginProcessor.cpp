@@ -843,7 +843,6 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         setNumberOfSpeakers(mNumberOfSpeakers, true);
         updateInputOutputMode();
     } else {
-        sdfg
         setNumberOfSources(getTotalNumInputChannels(), true);
         setNumberOfSpeakers(getTotalNumOutputChannels(), true);
     }
