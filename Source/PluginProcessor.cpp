@@ -841,12 +841,11 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     if (m_bAllowInputOutputModeSelection) {
         setNumberOfSources(mNumberOfSources, true);
         setNumberOfSpeakers(mNumberOfSpeakers, true);
+        updateInputOutputMode();
     } else {
+        sdfg
         setNumberOfSources(getTotalNumInputChannels(), true);
         setNumberOfSpeakers(getTotalNumOutputChannels(), true);
-    }
-    if (m_bAllowInputOutputModeSelection) {
-        updateInputOutputMode();
     }
     
 	int sr = sampleRate;
