@@ -169,11 +169,15 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		m_bAllowInputOutputModeSelection = false;
 	}
     
-    //SET SOURCES
-    setNumberOfSources(JucePlugin_MaxNumInputChannels, true);
-    
-    //SET SPEAKERS
-    setNumberOfSpeakers(JucePlugin_MaxNumOutputChannels, true);
+    //SET SOURCES AND SPEAKERS
+//    setNumberOfSources(JucePlugin_MaxNumInputChannels, true);
+//    setNumberOfSpeakers(JucePlugin_MaxNumOutputChannels, true);
+    int iSources = getTotalNumInputChannels();
+    int iSpeakers = getTotalNumOutputChannels();
+    setNumberOfSources(iSources, true);
+    setNumberOfSpeakers(iSpeakers, true);
+    cout << "CONSTRUCTOR: iTotalSources:" << iSources << ", iTotalSpeakers: " << iSpeakers << newLine;
+
     
 	mCalculateLevels = 0;
 	mApplyFilter = true;
@@ -506,6 +510,7 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
 		default:
 			jassert(0);
     }
+    cout << "SET INPUT OUTPUT: mNumberOfSources:" << mNumberOfSources << ", mNumberOfSpeakers: " << mNumberOfSpeakers << newLine;
 }
 
 void SpatGrisAudioProcessor::updateInputOutputMode (){
@@ -816,21 +821,24 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     if (m_bAllowInputOutputModeSelection) {
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
-
         int iTotalSources = getTotalNumInputChannels();
         if (iTotalSources < mNumberOfSources){
             mNumberOfSources = iTotalSources;
+            setNumberOfSources(mNumberOfSources, true);
+            cout << "PREPARE: iTotalSources:" << iTotalSources << newLine;
         }
         int iTotalSpeakers = getTotalNumOutputChannels();
         if (iTotalSpeakers < mNumberOfSpeakers) {
             mNumberOfSpeakers = iTotalSpeakers;
+            setNumberOfSpeakers(mNumberOfSpeakers, true);
+            cout << "PREPARE: iTotalSpeakers:" << iTotalSpeakers << newLine;
+
         }
         
-        cout << "PREPARE: iTotalSources:" << iTotalSources << ", iTotalSpeakers: " << iTotalSpeakers << newLine;
         
         //apply current mNumberOfSources and mNumberOfSpeakers
-        setNumberOfSources(mNumberOfSources, true);
-        setNumberOfSpeakers(mNumberOfSpeakers, true);
+//        setNumberOfSources(mNumberOfSources, true);
+//        setNumberOfSpeakers(mNumberOfSpeakers, true);
         //and update mInputOuputMode if needed
         updateInputOutputMode();
     } else {

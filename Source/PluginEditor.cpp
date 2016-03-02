@@ -2210,14 +2210,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mTrEndPointLabel->setVisible(false);
         mFilter->setJustSelectedEndPoint(false);
     }
-    //check if the inputOutput mode was changed by mFilter->prepareToPlay()
-    int iCurInOutMode = mFilter->getInputOutputMode();
-    if (mInputOutputModeCombo->getSelectedId() != iCurInOutMode){
-        cout << "timerCallBack: iCurInOutMode = " << iCurInOutMode << newLine;
-        mInputOutputModeCombo->setSelectedId(iCurInOutMode);
-        updateInputOutputCombo();
-    }
-    
 		
 	uint64_t hcp = mFilter->getHostChangedProperty();
 	if (hcp != mHostChangedProperty) {
@@ -2321,6 +2313,14 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
 			mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
+        }
+        
+        //check if the inputOutput mode was changed by mFilter->prepareToPlay()
+        int iCurInOutMode = mFilter->getInputOutputMode();
+        if (mInputOutputModeCombo->getSelectedId() != iCurInOutMode){
+            cout << "timerCallBack: iCurInOutMode = " << iCurInOutMode << newLine;
+            mInputOutputModeCombo->setSelectedId(iCurInOutMode);
+            updateInputOutputCombo();
         }
     }
 

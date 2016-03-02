@@ -24,3 +24,7 @@ before, everything was 8x16. Now, it's 8x16 until preparetoplay, which seems to 
 where is this stuff updated?
 filter constructor: using juce max numbers
 prepare to play: using gettotal
+
+what is critical, is that in processblock, we don't use more inputs/outputs than given by getTotal. 
+so probably in both constructor and preparetoplay, we should use gettotal. 
+question is: is always gettotal 2x2? yes for vst2. for vst3, we can get 8x8, but something is setting it back to 2x2.
