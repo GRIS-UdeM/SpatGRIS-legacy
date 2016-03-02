@@ -2031,7 +2031,9 @@ void SpatGrisAudioProcessorEditor::applyCurrentSrcPlacement(){
     bool startAtTop = false;
     bool clockwise = false;
     
-    int iCurrentOption = (mSrcPlacementCombo == NULL) ? kLeftAlternate : mSrcPlacementCombo->getSelectedId();
+    bool bIsStuffConstructedYet = (mSrcPlacementCombo == NULL) ? false : true;
+    
+    int iCurrentOption = (bIsStuffConstructedYet) ? mSrcPlacementCombo->getSelectedId() : kLeftAlternate;
     
     switch (iCurrentOption){
         case kLeftAlternate:
@@ -2076,10 +2078,8 @@ void SpatGrisAudioProcessorEditor::applyCurrentSrcPlacement(){
             offset += delta;
         }
     }
-    if (mSrcSelectCombo != NULL && mSrcR != NULL){
+    if (bIsStuffConstructedYet){
         updateSourceLocationTextEditor(false);
-    }
-    if (mSrcPlacementCombo != NULL){
         mFilter->setSrcPlacementMode(mSrcPlacementCombo->getSelectedId());
     }
 }
