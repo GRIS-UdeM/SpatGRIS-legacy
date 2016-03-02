@@ -465,7 +465,6 @@ AudioProcessorEditor (ownerFilter)
 	m_bLoadingPreset = false;
     bool leapSupported = true;
     
-    startTimer(kTimerDelay);
     mFilter->addListener(this);
     
     // main field
@@ -583,10 +582,10 @@ AudioProcessorEditor (ownerFilter)
         boxContent->setSize(w, y);
         
         
-        mSrcSelect = new ComboBox();
-        mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelect);
-        mComponents.add(mSrcSelect);
-        mSrcSelect->addListener(this);
+        mSrcSelectCombo = new ComboBox();
+        mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelectCombo);
+        mComponents.add(mSrcSelectCombo);
+        mSrcSelectCombo->addListener(this);
         //believe it or not, this actually does something useful...! Not quite sure what, but removing it messes up the number of sources and speakers when loading some presets
         if (mFilter->getIsAllowInputOutputModeSelection()){
             mFilter->setInputOutputMode(mFilter->getInputOutputMode());
@@ -674,10 +673,9 @@ AudioProcessorEditor (ownerFilter)
             mInputOutputModeCombo->setTopLeftPosition(x, y);
             box->addAndMakeVisible(mInputOutputModeCombo);
             mComponents.add(mInputOutputModeCombo);
-            updateInputOutputCombo();
-            
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
             y += dh + 5;
+            updateInputOutputCombo();
         }
         addLabel("Routing mode:", x, y, w, dh, box);
         y += dh + 5;
@@ -1005,20 +1003,20 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Source placement:", x, y, w, dh, box);
         y += dh + 5;
         
-        mSrcPlacement = new ComboBox();
-        mSrcPlacement->addItem("Left Alternate", kLeftAlternate);
-        mSrcPlacement->addItem("Left Clockwise", kLeftClockwise);
-        mSrcPlacement->addItem("Left Counter Clockwise", kLeftCounterClockWise);
-        mSrcPlacement->addItem("Top Clockwise", kTopClockwise);
-        mSrcPlacement->addItem("Top Counter Clockwise", kTopCounterClockwise);
+        mSrcPlacementCombo = new ComboBox();
+        mSrcPlacementCombo->addItem("Left Alternate", kLeftAlternate);
+        mSrcPlacementCombo->addItem("Left Clockwise", kLeftClockwise);
+        mSrcPlacementCombo->addItem("Left Counter Clockwise", kLeftCounterClockWise);
+        mSrcPlacementCombo->addItem("Top Clockwise", kTopClockwise);
+        mSrcPlacementCombo->addItem("Top Counter Clockwise", kTopCounterClockwise);
         
-        mSrcPlacement->setSelectedId(mFilter->getSrcPlacementMode());
-        box->addAndMakeVisible(mSrcPlacement);
-        mComponents.add(mSrcPlacement);
-        mSrcPlacement->setSize(w, dh);
-        mSrcPlacement->setTopLeftPosition(x, y);
-        mSrcPlacement->setExplicitFocusOrder(5);
-        //mSrcPlacement->addListener(this);
+        mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode());
+        box->addAndMakeVisible(mSrcPlacementCombo);
+        mComponents.add(mSrcPlacementCombo);
+        mSrcPlacementCombo->setSize(w, dh);
+        mSrcPlacementCombo->setTopLeftPosition(x, y);
+        mSrcPlacementCombo->setExplicitFocusOrder(5);
+        //mSrcPlacementCombo->addListener(this);
         y += dh + 5;
         mApplySrcPlacementButton = addButton("Apply", x, y, iButtonW, dh, box);
         
@@ -1027,10 +1025,10 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
         
         addLabel("Set RA position:", x, y, w - selectw, dh, box);
-        mSrcSelect->setSelectedId(mFilter->getSrcSelected()+1);
-        mSrcSelect->setSize(selectw, dh);
-        mSrcSelect->setTopLeftPosition(x + w - selectw, y);
-        mSrcSelect->setExplicitFocusOrder(5);
+        mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
+        mSrcSelectCombo->setSize(selectw, dh);
+        mSrcSelectCombo->setTopLeftPosition(x + w - selectw, y);
+        mSrcSelectCombo->setExplicitFocusOrder(5);
         
         int lw = 60, lwm = lw + kMargin;
         
@@ -1205,6 +1203,8 @@ AudioProcessorEditor (ownerFilter)
     m_oResizeLimits.setSizeLimits (960-150, 420-150, 1560, 1020);
     addAndMakeVisible (m_pResizer = new ResizableCornerComponent (this, &m_oResizeLimits));
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
+    
+    startTimer(kTimerDelay);
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
@@ -1246,7 +1246,14 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
     }
     
     mInputOutputModeCombo->setSelectedId(mode);
+    
 
+    //these don't work because of various things not being constructed when this method is called in the constructor. Need to extract
+    //the relevant parts of buttonClicked(mApplyInputOutputModeButton) in a method, and call that new method from here
+    applyCurrentSrcPlacement();
+//    mMover.updateNumberOfSources();
+//    buttonClicked(mApplyInputOutputModeButton);
+//    mFieldNeedRepaint = true;
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
@@ -1486,26 +1493,28 @@ void SpatGrisAudioProcessorEditor::resized()
 
 void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
+    //if we're not in constructor, clear source and movement constraint combos, and ensure movement constraint is valid
     if (!p_bCalledFromConstructor){
-        mSrcSelect->clear(dontSendNotification);
+        mSrcSelectCombo->clear(dontSendNotification);
         mMovementModeCombo->clear(dontSendNotification);
         updateMovementModeCombo();
     }
-    
+    //update number of sources in mover. this puts all sources at 0,0, ie, bottom left corner
     mMover.updateNumberOfSources();
     
+    //if we're not in constructor, reset source placement
     if (!p_bCalledFromConstructor){
         buttonClicked(mApplySrcPlacementButton);
     }
     
-    //source position combobox in source tab
+    //update content of source combobox
     int index = 1;
     int iCurSources = mFilter->getNumberOfSources();
     for (int i = 0; i < iCurSources; i++){
         String s; s << i+1;
-        mSrcSelect->addItem(s, index++);
+        mSrcSelectCombo->addItem(s, index++);
     }
-    mSrcSelect->setSelectedId(mFilter->getSrcSelected()+1);
+    mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
 }
 
 
@@ -1697,7 +1706,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
 //==============================================================================
 void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textEditor){
     if (&textEditor == mSrcR || &textEditor == mSrcT){
-        int src = mSrcSelect->getSelectedId() - 1;
+        int src = mSrcSelectCombo->getSelectedId() - 1;
         float r = mSrcR->getText().getFloatValue();
         float t = mSrcT->getText().getFloatValue();
         if (r < 0) r = 0; else if (r > kRadiusMax) r = kRadiusMax;
@@ -1854,84 +1863,29 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         updateEndLocationTextEditors();
     }
     else if (mFilter->getIsAllowInputOutputModeSelection() && button == mApplyInputOutputModeButton) {
+        //update mode in processor, which will update its number of sources and speakers
         int iSelectedMode = mInputOutputModeCombo->getSelectedId();
-
         mFilter->setInputOutputMode(iSelectedMode);
+        
+        //
 		updateSources(false);
 		updateSpeakers(false);
-
+        
+        //if we're loading a preset, make sure we keep the current source and speaker locations
         if (m_bLoadingPreset){
             mFilter->restoreCurrentLocations();
             m_bLoadingPreset = false;
         }
+        //repaint the field, could probably just set mFieldNeedRepaint = true
         mField->repaint();
+        
+        //ensure movement mode stays valid
         if (iSelectedMode == i1o2 || iSelectedMode == i1o4 || iSelectedMode == i1o6 || iSelectedMode == i1o8 || iSelectedMode == i1o16){
             mMovementModeCombo->setSelectedId(1);
         }
     }
     else if (button == mApplySrcPlacementButton) {
-        
-        if (mFilter->getNumberOfSources() == 1){
-            mFilter->setSourceRT(0, FPoint(0, 0));
-            return;
-        }
-        
-        bool alternate = false;
-        bool startAtTop = false;
-        bool clockwise = false;
-        
-        switch (mSrcPlacement->getSelectedId()){
-            case kLeftAlternate:
-                alternate = true;
-                break;
-            case kTopClockwise:
-                startAtTop = true;
-                clockwise = true;
-                break;
-            case kTopCounterClockwise:
-                startAtTop = true;
-                break;
-            case kLeftClockwise:
-                clockwise = true;
-                break;
-            case kLeftCounterClockWise:
-                break;
-                
-        }
-        
-        float anglePerSp = kThetaMax / mFilter->getNumberOfSources();
-        JUCE_COMPILER_WARNING("this stuff is kind of a replication of processor::setNumberOfSources, although setNumberOfSources is only for default placement")
-        if (alternate)
-        {
-            float offset = startAtTop
-            ? (clockwise ? kQuarterCircle : (kQuarterCircle - anglePerSp))
-            : (kQuarterCircle - anglePerSp/2);
-            float start = offset;
-            for (int i = clockwise ? 0 : 1; i < mFilter->getNumberOfSources(); i += 2)
-            {
-                mFilter->setSourceRT(i, FPoint(kSourceDefaultRadius, offset));
-                offset -= anglePerSp;
-            }
-            
-            offset = start + anglePerSp;
-            for (int i = clockwise ? 1 : 0; i < mFilter->getNumberOfSources(); i += 2)
-            {
-                mFilter->setSourceRT(i, FPoint(kSourceDefaultRadius, offset));
-                offset += anglePerSp;
-            }
-        }
-        else
-        {
-            float offset = startAtTop ? kQuarterCircle : kQuarterCircle + anglePerSp/2;
-            float delta = clockwise ? -anglePerSp : anglePerSp;
-            for (int i = 0; i < mFilter->getNumberOfSources(); i++)
-            {
-                mFilter->setSourceRT(i, FPoint(1, offset));
-                offset += delta;
-            }
-        }
-        updateSourceLocationTextEditor(false);
-        mFilter->setSrcPlacementMode(mSrcPlacement->getSelectedId());
+        applyCurrentSrcPlacement();
     }
     else if (button == mApplySpPlacementButton) {
         
@@ -2066,6 +2020,70 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
 	}
 }
 
+void SpatGrisAudioProcessorEditor::applyCurrentSrcPlacement(){
+    //if only one source, put it in middle
+    if (mFilter->getNumberOfSources() == 1){
+        mFilter->setSourceRT(0, FPoint(0, 0));
+        return;
+    }
+    //figure out current options
+    bool alternate = false;
+    bool startAtTop = false;
+    bool clockwise = false;
+    
+    int iCurrentOption = (mSrcPlacementCombo == NULL) ? kLeftAlternate : mSrcPlacementCombo->getSelectedId();
+    
+    switch (iCurrentOption){
+        case kLeftAlternate:
+            alternate = true;
+            break;
+        case kTopClockwise:
+            startAtTop = true;
+            clockwise = true;
+            break;
+        case kTopCounterClockwise:
+            startAtTop = true;
+            break;
+        case kLeftClockwise:
+            clockwise = true;
+            break;
+        case kLeftCounterClockWise:
+            break;
+            
+    }
+    float anglePerSp = kThetaMax / mFilter->getNumberOfSources();
+    JUCE_COMPILER_WARNING("this stuff is kind of a replication of processor::setNumberOfSources, although setNumberOfSources is only for default placement")
+    if (alternate) {
+        float offset = startAtTop
+        ? (clockwise ? kQuarterCircle : (kQuarterCircle - anglePerSp))
+        : (kQuarterCircle - anglePerSp/2);
+        float start = offset;
+        for (int i = clockwise ? 0 : 1; i < mFilter->getNumberOfSources(); i += 2) {
+            mFilter->setSourceRT(i, FPoint(kSourceDefaultRadius, offset));
+            offset -= anglePerSp;
+        }
+        
+        offset = start + anglePerSp;
+        for (int i = clockwise ? 1 : 0; i < mFilter->getNumberOfSources(); i += 2) {
+            mFilter->setSourceRT(i, FPoint(kSourceDefaultRadius, offset));
+            offset += anglePerSp;
+        }
+    } else {
+        float offset = startAtTop ? kQuarterCircle : kQuarterCircle + anglePerSp/2;
+        float delta = clockwise ? -anglePerSp : anglePerSp;
+        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+            mFilter->setSourceRT(i, FPoint(1, offset));
+            offset += delta;
+        }
+    }
+    if (mSrcSelectCombo != NULL && mSrcR != NULL){
+        updateSourceLocationTextEditor(false);
+    }
+    if (mSrcPlacementCombo != NULL){
+        mFilter->setSrcPlacementMode(mSrcPlacementCombo->getSelectedId());
+    }
+}
+
 void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
     int iSelectedSrc    = mFilter->getSrcSelected();
     FPoint pointRT      = mFilter->getSourceRT(iSelectedSrc);
@@ -2124,7 +2142,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 		mFilter->setOscLeapSource(comboBox->getSelectedId() - 1);
 	}
 
-    else if (comboBox == mSrcSelect){
+    else if (comboBox == mSrcSelectCombo){
         updateSourceLocationTextEditor(true);
     }
     else if (comboBox == mSpSelect){
@@ -2158,7 +2176,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 
 
 void SpatGrisAudioProcessorEditor::updateSourceLocationTextEditor(bool p_bUpdateFilter){
-    int iSelectedSrc = mSrcSelect->getSelectedId();
+    int iSelectedSrc = mSrcSelectCombo->getSelectedId();
     iSelectedSrc = (iSelectedSrc <= 0) ? 1: iSelectedSrc;
     if (p_bUpdateFilter){
         mFilter->setSrcSelected(iSelectedSrc-1);
@@ -2230,10 +2248,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             }
         }
         
-        mSrcSelect->setSelectedId(mFilter->getSrcSelected()+1);
+        mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
         mSpSelect->setSelectedId(mFilter->getSpSelected());
         
-        mSrcPlacement->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
+        mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
         updateSourceLocationTextEditor(false);
         mSpPlacement->setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
         updateSpeakerLocationTextEditor();

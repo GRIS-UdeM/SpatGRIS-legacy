@@ -128,6 +128,8 @@ public:
     
     void setDefaultPendulumEndpoint();
     
+    void applyCurrentSrcPlacement();
+    
 private:
 	SpatGrisAudioProcessor *mFilter;
 	SourceMover mMover;
@@ -201,7 +203,7 @@ private:
     // sources
     TextButton *mApplySrcPlacementButton;
     TextEditor *mSrcR, *mSrcT;
-    ComboBox *mSrcSelect, *mSrcPlacement;
+    ComboBox *mSrcSelectCombo, *mSrcPlacementCombo;
     
     // speakers
     TextButton *mApplySpPlacementButton;

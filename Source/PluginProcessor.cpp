@@ -832,7 +832,6 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
             mNumberOfSpeakers = iTotalSpeakers;
             setNumberOfSpeakers(mNumberOfSpeakers, true);
             cout << "PREPARE: iTotalSpeakers:" << iTotalSpeakers << newLine;
-
         }
         
         
