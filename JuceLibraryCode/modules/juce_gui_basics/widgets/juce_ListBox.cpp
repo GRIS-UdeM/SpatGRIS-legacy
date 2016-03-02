@@ -104,7 +104,7 @@ public:
     {
         if (ListBoxModel* m = owner.getModel())
         {
-            if (isEnabled() && e.mouseWasDraggedSinceMouseDown() && ! isDragging)
+            if (isEnabled() && ! (e.mouseWasClicked() || isDragging))
             {
                 SparseSet<int> rowsToDrag;
 
@@ -951,7 +951,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsT
 //==============================================================================
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)
 {
-    ignoreUnused (existingComponentToUpdate);
+    (void) existingComponentToUpdate;
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code that recycles the components
     return nullptr;
 }

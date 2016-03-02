@@ -106,15 +106,13 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (invalidate,    "invalidate",       "(IIII)V") \
  METHOD (containsPoint, "containsPoint",    "(II)Z") \
  METHOD (showKeyboard,  "showKeyboard",     "(Ljava/lang/String;)V") \
- METHOD (setSystemUiVisibility, "setSystemUiVisibility", "(I)V") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
 
 
 //==============================================================================
-class AndroidComponentPeer  : public ComponentPeer,
-                              private Timer
+class AndroidComponentPeer  : public ComponentPeer
 {
 public:
     AndroidComponentPeer (Component& comp, const int windowStyleFlags)
@@ -185,6 +183,7 @@ public:
                     view.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
                 }
 
+            private:
                 GlobalRef view;
                 bool shouldBeVisible;
             };
@@ -200,7 +199,7 @@ public:
 
     void setBounds (const Rectangle<int>& userRect, bool isNowFullScreen) override
     {
-        Rectangle<int> r = (userRect.toFloat() * scale).toNearestInt();
+        Rectangle<int> r = userRect * scale;
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -232,13 +231,13 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        return (Rectangle<float> (view.callIntMethod (ComponentPeerView.getLeft),
-                                  view.callIntMethod (ComponentPeerView.getTop),
-                                  view.callIntMethod (ComponentPeerView.getWidth),
-                                  view.callIntMethod (ComponentPeerView.getHeight)) / scale).toNearestInt();
+        return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
+                               view.callIntMethod (ComponentPeerView.getTop),
+                               view.callIntMethod (ComponentPeerView.getWidth),
+                               view.callIntMethod (ComponentPeerView.getHeight)) / scale;
     }
 
-    void handleScreenSizeChange() override
+    void handleScreenSizeChange()
     {
         ComponentPeer::handleScreenSizeChange();
 
@@ -272,46 +271,8 @@ public:
         return false;
     }
 
-    bool shouldNavBarsBeHidden() const
-    {
-        if (fullScreen)
-            if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
-                if (kiosk->getPeer() == this)
-                    return true;
-
-        return false;
-    }
-
-    void setNavBarsHidden (bool hidden) const
-    {
-        enum
-        {
-            SYSTEM_UI_FLAG_VISIBLE                  = 0,
-            SYSTEM_UI_FLAG_LOW_PROFILE              = 1,
-            SYSTEM_UI_FLAG_HIDE_NAVIGATION          = 2,
-            SYSTEM_UI_FLAG_FULLSCREEN               = 4,
-            SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION   = 512,
-            SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN        = 1024,
-            SYSTEM_UI_FLAG_IMMERSIVE                = 2048,
-            SYSTEM_UI_FLAG_IMMERSIVE_STICKY         = 4096
-        };
-
-        view.callVoidMethod (ComponentPeerView.setSystemUiVisibility,
-                             hidden ? (jint) (SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-                                    : (jint) (SYSTEM_UI_FLAG_VISIBLE));
-    }
-
     void setFullScreen (bool shouldBeFullScreen) override
     {
-        // updating the nav bar visibility is a bit odd on Android - need to wait for
-        if (shouldNavBarsBeHidden())
-        {
-            if (! isTimerRunning())
-                startTimer (500);
-        }
-        else
-            setNavBarsHidden (false);
-
         Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
                                              : lastNonFullscreenBounds);
 
@@ -328,13 +289,6 @@ public:
     bool isFullScreen() const override
     {
         return fullScreen;
-    }
-
-    void timerCallback() override
-    {
-        setNavBarsHidden (shouldNavBarsBeHidden());
-        setFullScreen (fullScreen);
-        stopTimer();
     }
 
     void setIcon (const Image& newIcon) override
@@ -373,7 +327,7 @@ public:
         handleBroughtToFront();
     }
 
-    void toBehind (ComponentPeer*) override
+    void toBehind (ComponentPeer* other) override
     {
         // TODO
     }
@@ -769,46 +723,9 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
-    ignoreUnused (allowMenusAndBars);
-
-    if (AndroidComponentPeer* peer = dynamic_cast<AndroidComponentPeer*> (kioskComp->getPeer()))
-        peer->setFullScreen (enableOrDisable);
-    else
-        jassertfalse; // (this should have been checked by the caller)
-}
-
-//==============================================================================
-static jint getAndroidOrientationFlag (int orientations) noexcept
-{
-    enum
-    {
-        SCREEN_ORIENTATION_LANDSCAPE          = 0,
-        SCREEN_ORIENTATION_PORTRAIT           = 1,
-        SCREEN_ORIENTATION_USER               = 2,
-        SCREEN_ORIENTATION_REVERSE_LANDSCAPE  = 8,
-        SCREEN_ORIENTATION_REVERSE_PORTRAIT   = 9,
-        SCREEN_ORIENTATION_USER_LANDSCAPE     = 11,
-        SCREEN_ORIENTATION_USER_PORTRAIT      = 12,
-    };
-
-    switch (orientations)
-    {
-        case Desktop::upright:                                          return (jint) SCREEN_ORIENTATION_PORTRAIT;
-        case Desktop::upsideDown:                                       return (jint) SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-        case Desktop::upright + Desktop::upsideDown:                    return (jint) SCREEN_ORIENTATION_USER_PORTRAIT;
-        case Desktop::rotatedAntiClockwise:                             return (jint) SCREEN_ORIENTATION_LANDSCAPE;
-        case Desktop::rotatedClockwise:                                 return (jint) SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        case Desktop::rotatedClockwise + Desktop::rotatedAntiClockwise: return (jint) SCREEN_ORIENTATION_USER_LANDSCAPE;
-        default:                                                        return (jint) SCREEN_ORIENTATION_USER;
-    }
-}
-
-void Desktop::allowedOrientationsChanged()
-{
-    android.activity.callVoidMethod (JuceAppActivity.setRequestedOrientation,
-                                     getAndroidOrientationFlag (allowedOrientations));
+    // TODO
 }
 
 //==============================================================================
@@ -847,7 +764,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
 //==============================================================================
 Image juce_createIconForFile (const File& file)
 {
-    return Image();
+    return Image::null;
 }
 
 //==============================================================================

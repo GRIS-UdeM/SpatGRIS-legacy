@@ -62,11 +62,6 @@ namespace SocketHelpers
        #endif
     }
 
-    inline bool isValidPortNumber (int port) noexcept
-    {
-        return isPositiveAndBelow (port, 65536);
-    }
-
     template <typename Type>
     static bool setOption (const SocketHandle handle, int mode, int property, Type value) noexcept
     {
@@ -120,7 +115,6 @@ namespace SocketHelpers
         {
             // unblock any pending read requests
             ::shutdown (h, SHUT_RDWR);
-
             {
                 // see man-page of recv on linux about a race condition where the
                 // shutdown command is lost if the receiving thread does not have
@@ -139,32 +133,37 @@ namespace SocketHelpers
        #endif
     }
 
-    static bool bindSocket (const SocketHandle handle, int port, const String& address) noexcept
+    static bool bindSocket (const SocketHandle handle, const int port, const String& address) noexcept
     {
-        if (handle <= 0 || ! isValidPortNumber (port))
+        if (handle <= 0 || port < 0)
             return false;
 
-        struct sockaddr_in addr;
-        zerostruct (addr); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
+        struct sockaddr_in servTmpAddr;
+        zerostruct (servTmpAddr); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
+        servTmpAddr.sin_family = PF_INET;
+        servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+        servTmpAddr.sin_port = htons ((uint16) port);
 
-        addr.sin_family = PF_INET;
-        addr.sin_port = htons ((uint16) port);
-        addr.sin_addr.s_addr = address.isNotEmpty() ? ::inet_addr (address.toRawUTF8())
-                                                    : htonl (INADDR_ANY);
+       #if JUCE_WINDOWS
+        if (address.isNotEmpty())
+            servTmpAddr.sin_addr.s_addr = ::inet_addr (address.toUTF8());
+       #else
+        ignoreUnused (address);
+       #endif
 
-        return ::bind (handle, (struct sockaddr*) &addr, sizeof (addr)) >= 0;
+        return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
     }
 
     static int getBoundPort (const SocketHandle handle) noexcept
     {
-        if (handle > 0)
-        {
-            struct sockaddr_in addr;
-            socklen_t len = sizeof (addr);
+        if (handle <= 0)
+            return -1;
 
-            if (getsockname (handle, (struct sockaddr*) &addr, &len) == 0)
-                return ntohs (addr.sin_port);
-        }
+        struct sockaddr_in sin_addr;
+        socklen_t len = sizeof (sin_addr);
+
+        if (getsockname (handle, (struct sockaddr*) &sin_addr, &len) == 0)
+            return ntohs (sin_addr.sin_port);
 
         return -1;
     }
@@ -385,11 +384,11 @@ namespace SocketHelpers
         struct ip_mreq mreq;
 
         zerostruct (mreq);
-        mreq.imr_multiaddr.s_addr = inet_addr (multicastIPAddress.toRawUTF8());
+        mreq.imr_multiaddr.s_addr = inet_addr (multicastIPAddress.toUTF8());
         mreq.imr_interface.s_addr = INADDR_ANY;
 
         if (interfaceIPAddress.isNotEmpty())
-            mreq.imr_interface.s_addr = inet_addr (interfaceIPAddress.toRawUTF8());
+            mreq.imr_interface.s_addr = inet_addr (interfaceIPAddress.toUTF8());
 
         return setsockopt (handle, IPPROTO_IP,
                            join ? IP_ADD_MEMBERSHIP
@@ -415,8 +414,6 @@ StreamingSocket::StreamingSocket (const String& host, int portNum, int h)
       connected (true),
       isListener (false)
 {
-    jassert (SocketHelpers::isValidPortNumber (portNum));
-
     SocketHelpers::initSockets();
     SocketHelpers::resetSocketOptions (h, false, false);
 }
@@ -458,8 +455,6 @@ bool StreamingSocket::bindToPort (const int port)
 
 bool StreamingSocket::bindToPort (const int port, const String& addr)
 {
-    jassert (SocketHelpers::isValidPortNumber (port));
-
     return SocketHelpers::bindSocket (handle, port, addr);
 }
 
@@ -472,8 +467,6 @@ bool StreamingSocket::connect (const String& remoteHostName,
                                const int remotePortNumber,
                                const int timeOutMillisecs)
 {
-    jassert (SocketHelpers::isValidPortNumber (remotePortNumber));
-
     if (isListener)
     {
         jassertfalse;    // a listener socket can't connect to another one!
@@ -512,14 +505,23 @@ void StreamingSocket::close()
 //==============================================================================
 bool StreamingSocket::createListener (const int newPortNumber, const String& localHostName)
 {
-    jassert (SocketHelpers::isValidPortNumber (newPortNumber));
-
     if (connected)
         close();
 
     hostName = "listener";
     portNumber = newPortNumber;
     isListener = true;
+
+    struct sockaddr_in servTmpAddr;
+    zerostruct (servTmpAddr);
+
+    servTmpAddr.sin_family = PF_INET;
+    servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+
+    if (localHostName.isNotEmpty())
+        servTmpAddr.sin_addr.s_addr = ::inet_addr (localHostName.toUTF8());
+
+    servTmpAddr.sin_port = htons ((uint16) portNumber);
 
     handle = (int) socket (AF_INET, SOCK_STREAM, 0);
 
@@ -530,15 +532,15 @@ bool StreamingSocket::createListener (const int newPortNumber, const String& loc
     SocketHelpers::makeReusable (handle);
    #endif
 
-    if (SocketHelpers::bindSocket (handle, portNumber, localHostName)
-         && listen (handle, SOMAXCONN) >= 0)
+    if (bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) < 0
+         || listen (handle, SOMAXCONN) < 0)
     {
-        connected = true;
-        return true;
+        close();
+        return false;
     }
 
-    close();
-    return false;
+    connected = true;
+    return true;
 }
 
 StreamingSocket* StreamingSocket::waitForNextConnection() const
@@ -612,12 +614,14 @@ bool DatagramSocket::bindToPort (const int port)
 
 bool DatagramSocket::bindToPort (const int port, const String& addr)
 {
-    jassert (SocketHelpers::isValidPortNumber (port));
+    if (handle < 0)
+        return false;
 
     if (SocketHelpers::bindSocket (handle, port, addr))
     {
         isBound = true;
         lastBindAddress = addr;
+
         return true;
     }
 
@@ -669,8 +673,6 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
 int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
                            const void* sourceBuffer, int numBytesToWrite)
 {
-    jassert (SocketHelpers::isValidPortNumber (remotePortNumber));
-
     if (handle < 0)
         return -1;
 

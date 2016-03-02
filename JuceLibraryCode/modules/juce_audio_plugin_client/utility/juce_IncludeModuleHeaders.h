@@ -31,12 +31,12 @@ using namespace juce;
 
 namespace juce
 {
-    #define Component juce::Component
+    #if JUCE_MAC
+     #define Point     juce::Point
+     #define Component juce::Component
 
-   #if JUCE_MAC
-    #define Point juce::Point
-    void repostCurrentNSEvent();
-   #endif
+     void repostCurrentNSEvent();
+    #endif
 
     //==============================================================================
     inline const PluginHostType& getHostType()

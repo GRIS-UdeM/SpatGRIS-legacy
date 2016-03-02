@@ -135,6 +135,14 @@ void MPEInstrument::removeListener (Listener* const listenerToRemove) noexcept
     listeners.remove (listenerToRemove);
 }
 
+MPEInstrument::Listener::Listener()
+{
+}
+
+MPEInstrument::Listener::~Listener()
+{
+}
+
 //==============================================================================
 void MPEInstrument::processNextMidiEvent (const MidiMessage& message)
 {
@@ -1968,7 +1976,7 @@ public:
     }
 
 private:
-    //==============================================================================
+    //==========================================================================
     /* This mock class is used for unit testing whether the methods of
        MPEInstrument are called correctly.
     */
@@ -2066,7 +2074,7 @@ private:
         ScopedPointer<MPENote> lastNoteFinished;
 
     private:
-        //==============================================================================
+        //======================================================================
         void noteAdded (MPENote) override              { noteAddedCallCounter++; }
 
         void notePressureChanged (MPENote) override    { notePressureChangedCallCounter++; }
@@ -2081,7 +2089,7 @@ private:
         }
     };
 
-    //==============================================================================
+    //==========================================================================
     template <int initial7BitPressure, int initial14BitPitchbend, int initial7BitTimbre>
     class CustomInitialValuesTest : public MPEInstrument
     {
@@ -2101,7 +2109,7 @@ private:
         }
     };
 
-    //==============================================================================
+    //==========================================================================
     void expectNote (MPENote noteToTest,
                      int noteOnVelocity7Bit,
                      int pressure7Bit,
@@ -2133,7 +2141,7 @@ private:
         expect (std::fabs (expected - actual) < maxAbsoluteError);
     }
 
-    //==============================================================================
+    //==========================================================================
     MPEZoneLayout testLayout;
 };
 

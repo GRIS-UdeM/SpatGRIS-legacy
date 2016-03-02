@@ -19,12 +19,42 @@ ok. so 2 problems
 2- only for source 1, setting volume (or pan) and reading it is reversed
 -------- 2016-03-02 ------------
 ok. so problem in reaper with number of inputs and outputs. 
-before, everything was 8x16. Now, it's 8x16 until preparetoplay, which seems to always be 2x2. check that this is true. 
-
-where is this stuff updated?
-filter constructor: using juce max numbers
-prepare to play: using gettotal
 
 what is critical, is that in processblock, we don't use more inputs/outputs than given by getTotal. 
-so probably in both constructor and preparetoplay, we should use gettotal. 
-question is: is always gettotal 2x2? yes for vst2. for vst3, we can get 8x8, but something is setting it back to 2x2.
+
+so currently, getTotal for AU and VST3 is able to read the I/O number of inputs and outputs. NOT vst2.
+Check if we can fix this using setPreferredBusArrangement. but if we do that, we need to remove Plugin Channel Configurations from introjucer
+
+ok, there is an example surround plugin which looks at this very problem. With vst2, reaper seems to make a ton of random calls to setPrefferedBusArrangement, so not sure how to deal with that. Could recommend using vst3 with reaper, but need to ensure vst2 is working with DP. 
+
+DP
+Spatgris is crashing dp at the moment. Need to test surround. So apparently: 
+* dp uses AU by default...
+* i cannot load the surround plugin, even though it is in the plugin manager... BECAUSE IT IS A SYNTH. it works really well, and there are several calls to getPreferred, but it ends on createFront7point1. 
+
+LOGIC
+seems to also work, but needs to be tested more.
+
+CHECKING OCTOGRIS3
+DP: OK
+reaper: vst2:OK, vst3: NAN, AU: ok
+logic: (probably ok)
+
+ok. so if octogris3 is working... could we not use the same code in SpatGRIS? well wait, vst3 was not working for octogris. but who gives a shit?
+so current git version of octogris is the same source code as 3.0.1, but a different version of JUCE, which may be critical. let's try it. 
+it doesn't work. so the juce version is probably to blame!
+
+testing juce versions
+LATEST PULL: 
+* introjucer plygin channel config NOT deprecated
+* spatgris 
+    * au: load 2x2, 8x8 avail
+    * vst3: same
+    * vst2: load 2x2, 2x2 max avail
+
+
+v4.0.1: 
+* introjucer plugin channel config deprecated
+* octogris vst2 ok, vst3 not
+* spatgris: vst2 8x16, vst3 8x8, au 2x2 selected, 8x16 avail
+* SO EVERYTHING WORKS. problem is with bleeding edge juce version. need to be careful with this for next JUCE release. 

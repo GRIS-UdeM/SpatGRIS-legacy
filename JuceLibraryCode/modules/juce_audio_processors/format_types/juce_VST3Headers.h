@@ -25,6 +25,9 @@
 #ifndef JUCE_VST3HEADERS_H_INCLUDED
 #define JUCE_VST3HEADERS_H_INCLUDED
 
+#undef Point
+#undef Component
+
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 #if _MSC_VER
  #pragma warning (disable: 4505)
@@ -168,5 +171,7 @@ namespace Steinberg
 #undef DEF_CLASS2
 #undef DEF_CLASS_W
 #undef END_FACTORY
+#undef Point
+#undef Component
 
 #endif   // JUCE_VST3HEADERS_H_INCLUDED

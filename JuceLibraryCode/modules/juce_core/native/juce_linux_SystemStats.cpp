@@ -156,10 +156,7 @@ void CPUInformation::initialise() noexcept
     hasSSE3  = flags.contains ("sse3");
     has3DNow = flags.contains ("3dnow");
     hasSSSE3 = flags.contains ("ssse3");
-    hasSSE41 = flags.contains ("sse4_1");
-    hasSSE42 = flags.contains ("sse4_2");
     hasAVX   = flags.contains ("avx");
-    hasAVX2  = flags.contains ("avx2");
 
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }
@@ -200,7 +197,7 @@ bool Time::setSystemTimeToThisTime() const
     return settimeofday (&t, 0) == 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
+JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
 {
    #if JUCE_BSD
     return false;

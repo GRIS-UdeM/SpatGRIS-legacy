@@ -22,7 +22,10 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+// Your project must contain an AppConfig.h file with your project-specific settings in it,
+// and your header search path must make it accessible to the module's files.
+#include "AppConfig.h"
+
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_RTAS
@@ -119,18 +122,19 @@
  #pragma comment(lib, PT_LIB_PATH "RTASClientLib.lib")
 #endif
 
+#undef Component
 #undef MemoryBlock
 
 //==============================================================================
 #if JUCE_WINDOWS
-  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, Component* comp);
-  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, Component* comp);
+  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
+  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
  #if ! JucePlugin_EditorRequiresKeyboardFocus
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
 #else
-  extern void* attachSubWindow (void* hostWindowRef, Component* comp);
-  extern void removeSubWindow (void* nsWindow, Component* comp);
+  extern void* attachSubWindow (void* hostWindowRef, juce::Component* comp);
+  extern void removeSubWindow (void* nsWindow, juce::Component* comp);
   extern void forwardCurrentKeyEventToHostWindow();
 #endif
 
@@ -236,7 +240,7 @@ public:
 
         void timerCallback() override
         {
-            if (! Component::isMouseButtonDownAnywhere())
+            if (! juce::Component::isMouseButtonDownAnywhere())
             {
                 stopTimer();
 
@@ -286,7 +290,7 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        ScopedPointer<Component> wrapper;
+        ScopedPointer<juce::Component> wrapper;
         ScopedPointer<AudioProcessorEditor> editorComp;
 
         void deleteEditorComp()
@@ -297,7 +301,7 @@ public:
                 {
                     PopupMenu::dismissAllActiveMenus();
 
-                    if (Component* const modalComponent = Component::getCurrentlyModalComponent())
+                    if (juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent())
                         modalComponent->exitModalState (0);
 
                     filter->editorBeingDeleted (editorComp);
@@ -311,7 +315,7 @@ public:
         //==============================================================================
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
-        class EditorCompWrapper  : public Component
+        class EditorCompWrapper  : public juce::Component
                                  #if ! JUCE_MAC
                                    , public FocusChangeListener
                                  #endif
@@ -364,14 +368,14 @@ public:
 
             void resized() override
             {
-                if (Component* const ed = getEditor())
+                if (juce::Component* const ed = getEditor())
                     ed->setBounds (getLocalBounds());
 
                 repaint();
             }
 
            #if JUCE_WINDOWS
-            void globalFocusChanged (Component*) override
+            void globalFocusChanged (juce::Component*) override
             {
                #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -380,7 +384,7 @@ public:
             }
            #endif
 
-            void childBoundsChanged (Component* child) override
+            void childBoundsChanged (juce::Component* child) override
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
@@ -409,7 +413,7 @@ public:
             JuceCustomUIView* const owner;
             int titleW, titleH;
 
-            Component* getEditor() const        { return getChildComponent (0); }
+            juce::Component* getEditor() const        { return getChildComponent (0); }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
         };
@@ -494,8 +498,8 @@ public:
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
         midiEvents.ensureSize (2048);
 
-        channels.calloc (jmax (juceFilter->getTotalNumInputChannels(),
-                               juceFilter->getTotalNumOutputChannels()));
+        channels.calloc (jmax (juceFilter->getNumInputChannels(),
+                               juceFilter->getNumOutputChannels()));
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
@@ -535,14 +539,14 @@ public:
 
        #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
-        ignoreUnused (numMidiEventsComingIn);
+        (void) numMidiEventsComingIn;
        #endif
 
         {
             const ScopedLock sl (juceFilter->getCallbackLock());
 
-            const int numIn  = juceFilter->getTotalNumInputChannels();
-            const int numOut = juceFilter->getTotalNumOutputChannels();
+            const int numIn = juceFilter->getNumInputChannels();
+            const int numOut = juceFilter->getNumOutputChannels();
             const int totalChans = jmax (numIn, numOut);
 
             if (juceFilter->isSuspended())
@@ -662,9 +666,9 @@ public:
    #if JUCE_WINDOWS
     Boolean HandleKeystroke (EventRecord* e) override
     {
-        if (Component* modalComp = Component::getCurrentlyModalComponent())
+        if (juce::Component* modalComp = juce::Component::getCurrentlyModalComponent())
         {
-            if (Component* focused = modalComp->getCurrentlyFocusedComponent())
+            if (juce::Component* focused = modalComp->getCurrentlyFocusedComponent())
             {
                 switch (e->message & charCodeMask)
                 {

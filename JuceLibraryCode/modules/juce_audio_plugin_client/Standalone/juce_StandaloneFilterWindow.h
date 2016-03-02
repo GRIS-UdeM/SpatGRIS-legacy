@@ -40,27 +40,15 @@ class StandalonePluginHolder
 public:
     /** Creates an instance of the default plugin.
 
-        The settings object can be a PropertySet that the class should use to store its
-        settings - the takeOwnershipOfSettings indicates whether this object will delete
-        the settings automatically when no longer needed. The settings can also be nullptr.
-
-        A default device name can be passed in.
-
-        Preferably a complete setup options object can be used, which takes precedence over
-        the preferredDefaultDeviceName and allows you to select the input & output device names,
-        sample rate, buffer size etc.
-
-        In all instances, the settingsToUse will take precedence over the "preferred" options if not null.
+        The settings object can be a PropertySet that the class should use to
+        store its settings - the object that is passed-in will be owned by this
+        class and deleted automatically when no longer needed. (It can also be null)
     */
-    StandalonePluginHolder (PropertySet* settingsToUse,
-                            bool takeOwnershipOfSettings = true,
-                            const String& preferredDefaultDeviceName = String(),
-                            const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr)
-
+    StandalonePluginHolder (PropertySet* settingsToUse, bool takeOwnershipOfSettings)
         : settings (settingsToUse, takeOwnershipOfSettings)
     {
         createPlugin();
-        setupAudioDevices (preferredDefaultDeviceName, preferredSetupOptions);
+        setupAudioDevices();
         reloadPluginState();
         startPlaying();
     }
@@ -201,8 +189,7 @@ public:
         }
     }
 
-    void reloadAudioDeviceState (const String& preferredDefaultDeviceName,
-                                 const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
+    void reloadAudioDeviceState()
     {
         ScopedPointer<XmlElement> savedState;
 
@@ -212,9 +199,7 @@ public:
         deviceManager.initialise (processor->getTotalNumInputChannels(),
                                   processor->getTotalNumOutputChannels(),
                                   savedState,
-                                  true,
-                                  preferredDefaultDeviceName,
-                                  preferredSetupOptions);
+                                  true);
     }
 
     //==============================================================================
@@ -247,20 +232,19 @@ public:
     AudioProcessorPlayer player;
 
 private:
-    void setupAudioDevices (const String& preferredDefaultDeviceName,
-                            const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
+    void setupAudioDevices()
     {
         deviceManager.addAudioCallback (&player);
-        deviceManager.addMidiInputCallback (String(), &player);
+        deviceManager.addMidiInputCallback (String::empty, &player);
 
-        reloadAudioDeviceState (preferredDefaultDeviceName, preferredSetupOptions);
+        reloadAudioDeviceState();
     }
 
     void shutDownAudioDevices()
     {
         saveAudioDeviceState();
 
-        deviceManager.removeMidiInputCallback (String(), &player);
+        deviceManager.removeMidiInputCallback (String::empty, &player);
         deviceManager.removeAudioCallback (&player);
     }
 
@@ -289,9 +273,7 @@ public:
     StandaloneFilterWindow (const String& title,
                             Colour backgroundColour,
                             PropertySet* settingsToUse,
-                            bool takeOwnershipOfSettings,
-                            const String& preferredDefaultDeviceName = String(),
-                            const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr)
+                            bool takeOwnershipOfSettings)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("options")
     {
@@ -301,8 +283,7 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
 
-        pluginHolder = new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings,
-                                                   preferredDefaultDeviceName, preferredSetupOptions);
+        pluginHolder = new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings);
 
         createEditorComp();
 

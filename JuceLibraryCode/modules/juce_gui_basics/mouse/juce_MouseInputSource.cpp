@@ -330,7 +330,7 @@ public:
         setScreenPos (screenPos, time, false);
         triggerFakeMove();
 
-        return getComponentUnderMouse();
+        return isDragging() ? nullptr : getComponentUnderMouse();
     }
 
     void handleWheel (ComponentPeer& peer, Point<float> positionWithinPeer,

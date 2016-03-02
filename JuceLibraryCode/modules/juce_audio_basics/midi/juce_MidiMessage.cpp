@@ -371,7 +371,7 @@ int MidiMessage::getNoteNumber() const noexcept
 
 void MidiMessage::setNoteNumber (const int newNoteNumber) noexcept
 {
-    if (isNoteOnOrOff() || isAftertouch())
+    if (isNoteOnOrOff())
         getData()[1] = (uint8) (newNoteNumber & 127);
 }
 
@@ -982,7 +982,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
         return s;
     }
 
-    return String();
+    return String::empty;
 }
 
 double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept

@@ -33,21 +33,13 @@ DialogWindow::~DialogWindow()
 {
 }
 
-bool DialogWindow::escapeKeyPressed()
+bool DialogWindow::keyPressed (const KeyPress& key)
 {
-    if (escapeKeyTriggersCloseButton)
+    if (escapeKeyTriggersCloseButton && key == KeyPress::escapeKey)
     {
         setVisible (false);
         return true;
     }
-
-    return false;
-}
-
-bool DialogWindow::keyPressed (const KeyPress& key)
-{
-    if (key == KeyPress::escapeKey && escapeKeyPressed())
-        return true;
 
     return DocumentWindow::keyPressed (key);
 }

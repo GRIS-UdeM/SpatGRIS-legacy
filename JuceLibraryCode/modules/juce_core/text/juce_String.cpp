@@ -821,10 +821,10 @@ namespace StringHelpers
         char* end = buffer + numElementsInArray (buffer);
         char* start = NumberToStringConverters::numberToString (end, number);
 
-       #if JUCE_STRING_UTF_TYPE == 8
+       #if (JUCE_STRING_UTF_TYPE == 8)
         str.appendCharPointer (String::CharPointerType (start), String::CharPointerType (end));
        #else
-        str.appendCharPointer (CharPointer_ASCII (start), CharPointer_ASCII (end));
+        str.appendCharPointer (String::CharPointer_ASCII (start), String::CharPointer_ASCII (end));
        #endif
 
         return str;
@@ -1387,10 +1387,6 @@ String String::replaceCharacter (const juce_wchar charToReplace, const juce_wcha
 
 String String::replaceCharacters (StringRef charactersToReplace, StringRef charactersToInsertInstead) const
 {
-    // Each character in the first string must have a matching one in the
-    // second, so the two strings must be the same length.
-    jassert (charactersToReplace.length() == charactersToInsertInstead.length());
-
     StringCreationHelper builder (text);
 
     for (;;)
