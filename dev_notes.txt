@@ -17,3 +17,10 @@ WHAT IS NEXT?
 ok. so 2 problems
 1- compared to octogris, spatgris surface (free volume) and span (pan span) are reversed.
 2- only for source 1, setting volume (or pan) and reading it is reversed
+-------- 2016-03-02 ------------
+ok. so problem in reaper with number of inputs and outputs. 
+before, everything was 8x16. Now, it's 8x16 until preparetoplay, which seems to always be 2x2. check that this is true. 
+
+where is this stuff updated?
+filter constructor: using juce max numbers
+prepare to play: using gettotal
