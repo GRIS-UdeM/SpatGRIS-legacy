@@ -190,7 +190,7 @@ private:
     Label *m_VersionLabel;
 	
 	ComboBox *mRoutingMode;
-	Slider *mRoutingVolume;
+	Slider *mRoutingVolumeSlider;
     
     ImageComponent m_logoImage;
 	

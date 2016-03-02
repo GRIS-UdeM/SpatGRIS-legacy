@@ -444,8 +444,8 @@ AudioProcessorEditor (ownerFilter)
 , mOsc (nullptr)
 {
     if (s_bUseNewGui){
-        //this works, but everything is too small. This appears to be the only way that I found to change the
-        mGrisFeel.setDefaultSansSerifTypefaceName(mGrisFeel.getFontName());
+        //this works, but everything is too small. This appears to be the only way that I found to change the tab font
+//        mGrisFeel.setDefaultSansSerifTypefaceName(mGrisFeel.getFontName());
         LookAndFeel::setDefaultLookAndFeel(&mGrisFeel);
     } else {
         LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
@@ -614,12 +614,10 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
         addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
         y += 2*dh + 5;
-        mRoutingVolume = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
-        mRoutingVolume->setTextBoxStyle(Slider::TextBoxAbove, false, 40, dh);
-        mRoutingVolume->setSliderStyle(Slider::LinearVertical);
+        mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
+        mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxAbove, false, 40, dh);
+        mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
         y += dh + 5;
-
-        
         
         mSpSelect = new ComboBox();
         mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelect);
@@ -1518,13 +1516,11 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     for (int iCurLevelComponent = 0; iCurLevelComponent < mLevels.size(); ++iCurLevelComponent){
         ct->removeChildComponent(mMutes.getUnchecked(iCurLevelComponent));
         ct->removeChildComponent(mLevels.getUnchecked(iCurLevelComponent));
-        
         mComponents.removeObject(mLevels.getUnchecked(iCurLevelComponent));
     }
     mMutes.clear();
     mLevels.clear();
     mSpSelect->clear();
-    
     
     //put new stuff
     int iCurSpeakers = mFilter->getNumberOfSpeakers();
@@ -1539,7 +1535,6 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
 		float fMute = mFilter->getSpeakerM(i);
 		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
         mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
-
         mMutes.add(mute);
         const int muteWidth = 50;
         juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
@@ -1552,7 +1547,10 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
         
         y += dh + 5;
     }
-    
+    //ensure box height is not smaller than mRoutingVolumeSlider
+    if (y < 200 + 2*dh + 10){
+        y = 200 + 2*dh + 10;
+    }
     ct->setSize(w, y);
     
     if (!p_bCalledFromConstructor){
@@ -1561,8 +1559,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     
     //speaker position combo box in speakers tab
     int index = 1;
-    for (int i = 0; i < iCurSpeakers; i++)
-    {
+    for (int i = 0; i < iCurSpeakers; i++){
         String s; s << i+1;
         mSpSelect->addItem(s, index++);
     }
@@ -2303,6 +2300,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mVolumeMid->setValue(mFilter->getParameter(kVolumeMid));
         mVolumeNear->setValue(mFilter->getParameter(kVolumeNear));
         mMaxSpanVolume->setValue(mFilter->getParameter(kMaxSpanVolume));
+        mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
         
         mFilterNear->setValue(mFilter->getParameter(kFilterNear));
         mFilterMid->setValue(mFilter->getParameter(kFilterMid));

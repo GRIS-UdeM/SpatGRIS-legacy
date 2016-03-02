@@ -16,6 +16,8 @@
             file="../GrisCommonFiles/GrisLookAndFeel.h"/>
     </GROUP>
     <GROUP id="{B76B0FE8-BBC6-AA42-5E09-44DABB7BB441}" name="Resources">
+      <FILE id="u2xufn" name="SinkinSans-400Regular.otf" compile="0" resource="1"
+            file="../GrisCommonFiles/Fonts/sinkin-sans/SinkinSans-400Regular.otf"/>
       <FILE id="NATXje" name="logoGris.png" compile="0" resource="1" file="logoGris.png"/>
     </GROUP>
     <FILE id="oQBaSA" name="libLeap.dylib" compile="0" resource="1" file="libLeap.dylib"/>
