@@ -1251,6 +1251,7 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
     //these don't work because of various things not being constructed when this method is called in the constructor. Need to extract
     //the relevant parts of buttonClicked(mApplyInputOutputModeButton) in a method, and call that new method from here
     applyCurrentSrcPlacement();
+    applyCurrentSpkPlacement();
 //    mMover.updateNumberOfSources();
 //    buttonClicked(mApplyInputOutputModeButton);
 //    mFieldNeedRepaint = true;
@@ -1888,33 +1889,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         applyCurrentSrcPlacement();
     }
     else if (button == mApplySpPlacementButton) {
-        
-        bool alternate = false;
-        bool startAtTop = false;
-        bool clockwise = false;
-        
-        switch (mSpPlacement->getSelectedId()){
-            case kLeftAlternate:
-                alternate = true;
-                break;
-            case kTopClockwise:
-                startAtTop = true;
-                clockwise = true;
-                break;
-            case kTopCounterClockwise:
-                startAtTop = true;
-                break;
-            case kLeftClockwise:
-                clockwise = true;
-                break;
-            case kLeftCounterClockWise:
-                break;
-        }
-        
-        mFilter->updateSpeakerLocation(alternate, startAtTop, clockwise);
-
-        updateSpeakerLocationTextEditor();
-        mFilter->setSpPlacementMode(mSpPlacement->getSelectedId());
+        applyCurrentSpkPlacement();
     }
     else if (button == mShowGridLines) {
         mFilter->setShowGridLines(button->getToggleState());
@@ -2081,6 +2056,39 @@ void SpatGrisAudioProcessorEditor::applyCurrentSrcPlacement(){
     if (bIsStuffConstructedYet){
         updateSourceLocationTextEditor(false);
         mFilter->setSrcPlacementMode(mSrcPlacementCombo->getSelectedId());
+    }
+}
+
+void SpatGrisAudioProcessorEditor::applyCurrentSpkPlacement(){
+    bool alternate = false;
+    bool startAtTop = false;
+    bool clockwise = false;
+    
+    bool bIsStuffConstructedYet = (mSpPlacement == NULL) ? false : true;
+    int iCurrentOption = (bIsStuffConstructedYet) ? mSpPlacement->getSelectedId() : kLeftAlternate;
+    
+    switch (iCurrentOption){
+        case kLeftAlternate:
+            alternate = true;
+            break;
+        case kTopClockwise:
+            startAtTop = true;
+            clockwise = true;
+            break;
+        case kTopCounterClockwise:
+            startAtTop = true;
+            break;
+        case kLeftClockwise:
+            clockwise = true;
+            break;
+        case kLeftCounterClockWise:
+            break;
+    }
+    
+    mFilter->updateSpeakerLocation(alternate, startAtTop, clockwise);
+    if (bIsStuffConstructedYet){
+        updateSpeakerLocationTextEditor();
+        mFilter->setSpPlacementMode(mSpPlacement->getSelectedId());
     }
 }
 

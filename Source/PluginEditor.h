@@ -128,8 +128,6 @@ public:
     
     void setDefaultPendulumEndpoint();
     
-    void applyCurrentSrcPlacement();
-    
 private:
 	SpatGrisAudioProcessor *mFilter;
 	SourceMover mMover;
@@ -287,6 +285,10 @@ private:
     
     Component  *mOscSpatPortLabel;
     TextEditor *mOscSpatPortTextEditor;
+    
+    void applyCurrentSrcPlacement();
+    void applyCurrentSpkPlacement();
+
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED
