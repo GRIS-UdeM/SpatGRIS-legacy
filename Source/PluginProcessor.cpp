@@ -245,6 +245,10 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
+    
+//    if (getIsAllowInputOutputModeSelection()){
+//        setInputOutputMode(getInputOutputMode());
+//    }
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
