@@ -2006,7 +2006,7 @@ void SpatGrisAudioProcessorEditor::applyCurrentSrcPlacement(){
     bool startAtTop = false;
     bool clockwise = false;
     
-    bool bIsStuffConstructedYet = (mSrcPlacementCombo == NULL) ? false : true;
+    bool bIsStuffConstructedYet = (mSrcPlacementCombo != NULL && mSrcPlacementCombo->getNumItems() !=0) ? true : false;
     
     int iCurrentOption = (bIsStuffConstructedYet) ? mSrcPlacementCombo->getSelectedId() : kLeftAlternate;
     
