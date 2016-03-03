@@ -206,7 +206,7 @@ private:
     // speakers
     TextButton *mApplySpPlacementButton;
 	TextEditor *mSpR, *mSpT;
-	ComboBox *mSpSelect, *mSpPlacement;
+	ComboBox *mSpSelectCombo, *mSpPlacementCombo;
 
 	// trajectories
 	ComboBox *mTrTypeComboBox;

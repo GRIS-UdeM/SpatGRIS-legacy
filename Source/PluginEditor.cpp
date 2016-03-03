@@ -586,10 +586,11 @@ AudioProcessorEditor (ownerFilter)
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelectCombo);
         mComponents.add(mSrcSelectCombo);
         mSrcSelectCombo->addListener(this);
-        //believe it or not, this actually does something useful...! Not quite sure what, but removing it messes up the number of sources and speakers when loading some presets
-        if (mFilter->getIsAllowInputOutputModeSelection()){
-            mFilter->setInputOutputMode(mFilter->getInputOutputMode());
-        }
+//        JUCE_COMPILER_WARNING("THIS NEEDS TO BE IN CONSTRUCTOR! because otherwise we need the editor for the plugin to work correctly!")
+//        //believe it or not, this actually does something useful...! Not quite sure what, but removing it messes up the number of sources and speakers when loading some presets
+//        if (mFilter->getIsAllowInputOutputModeSelection()){
+//            mFilter->setInputOutputMode(mFilter->getInputOutputMode());
+//        }
         updateSources(true);
     }
     
@@ -618,10 +619,10 @@ AudioProcessorEditor (ownerFilter)
         mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
         y += dh + 5;
         
-        mSpSelect = new ComboBox();
-        mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelect);
-        mComponents.add(mSpSelect);
-        mSpSelect->addListener(this);
+        mSpSelectCombo = new ComboBox();
+        mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelectCombo);
+        mComponents.add(mSpSelectCombo);
+        mSpSelectCombo->addListener(this);
 
         updateSpeakers(true);
     }
@@ -663,7 +664,10 @@ AudioProcessorEditor (ownerFilter)
         // start 2nd column
         y = kMargin;
         x += w + kMargin;
-    
+        //need to initialize those before calling updateInputOuputCombo() below
+        mSrcPlacementCombo = new ComboBox();
+        mSpPlacementCombo = new ComboBox();
+
         if (mFilter->getIsAllowInputOutputModeSelection()) {
             addLabel("Input/Output mode:", x, y, w, dh, box);
             y += dh + 5;
@@ -1002,8 +1006,8 @@ AudioProcessorEditor (ownerFilter)
         // column 1
         addLabel("Source placement:", x, y, w, dh, box);
         y += dh + 5;
-        
-        mSrcPlacementCombo = new ComboBox();
+
+        //mSrcPlacementCombo = new ComboBox();
         mSrcPlacementCombo->addItem("Left Alternate", kLeftAlternate);
         mSrcPlacementCombo->addItem("Left Clockwise", kLeftClockwise);
         mSrcPlacementCombo->addItem("Left Counter Clockwise", kLeftCounterClockWise);
@@ -1059,21 +1063,21 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Speaker placement:", x, y, w, dh, box);
         y += dh + 5;
         
-        mSpPlacement = new ComboBox();
-        mSpPlacement->addItem("Left Alternate", kLeftAlternate);
-        mSpPlacement->addItem("Left Clockwise", kLeftClockwise);
-        mSpPlacement->addItem("Left Counter Clockwise", kLeftCounterClockWise);
-        mSpPlacement->addItem("Top Clockwise", kTopClockwise);
-        mSpPlacement->addItem("Top Counter Clockwise", kTopCounterClockwise);
+
+        mSpPlacementCombo->addItem("Left Alternate", kLeftAlternate);
+        mSpPlacementCombo->addItem("Left Clockwise", kLeftClockwise);
+        mSpPlacementCombo->addItem("Left Counter Clockwise", kLeftCounterClockWise);
+        mSpPlacementCombo->addItem("Top Clockwise", kTopClockwise);
+        mSpPlacementCombo->addItem("Top Counter Clockwise", kTopCounterClockwise);
         
-        mSpPlacement->setSelectedId(mFilter->getSpPlacementMode());
+        mSpPlacementCombo->setSelectedId(mFilter->getSpPlacementMode());
         
-        box->addAndMakeVisible(mSpPlacement);
-        mComponents.add(mSpPlacement);
-        mSpPlacement->setSize(w, dh);
-        mSpPlacement->setTopLeftPosition(x, y);
-        mSpPlacement->setExplicitFocusOrder(5);
-        //mSpPlacement->addListener(this);
+        box->addAndMakeVisible(mSpPlacementCombo);
+        mComponents.add(mSpPlacementCombo);
+        mSpPlacementCombo->setSize(w, dh);
+        mSpPlacementCombo->setTopLeftPosition(x, y);
+        mSpPlacementCombo->setExplicitFocusOrder(5);
+        //mSpPlacementCombo->addListener(this);
         y += dh + 5;
         mApplySpPlacementButton = addButton("Apply", x, y, iButtonW, dh, box);
         
@@ -1083,10 +1087,10 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
         
         addLabel("Set RA position:", x, y, w - selectw, dh, box);
-        mSpSelect->setSelectedId(mFilter->getSpSelected());
-        mSpSelect->setSize(selectw, dh);
-        mSpSelect->setTopLeftPosition(x + w - selectw, y);
-        mSpSelect->setExplicitFocusOrder(5);
+        mSpSelectCombo->setSelectedId(mFilter->getSpSelected());
+        mSpSelectCombo->setSize(selectw, dh);
+        mSpSelectCombo->setTopLeftPosition(x + w - selectw, y);
+        mSpSelectCombo->setExplicitFocusOrder(5);
         
         int lw = 60, lwm = lw + kMargin;
         
@@ -1530,7 +1534,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     }
     mMutes.clear();
     mLevels.clear();
-    mSpSelect->clear();
+    mSpSelectCombo->clear();
     
     //put new stuff
     int iCurSpeakers = mFilter->getNumberOfSpeakers();
@@ -1571,9 +1575,9 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     int index = 1;
     for (int i = 0; i < iCurSpeakers; i++){
         String s; s << i+1;
-        mSpSelect->addItem(s, index++);
+        mSpSelectCombo->addItem(s, index++);
     }
-    mSpSelect->setSelectedId(mFilter->getSpSelected());
+    mSpSelectCombo->setSelectedId(mFilter->getSpSelected());
 }
 
 void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
@@ -1717,7 +1721,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         mMover.end(kField);
     }
     else if (&textEditor == mSpR || &textEditor == mSpT) {
-        int sp = mSpSelect->getSelectedId() - 1;
+        int sp = mSpSelectCombo->getSelectedId() - 1;
         float r = mSpR->getText().getFloatValue();
         float t = mSpT->getText().getFloatValue();
         if (r < 0) r = 0; else if (r > kRadiusMax) r = kRadiusMax;
@@ -2006,7 +2010,7 @@ void SpatGrisAudioProcessorEditor::applyCurrentSrcPlacement(){
     bool startAtTop = false;
     bool clockwise = false;
     
-    bool bIsStuffConstructedYet = (mSrcPlacementCombo != NULL && mSrcPlacementCombo->getNumItems() !=0) ? true : false;
+    bool bIsStuffConstructedYet = (mSrcPlacementCombo->getNumItems() !=0) ? true : false;
     
     int iCurrentOption = (bIsStuffConstructedYet) ? mSrcPlacementCombo->getSelectedId() : kLeftAlternate;
     
@@ -2064,8 +2068,8 @@ void SpatGrisAudioProcessorEditor::applyCurrentSpkPlacement(){
     bool startAtTop = false;
     bool clockwise = false;
     
-    bool bIsStuffConstructedYet = (mSpPlacement == NULL) ? false : true;
-    int iCurrentOption = (bIsStuffConstructedYet) ? mSpPlacement->getSelectedId() : kLeftAlternate;
+    bool bIsStuffConstructedYet = (mSpPlacementCombo->getNumItems() !=0) ? true : false;
+    int iCurrentOption = (bIsStuffConstructedYet) ? mSpPlacementCombo->getSelectedId() : kLeftAlternate;
     
     switch (iCurrentOption){
         case kLeftAlternate:
@@ -2088,7 +2092,7 @@ void SpatGrisAudioProcessorEditor::applyCurrentSpkPlacement(){
     mFilter->updateSpeakerLocation(alternate, startAtTop, clockwise);
     if (bIsStuffConstructedYet){
         updateSpeakerLocationTextEditor();
-        mFilter->setSpPlacementMode(mSpPlacement->getSelectedId());
+        mFilter->setSpPlacementMode(mSpPlacementCombo->getSelectedId());
     }
 }
 
@@ -2153,7 +2157,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     else if (comboBox == mSrcSelectCombo){
         updateSourceLocationTextEditor(true);
     }
-    else if (comboBox == mSpSelect){
+    else if (comboBox == mSpSelectCombo){
         updateSpeakerLocationTextEditor();
     }
     else if (comboBox == mTrUnits)
@@ -2195,7 +2199,7 @@ void SpatGrisAudioProcessorEditor::updateSourceLocationTextEditor(bool p_bUpdate
 }
 
 void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
-    FPoint curPosition = mFilter->getSpeakerRT(mSpSelect->getSelectedId()-1);
+    FPoint curPosition = mFilter->getSpeakerRT(mSpSelectCombo->getSelectedId()-1);
     mSpR->setText(String(curPosition.x));
     mSpT->setText(String(curPosition.y * 180. / M_PI));
 }
@@ -2257,11 +2261,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         }
         
         mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
-        mSpSelect->setSelectedId(mFilter->getSpSelected());
+        mSpSelectCombo->setSelectedId(mFilter->getSpSelected());
         
         mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
         updateSourceLocationTextEditor(false);
-        mSpPlacement->setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
+        mSpPlacementCombo->setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
         updateSpeakerLocationTextEditor();
         
         mTrTypeComboBox->setSelectedId(mFilter->getTrType());
