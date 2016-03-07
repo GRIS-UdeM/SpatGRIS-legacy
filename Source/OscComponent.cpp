@@ -80,6 +80,7 @@ public:
         
         mReceiveIp = new TextEditor();
         mReceiveIp->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+        mReceiveIp->setFont(mGrisFeel.getFont());
         mReceiveIp->setSize(iw, dh);
         mReceiveIp->setTopLeftPosition(x, y);
         //if local address does not start with 10., put it in the ip receive box. Using 10.x.x.x addresses is problematic at UdeM
@@ -94,6 +95,7 @@ public:
         x += iw + m;
 		
 		mReceivePort = new TextEditor();
+        mReceivePort->setFont(mGrisFeel.getFont());
 		mReceivePort->setText(String(mFilter->getOscReceivePort()));
 		mReceivePort->setSize(pw, dh);
 		mReceivePort->setTopLeftPosition(x, y);
@@ -114,6 +116,7 @@ public:
 		x += cw + m;
 		
 		mSendIp = new TextEditor();
+        mSendIp->setFont(mGrisFeel.getFont());
 		mSendIp->setText(mFilter->getOscSendIp());
 		mSendIp->setSize(iw, dh);
         mSendIp->addListener(this);
@@ -123,6 +126,7 @@ public:
 		x += iw + m;
 		
 		mSendPort = new TextEditor();
+        mSendPort->setFont(mGrisFeel.getFont());
 		mSendPort->setText(String(mFilter->getOscSendPort()));
 		mSendPort->setSize(pw, dh);
 		mSendPort->setTopLeftPosition(x, y);
