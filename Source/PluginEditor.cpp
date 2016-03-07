@@ -1140,7 +1140,7 @@ AudioProcessorEditor (ownerFilter)
 #if USE_LEAP           
         mEnableLeap = new ToggleButton();
         mEnableLeap->setButtonText("Enable Leap");
-        mEnableLeap->setSize(cw-100, dh);
+        mEnableLeap->setSize(130, dh);
         mEnableLeap->setTopLeftPosition(x, y);
         mEnableLeap->addListener(this);
         mEnableLeap->setToggleState(false, dontSendNotification);
@@ -1153,7 +1153,7 @@ AudioProcessorEditor (ownerFilter)
         mStateLeap->setSize(cw, dh);
         mStateLeap->setJustificationType(Justification::left);
         mStateLeap->setMinimumHorizontalScale(1);
-        mStateLeap->setTopLeftPosition(x+cw-150+ m, y);
+        mStateLeap->setTopLeftPosition(x+130+ m, y);
         box->addAndMakeVisible(mStateLeap);
         mComponents.add(mStateLeap);
        
@@ -1163,7 +1163,7 @@ AudioProcessorEditor (ownerFilter)
 		y += 10;
         mEnableJoystick = new ToggleButton();
         mEnableJoystick->setButtonText("Enable Joystick");
-        mEnableJoystick->setSize(cw-150, dh);
+        mEnableJoystick->setSize(130, dh);
         mEnableJoystick->setTopLeftPosition(x, y);
         mEnableJoystick->addListener(this);
         mEnableJoystick->setToggleState(false, dontSendNotification);
@@ -1176,7 +1176,7 @@ AudioProcessorEditor (ownerFilter)
         mStateJoystick->setSize(cw, dh);
         mStateJoystick->setJustificationType(Justification::left);
         mStateJoystick->setMinimumHorizontalScale(1);
-        mStateJoystick->setTopLeftPosition(x+cw-150+ m, y);
+        mStateJoystick->setTopLeftPosition(x+130+ m, y);
         box->addAndMakeVisible(mStateJoystick);
         mComponents.add(mStateJoystick);
         
@@ -1667,6 +1667,7 @@ TextButton* SpatGrisAudioProcessorEditor::addButton(const String &s, int x, int 
 TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, int y, int w, int h, Component *into)
 {
     TextEditor *te = new TextEditor();
+    te->setFont(mGrisFeel.getFont());
     te->setText(s);
     te->setSize(w, h);
     te->setTopLeftPosition(x, y);
