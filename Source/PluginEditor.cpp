@@ -869,17 +869,11 @@ AudioProcessorEditor (ownerFilter)
         m_pTrEndRayTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
         m_pTrEndRayTextEditor->setTextToShowWhenEmpty("Ray", juce::Colour::greyLevel(.6));
         m_pTrEndRayTextEditor->addListener(this);
-//        m_pTrEndRayTextEditor->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
-//        m_pTrEndRayTextEditor->setReadOnly(true);
-//        m_pTrEndRayTextEditor->setCaretVisible(false);
         
         x += cbw/2 + kMargin;
         m_pTrEndAngleTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
         m_pTrEndAngleTextEditor->setTextToShowWhenEmpty("Angle", juce::Colour::greyLevel(.6));
         m_pTrEndAngleTextEditor->addListener(this);
-//        m_pTrEndAngleTextEditor->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
-//        m_pTrEndAngleTextEditor->setReadOnly(true);
-//        m_pTrEndAngleTextEditor->setCaretVisible(false);
         updateEndLocationTextEditors();
 
         x += cbw/2 + kMargin;
@@ -1798,13 +1792,13 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
     }
     if (&textEditor == m_pTrEndRayTextEditor || &textEditor == m_pTrEndAngleTextEditor){
-        
+        if (mTrEndPointButton->getToggleState()){
+            return;
+        }
         float fEndRay   = m_pTrEndRayTextEditor->getText().getFloatValue();
         float fEndAngle = m_pTrEndAngleTextEditor->getText().getFloatValue();
-
         if (fEndRay >= 0 && fEndRay <= 2 && fEndAngle >= 0 && fEndAngle <= 360 ){
             FPoint endPoint = mFilter->convertRt2Xy01(fEndRay, fEndAngle*M_PI/180);
-            cout << "EDITOR X: " << endPoint.x << ", Y: " << 1-endPoint.y << ", R: " << fEndRay << ", A: " << fEndAngle << newLine;
             mFilter->setEndLocationXY01(make_pair (endPoint.x, 1-endPoint.y));
         }
         updateEndLocationTextEditors();
@@ -1875,6 +1869,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mTrEndPointLabel->setVisible(true);
             m_pTrEndRayTextEditor->setText("");
             m_pTrEndAngleTextEditor->setText("");
+            m_pTrEndRayTextEditor->setReadOnly(true);
+            m_pTrEndAngleTextEditor->setReadOnly(true);
             mTrEndPointLabel->setVisible(true);
         } else {
             mTrEndPointButton->setButtonText("Set end point");
@@ -1882,6 +1878,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mTrEndPointLabel->setVisible(false);
             updateEndLocationTextEditors();
             mTrEndPointLabel->setVisible(false);
+            m_pTrEndRayTextEditor->setReadOnly(false);
+            m_pTrEndAngleTextEditor->setReadOnly(false);
         }
     }
     else if (button == m_pTrResetEndButton) {
