@@ -500,6 +500,7 @@ AudioProcessorEditor (ownerFilter)
     }
 
     mTabs = new OctTabbedComponent(TabbedButtonBar::TabsAtTop, mFilter);
+//    mTabs->setLookAndFeel(&mGrisFeel);
     mTabs->addTab("Settings",           tabBg, new Component(), true);
     mTabs->addTab("Trajectories",       tabBg, new Component(), true);
     mTabs->addTab("Volume & Filters",   tabBg, new Component(), true);
@@ -1626,8 +1627,9 @@ Component* SpatGrisAudioProcessorEditor::addLabel(const String &s, int x, int y,
     label->setJustificationType(Justification::left);
     label->setMinimumHorizontalScale(1);
     label->setTopLeftPosition(x, y);
+//    label->setColour(Label::textColourId, mGrisFeel.getFontColour());
+    label->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(label);
-    label->setColour(Label::textColourId, mGrisFeel.getFontColour());
     mComponents.add(label);
     return label;
 }
@@ -1640,8 +1642,9 @@ ToggleButton* SpatGrisAudioProcessorEditor::addCheckbox(const String &s, bool v,
     tb->setTopLeftPosition(x, y);
     tb->addListener(this);
     tb->setToggleState(v, dontSendNotification);
+//    tb->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
+    tb->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(tb);
-    tb->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
     mComponents.add(tb);
     return tb;
 }
@@ -1653,6 +1656,7 @@ TextButton* SpatGrisAudioProcessorEditor::addButton(const String &s, int x, int 
     tb->setSize(w, h);
     tb->setTopLeftPosition(x, y);
     tb->addListener(this);
+    tb->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(tb);
     mComponents.add(tb);
     return tb;
@@ -1665,6 +1669,7 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
     te->setText(s);
     te->setSize(w, h);
     te->setTopLeftPosition(x, y);
+    te->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(te);
     mComponents.add(te);
     return te;
@@ -1702,6 +1707,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
     ds->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
     ds->setSize(w, h);
     ds->setTopLeftPosition(x, y);
+    ds->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(ds);
     mComponents.add(ds);
     return ds;
