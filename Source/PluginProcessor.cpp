@@ -219,7 +219,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_iOscSpatPort = 18032;
     m_fTrTurns = 1.f;
     m_fTrDeviation = 0.f;
-    m_fEndLocationXY = make_pair(.5, .5);
+    m_fEndLocationXY01 = make_pair(.5, .5);
     m_bIsSettingEndPoint = false;
     m_bJustSelectedEndPoint = false;
     
@@ -1939,8 +1939,8 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("m_fTrDampening", m_fTrDampening);
     xml.setAttribute ("m_fTrTurns", m_fTrTurns);
     xml.setAttribute ("m_fTrDeviation", m_fTrDeviation);
-    xml.setAttribute ("m_fEndLocationX", m_fEndLocationXY.first);
-    xml.setAttribute ("m_fEndLocationY", m_fEndLocationXY.second);
+    xml.setAttribute ("m_fEndLocationX", m_fEndLocationXY01.first);
+    xml.setAttribute ("m_fEndLocationY", m_fEndLocationXY01.second);
     xml.setAttribute ("mLeapEnabled", mLeapEnabled);
     xml.setAttribute ("kMaxSpanVolume", mParameters[kMaxSpanVolume]);
     xml.setAttribute ("kRoutingVolume", mParameters[kRoutingVolume]);
@@ -2024,8 +2024,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             m_fTrDampening      = static_cast<float>(xmlState->getDoubleAttribute("m_fTrDampening", m_fTrDampening));
             m_fTrDeviation      = static_cast<float>(xmlState->getDoubleAttribute("m_fTrDeviation", m_fTrDeviation));
             m_fTrTurns          = static_cast<float>(xmlState->getDoubleAttribute("m_fTrTurns", m_fTrTurns));
-            m_fEndLocationXY.first  = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationX", m_fEndLocationXY.first));
-            m_fEndLocationXY.second = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationY", m_fEndLocationXY.second));
+            m_fEndLocationXY01.first  = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationX", m_fEndLocationXY01.first));
+            m_fEndLocationXY01.second = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationY", m_fEndLocationXY01.second));
             mLeapEnabled        = xmlState->getIntAttribute ("mLeapEnabled", 0);
             mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
             mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));

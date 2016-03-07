@@ -868,16 +868,18 @@ AudioProcessorEditor (ownerFilter)
         x += cbw + kMargin;
         m_pTrEndRayTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
         m_pTrEndRayTextEditor->setTextToShowWhenEmpty("Ray", juce::Colour::greyLevel(.6));
-        m_pTrEndRayTextEditor->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
-        m_pTrEndRayTextEditor->setReadOnly(true);
-        m_pTrEndRayTextEditor->setCaretVisible(false);
+        m_pTrEndRayTextEditor->addListener(this);
+//        m_pTrEndRayTextEditor->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+//        m_pTrEndRayTextEditor->setReadOnly(true);
+//        m_pTrEndRayTextEditor->setCaretVisible(false);
         
         x += cbw/2 + kMargin;
         m_pTrEndAngleTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
         m_pTrEndAngleTextEditor->setTextToShowWhenEmpty("Angle", juce::Colour::greyLevel(.6));
-        m_pTrEndAngleTextEditor->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
-        m_pTrEndAngleTextEditor->setReadOnly(true);
-        m_pTrEndAngleTextEditor->setCaretVisible(false);
+        m_pTrEndAngleTextEditor->addListener(this);
+//        m_pTrEndAngleTextEditor->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+//        m_pTrEndAngleTextEditor->setReadOnly(true);
+//        m_pTrEndAngleTextEditor->setCaretVisible(false);
         updateEndLocationTextEditors();
 
         x += cbw/2 + kMargin;
@@ -1268,7 +1270,7 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
-    std::pair<float, float> endLocation = mFilter->getEndLocationXY();
+    std::pair<float, float> endLocation = mFilter->getEndLocationXY01();
     FPoint pointRT = mFilter->convertXy012Rt(FPoint(endLocation.first, 1-endLocation.second), false);
     pointRT.y *= 360/(2*M_PI);
 #if WIN32
@@ -1795,6 +1797,18 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
     }
+    if (&textEditor == m_pTrEndRayTextEditor || &textEditor == m_pTrEndAngleTextEditor){
+        
+        float fEndRay   = m_pTrEndRayTextEditor->getText().getFloatValue();
+        float fEndAngle = m_pTrEndAngleTextEditor->getText().getFloatValue();
+
+        if (fEndRay >= 0 && fEndRay <= 2 && fEndAngle >= 0 && fEndAngle <= 360 ){
+            FPoint endPoint = mFilter->convertRt2Xy01(fEndRay, fEndAngle*M_PI/180);
+            cout << "EDITOR X: " << endPoint.x << ", Y: " << 1-endPoint.y << ", R: " << fEndRay << ", A: " << fEndAngle << newLine;
+            mFilter->setEndLocationXY01(make_pair (endPoint.x, 1-endPoint.y));
+        }
+        updateEndLocationTextEditors();
+    }
     else {
         printf("unknown TextEditor clicked...\n");
     }
@@ -1845,7 +1859,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
 
             mFilter->setIsRecordingAutomation(true);
             mFilter->storeCurrentLocations();
-            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, &mMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY()));
+            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, &mMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY01()));
             mTrWriteButton->setButtonText("Cancel");
             mTrStateEditor = kTrWriting;
             mFilter->setTrState(mTrStateEditor);
@@ -1875,7 +1889,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             setDefaultPendulumEndpoint();
         } else {
             pair<float, float> pair = make_pair(.5, .5);
-            mFilter->setEndLocationXY(pair);
+            mFilter->setEndLocationXY01(pair);
         }
         updateEndLocationTextEditors();
     }
@@ -2114,7 +2128,7 @@ void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
     pointRT.y += M_PI;
     JUCE_COMPILER_WARNING("throughout the code, need to check conversions, especially pertaining to the end location of trajectories. Also need to make the y consistent so that we don't revert it in only some cases")
     FPoint pointXY = mFilter->convertRt2Xy01(pointRT.x, pointRT.y);
-    mFilter->setEndLocationXY(make_pair(pointXY.x, 1-pointXY.y));
+    mFilter->setEndLocationXY01(make_pair(pointXY.x, 1-pointXY.y));
 }
 
 

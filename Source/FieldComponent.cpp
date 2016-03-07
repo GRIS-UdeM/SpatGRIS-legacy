@@ -371,9 +371,12 @@ void FieldComponent::mouseDown(const MouseEvent &event)
     //if assigning end location
     if (mFilter->isSettingEndPoint()) {
         //get point of current event
-        float fCenteredX = (float)event.x/fieldWidth;//-_ZirkOSC_Center_X;
-        float fCenteredY = (float)event.y/fieldHeight;//-_ZirkOSC_Center_Y;
-        mFilter->setEndLocationXY(make_pair (fCenteredX, fCenteredY));
+        float fCenteredX01 = (float)event.x/fieldWidth;//-_ZirkOSC_Center_X;
+        float fCenteredY01 = (float)event.y/fieldHeight;//-_ZirkOSC_Center_Y;
+        
+        FPoint endPoint = mFilter->convertXy012Rt(FPoint(fCenteredX01, fCenteredY01));
+        cout << "FIELD COMPONENT X: " << fCenteredX01 << ", Y: " << fCenteredY01 << "R: " << endPoint.x << ", A: " << endPoint.y << newLine;
+        mFilter->setEndLocationXY01(make_pair (fCenteredX01, fCenteredY01));
         
         mFilter->setIsSettingEndPoint(false);
         mFilter->setJustSelectedEndPoint(true);
