@@ -88,8 +88,7 @@ public:
     ,mInited(false)
     { }
     
-    void currentTabChanged (int newCurrentTabIndex, const String& newCurrentTabName)
-    {
+    void currentTabChanged (int newCurrentTabIndex, const String& newCurrentTabName) override{
         if (!mInited) return;
         
         //printf("Octogris: currentTabChanged\n");
@@ -97,6 +96,12 @@ public:
     }
     
     void initDone() { mInited = true; }
+    
+    ~OctTabbedComponent() override
+    {
+//        clearTabs();
+//        tabs = nullptr;
+    }
     
 private:
     SpatGrisAudioProcessor *mFilter;
@@ -500,7 +505,7 @@ AudioProcessorEditor (ownerFilter)
     }
 
     mTabs = new OctTabbedComponent(TabbedButtonBar::TabsAtTop, mFilter);
-//    mTabs->setLookAndFeel(&mGrisFeel);
+    mTabs->setLookAndFeel(&mGrisFeel);
     mTabs->addTab("Settings",           tabBg, new Component(), true);
     mTabs->addTab("Trajectories",       tabBg, new Component(), true);
     mTabs->addTab("Volume & Filters",   tabBg, new Component(), true);
