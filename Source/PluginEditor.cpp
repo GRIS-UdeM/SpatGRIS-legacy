@@ -1632,7 +1632,7 @@ Component* SpatGrisAudioProcessorEditor::addLabel(const String &s, int x, int y,
     label->setJustificationType(Justification::left);
     label->setMinimumHorizontalScale(1);
     label->setTopLeftPosition(x, y);
-//    label->setColour(Label::textColourId, mGrisFeel.getFontColour());
+    label->setColour(Label::textColourId, mGrisFeel.getFontColour());
     label->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(label);
     mComponents.add(label);
@@ -1647,7 +1647,7 @@ ToggleButton* SpatGrisAudioProcessorEditor::addCheckbox(const String &s, bool v,
     tb->setTopLeftPosition(x, y);
     tb->addListener(this);
     tb->setToggleState(v, dontSendNotification);
-//    tb->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
+    tb->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
     tb->setLookAndFeel(&mGrisFeel);
     into->addAndMakeVisible(tb);
     mComponents.add(tb);
@@ -1713,6 +1713,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
     ds->setSize(w, h);
     ds->setTopLeftPosition(x, y);
     ds->setLookAndFeel(&mGrisFeel);
+    ds->setColour(ParamSliderGRIS::ColourIds::rotarySliderFillColourId, mGrisFeel.getSliderColour());
     into->addAndMakeVisible(ds);
     mComponents.add(ds);
     return ds;
