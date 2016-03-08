@@ -176,20 +176,23 @@ private:
     TextButton *mApplyInputOutputModeButton;
 	ComboBox *mProcessModeCombo;
 	OctTabbedComponent *mTabs;
-	Slider *mSmoothing;
+	Slider *mSmoothingSlider;
+    Component *mSmoothingLabel;
 	Slider *mVolumeFar;
 	Slider *mVolumeMid;
 	Slider *mVolumeNear;
 	Slider *mFilterFar;
 	Slider *mFilterMid;
 	Slider *mFilterNear;
-	Slider *mMaxSpanVolume;
+	Slider *mMaxSpanVolumeSlider;
+    Component *mMaxSpanVolumeLabel;
     //Label *mShowChange;
     Label *mStateLeap;
     Label *mStateJoystick;
     Label *m_VersionLabel;
 	
-	ComboBox *mRoutingMode;
+	ComboBox *mRoutingModeCombo;
+    Component *mRoutingModeLabel;
 	Slider *mRoutingVolumeSlider;
     
     ImageComponent m_logoImage;

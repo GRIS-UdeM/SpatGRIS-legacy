@@ -656,12 +656,12 @@ AudioProcessorEditor (ownerFilter)
         }
         
         {
-            addLabel("Param smoothing (ms):", x, y, w, dh, box);
+            mSmoothingLabel = addLabel("Param smoothing (ms):", x, y, w, dh, box);
             y += dh + 5;
             
             Slider *ds = addParamSliderGRIS(kParamSmooth, kSmooth, mFilter->getParameter(kSmooth), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
-            mSmoothing = ds;
+            mSmoothingSlider = ds;
             y += dh + 5;
         }
         mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
@@ -687,7 +687,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 5;
             updateInputOutputCombo();
         }
-        addLabel("Routing mode:", x, y, w, dh, box);
+        mRoutingModeLabel = addLabel("Routing mode:", x, y, w, dh, box);
         y += dh + 5;
         {
             ComboBox *cb = new ComboBox();
@@ -710,7 +710,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 5;
             
             cb->addListener(this);
-            mRoutingMode = cb;
+            mRoutingModeCombo = cb;
         }
         
 
@@ -740,12 +740,12 @@ AudioProcessorEditor (ownerFilter)
         }
         
         {
-            addLabel("Max span volume (dB):", x, y, w, dh, box);
+            mMaxSpanVolumeLabel = addLabel("Max span volume (dB):", x, y, w, dh, box);
             y += dh + 5;
             
             Slider *ds = addParamSliderGRIS(kParamMaxSpanVolume, kMaxSpanVolume, mFilter->getParameter(kMaxSpanVolume), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
-            mMaxSpanVolume = ds;
+            mMaxSpanVolumeSlider = ds;
             y += dh + 5;
         }
         mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
@@ -1309,6 +1309,16 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mElevSpanSlider->setEnabled(true);
         mElevSpanLabel->setEnabled(true);
         mElevSpanLinkButton->setEnabled(true);
+        
+        mSpeakersBox->setEnabled(false);
+        mSmoothingLabel->setEnabled(false);
+        mSmoothingSlider->setEnabled(false);
+        mRoutingModeCombo->setEnabled(false);
+        mRoutingModeLabel->setEnabled(false);
+        mMaxSpanVolumeLabel->setEnabled(false);
+        mMaxSpanVolumeSlider->setEnabled(false);
+        mTabs->getTabContentComponent(2)->setEnabled(false);
+        mTabs->getTabContentComponent(4)->setEnabled(false);
     } else {
         mOscSpat1stSrcIdLabel->setVisible(false);
         mOscSpat1stSrcIdTextEditor->setVisible(false);
@@ -1322,6 +1332,15 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mElevSpanLabel->setEnabled(false);
         mElevSpanLinkButton->setEnabled(false);
 
+        mSpeakersBox->setEnabled(true);
+        mSmoothingLabel->setEnabled(true);
+        mSmoothingSlider->setEnabled(true);
+        mRoutingModeCombo->setEnabled(true);
+        mRoutingModeLabel->setEnabled(true);
+        mMaxSpanVolumeLabel->setEnabled(true);
+        mMaxSpanVolumeSlider->setEnabled(true);
+        mTabs->getTabContentComponent(2)->setEnabled(true);
+        mTabs->getTabContentComponent(4)->setEnabled(true);
     }
     if (iSelectedMode == kPanVolumeMode){
         mSurfaceOrPanSlider->setEnabled(false);
@@ -2166,7 +2185,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             m_pSourceUpdateThread->startThread();
         }
     }
-    else if (comboBox == mRoutingMode) {
+    else if (comboBox == mRoutingModeCombo) {
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
 	}
     else if (comboBox == mProcessModeCombo) {
@@ -2342,11 +2361,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             mTabs->getTabContentComponent(1)->addAndMakeVisible(mMovementModeCombo);
         }
         
-        mSmoothing->setValue(mFilter->getParameter(kSmooth));
+        mSmoothingSlider->setValue(mFilter->getParameter(kSmooth));
         mVolumeFar->setValue(mFilter->getParameter(kVolumeFar));
         mVolumeMid->setValue(mFilter->getParameter(kVolumeMid));
         mVolumeNear->setValue(mFilter->getParameter(kVolumeNear));
-        mMaxSpanVolume->setValue(mFilter->getParameter(kMaxSpanVolume));
+        mMaxSpanVolumeSlider->setValue(mFilter->getParameter(kMaxSpanVolume));
         mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
         
         mFilterNear->setValue(mFilter->getParameter(kFilterNear));
