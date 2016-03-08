@@ -112,7 +112,7 @@ void FieldComponent::paint (Graphics& g)
 	// draw back circles
 	// - - - - - - - - - - - -
 	g.setColour(Colours::white);
-    float iCurRadius = (processMode == kOscSpatMode) ? kRadiusMax : 1;
+    float iCurRadius = 1;//(processMode == kOscSpatMode) ? kRadiusMax : 1;
 	for (; iCurRadius <= kRadiusMax; iCurRadius += 1) {
 		float w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
 		float x = (fieldWidth - w) / 2;
