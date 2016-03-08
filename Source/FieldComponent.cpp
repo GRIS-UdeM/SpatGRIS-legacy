@@ -279,6 +279,7 @@ void FieldComponent::paint (Graphics& g)
             
             String s; s << i+1;
             g.setColour(Colours::black);
+            g.setFont(mGrisFeel.getFont());
             g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
             g.setColour(Colours::white);
             g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
@@ -333,6 +334,7 @@ void FieldComponent::paint (Graphics& g)
         }
 	
 		g.setColour(Colours::black);
+        g.setFont(mGrisFeel.getFont());
 		g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter,
 					Justification(Justification::centred), false);
 					
