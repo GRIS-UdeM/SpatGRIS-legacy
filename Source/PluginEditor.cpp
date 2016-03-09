@@ -685,7 +685,8 @@ AudioProcessorEditor (ownerFilter)
             mComponents.add(mInputOutputModeCombo);
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
             y += dh + 5;
-            updateInputOutputCombo();
+            cout << "updateInputOutputCombo editor constructor\n";
+            updateInputOutputCombo(false);
         }
         mRoutingModeLabel = addLabel("Routing mode:", x, y, w, dh, box);
         y += dh + 5;
@@ -1213,7 +1214,7 @@ AudioProcessorEditor (ownerFilter)
     startTimer(kTimerDelay);
 }
 
-void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
+void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpkPositions){
     mInputOutputModeCombo->clear();
     //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
@@ -1256,8 +1257,10 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
 
     //these don't work because of various things not being constructed when this method is called in the constructor. Need to extract
     //the relevant parts of buttonClicked(mApplyInputOutputModeButton) in a method, and call that new method from here
-    applyCurrentSrcPlacement();
-    applyCurrentSpkPlacement();
+    if (p_bResetSrcAndSpkPositions){
+        applyCurrentSrcPlacement();
+        applyCurrentSpkPlacement();
+    }
 //    mMover.updateNumberOfSources();
 //    buttonClicked(mApplyInputOutputModeButton);
 //    mFieldNeedRepaint = true;
@@ -1916,7 +1919,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         int iSelectedMode = mInputOutputModeCombo->getSelectedId();
         mFilter->setInputOutputMode(iSelectedMode);
         
-        //
 		updateSources(false);
 		updateSpeakers(false);
         

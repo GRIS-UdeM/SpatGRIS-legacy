@@ -576,9 +576,7 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
         mInputOutputMode =  i8o16;
         return;
     }
-    
     jassert(0);
-    
 }
 
 void SpatGrisAudioProcessor::setSrcPlacementMode(int p_i){
@@ -827,22 +825,17 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
         int iTotalSources = getTotalNumInputChannels();
         if (iTotalSources < mNumberOfSources){
-            mNumberOfSources = iTotalSources;
-            setNumberOfSources(mNumberOfSources, true);
+//            mNumberOfSources = iTotalSources;
+            setNumberOfSources(iTotalSources, true);
             cout << "PREPARE: iTotalSources:" << iTotalSources << newLine;
         }
         int iTotalSpeakers = getTotalNumOutputChannels();
         if (iTotalSpeakers < mNumberOfSpeakers) {
-            mNumberOfSpeakers = iTotalSpeakers;
-            setNumberOfSpeakers(mNumberOfSpeakers, true);
+//            mNumberOfSpeakers = iTotalSpeakers;
+            setNumberOfSpeakers(iTotalSpeakers, true);
             cout << "PREPARE: iTotalSpeakers:" << iTotalSpeakers << newLine;
         }
-        
-        
         //apply current mNumberOfSources and mNumberOfSpeakers
-//        setNumberOfSources(mNumberOfSources, true);
-//        setNumberOfSpeakers(mNumberOfSpeakers, true);
-        //and update mInputOuputMode if needed
         updateInputOutputMode();
     } else {
         //this is basically only done in unknown daws and in AUeval (or whatever)

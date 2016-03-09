@@ -264,7 +264,7 @@ private:
     void updateMovementModeCombo();
     void updateTrajectoryComponents();
     void updateEndLocationTextEditors();
-    void updateInputOutputCombo();
+    void updateInputOutputCombo(bool p_bResetSrcAndSpkPositions = true);
     void updateProcessModeComponents();
 	
 	Component* addLabel(const String &s, int x, int y, int w, int h, Component *into);

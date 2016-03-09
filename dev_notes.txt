@@ -58,3 +58,5 @@ v4.0.1:
 * octogris vst2 ok, vst3 not
 * spatgris: vst2 8x16, vst3 8x8, au 2x2 selected, 8x16 avail
 * SO EVERYTHING WORKS. problem is with bleeding edge juce version. need to be careful with this for next JUCE release. 
+------------- 2016-03-09 ----------------------
+src and speaker positions need to be reset when prepare to play changes their numbers. 
