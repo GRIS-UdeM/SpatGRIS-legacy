@@ -60,3 +60,12 @@ v4.0.1:
 * SO EVERYTHING WORKS. problem is with bleeding edge juce version. need to be careful with this for next JUCE release. 
 ------------- 2016-03-09 ----------------------
 src and speaker positions need to be reset when prepare to play changes their numbers. 
+alright, that's fixed. 
+
+NOW #27
+DP seems fine, other than lagging on trajectories...
+Logic is quite troublesome. Having saved a project, on reopening no sound. Need to deactivate and reactivate main audio track. Then outputs 5 and 7 do not work, output 8 goes on 8 and 7, output 6 goes on 6 and 5. then if you stop playing and start it again, you start to lose some outputs, until only 4 is working. deactivating and reactivating spatgris on main track resets the behaviour. 
+
+ok, one way to fix the outputs 8 and 6 being doubles on 7 and 5 is to use surround busses (hold the logo on the right of the input name on aux tracks to select surround bus input). 
+
+but we still have the problem of the plugin needing to be re-initialized after stopping playback.
