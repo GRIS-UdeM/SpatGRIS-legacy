@@ -685,7 +685,6 @@ AudioProcessorEditor (ownerFilter)
             mComponents.add(mInputOutputModeCombo);
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
             y += dh + 5;
-            cout << "updateInputOutputCombo editor constructor\n";
             updateInputOutputCombo(false);
         }
         mRoutingModeLabel = addLabel("Routing mode:", x, y, w, dh, box);
@@ -2394,7 +2393,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         //check if the inputOutput mode was changed by mFilter->prepareToPlay()
         int iCurInOutMode = mFilter->getInputOutputMode();
         if (mInputOutputModeCombo->getSelectedId() != iCurInOutMode){
-            cout << "timerCallBack: iCurInOutMode = " << iCurInOutMode << newLine;
             mInputOutputModeCombo->setSelectedId(iCurInOutMode);
             updateInputOutputCombo();
         }

@@ -176,8 +176,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     int iSpeakers = getTotalNumOutputChannels();
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
-    cout << "CONSTRUCTOR: iTotalSources:" << iSources << ", iTotalSpeakers: " << iSpeakers << newLine;
-
     
 	mCalculateLevels = 0;
 	mApplyFilter = true;
@@ -514,7 +512,6 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
 		default:
 			jassert(0);
     }
-    cout << "SET INPUT OUTPUT: mNumberOfSources:" << mNumberOfSources << ", mNumberOfSpeakers: " << mNumberOfSpeakers << newLine;
 }
 
 void SpatGrisAudioProcessor::updateInputOutputMode (){
@@ -598,69 +595,60 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     
     //prevents audio process thread from running
     suspendProcessing (true);
-    
-    mNumberOfSources = p_iNewNumberOfSources;
-  
-    mFilters.clear();
-    mFilters.resize(mNumberOfSources);
-    
-    mLockedThetas.ensureStorageAllocated(mNumberOfSources);
-    for (int i = 0; i < mNumberOfSources; i++){
-        mLockedThetas.add(0);
-    }
-    mInputsCopy.resize(mNumberOfSources);
-    
+    {
+        //prevents gui from running
+        const MessageManagerLock mmLock;
+        
+        mNumberOfSources = p_iNewNumberOfSources;
+        
+        mFilters.clear();
+        mFilters.resize(mNumberOfSources);
+        
+        mLockedThetas.ensureStorageAllocated(mNumberOfSources);
+        for (int i = 0; i < mNumberOfSources; i++){
+            mLockedThetas.add(0);
+        }
+        mInputsCopy.resize(mNumberOfSources);
+        
+        if (bUseDefaultValues){
+            double anglePerSource = 360 / mNumberOfSources;
+            double offset, axisOffset;
+            if (mNumberOfSources == 1){
+                setSourceRT(0, FPoint(0, 0));
+                mOldSrcLocRT[0] = FPoint(0, 0);
+            } else if(mNumberOfSources%2 == 0) {//if the number of speakers is even we will assign them as stereo pairs
+                axisOffset = anglePerSource / 2;
+                for (int i = 0; i < mNumberOfSources; i++) {
+                    if(i%2 == 0) {
+                        offset = 90 + axisOffset;
+                    } else {
+                        offset = 90 - axisOffset;
+                        axisOffset += anglePerSource;
+                    }
+                    if (offset < 0) offset += 360;
+                    else if (offset > 360) offset -= 360;
+                    
+                    setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
+                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
+                }
+            } else {    //odd number of speakers, assign in circular fashion
 
-    if (bUseDefaultValues){
-        double anglePerSource = 360 / mNumberOfSources;
-        double offset, axisOffset;
-        
-        if (mNumberOfSources == 1){
-            setSourceRT(0, FPoint(0, 0));
-            mOldSrcLocRT[0] = FPoint(0, 0);
-        }
-        else if(mNumberOfSources%2 == 0) //if the number of speakers is even we will assign them as stereo pairs
-        {
-            axisOffset = anglePerSource / 2;
-            for (int i = 0; i < mNumberOfSources; i++)
-            {
-                if(i%2 == 0)
-                {
-                    offset = 90 + axisOffset;
+                offset = (anglePerSource + 180) / 2 - anglePerSource;
+                for (int i = 0; i < mNumberOfSources; i++) {
+                    if (offset < 0) offset += 360;
+                    else if (offset > 360) offset -= 360;
+                    
+                    setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
+                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
+                    offset += anglePerSource;
                 }
-                else
-                {
-                    offset = 90 - axisOffset;
-                    axisOffset += anglePerSource;
-                }
-                if (offset < 0) offset += 360;
-                else if (offset > 360) offset -= 360;
-                
-                setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
-                mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
             }
         }
-        else //odd number of speakers, assign in circular fashion
-        {
-            offset = (anglePerSource + 180) / 2 - anglePerSource;
-            for (int i = 0; i < mNumberOfSources; i++)
-            {
-                if (offset < 0) offset += 360;
-                else if (offset > 360) offset -= 360;
-                
-                setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
-                mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
-                offset += anglePerSource;
-            }
+        for (int i = 0; i < mNumberOfSources; i++){
+            mLockedThetas.set(i, getSourceRT(i).y);
         }
-        
+        mHostChangedParameter++;
     }
-    
-    for (int i = 0; i < mNumberOfSources; i++){
-		mLockedThetas.set(i, getSourceRT(i).y);
-    }
-    mHostChangedParameter++;
-    
     //restart audio processing
     suspendProcessing (false);
 }
@@ -676,25 +664,28 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     
     //prevents audio process thread from running
     suspendProcessing (true);
-    
-    mNumberOfSpeakers = p_iNewNumberOfSpeakers;
-
-    mLevels.ensureStorageAllocated(mNumberOfSpeakers);
-    if (mRoutingMode == 1) {
-        updateRoutingTemp();
+    {
+        //prevents gui from running
+        const MessageManagerLock mmLock;
+        
+        mNumberOfSpeakers = p_iNewNumberOfSpeakers;
+        
+        mLevels.ensureStorageAllocated(mNumberOfSpeakers);
+        if (mRoutingMode == 1) {
+            updateRoutingTemp();
+        }
+        for (int i = 0; i < mNumberOfSpeakers; i++){
+            mLevels.add(0);
+        }
+        
+        if (bUseDefaultValues){
+            //updateSpeakerLocation(true, false, true);
+            updateSpeakerLocation(true, false, false);
+        }
+        
+        
+        mHostChangedParameter++;
     }
-    for (int i = 0; i < mNumberOfSpeakers; i++){
-        mLevels.add(0);
-    }
-
-    if (bUseDefaultValues){
-        //updateSpeakerLocation(true, false, true);
-        updateSpeakerLocation(true, false, false);
-    }
-
-    
-	mHostChangedParameter++;
-    
     //starts audio processing again
     suspendProcessing (false);
 }
@@ -825,15 +816,11 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
         int iTotalSources = getTotalNumInputChannels();
         if (iTotalSources < mNumberOfSources){
-//            mNumberOfSources = iTotalSources;
             setNumberOfSources(iTotalSources, true);
-            cout << "PREPARE: iTotalSources:" << iTotalSources << newLine;
         }
         int iTotalSpeakers = getTotalNumOutputChannels();
         if (iTotalSpeakers < mNumberOfSpeakers) {
-//            mNumberOfSpeakers = iTotalSpeakers;
             setNumberOfSpeakers(iTotalSpeakers, true);
-            cout << "PREPARE: iTotalSpeakers:" << iTotalSpeakers << newLine;
         }
         //apply current mNumberOfSources and mNumberOfSpeakers
         updateInputOutputMode();
