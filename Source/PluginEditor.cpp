@@ -619,9 +619,9 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Mute", x, y, muteWidth, dh, ct);
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
         addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
-        y += 2*dh + 5;
+        y += dh;
         mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
-        mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxAbove, false, 40, dh);
+        mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 30, dh);
         mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
         y += dh + 5;
         
