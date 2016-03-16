@@ -1731,7 +1731,6 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
     ds->setSize(w, h);
     ds->setTopLeftPosition(x, y);
     ds->setLookAndFeel(&mGrisFeel);
-    ds->setColour(ParamSliderGRIS::ColourIds::rotarySliderFillColourId, mGrisFeel.getSliderColour());
     into->addAndMakeVisible(ds);
     mComponents.add(ds);
     return ds;
