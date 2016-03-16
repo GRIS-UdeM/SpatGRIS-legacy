@@ -130,6 +130,10 @@ public:
     
 private:
 	SpatGrisAudioProcessor *mFilter;
+
+    LookAndFeel_V2 mV2Feel;
+    GrisLookAndFeel mGrisFeel;
+    
 	SourceMover mMover;
 	
 	// for memory management:
@@ -280,8 +284,7 @@ private:
     ComponentBoundsConstrainer m_oResizeLimits;
     ScopedPointer<ResizableCornerComponent> m_pResizer;
     
-    LookAndFeel_V2 mV2Feel;
-    GrisLookAndFeel mGrisFeel;
+
 
     Component  *mOscSpat1stSrcIdLabel;
     TextEditor *mOscSpat1stSrcIdTextEditor;

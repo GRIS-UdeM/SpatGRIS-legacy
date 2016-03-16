@@ -412,8 +412,8 @@ void TabbedButtonBar::updateTabPositions (bool animate)
     if (! isVertical())
         std::swap (depth, length);
 
-//    const int overlap = lf.getTabButtonOverlap (depth) + lf.getTabButtonSpaceAroundImage() * 2;
-    const int overlap = -1 + 0 * 2;
+    const int overlap = lf.getTabButtonOverlap (depth) + lf.getTabButtonSpaceAroundImage() * 2;
+//    const int overlap = -1 + 0 * 2;
     int totalLength = jmax (0, overlap);
     int numVisibleButtons = tabs.size();
 
