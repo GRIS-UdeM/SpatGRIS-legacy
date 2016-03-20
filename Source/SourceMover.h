@@ -1,6 +1,6 @@
 /*
  ==============================================================================
- Octogris2: multichannel sound spatialization plug-in.
+ SpatGRIS: multichannel sound spatialization plug-in.
  
  Copyright (C) 2015  GRIS-UdeM
  
