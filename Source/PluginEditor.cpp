@@ -573,20 +573,7 @@ AudioProcessorEditor (ownerFilter)
         mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, iSelSrc, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
         
-        JUCE_COMPILER_WARNING("this should probably in its own 'update source sliders' function")
-        if (mFilter->getProcessMode() != kOscSpatMode){
-            mAzimSpanLabel->setEnabled(false);
-            mAzimSpanSlider->setEnabled(false);
-            mAzimSpanLinkButton->setEnabled(false);
-
-            mElevSpanLabel->setEnabled(false);
-            mElevSpanSlider->setEnabled(false);
-            mElevSpanLinkButton->setEnabled(false);
-        }
-
-        
         boxContent->setSize(w, y);
-        
         
         mSrcSelectCombo = new ComboBox();
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelectCombo);
