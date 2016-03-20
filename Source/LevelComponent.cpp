@@ -87,7 +87,8 @@ void LevelComponent::paint (Graphics& g)
 	
 	//fprintf(stderr, "speaker %d linear: %.3f dB: %.1f hue: %.3f\n", mIndex, mLastLevel, level, hue);
 	
-	g.fillAll (Colours::black);
+	//g.fillAll (Colours::black);
+    g.fillAll (mLookAndFeel.getDarkColour());
 	g.setColour (Colour::fromHSV(hue, 1, 1, 1));
 	juce::Rectangle<int> r(0, 0, getWidth() * (level - kMinLevel) / (kMaxLevel - kMinLevel), getHeight());
 	g.fillRect(r);

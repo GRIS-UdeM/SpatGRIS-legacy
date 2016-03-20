@@ -29,6 +29,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
+#include "GrisLookAndFeel.h"
 
 //==============================================================================
 /*
@@ -48,6 +49,7 @@ private:
 	float mLevelAdjustment;
 	float mShowLevel;
 	uint64_t mLastProcessCounter;
+    GrisLookAndFeel mLookAndFeel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelComponent)
 };
