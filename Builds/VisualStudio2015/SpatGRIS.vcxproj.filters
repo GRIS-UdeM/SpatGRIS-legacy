@@ -1476,6 +1476,9 @@
     <ClInclude Include="..\..\HIDManager\IOHIDLib_.h">
       <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\ParamSliderGris.h">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\HIDDelegate.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>

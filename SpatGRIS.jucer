@@ -7,7 +7,7 @@
               pluginManufacturerCode="UdeM" pluginCode="Spat" pluginChannelConfigs="{8,16}, {1,2}, {1,4}, {1,6}, {1,8}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,16}, {4,4}, {4,6}, {4,8}, {4,16}, {6,6}, {6,8}, {6,16}, {8,8}, {8,16}"
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
-              pluginAUExportPrefix="OctogrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.Octogris2"
+              pluginAUExportPrefix="SpatGrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris"
               pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.1.0"
               pluginIsMidiEffectPlugin="0" companyName="UdeM">
   <MAINGROUP id="rRl79u" name="SpatGRIS">
@@ -56,6 +56,8 @@
       <FILE id="ebGlDe" name="IOHIDLib_.h" compile="0" resource="1" file="HIDManager/IOHIDLib_.h"/>
     </GROUP>
     <GROUP id="{89B00B3D-3E60-2792-C7A4-D570AF057C40}" name="Source">
+      <FILE id="wR0X34" name="ParamSliderGris.h" compile="0" resource="0"
+            file="Source/ParamSliderGris.h"/>
       <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>
       <FILE id="QwSZHu" name="HIDDelegate.h" compile="0" resource="0" file="Source/HIDDelegate.h"/>
       <FILE id="iDZlup" name="_firs.h" compile="0" resource="0" file="Source/_firs.h"/>
@@ -104,16 +106,16 @@
                        libraryPath="~/Documents/sdks/LeapSDK/lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_events" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_graphics" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../JUCE-4.1.0/modules"/>
-        <MODULEPATH id="juce_osc" path="../JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_core" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_events" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_osc" path="../../sdks/JUCE-4.1.0/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
