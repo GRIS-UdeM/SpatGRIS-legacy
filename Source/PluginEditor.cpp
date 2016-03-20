@@ -843,8 +843,7 @@ AudioProcessorEditor (ownerFilter)
         }
         x += tew + kMargin;
         addLabel("per cycle", x, y, w, dh, box);
-        
-        mTrDeviationTextEditor = addTextEditor(String(mFilter->getTrDeviation()), x2, y, tewShort, dh, box);
+        mTrDeviationTextEditor = addTextEditor(String(mFilter->getTrDeviation()*360), x2, y, tewShort, dh, box);
         mTrDeviationTextEditor->addListener(this);
         mTrDeviationLabel = addLabel("deviation", x2 + tewShort, y, w, dh, box);
         
