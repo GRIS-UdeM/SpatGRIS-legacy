@@ -1591,8 +1591,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     
     //if called from actually pressing enter, put focus on something else
     if (!m_bIsReturnKeyPressedCalledFromFocusLost){
-        JUCE_COMPILER_WARNING("test having the main component grab the focus instead of this button")
-        mSurfaceOrPanLinkButton->grabKeyboardFocus();
+        this->grabKeyboardFocus();
     }
     
 }
