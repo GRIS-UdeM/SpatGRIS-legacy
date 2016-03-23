@@ -757,7 +757,7 @@ private:
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
-	void addToOutput(float s, float **outputs, int o, int f);
+	inline void addToOutput(float s, float **outputs, int o, int f);
 	void ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);

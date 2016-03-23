@@ -1168,17 +1168,18 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	float output_adj = a * m;
 	float *output = outputs[o];
 	output[f] += s * output_adj;
+    
+    if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .9){
+        cout << ".";
+    }
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
-	const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
-	const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
-	const float sm_n = 1 - sm_o;
 	
 	// ramp all parameters, except constant ones and speaker thetas
     const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
 	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    for (int i = 0; i < (kNumberOfParameters - kConstantParameters); i++) {
+    for (int i = 0; i < (kNumberOfParameters - kConstantParameters); ++i) {
 		bool isSpeakerXY = (i >= sourceParameters && i < (sourceParameters + speakerParameters) && ((i - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
         if (isSpeakerXY) {
             continue;
@@ -1187,7 +1188,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 		float targetParam = params[i];
 		float *ramp = mSmoothedParametersRamps.getReference(i).b;
 	
-		for (unsigned int f = 0; f < frames; f++) {
+		for (unsigned int f = 0; f < frames; ++f) {
+            //this is apparently more optimal than having variables declared outside the loop, http://stackoverflow.com/questions/7959573/declaring-variables-inside-loops-good-practice-or-bad-practice-2-parter#
+            const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
+            const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
+            const float sm_n = 1 - sm_o;
 			currentParam = currentParam * sm_o + targetParam * sm_n;
 			ramp[f] = currentParam;
 		}
@@ -1195,23 +1200,22 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 		mSmoothedParameters.setUnchecked(i, currentParam);
 	}
 	
-	// clear outputs
-	for (int o = 0; o < mNumberOfSpeakers; o++) {
+	// clear outputs[]
+	for (int o = 0; o < mNumberOfSpeakers; ++o) {
 		float *output = outputs[o];
 		memset(output, 0, frames * sizeof(float));
 	}
 
-	// compute
-	// in this context: input_x and input_x are actually source T and R
-	for (int i = 0; i < mNumberOfSources; i++) {
+	// Compute output[]
+	for (int i = 0; i < mNumberOfSources; ++i) {
 		float *input = inputs[i];
 		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
 		float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
 	
-		for (unsigned int f = 0; f < frames; f++) {
-			float s = input[f];
-			float x = input_x[f];
-			float y = input_y[f];
+		for (unsigned int f = 0; f < frames; ++f) {
+			float s = input[f];     //current sample
+			float x = input_x[f];   //x position of current sample
+			float y = input_y[f];   //y position of current sample
 			
 			// could use the Accelerate framework on mac for these
 			float r = hypotf(x, y);
@@ -2003,6 +2007,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mParameters.set(getParamForSourceX(i), fX01);
                 String srcY = "src" + to_string(i) + "y";
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
+                
+                cout << "src " << i << ": (" << fX01 << ", " << fY01 << endl;
+                
                 mParameters.set(getParamForSourceY(i), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
                 mOldSrcLocRT[i] = convertXy012Rt(curPoint);
