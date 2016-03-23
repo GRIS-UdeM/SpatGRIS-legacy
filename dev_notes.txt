@@ -69,3 +69,7 @@ Logic is quite troublesome. Having saved a project, on reopening no sound. Need 
 ok, one way to fix the outputs 8 and 6 being doubles on 7 and 5 is to use surround busses (hold the logo on the right of the input name on aux tracks to select surround bus input). 
 
 but we still have the problem of the plugin needing to be re-initialized after stopping playback.
+------------- 2016-03-23 -------------------
+#47: Clicks audio au centre. 
+
+Ces clicks semblent être causés par des shorts bursts d'activité dans tous les haut-parleurs. Au centre, c'est normal que tous les haut-parleurs soient solicités, j'imagine? Ce qu'il faut s'assurer est de ne pas avoir de transient super rapide. Est-ce qu'il y a déjà un algorithme qui regarde le delta inter-sample?

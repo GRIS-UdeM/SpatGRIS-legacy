@@ -672,7 +672,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
         
         mLevels.ensureStorageAllocated(mNumberOfSpeakers);
         if (mRoutingMode == 1) {
-            updateRoutingTemp();
+            updateRoutingTempAudioBuffer();
         }
         for (int i = 0; i < mNumberOfSpeakers; i++){
             mLevels.add(0);
@@ -690,9 +690,9 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     suspendProcessing (false);
 }
 
-void SpatGrisAudioProcessor::updateRoutingTemp()
+void SpatGrisAudioProcessor::updateRoutingTempAudioBuffer()
 {
-	mRoutingTemp.setSize(mNumberOfSpeakers, kMaxSize);
+	mRoutingTempAudioBuffer.setSize(mNumberOfSpeakers, kMaxSize);
 }
 
 void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise){
@@ -946,15 +946,15 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	}
 	
 	if (mRoutingMode == 1) {
-		jassert(mRoutingTemp.getNumSamples() >= oriFramesToProcess);
-		jassert(mRoutingTemp.getNumChannels() >= mNumberOfSpeakers);
+		jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
+		jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
 	
 	//float *outputs[iActualNumberOfSpeakers];
 	float **outputs = new float*[mNumberOfSpeakers];
 	for (int o = 0; o < mNumberOfSpeakers; o++)
 	{
-		outputs[o] = (mRoutingMode == 1) ? mRoutingTemp.getWritePointer(o) : buffer.getWritePointer(o);
+		outputs[o] = (mRoutingMode == 1) ? mRoutingTempAudioBuffer.getWritePointer(o) : buffer.getWritePointer(o);
         
 		if (mProcessMode == kFreeVolumeMode)
 		{
@@ -1032,7 +1032,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		mSmoothedParameters.setUnchecked(i, currentParam);
 		for (int o = 0; o < mNumberOfSpeakers; o++)
 		{
-			float *output = mRoutingTemp.getWritePointer(o);
+			float *output = mRoutingTempAudioBuffer.getWritePointer(o);
 			for (unsigned int f = 0; f < oriFramesToProcess; f++)
 				output[f] *= ramp[f];
 		}
@@ -1060,7 +1060,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	if (mRoutingMode == 1)
 	{
 		// accumulate in internal buffer
-		Router::instance().accumulate(mNumberOfSpeakers, oriFramesToProcess, mRoutingTemp);
+		Router::instance().accumulate(mNumberOfSpeakers, oriFramesToProcess, mRoutingTempAudioBuffer);
 		buffer.clear();
 	}
 	

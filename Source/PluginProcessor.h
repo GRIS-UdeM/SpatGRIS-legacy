@@ -316,10 +316,10 @@ public:
 	void setRoutingMode(int s) {
         mRoutingMode = s;
         if (mRoutingMode == 1){
-            updateRoutingTemp();
+            updateRoutingTempAudioBuffer();
         }
     }
-	void updateRoutingTemp();
+	void updateRoutingTempAudioBuffer();
     
     int getGuiWidth() const{return mGuiWidth;}
     int getGuiHeight() const{return mGuiHeight;}
@@ -727,7 +727,7 @@ private:
 	
 	int mProcessMode;
 	int mRoutingMode;
-	AudioSampleBuffer mRoutingTemp;
+	AudioSampleBuffer mRoutingTempAudioBuffer;
     
     bool mIsNumberSourcesChanged;
     bool mIsNumberSpeakersChanged;

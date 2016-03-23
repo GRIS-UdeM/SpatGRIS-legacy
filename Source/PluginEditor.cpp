@@ -1946,6 +1946,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         }
     }
     else if (comboBox == mRoutingModeCombo) {
+        JUCE_COMPILER_WARNING("use an enum to manage routing mode IDs")
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
 	}
     else if (comboBox == mProcessModeCombo) {
