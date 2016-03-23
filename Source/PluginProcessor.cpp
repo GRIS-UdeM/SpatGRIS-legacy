@@ -118,7 +118,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 :mFilters()
 ,m_bIsRecordingAutomation(false)
 ,m_iSourceLocationChanged(-1)
-,m_bPreventSourceLocationUpdate(true)
+,m_bPreventSourceLocationUpdate(false)
 {
 //
 //#if USE_LEAP
@@ -247,7 +247,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 //    if (getIsAllowInputOutputModeSelection()){
 //        setInputOutputMode(getInputOutputMode());
 //    }
-    m_bPreventSourceLocationUpdate = false;
+    cout << "constructor done\n";
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
