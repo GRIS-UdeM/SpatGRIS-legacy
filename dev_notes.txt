@@ -73,3 +73,7 @@ but we still have the problem of the plugin needing to be re-initialized after s
 #47: Clicks audio au centre. 
 
 Ces clicks semblent être causés par des shorts bursts d'activité dans tous les haut-parleurs. Au centre, c'est normal que tous les haut-parleurs soient solicités, j'imagine? Ce qu'il faut s'assurer est de ne pas avoir de transient super rapide. Est-ce qu'il y a déjà un algorithme qui regarde le delta inter-sample?
+
+playing with param smoothing slider has an effect, mais ne rêgle pas complètement le problème de click audios. 
+
+searching for ksmooth, I see that param smoothing is used in all process modes, in processor::ProcessData.

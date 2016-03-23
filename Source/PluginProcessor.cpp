@@ -988,9 +988,8 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
 		
 		if (processesInPlaceIsIgnored) {
-			//float *inputsCopy[iActualNumberOfSources];
 			float **inputsCopy = new float* [mNumberOfSources];
-
+            JUCE_COMPILER_WARNING("why are we copying the inputs instead of using original?")
 			for (int i = 0; i < mNumberOfSources; i++) {
 				memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
 				inputsCopy[i] = mInputsCopy.getReference(i).b;
@@ -1014,8 +1013,8 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
         }
 	}
 	
-	if (mRoutingMode == 1)
-	{
+    JUCE_COMPILER_WARNING("1 = internal write")
+	if (mRoutingMode == 1){
 		// apply routing volume
 		int i = kRoutingVolume;
 		float currentParam = mSmoothedParameters[i];
@@ -1171,66 +1170,60 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	output[f] += s * output_adj;
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
-{
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
 	const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 	const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
 	const float sm_n = 1 - sm_o;
 	
-	// ramp all the parameters, except constant ones and speaker thetas
+	// ramp all parameters, except constant ones and speaker thetas
     const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
 	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
     for (int i = 0; i < (kNumberOfParameters - kConstantParameters); i++) {
 		bool isSpeakerXY = (i >= sourceParameters && i < (sourceParameters + speakerParameters) && ((i - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
-		if (isSpeakerXY) continue;
-	
+        if (isSpeakerXY) {
+            continue;
+        }
 		float currentParam = mSmoothedParameters[i];
 		float targetParam = params[i];
 		float *ramp = mSmoothedParametersRamps.getReference(i).b;
 	
-		//float ori = currentParam;
-		
-		for (unsigned int f = 0; f < frames; f++)
-		{
+		for (unsigned int f = 0; f < frames; f++) {
 			currentParam = currentParam * sm_o + targetParam * sm_n;
 			ramp[f] = currentParam;
 		}
 		
-		//if (i == 0 && ori != currentParam) printf("param %i -> %f -> %f\n", i, ori, currentParam);
-
 		mSmoothedParameters.setUnchecked(i, currentParam);
 	}
 	
 	// clear outputs
-	for (int o = 0; o < mNumberOfSpeakers; o++)
-	{
+	for (int o = 0; o < mNumberOfSpeakers; o++) {
 		float *output = outputs[o];
 		memset(output, 0, frames * sizeof(float));
 	}
 
 	// compute
 	// in this context: input_x and input_x are actually source T and R
-	for (int i = 0; i < mNumberOfSources; i++)
-	{
+	for (int i = 0; i < mNumberOfSources; i++) {
 		float *input = inputs[i];
 		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
 		float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
 	
-		for (unsigned int f = 0; f < frames; f++)
-		{
+		for (unsigned int f = 0; f < frames; f++) {
 			float s = input[f];
 			float x = input_x[f];
 			float y = input_y[f];
 			
 			// could use the Accelerate framework on mac for these
 			float r = hypotf(x, y);
-			if (r > kRadiusMax) r = kRadiusMax;
-			
+            if (r > kRadiusMax) {
+                r = kRadiusMax;
+            }
 			float it = atan2f(y, x);
-			if (it < 0) it += kThetaMax;
+            if (it < 0){
+                it += kThetaMax;
+            }
 			
-			if (mApplyFilter)
-			{
+			if (mApplyFilter) {
 				float distance;
 				if (r >= 1) distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
 				else distance = denormalize(params[kFilterNear], params[kFilterMid], r);
@@ -1246,13 +1239,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 			}
 			
 			float t;
-			if (r >= kThetaLockRadius)
-			{
+			if (r >= kThetaLockRadius){
 				t = it;
 				mLockedThetas.setUnchecked(i, it);
-			}
-			else
-			{
+			} else {
 				float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
 				float lt = mLockedThetas.getUnchecked(i);
 				float dt = lt - it;
@@ -1271,34 +1261,28 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 				//if (f == 0) printf("it: %f lt: %f lt2: %f t: %f c: %f\n", it, mLockedThetas.getUnchecked(i), lt, t, c);
 			}
 			
-			if (r >= 1)
-			{
+			if (r >= 1) {
 				// find left and right speakers
 				int left, right;
 				float dLeft, dRight;
                 findLeftAndRightSpeakers(t, params, left, right, dLeft, dRight);
                 
 				// add to output
-				if (left >= 0 && right >= 0)
-				{
+				if (left >= 0 && right >= 0) {
 					float dTotal = dLeft + dRight;
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
 					addToOutput(s * vLeft, outputs, left, f);
 					addToOutput(s * vRight, outputs, right, f);
-				}
-				else
-				{
+				} else {
 					// one side is empty!
 					int o = (left >= 0) ? left : right;
 					jassert(o >= 0);
 					
 					addToOutput(s, outputs, o, f);
 				}
-			}
-			else
-			{
+			} else {
 				// find front left, right
 				int frontLeft, frontRight;
 				float dFrontLeft, dFrontRight;
@@ -1316,17 +1300,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 				float back = 1 - front;
 				
 				// add to front output
-				if (frontLeft >= 0 && frontRight >= 0)
-				{
+				if (frontLeft >= 0 && frontRight >= 0) {
 					float dTotal = dFrontLeft + dFrontRight;
 					float vLeft = 1 - dFrontLeft / dTotal;
 					float vRight = 1 - dFrontRight / dTotal;
 					
 					addToOutput(s * vLeft * front, outputs, frontLeft, f);
 					addToOutput(s * vRight * front, outputs, frontRight, f);
-				}
-				else
-				{
+				} else {
 					// one side is empty!
 					int o = (frontLeft >= 0) ? frontLeft : frontRight;
 					jassert(o >= 0);
@@ -1335,17 +1316,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 				}
 				
 				// add to back output
-				if (backLeft >= 0 && backRight >= 0)
-				{
+				if (backLeft >= 0 && backRight >= 0) {
 					float dTotal = dBackLeft + dBackRight;
 					float vLeft = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
 					addToOutput(s * vLeft * back, outputs, backLeft, f);
 					addToOutput(s * vRight * back, outputs, backRight, f);
-				}
-				else
-				{
+				} else {
 					// one side is empty!
 					int o = (backLeft >= 0) ? backLeft : backRight;
 					jassert(o >= 0);
