@@ -224,8 +224,6 @@ AudioProcessorEditor (ownerFilter)
 , mOsc (nullptr)
 {
     if (s_bUseNewGui){
-        //this works, but everything is too small. This appears to be the only way that I found to change the tab font
-//        mGrisFeel.setDefaultSansSerifTypefaceName(mGrisFeel.getFontName());
         LookAndFeel::setDefaultLookAndFeel(&mGrisFeel);
     } else {
         LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
@@ -243,6 +241,7 @@ AudioProcessorEditor (ownerFilter)
     mNeedRepaint = false;
     mFieldNeedRepaint = false;
 	m_bLoadingPreset = false;
+    JUCE_COMPILER_WARNING("isn't there a macro for this?")
     bool leapSupported = true;
     
     mFilter->addListener(this);
@@ -1376,7 +1375,6 @@ void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
         if (mFilter->getNumberOfSources() == 2){
             mMovementModeCombo->addItem("Symmetric X", index++);
             mMovementModeCombo->addItem("Symmetric Y", index++);
-            //mMovementMode->addItem("Symmetric X & Y", index++);
         }
     }
     int iCurMode = mFilter->getMovementMode() + 1;

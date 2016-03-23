@@ -118,7 +118,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 :mFilters()
 ,m_bIsRecordingAutomation(false)
 ,m_iSourceLocationChanged(-1)
-,m_bPreventSourceLocationUpdate(false)
+,m_bPreventSourceLocationUpdate(true)
 {
 //
 //#if USE_LEAP
@@ -247,6 +247,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 //    if (getIsAllowInputOutputModeSelection()){
 //        setInputOutputMode(getInputOutputMode());
 //    }
+    m_bPreventSourceLocationUpdate = false;
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
@@ -1170,7 +1171,7 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	output[f] += s * output_adj;
     
     if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .9){
-        cout << ".";
+        cout << "click?";
     }
 }
 
@@ -2007,9 +2008,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mParameters.set(getParamForSourceX(i), fX01);
                 String srcY = "src" + to_string(i) + "y";
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
-                
-                cout << "src " << i << ": (" << fX01 << ", " << fY01 << endl;
-                
                 mParameters.set(getParamForSourceY(i), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
                 mOldSrcLocRT[i] = convertXy012Rt(curPoint);

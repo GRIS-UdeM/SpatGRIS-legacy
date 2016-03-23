@@ -571,6 +571,9 @@ public:
 	}
 
 	void setSourceXY01(int i, FPoint p, bool p_bNotifyHost = true) {
+        if (i == 0){
+            cout << "src01 " << i << ": (" << p.x << ", " << p.y << endl;
+        }
 		p = clampRadius01(p);
         if (p_bNotifyHost){
             setParameterNotifyingHost(getParamForSourceX(i), p.x);
@@ -582,6 +585,9 @@ public:
 	}
 
 	void setSourceXY(int i, FPoint p, bool p_bNotifyHost = true) {
+        if (i == 0){
+            cout << "src " << i << ": (" << p.x << ", " << p.y << endl;
+        }
 		float r = hypotf(p.x, p.y);
 		if (r > kRadiusMax)
 		{
@@ -634,6 +640,7 @@ public:
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
     void setSourceLocationChanged(int i)   {
+        cout << "src changed: " << i << newLine;
         m_iSourceLocationChanged = i;
     }
     int  getSourceLocationChanged()        { return m_iSourceLocationChanged;  }
