@@ -571,11 +571,14 @@ public:
 	}
 
 	void setSourceXY01(int i, FPoint p, bool p_bNotifyHost = true) {
-        if (i == 0){
-            cout << "src01 " << i << ": (" << p.x << ", " << p.y << endl;
-        }
+        JUCE_COMPILER_WARNING("for debugging #54")
+//        if (i == 0){
+//            cout << "src01 " << i << ": (" << p.x << ", " << p.y << endl;
+//        }
 		p = clampRadius01(p);
         if (p_bNotifyHost){
+            int iParamForSource = getParamForSourceY(i);
+            cout << iParamForSource << newLine;
             setParameterNotifyingHost(getParamForSourceX(i), p.x);
             setParameterNotifyingHost(getParamForSourceY(i), p.y);
         } else {
@@ -585,9 +588,10 @@ public:
 	}
 
 	void setSourceXY(int i, FPoint p, bool p_bNotifyHost = true) {
-        if (i == 0){
-            cout << "src " << i << ": (" << p.x << ", " << p.y << endl;
-        }
+        JUCE_COMPILER_WARNING("for debugging #54")
+//        if (i == 0){
+//            cout << "src " << i << ": (" << p.x << ", " << p.y << endl;
+//        }
 		float r = hypotf(p.x, p.y);
 		if (r > kRadiusMax)
 		{
@@ -783,6 +787,7 @@ private:
 
     OSCSender mOscSpatSender;
     OscSpatThread* m_pOscSpatThread;
+    OwnedArray<Thread> m_OwnedThreads;
     float m_fFieldWidth;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)

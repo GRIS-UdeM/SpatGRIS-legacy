@@ -36,6 +36,142 @@ SourceMover::SourceMover(SpatGrisAudioProcessor *filter)
     updateNumberOfSources();
 }
 
+void SourceMover::begin(int s, MoverType mt) {
+	if (mMoverType != kVacant) return;
+	mMoverType = mt;
+	mSelectedSrc = s;
+    mFilter->setSrcSelected(s);
+	
+    if (mMoverType != kSourceThread){
+        mFilter->setIsRecordingAutomation(true);
+        cout << "begin\n";
+        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
+        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+    }
+    
+    int iNbrSrc = mFilter->getNumberOfSources();
+
+    //if we are not in independent mode and have more than 1 source
+	if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
+		for (int j = 0; j < iNbrSrc; j++) {
+			mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
+			mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
+		}
+    }
+}
+
+//in kSourceThread, FPoint p is the current location of the selected source, as read on the automation
+void SourceMover::move(FPoint pointXY01, MoverType mt) {
+    if (mMoverType != mt){
+        return;
+    }
+    
+    //move selected item only if not kSourceThread, since in kSourceThread item is already moved by automation
+    if (mMoverType != kSourceThread){
+        mFilter->setSourceXY01(mSelectedSrc, pointXY01);
+        mFilter->setOldSrcLocRT(mSelectedSrc, mFilter->convertXy012Rt(pointXY01));
+        mField->updatePositionTrace(pointXY01.x, pointXY01.y);
+    }
+    
+    int iMovementMode = mFilter->getMovementMode();
+    if (iMovementMode == 0){
+        return; //independent, so no need to move unselected sources
+    }
+    
+    if (mFilter->getNumberOfSources() > 1) {
+        //calculate delta for selected source
+        FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
+        FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
+        FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
+        
+        if (delSelSrcPosRT.isOrigin()){
+            return;     //return if delta is null
+        }
+        float vxo = pointXY01.x, vyo = pointXY01.y;
+        if (kSourceThread){
+            mFilter->setPreventSourceLocationUpdate(true);
+        }
+        
+        for (int iCurSrc = 0; iCurSrc < mFilter->getNumberOfSources(); iCurSrc++) {
+            if (iCurSrc == mSelectedSrc) {
+                mFilter->setOldSrcLocRT(iCurSrc, newSelSrcPosRT);
+                continue;
+            }
+            //all x's and y's here are actually r's and t's
+            switch(mFilter->getMovementMode()) {
+                case 1:     // circular
+                case 2:     // circular, fixed radius
+                case 3:     // circular, fixed angle
+                case 4:{    // circular, fully fixed
+                    //calculate new position for curSrc using delta for selected source
+                    FPoint oldCurSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(iCurSrc) : mSourcesDownRT[iCurSrc];
+                    FPoint newCurSrcPosRT = oldCurSrcPosRT + delSelSrcPosRT;
+                    if (newCurSrcPosRT.x < 0){
+                        newCurSrcPosRT.x = 0;
+                    }
+                    if (newCurSrcPosRT.x > kRadiusMax){
+                        newCurSrcPosRT.x = kRadiusMax;
+                    }
+                    if (newCurSrcPosRT.y < 0){
+                        newCurSrcPosRT.y += kThetaMax;
+                    }
+                    if (newCurSrcPosRT.y > kThetaMax){
+                        newCurSrcPosRT.y -= kThetaMax;
+                    }
+                    
+                    mFilter->setSourceRT(iCurSrc, newCurSrcPosRT, false);
+                    mFilter->setOldSrcLocRT(iCurSrc, newCurSrcPosRT);
+                    break;
+                }
+                case 5:{      // delta lock
+                    FPoint delSelSrcPosXY;
+                    if (mMoverType == kSourceThread){
+                        delSelSrcPosXY = mFilter->convertRt2Xy(newSelSrcPosRT) - mFilter->convertRt2Xy(oldSelSrcPosRT);
+                    } else {
+                        delSelSrcPosXY = mFilter->getSourceXY(mSelectedSrc) - mSourcesDownXY[mSelectedSrc];
+                    }
+                    
+                    //calculate new position for curSrc using delta for selected source
+                    FPoint oldCurSrcPosXY = (mMoverType == kSourceThread) ? mFilter->convertRt2Xy(mFilter->getOldSrcLocRT(iCurSrc)) : mSourcesDownXY[iCurSrc];
+                    FPoint newCurSrcPosXY = oldCurSrcPosXY + delSelSrcPosXY;
+                    
+                    mFilter->setSourceXY(iCurSrc, newCurSrcPosXY, false);
+                    mFilter->setOldSrcLocRT(iCurSrc, mFilter->convertXy2Rt(newCurSrcPosXY, false));
+                    break;
+                }
+                case 6:  // sym x
+                    vyo = 1 - vyo;
+                    mFilter->setSourceXY01(iCurSrc, FPoint(vxo, vyo));
+                    break;
+                case 7: // sym y
+                    vxo = 1 - vxo;
+                    mFilter->setSourceXY01(iCurSrc, FPoint(vxo, vyo));
+                    break;
+                default:
+                    jassert(0);
+                    break;
+            }
+        }
+        if (kSourceThread){
+            mFilter->setPreventSourceLocationUpdate(false);
+        }
+    }
+}
+
+void SourceMover::end(MoverType mt) {
+    if (mMoverType != mt) return;
+    
+    if (mMoverType != kSourceThread){
+        cout << "end\n";
+        mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
+        mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->setIsRecordingAutomation(false);
+        mField->clearTrajectoryPath();
+    }
+    
+    mMoverType = kVacant;
+}
+
 void SourceMover::updateNumberOfSources(){
     mSourcesDownXY.clear();
     mSourcesDownRT.clear();
@@ -52,29 +188,6 @@ void SourceMover::updateNumberOfSources(){
     }
 }
 
-void SourceMover::begin(int s, MoverType mt)
-{
-	if (mMoverType != kVacant) return;
-	mMoverType = mt;
-	mSelectedSrc = s;
-    mFilter->setSrcSelected(s);
-	
-    if (mMoverType != kSourceThread){
-        mFilter->setIsRecordingAutomation(true);
-        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
-        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
-    }
-    
-    int iNbrSrc = mFilter->getNumberOfSources();
-
-    //if we are not in independent mode and have more than 1 source
-	if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
-		for (int j = 0; j < iNbrSrc; j++) {
-			mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
-			mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
-		}
-    }
-}
 
 void SourceMover::sortAngles(){
     
@@ -190,118 +303,4 @@ void SourceMover::setSymmetricY(){
     float vxo = pointXY01.x, vyo = pointXY01.y;
     vxo = 1 - vxo;
     mFilter->setSourceXY01(mSlaveSrc, FPoint(vxo, vyo));
-}
-
-
-//in kSourceThread, FPoint p is the current location of the selected source, as read on the automation
-void SourceMover::move(FPoint pointXY01, MoverType mt)
-{
-    if (mMoverType != mt){
-        return;
-    }
-    
-    //move selected item only if not kSourceThread, since in kSourceThread item is already moved by automation
-    if (mMoverType != kSourceThread){
-        mFilter->setSourceXY01(mSelectedSrc, pointXY01);
-        mFilter->setOldSrcLocRT(mSelectedSrc, mFilter->convertXy012Rt(pointXY01));
-        mField->updatePositionTrace(pointXY01.x, pointXY01.y);
-    }
-    
-    int iMovementMode = mFilter->getMovementMode();
-    if (iMovementMode == 0){
-        return; //independent, so no need to move unselected sources
-    }
-    
-    if (mFilter->getNumberOfSources() > 1) {
-        //calculate delta for selected source
-        FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
-        FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
-        FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
-        
-        if (delSelSrcPosRT.isOrigin()){
-            return;     //return if delta is null
-        }
-        float vxo = pointXY01.x, vyo = pointXY01.y;
-        if (kSourceThread){
-            mFilter->setPreventSourceLocationUpdate(true);
-        }
-        
-        for (int iCurSrc = 0; iCurSrc < mFilter->getNumberOfSources(); iCurSrc++) {
-            if (iCurSrc == mSelectedSrc) {
-                mFilter->setOldSrcLocRT(iCurSrc, newSelSrcPosRT);
-                continue;
-            }
-            //all x's and y's here are actually r's and t's
-            switch(mFilter->getMovementMode()) {
-                case 1:     // circular
-                case 2:     // circular, fixed radius
-                case 3:     // circular, fixed angle
-                case 4:{    // circular, fully fixed
-                    //calculate new position for curSrc using delta for selected source
-                    FPoint oldCurSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(iCurSrc) : mSourcesDownRT[iCurSrc];
-                    FPoint newCurSrcPosRT = oldCurSrcPosRT + delSelSrcPosRT;
-                    if (newCurSrcPosRT.x < 0){
-                        newCurSrcPosRT.x = 0;
-                    }
-                    if (newCurSrcPosRT.x > kRadiusMax){
-                        newCurSrcPosRT.x = kRadiusMax;
-                    }
-                    if (newCurSrcPosRT.y < 0){
-                        newCurSrcPosRT.y += kThetaMax;
-                    }
-                    if (newCurSrcPosRT.y > kThetaMax){
-                        newCurSrcPosRT.y -= kThetaMax;
-                    }
-                    
-                    mFilter->setSourceRT(iCurSrc, newCurSrcPosRT, false);
-                    mFilter->setOldSrcLocRT(iCurSrc, newCurSrcPosRT);
-                    break;
-                }
-                case 5:{      // delta lock
-                    FPoint delSelSrcPosXY;
-                    if (mMoverType == kSourceThread){
-                        delSelSrcPosXY = mFilter->convertRt2Xy(newSelSrcPosRT) - mFilter->convertRt2Xy(oldSelSrcPosRT);
-                    } else {
-                        delSelSrcPosXY = mFilter->getSourceXY(mSelectedSrc) - mSourcesDownXY[mSelectedSrc];
-                    }
-                    
-                    //calculate new position for curSrc using delta for selected source
-                    FPoint oldCurSrcPosXY = (mMoverType == kSourceThread) ? mFilter->convertRt2Xy(mFilter->getOldSrcLocRT(iCurSrc)) : mSourcesDownXY[iCurSrc];
-                    FPoint newCurSrcPosXY = oldCurSrcPosXY + delSelSrcPosXY;
-                    
-                    mFilter->setSourceXY(iCurSrc, newCurSrcPosXY, false);
-                    mFilter->setOldSrcLocRT(iCurSrc, mFilter->convertXy2Rt(newCurSrcPosXY, false));
-                    break;
-                }
-                case 6:  // sym x
-                    vyo = 1 - vyo;
-                    mFilter->setSourceXY01(iCurSrc, FPoint(vxo, vyo));
-                    break;
-                case 7: // sym y
-                    vxo = 1 - vxo;
-                    mFilter->setSourceXY01(iCurSrc, FPoint(vxo, vyo));
-                    break;                    
-                default:
-                    jassert(0);
-                    break;
-            }
-        }
-        if (kSourceThread){
-            mFilter->setPreventSourceLocationUpdate(false);
-        }
-    }
-}
-
-void SourceMover::end(MoverType mt)
-{
-	if (mMoverType != mt) return;
-
-    if (mMoverType != kSourceThread){
-        mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
-        mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
-        mFilter->setIsRecordingAutomation(false);
-        mField->clearTrajectoryPath();
-    }
-    
-    mMoverType = kVacant;
 }

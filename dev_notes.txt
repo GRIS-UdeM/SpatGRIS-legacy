@@ -77,3 +77,9 @@ Ces clicks semblent être causés par des shorts bursts d'activité dans tous le
 playing with param smoothing slider has an effect, mais ne rêgle pas complètement le problème de click audios. 
 
 searching for ksmooth, I see that param smoothing is used in all process modes, in processor::ProcessData.
+------------ 2016-03-24 ---------------
+#51: osc spat thread leak
+I think this can be fixed at the same time as #52 (source update thread not running when editor is
+closed). 
+Both threads need to run in the processor, and be deleted using an owned array.
+
