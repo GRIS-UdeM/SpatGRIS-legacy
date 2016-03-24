@@ -271,6 +271,7 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
+        cout << "updateNonSelectedSourcePositions\n";
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
@@ -665,6 +666,12 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     }
     //restart audio processing
     suspendProcessing (false);
+    
+    if (mNumberOfSources > 1 && m_pSourceUpdateThread && !m_pSourceUpdateThread->isThreadRunning()){
+        m_pSourceUpdateThread->startThread();
+    } else if (m_pSourceUpdateThread && m_pSourceUpdateThread->isThreadRunning()){
+        m_pSourceUpdateThread->stopThread(500);
+    }
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
