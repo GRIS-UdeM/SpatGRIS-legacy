@@ -255,9 +255,9 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     if (t){
         t->stop();
     }
-    if (m_pOscSpatThread){
-        delete m_pOscSpatThread;
-    }
+//    if (m_pOscSpatThread){
+//        delete m_pOscSpatThread;
+//    }
 }
 
 
@@ -281,10 +281,11 @@ void SpatGrisAudioProcessor::setProcessMode(int s) {
     if (mProcessMode == kOscSpatMode){
         connectOscSpat();
         m_pOscSpatThread = new OscSpatThread(this);
+        m_OwnedThreads.add(m_pOscSpatThread);
     } else {
         mOscSpatSender.disconnect();
         if(m_pOscSpatThread){
-            delete m_pOscSpatThread;
+//            delete m_pOscSpatThread;
             m_pOscSpatThread = nullptr;
         }
     }
