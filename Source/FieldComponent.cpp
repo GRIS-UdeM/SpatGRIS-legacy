@@ -30,14 +30,14 @@
 
 FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover)
 : mFilter(filter)
-, mMover(mover)
+, m_pMover(mover)
 , m_fStartPathX(-1)
 , m_fStartPathY(-1)
 , m_fEndPathX(-1)
 , m_fEndPathY(-1)
 , m_bPathJustStarted(false)
 {
-    mMover->setFieldComponent(this);
+    m_pMover->setFieldComponent(this);
 }
 
 FieldComponent::~FieldComponent()
@@ -396,7 +396,7 @@ void FieldComponent::mouseDown(const MouseEvent &event)
 				mSavedValue = mFilter->getSourceRT(mSelectedItem).x;
 			mLastKeys = event.mods;
 			
-			mMover->begin(i, kField);
+			m_pMover->begin(i, kField);
 			return;
 		}
 	}
@@ -462,7 +462,7 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 			}
 			mLastKeys = event.mods;
            
-			mMover->move(FPoint(vx, vy), kField);
+			m_pMover->move(FPoint(vx, vy), kField);
 			break;
 		}
 			
@@ -485,7 +485,7 @@ void FieldComponent::mouseUp(const MouseEvent &event) {
 		case kNoSelection:
 			return;
 		case kSelectedSource:
-			mMover->end(kField);
+			m_pMover->end(kField);
 			break;
 		case kSelectedSpeaker:
 			break;

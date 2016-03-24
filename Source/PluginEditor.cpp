@@ -185,10 +185,10 @@ private:
 
 //==================================== EDITOR ===================================================================
 
-SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter):
+SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter, SourceMover *mover):
 AudioProcessorEditor (ownerFilter)
 , mFilter(ownerFilter)
-, mMover(ownerFilter)
+, m_pMover(mover)
 , m_logoImage()
 , mTrCycleCount(-1)
 , mOsc (nullptr)
@@ -217,7 +217,7 @@ AudioProcessorEditor (ownerFilter)
     mFilter->addListener(this);
     
     // main field
-    mField = new FieldComponent(mFilter, &mMover);
+    mField = new FieldComponent(mFilter, m_pMover);
     addAndMakeVisible(mField);
     mComponents.add(mField);
 
@@ -990,9 +990,6 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpk
         applyCurrentSrcPlacement();
         applyCurrentSpkPlacement();
     }
-//    mMover.updateNumberOfSources();
-//    buttonClicked(mApplyInputOutputModeButton);
-//    mFieldNeedRepaint = true;
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
@@ -1015,17 +1012,6 @@ void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
     }
 #endif
 }
-////THIS NEEDS TO BE MOVED TO PROCESSOR. mover needs to be copied around, like it is done for fieldComponent
-//void SpatGrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
-//    int iSourceChanged = mFilter->getSourceLocationChanged();
-////    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
-//    if (iSourceChanged != -1){
-//        mMover.begin(iSourceChanged, kSourceThread);
-//        mMover.move(mFilter->getSourceXY01(iSourceChanged), kSourceThread);
-//        mMover.end(kSourceThread);
-//        mFilter->setSourceLocationChanged(-1);
-//    }
-//}
 
 void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     int iSelectedMode = mFilter->getProcessMode();
@@ -1258,7 +1244,7 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
         updateMovementModeCombo();
     }
     //update number of sources in mover. this puts all sources at 0,0, ie, bottom left corner
-    mMover.updateNumberOfSources();
+    m_pMover->updateNumberOfSources();
     
     //if we're not in constructor, reset source placement
     if (!p_bCalledFromConstructor){
@@ -1474,9 +1460,9 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         float t = mSrcT->getText().getFloatValue();
         if (r < 0) r = 0; else if (r > kRadiusMax) r = kRadiusMax;
 
-        mMover.begin(src, kField);
-        mMover.move(mFilter->convertRt2Xy01(r, t * M_PI / 180.), kField);
-        mMover.end(kField);
+        m_pMover->begin(src, kField);
+        m_pMover->move(mFilter->convertRt2Xy01(r, t * M_PI / 180.), kField);
+        m_pMover->end(kField);
     }
     else if (&textEditor == mSpR || &textEditor == mSpT) {
         int sp = mSpSelectCombo->getSelectedId() - 1;
@@ -1602,7 +1588,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
 
             mFilter->setIsRecordingAutomation(true);
             mFilter->storeCurrentLocations();
-            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, &mMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY01()));
+            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY01()));
             mTrWriteButton->setButtonText("Cancel");
             mTrStateEditor = kTrWriting;
             mFilter->setTrState(mTrStateEditor);
@@ -1894,19 +1880,19 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             mFilter->getSourceUpdateThread()->stopThread(500);
             switch (iSelectedMode) {
                 case 2:
-                    mMover.setEqualRadius();
+                    m_pMover->setEqualRadius();
                     break;
                 case 3:
-                    mMover.setEqualAngles();
+                    m_pMover->setEqualAngles();
                     break;
                 case 4:
-                    mMover.setEqualRadiusAndAngles();
+                    m_pMover->setEqualRadiusAndAngles();
                     break;
                 case 6:
-                    mMover.setSymmetricX();
+                    m_pMover->setSymmetricX();
                     break;
                 case 7:
-                    mMover.setSymmetricY();
+                    m_pMover->setSymmetricY();
                     break;
                 default:
                     break;

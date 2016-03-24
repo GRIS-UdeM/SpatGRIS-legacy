@@ -46,6 +46,7 @@ typedef enum
 class SourceMover
 {
 public:
+    
 	SourceMover(SpatGrisAudioProcessor *filter);
     void updateNumberOfSources();
 	

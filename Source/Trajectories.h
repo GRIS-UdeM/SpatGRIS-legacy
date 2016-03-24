@@ -81,7 +81,7 @@ private:
 protected:
 	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);	
 	SpatGrisAudioProcessor *mFilter;
-    SourceMover *mMover;
+    SourceMover *m_pMover;
 	bool mStarted, mStopped;
 	float mDone;
 	float mDurationSingleTraj;

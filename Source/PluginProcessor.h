@@ -57,7 +57,6 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #include "FirFilter.h"
 #include "Trajectories.h"
 #include "Routing.h"
-
 #include <memory>
 using namespace std;
 
@@ -232,7 +231,7 @@ int IndexedAngleCompare(const void *a, const void *b);
 
 class OscSpatThread;
 class SourceUpdateThread;
-
+class SourceMover;
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor
@@ -798,10 +797,13 @@ private:
     SourceUpdateThread* m_pSourceUpdateThread;
     OwnedArray<Thread>  m_OwnedThreads;
     float m_fFieldWidth;
+
+	unique_ptr<SourceMover> m_pMover;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
 
+JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
 //==================================== SourceUpdateThread ===================================================================
 class SourceUpdateThread : public Thread
 {

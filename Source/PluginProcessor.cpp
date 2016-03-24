@@ -234,9 +234,11 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mJoystickEnabled = 0;
     
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
-    m_pOscSpatThread = new OscSpatThread(this);
-    m_pSourceUpdateThread = new SourceUpdateThread(this);
+    
+    m_pOscSpatThread        = new OscSpatThread(this);
+    m_pSourceUpdateThread   = new SourceUpdateThread(this);
     m_OwnedThreads.add(m_pOscSpatThread);
+    m_OwnedThreads.add(m_pSourceUpdateThread);
 	
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
@@ -247,6 +249,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
+//    m_pMover = new SourceMover(this);
+    std::unique_ptr<SourceMover> pMover(new SourceMover(this));
+    m_pMover = std::move(pMover);
     
 //    if (getIsAllowInputOutputModeSelection()){
 //        setInputOutputMode(getInputOutputMode());
@@ -266,9 +271,9 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
-        mMover.begin(iSourceChanged, kSourceThread);
-        mMover.move(mFilter->getSourceXY01(iSourceChanged), kSourceThread);
-        mMover.end(kSourceThread);
+        m_pMover->begin(iSourceChanged, kSourceThread);
+        m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
+        m_pMover->end(kSourceThread);
         setSourceLocationChanged(-1);
     }
 }
@@ -1765,7 +1770,7 @@ bool SpatGrisAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 {
-    return new SpatGrisAudioProcessorEditor (this);
+    return new SpatGrisAudioProcessorEditor (this, m_pMover.get());
 }
 
 //==============================================================================

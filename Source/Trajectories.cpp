@@ -31,7 +31,7 @@
 
 // ==============================================================================
 void Trajectory::start() {
-    mMover->begin(mFilter->getSrcSelected(), kTrajectory);
+    m_pMover->begin(mFilter->getSrcSelected(), kTrajectory);
     for (int i = 0; i < mFilter->getNumberOfSources(); i++){
         mSourcesInitialPositionRT.add(mFilter->getSourceRT(i));
     }
@@ -74,13 +74,13 @@ float Trajectory::progressCycle(){
 void Trajectory::stop()
 {
 	if (!mStarted || mStopped) return;
-    mMover->end(kTrajectory);
+    m_pMover->end(kTrajectory);
 	mStopped = true;
 }
 
 Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
     :mFilter(filter)
-    ,mMover(p_pMover)
+    ,m_pMover(p_pMover)
 	,mStarted(false)
 	,mStopped(false)
 	,mDone(0)
@@ -92,6 +92,7 @@ Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, fl
 	mTotalDuration = mDurationSingleTraj * times;
 }
 
+JUCE_COMPILER_WARNING("should this be a shared_ptr instead? is this thing copied?")
 std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleDirections(int p_iTrajectory){
     unique_ptr<vector<String>> vDirections (new vector<String>);
     
@@ -204,7 +205,7 @@ protected:
         if (!mCCW) da = -da;
     
         FPoint p = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
-        mMover->move(mFilter->convertRt2Xy01(p.x, p.y+da*2*M_PI), kTrajectory);
+        m_pMover->move(mFilter->convertRt2Xy01(p.x, p.y+da*2*M_PI), kTrajectory);
     }
 	
 private:
@@ -273,7 +274,7 @@ protected:
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first - untranslatedEndOutPointXY.x);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second- untranslatedEndOutPointXY.y);
         }
-        mMover->move(curPointXY01, kTrajectory);
+        m_pMover->move(curPointXY01, kTrajectory);
     }
     
 private:
@@ -350,7 +351,7 @@ protected:
         
         FPoint pointXY01 = mFilter->convertRt2Xy01(pointRT.x, pointRT.y + deviationAngle);
         
-        mMover->move(pointXY01, kTrajectory);
+        m_pMover->move(pointXY01, kTrajectory);
     }
 private:
     bool mCCW, m_bRT, m_bYisDependent;
@@ -391,7 +392,7 @@ protected:
         float cosDa2 = cosDa*cosDa;
         float r2 = (a2*b2)/((b2-a2)*cosDa2+a2);
         float r = sqrt(r2);
-        mMover->move(mFilter->convertRt2Xy01(p.x * r, p.y + da), kTrajectory);
+        m_pMover->move(mFilter->convertRt2Xy01(p.x * r, p.y + da), kTrajectory);
     }
 	
 private:
@@ -504,7 +505,7 @@ protected:
                 p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                 p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
                 if (mFilter->getIndependentMode()){}
-                mMover->move(p, kTrajectory);
+                m_pMover->move(p, kTrajectory);
             }
         }
     }
@@ -570,7 +571,7 @@ protected:
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
-                    mMover->move(p, kTrajectory);
+                    m_pMover->move(p, kTrajectory);
                 }
             }
         }

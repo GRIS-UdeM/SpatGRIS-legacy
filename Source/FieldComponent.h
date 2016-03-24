@@ -59,7 +59,7 @@ public:
     void updatePositionTrace(float p_fX, float p_fY);
 private:
 	SpatGrisAudioProcessor *mFilter;
-	SourceMover *mMover;
+	SourceMover *m_pMover;
 	
 	SelectionType mSelectionType;
 	int mSelectedItem;

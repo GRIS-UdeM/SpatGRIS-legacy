@@ -87,7 +87,7 @@ class SpatGrisAudioProcessorEditor  : public AudioProcessorEditor,
 									  private Timer
 {
 public:
-    SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter);
+    SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter, SourceMover *mover);
     ~SpatGrisAudioProcessorEditor();
 
     //==============================================================================
@@ -113,7 +113,7 @@ public:
 	int getOscLeapSource() { return mFilter->getOscLeapSource(); }
     //! Set the number of the source selected for the Leap Motion
 	void setOscLeapSource(int s);
-	SourceMover * getMover() { return &mMover; }
+	SourceMover * getMover() { return m_pMover; }
     Label * getmStateLeap() {return mStateLeap;}
     
 #if USE_JOYSTICK
@@ -134,7 +134,7 @@ private:
     LookAndFeel_V2 mV2Feel;
     GrisLookAndFeel mGrisFeel;
     
-	SourceMover mMover;
+	SourceMover *m_pMover;
 	
 	// for memory management:
 	OwnedArray<Component> mComponents;
