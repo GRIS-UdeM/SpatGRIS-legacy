@@ -124,7 +124,7 @@ public:
     //! Return the number of sources form the processor
     int getNbSources();
     
-    void updateNonSelectedSourcePositions();
+//    void updateNonSelectedSourcePositions();
     
     void setDefaultPendulumEndpoint();
     
@@ -277,7 +277,7 @@ private:
     TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
 	Slider* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
     
-    SourceUpdateThread*     m_pSourceUpdateThread;
+//    SourceUpdateThread*     m_pSourceUpdateThread;
 //    JoystickUpdateThread*   m_pJoystickUpdateThread;
     
     //! Bounds of the resizable window

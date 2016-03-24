@@ -69,7 +69,9 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 }
 #endif
 
-//==============================================================================
+
+
+//====================================== OscSpatThread ========================================
 class OscSpatThread : public Thread {
 public:
     OscSpatThread(SpatGrisAudioProcessor* p_pProcessor)
@@ -233,6 +235,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
     m_pOscSpatThread = new OscSpatThread(this);
+    m_pSourceUpdateThread = new SourceUpdateThread(this);
     m_OwnedThreads.add(m_pOscSpatThread);
 	
 	// default values for parameters
@@ -255,6 +258,18 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     Trajectory::Ptr t = getTrajectory();
     if (t){
         t->stop();
+    }
+}
+
+//THIS NEEDS TO BE MOVED TO PROCESSOR. mover needs to be copied around, like it is done for fieldComponent
+void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
+    int iSourceChanged = getSourceLocationChanged();
+    //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
+    if (iSourceChanged != -1){
+        mMover.begin(iSourceChanged, kSourceThread);
+        mMover.move(mFilter->getSourceXY01(iSourceChanged), kSourceThread);
+        mMover.end(kSourceThread);
+        setSourceLocationChanged(-1);
     }
 }
 

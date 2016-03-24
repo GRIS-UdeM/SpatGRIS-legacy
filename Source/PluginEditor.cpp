@@ -158,34 +158,6 @@ private:
 };
 
 
-
-//==================================== SourceUpdateThread ===================================================================
-class SourceUpdateThread : public Thread, public Component
-{
-public:
-    SourceUpdateThread(SpatGrisAudioProcessorEditor* p_pEditor)
-    : Thread ("SourceUpdateThread")
-    ,m_iInterval(50)
-    ,m_pEditor(p_pEditor)
-    { }
-    
-    ~SourceUpdateThread() {
-        stopThread (500);
-    }
-    
-    void run() override {
-        while (! threadShouldExit()) {
-            wait (m_iInterval);
-            m_pEditor->updateNonSelectedSourcePositions();
-        }
-    }
-    
-private:
-    int m_iInterval;
-    SpatGrisAudioProcessorEditor* m_pEditor;
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
-};
 //==================================== JoystickUpdateThread ===================================================================
 //class JoystickUpdateThread : public Thread, public Component {
 //public:
@@ -194,11 +166,11 @@ private:
 //    ,m_iInterval(25)
 //    ,m_pEditor(p_pEditor)
 //    {  }
-//    
+//
 //    ~JoystickUpdateThread() {
 //        stopThread (500);
 //    }
-//    
+//
 //    void run() override {
 //        while (! threadShouldExit()) {
 //            wait (m_iInterval);
@@ -210,8 +182,6 @@ private:
 //    SpatGrisAudioProcessorEditor* m_pEditor;
 //    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JoystickUpdateThread)
 //};
-
-
 
 //==================================== EDITOR ===================================================================
 
@@ -229,8 +199,8 @@ AudioProcessorEditor (ownerFilter)
         LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
     }
     
-    m_pSourceUpdateThread = new SourceUpdateThread(this);
-    mComponents.add(m_pSourceUpdateThread);
+//    m_pSourceUpdateThread = new SourceUpdateThread(this);
+//    mComponents.add(m_pSourceUpdateThread);
 
 //    m_pJoystickUpdateThread = new JoystickUpdateThread(this);
 //    mComponents.add(m_pJoystickUpdateThread);
@@ -1045,17 +1015,17 @@ void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
     }
 #endif
 }
-
-void SpatGrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
-    int iSourceChanged = mFilter->getSourceLocationChanged();
-//    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
-    if (iSourceChanged != -1){
-        mMover.begin(iSourceChanged, kSourceThread);
-        mMover.move(mFilter->getSourceXY01(iSourceChanged), kSourceThread);
-        mMover.end(kSourceThread);
-        mFilter->setSourceLocationChanged(-1);
-    }
-}
+////THIS NEEDS TO BE MOVED TO PROCESSOR. mover needs to be copied around, like it is done for fieldComponent
+//void SpatGrisAudioProcessorEditor::updateNonSelectedSourcePositions(){
+//    int iSourceChanged = mFilter->getSourceLocationChanged();
+////    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
+//    if (iSourceChanged != -1){
+//        mMover.begin(iSourceChanged, kSourceThread);
+//        mMover.move(mFilter->getSourceXY01(iSourceChanged), kSourceThread);
+//        mMover.end(kSourceThread);
+//        mFilter->setSourceLocationChanged(-1);
+//    }
+//}
 
 void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     int iSelectedMode = mFilter->getProcessMode();
@@ -1920,7 +1890,8 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         int iSelectedMode = comboBox->getSelectedId() - 1;
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
-            m_pSourceUpdateThread->stopThread(500);
+            
+            mFilter->getSourceUpdateThread()->stopThread(500);
             switch (iSelectedMode) {
                 case 2:
                     mMover.setEqualRadius();
@@ -1940,7 +1911,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 default:
                     break;
             }
-            m_pSourceUpdateThread->startThread();
+            mFilter->getSourceUpdateThread()->startThread();
         }
     }
     else if (comboBox == mRoutingModeCombo) {
@@ -2155,13 +2126,13 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             updateInputOutputCombo();
         }
     }
-
+JUCE_COMPILER_WARNING("all this getSourceUpdateThread() business should probably be done directly in processor")
     if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && mFilter->getSourceLocationChanged() != -1) {
-        if(!m_pSourceUpdateThread->isThreadRunning()){
-            m_pSourceUpdateThread->startThread();
+        if(!mFilter->getSourceUpdateThread()->isThreadRunning()){
+            mFilter->getSourceUpdateThread()->startThread();
         }
-    } else if (m_pSourceUpdateThread->isThreadRunning()){
-            m_pSourceUpdateThread->stopThread(500);
+    } else if (mFilter->getSourceUpdateThread()->isThreadRunning()){
+            mFilter->getSourceUpdateThread()->stopThread(500);
     }
     mNeedRepaint = false;
     mFieldNeedRepaint = false;

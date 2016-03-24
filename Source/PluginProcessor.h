@@ -231,6 +231,8 @@ typedef struct
 int IndexedAngleCompare(const void *a, const void *b);
 
 class OscSpatThread;
+class SourceUpdateThread;
+
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor
@@ -677,7 +679,13 @@ public:
     void    setOldSrcLocRT(int id, FPoint pointRT){
         mOldSrcLocRT[id] = pointRT;
     }
-	
+    
+    SourceUpdateThread* getSourceUpdateThread(){
+        return m_pSourceUpdateThread;
+    }
+    
+    void updateNonSelectedSourcePositions();
+    
 private:
 
 	bool m_bAllowInputOutputModeSelection;
@@ -773,7 +781,7 @@ private:
 	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
-
+    
     int mNumberOfSources;
     int mNumberOfSpeakers;
     std::vector<FirFilter> mFilters;
@@ -786,11 +794,41 @@ private:
     bool m_bJustSelectedEndPoint;
 
     OSCSender mOscSpatSender;
-    OscSpatThread* m_pOscSpatThread;
-    OwnedArray<Thread> m_OwnedThreads;
+    OscSpatThread*      m_pOscSpatThread;
+    SourceUpdateThread* m_pSourceUpdateThread;
+    OwnedArray<Thread>  m_OwnedThreads;
     float m_fFieldWidth;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
+
+//==================================== SourceUpdateThread ===================================================================
+class SourceUpdateThread : public Thread
+{
+public:
+    SourceUpdateThread(SpatGrisAudioProcessor* p_pProcessor)
+    : Thread ("SourceUpdateThread")
+    ,m_iInterval(50)
+    ,m_pProcessor(p_pProcessor)
+    { }
+    
+    ~SourceUpdateThread() {
+        stopThread (500);
+    }
+    
+    void run() override {
+        while (! threadShouldExit()) {
+            wait (m_iInterval);
+            m_pProcessor->updateNonSelectedSourcePositions();
+        }
+    }
+    
+private:
+    int m_iInterval;
+    SpatGrisAudioProcessor* m_pProcessor;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
+};
+
 
 #endif  // PLUGINPROCESSOR_H_INCLUDED
