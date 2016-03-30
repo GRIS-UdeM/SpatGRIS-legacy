@@ -728,7 +728,8 @@ private:
     int     mTrState;
     float   m_iOscSpat1stSrcId;
     int     m_iOscSpatPort;
-
+    String  m_sOscIpAddress;
+    
     int mGuiTab;
     int mJoystickEnabled;
     int mOscJoystickSource;

@@ -222,6 +222,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_fTrDampening = 0.f;
     m_iOscSpat1stSrcId = 1;
     m_iOscSpatPort = 18032;
+    m_sOscIpAddress = "127.0.0.1";
     m_fTrTurns = 1.f;
     m_fTrDeviation = 0.f;
     m_fEndLocationXY01 = make_pair(.5, .5);
@@ -306,7 +307,7 @@ void SpatGrisAudioProcessor::setProcessMode(int s) {
 void SpatGrisAudioProcessor::connectOscSpat(){
     disconnectOscSpat();
     
-    m_bOscSpatSenderIsConnected = mOscSpatSender.connect("127.0.0.1", m_iOscSpatPort);
+    m_bOscSpatSenderIsConnected = mOscSpatSender.connect(m_sOscIpAddress, m_iOscSpatPort);
     if(m_bOscSpatSenderIsConnected){
         m_pOscSpatThread->startThread();
     } else {
@@ -350,7 +351,10 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(elevspan_osc);
         message.addFloat32(gain_osc);
         
+        //deactivate this for now, because current juce version is sending osc messages everywhere instead of just locally
+        jassertfalse;
         if (!mOscSpatSender.send(message)) {
+//        if (!mOscSpatSender.sendToIPAddress(m_sOscIpAddress, m_iOscSpatPort, message)) {
             DBG("Error: could not send OSC message.");
             return;
         }
