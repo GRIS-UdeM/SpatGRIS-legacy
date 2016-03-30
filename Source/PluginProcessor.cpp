@@ -237,7 +237,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	
     mLeapEnabled = 0;
     mJoystickEnabled = 0;
-    
+    m_bOscSpatSenderIsConnected = false;
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
 	
 	// default values for parameters
@@ -249,7 +249,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
-//    m_pMover = new SourceMover(this);
+
     std::unique_ptr<SourceMover> pMover(new SourceMover(this));
     m_pMover = std::move(pMover);
     
@@ -299,30 +299,38 @@ void SpatGrisAudioProcessor::setProcessMode(int s) {
     if (mProcessMode == kOscSpatMode){
         connectOscSpat();
     } else {
-        mOscSpatSender.disconnect();
-        if (m_pOscSpatThread->isThreadRunning()){
-            m_pOscSpatThread->stopThread(500);
-        }
+        disconnectOscSpat();
     }
 }
 
 void SpatGrisAudioProcessor::connectOscSpat(){
+    disconnectOscSpat();
     
-    mOscSpatSender.disconnect();
+    m_bOscSpatSenderIsConnected = mOscSpatSender.connect("127.0.0.1", m_iOscSpatPort);
+    if(m_bOscSpatSenderIsConnected){
+        m_pOscSpatThread->startThread();
+    } else {
+        DBG("OSC cannot connect to " + String(mOscSendIp) + ", port " + String(m_iOscSpatPort));
+        jassertfalse;
+    }
+}
+
+void SpatGrisAudioProcessor::disconnectOscSpat(){
+    m_bOscSpatSenderIsConnected = !mOscSpatSender.disconnect();
+    if (m_bOscSpatSenderIsConnected){
+        DBG("OSC cannot disconnect from " + String(mOscSendIp) + ", port " + String(m_iOscSpatPort));
+        jassertfalse;
+    }
     if (m_pOscSpatThread->isThreadRunning()){
         m_pOscSpatThread->stopThread(500);
-    }
-    if(!mOscSpatSender.connect("127.0.0.1", m_iOscSpatPort)){
-        DBG("OSC cannot connect to " + String(mOscSendIp) + ", port " + String(m_iOscSpatPort));
-    } else {
-        m_pOscSpatThread->startThread();
     }
 }
 
 void SpatGrisAudioProcessor::sendOscSpatValues(){
-    if  (mProcessMode != kOscSpatMode){
+    if  (mProcessMode != kOscSpatMode || !m_bOscSpatSenderIsConnected){
         return;
     }
+    
     for(int iCurSrc = 0; iCurSrc <mNumberOfSources; ++iCurSrc){
         int   channel_osc   = getOscSpat1stSrcId()+iCurSrc-1;   //in gui the range is 1-99, for zirkonium it actually starts at 0 (or potentially lower, but Zirkosc uses 0 as starting channel)
         FPoint curPoint     = getSourceAzimElev(iCurSrc);

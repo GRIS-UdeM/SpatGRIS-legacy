@@ -385,6 +385,7 @@ public:
 
     void sendOscSpatValues();
     void connectOscSpat();
+    void disconnectOscSpat();
     
     int getIsJoystickEnabled() const { return mJoystickEnabled; }
     void setIsJoystickEnabled(int s) { mJoystickEnabled = s; }
@@ -793,6 +794,7 @@ private:
     bool m_bJustSelectedEndPoint;
 
     OSCSender mOscSpatSender;
+    bool m_bOscSpatSenderIsConnected;
     OscSpatThread*      m_pOscSpatThread;
     SourceUpdateThread* m_pSourceUpdateThread;
     OwnedArray<Thread>  m_OwnedThreads;
