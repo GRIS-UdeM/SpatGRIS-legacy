@@ -351,8 +351,6 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(elevspan_osc);
         message.addFloat32(gain_osc);
         
-        //deactivate this for now, because current juce version is sending osc messages everywhere instead of just locally
-        jassertfalse;
         if (!mOscSpatSender.send(message)) {
 //        if (!mOscSpatSender.sendToIPAddress(m_sOscIpAddress, m_iOscSpatPort, message)) {
             DBG("Error: could not send OSC message.");
