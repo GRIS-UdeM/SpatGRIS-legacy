@@ -667,9 +667,9 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     //restart audio processing
     suspendProcessing (false);
     
-    if (mNumberOfSources > 1 && m_pSourceUpdateThread && !m_pSourceUpdateThread->isThreadRunning()){
+    if (mNumberOfSources > 1 && m_pSourceUpdateThread != NULL && !m_pSourceUpdateThread->isThreadRunning()){
         m_pSourceUpdateThread->startThread();
-    } else if (m_pSourceUpdateThread && m_pSourceUpdateThread->isThreadRunning()){
+    } else if (m_pSourceUpdateThread != NULL && m_pSourceUpdateThread->isThreadRunning()){
         m_pSourceUpdateThread->stopThread(500);
     }
 }
