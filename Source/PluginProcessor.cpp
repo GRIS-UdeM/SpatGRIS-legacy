@@ -130,6 +130,11 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 //	HINSTANCE DLL = LoadLibrary(winDir);//load example dll
 //#endif
     
+    m_pOscSpatThread        = new OscSpatThread(this);
+    m_pSourceUpdateThread   = new SourceUpdateThread(this);
+    m_OwnedThreads.add(m_pOscSpatThread);
+    m_OwnedThreads.add(m_pSourceUpdateThread);
+    
     //SET PARAMETERS
 	mParameters.ensureStorageAllocated(kNumberOfParameters);
     for (int i = 0; i < kNumberOfParameters; i++){
@@ -234,11 +239,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mJoystickEnabled = 0;
     
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
-    
-    m_pOscSpatThread        = new OscSpatThread(this);
-    m_pSourceUpdateThread   = new SourceUpdateThread(this);
-    m_OwnedThreads.add(m_pOscSpatThread);
-    m_OwnedThreads.add(m_pSourceUpdateThread);
 	
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
@@ -298,17 +298,24 @@ void SpatGrisAudioProcessor::setProcessMode(int s) {
     
     if (mProcessMode == kOscSpatMode){
         connectOscSpat();
-        m_pOscSpatThread->startThread();
     } else {
         mOscSpatSender.disconnect();
-        m_pOscSpatThread->stopThread(500);
+        if (m_pOscSpatThread->isThreadRunning()){
+            m_pOscSpatThread->stopThread(500);
+        }
     }
 }
 
 void SpatGrisAudioProcessor::connectOscSpat(){
+    
     mOscSpatSender.disconnect();
+    if (m_pOscSpatThread->isThreadRunning()){
+        m_pOscSpatThread->stopThread(500);
+    }
     if(!mOscSpatSender.connect("127.0.0.1", m_iOscSpatPort)){
         DBG("OSC cannot connect to " + String(mOscSendIp) + ", port " + String(m_iOscSpatPort));
+    } else {
+        m_pOscSpatThread->startThread();
     }
 }
 
