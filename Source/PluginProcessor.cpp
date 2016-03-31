@@ -254,9 +254,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     std::unique_ptr<SourceMover> pMover(new SourceMover(this));
     m_pMover = std::move(pMover);
     
-//    if (getIsAllowInputOutputModeSelection()){
-//        setInputOutputMode(getInputOutputMode());
-//    }
     cout << "constructor done\n";
 }
 
@@ -461,6 +458,7 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
+    cout << "set InputOutputMode ";
     mInputOutputMode = p_iInputOutputMode-1;
     
     switch (mInputOutputMode){
@@ -542,7 +540,7 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSpeakers(16, false);
             break;
 		default:
-			jassert(0);
+			jassertfalse;
     }
 }
 
@@ -620,8 +618,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
+        cout << "mNumberOfSources is " << mNumberOfSources << ", returning from setNumberOfSources\n";
         return;
     } else {
+        cout << "changing mNumberOfSources from " << mNumberOfSources << " to " << p_iNewNumberOfSources << newLine;
         mIsNumberSourcesChanged = true;
     }
     
@@ -851,6 +851,7 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     if (m_bAllowInputOutputModeSelection) {
+        cout << "prepare to play ";
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
         int iTotalSources = getTotalNumInputChannels();
         if (iTotalSources < mNumberOfSources){
@@ -2008,7 +2009,10 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mOscSendIp          = xmlState->getStringAttribute ("mOscSendIp", mOscSendIp);
             mProcessMode        = xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode);
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
-            mInputOutputMode    = xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode);
+            
+//            mInputOutputMode    = xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode);
+            setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
+            
             mSrcPlacementMode   = xmlState->getIntAttribute ("mSrcPlacementMode", 1);
             mSpPlacementMode    = xmlState->getIntAttribute ("mSpPlacementMode", 1);
             mSrcSelected        = xmlState->getIntAttribute ("mSrcSelected", 0);

@@ -325,9 +325,10 @@ AudioProcessorEditor (ownerFilter)
         mSrcSelectCombo->addListener(this);
         JUCE_COMPILER_WARNING("THIS NEEDS TO BE IN CONSTRUCTOR! because otherwise we need the editor for the plugin to work correctly!")
         //believe it or not, this actually does something useful...! Not quite sure what, but removing it messes up the number of sources and speakers when loading some presets
-        if (mFilter->getIsAllowInputOutputModeSelection()){
-            mFilter->setInputOutputMode(mFilter->getInputOutputMode());
-        }
+//        if (mFilter->getIsAllowInputOutputModeSelection()){
+//            cout << "editor ";
+//            mFilter->setInputOutputMode(mFilter->getInputOutputMode());
+//        }
         updateSources(true);
     }
     
