@@ -51,18 +51,15 @@ public:
     CFDictionaryRef hu_CreateMatchingDictionary(uint32_t inUsagePage, uint32_t inUsage);
     //! Set for the table memorizing button states
     void setButtonPressedTab(u_int32_t index, bool state);
-    //! Get for the table memorizing button states
-    bool getButtonPressedTab(u_int32_t index);
     //! Return the number of button counted on the joystick
-    int getNbButton(){return nbButton;};
+    int getNbButton(){return m_iNbOfJoystickButtons;};
     //! Return the address of the device
     IOHIDDeviceRef getDeviceRef(){return deviceRef;}
     //! Return the address of the set of devices
     CFSetRef getDeviceSetRef(){return deviceSetRef;}
     
 //    void readAndUseJoystickValues();
-    
-    //! Destroyer
+
     virtual ~HIDDelegate() {};
     
 private:
@@ -70,9 +67,9 @@ private:
     SpatGrisAudioProcessor *mFilter;
     SpatGrisAudioProcessorEditor *mEditor;
     //! Number of counted buttons
-    int nbButton;
+    int m_iNbOfJoystickButtons;
     //! Table memorizing button states
-    bool* buttonPressedTab;
+    vector<bool> m_bJoystickButtonsCurentlyPressed;
     //! Variables recording the last and present coordinates (calculated or not)
     float vx, vy;
     //! Set of devices address
