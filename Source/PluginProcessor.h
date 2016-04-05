@@ -573,14 +573,8 @@ public:
 	}
 
 	void setSourceXY01(int i, FPoint p, bool p_bNotifyHost = true) {
-        JUCE_COMPILER_WARNING("for debugging #54")
-//        if (i == 0){
-//            cout << "src01 " << i << ": (" << p.x << ", " << p.y << endl;
-//        }
 		p = clampRadius01(p);
         if (p_bNotifyHost){
-            int iParamForSource = getParamForSourceY(i);
-            cout << iParamForSource << newLine;
             setParameterNotifyingHost(getParamForSourceX(i), p.x);
             setParameterNotifyingHost(getParamForSourceY(i), p.y);
         } else {
@@ -590,10 +584,6 @@ public:
 	}
 
 	void setSourceXY(int i, FPoint p, bool p_bNotifyHost = true) {
-        JUCE_COMPILER_WARNING("for debugging #54")
-//        if (i == 0){
-//            cout << "src " << i << ": (" << p.x << ", " << p.y << endl;
-//        }
 		float r = hypotf(p.x, p.y);
 		if (r > kRadiusMax)
 		{
@@ -646,11 +636,6 @@ public:
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
     void setSourceLocationChanged(int i)   {
-
-        if (i != -1){
-            FPoint point = getSourceXY01(i);
-            cout << "src changed: " << i << " (" << point.x << ", " << point.y << ")\n";
-        }
         m_iSourceLocationChanged = i;
     }
     int  getSourceLocationChanged()        { return m_iSourceLocationChanged;  }

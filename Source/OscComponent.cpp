@@ -219,7 +219,7 @@ public:
                 printf("unknown button clicked...\n");
             }
         } catch (exception& e) {
-            cout << e.what() << '\n';
+            DBG(e.what());
         }
     }
 	void oscMessageReceived(const OSCMessage& message) override {

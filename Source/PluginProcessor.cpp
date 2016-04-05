@@ -262,12 +262,11 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     }
 }
 
-//THIS NEEDS TO BE MOVED TO PROCESSOR. mover needs to be copied around, like it is done for fieldComponent
 void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
-        cout << "updateNonSelectedSourcePositions\n";
+        JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
@@ -305,7 +304,6 @@ void SpatGrisAudioProcessor::connectOscSpat(){
     m_bOscSpatSenderIsConnected = mOscSpatSender.connect(m_sOscIpAddress, m_iOscSpatPort);
     if(m_bOscSpatSenderIsConnected){
         m_pOscSpatThread->startThread();
-        cout << "m_pOscSpatThread->startThread()\n";
     } else {
         DBG("OSC cannot connect to " + String(mOscSendIp) + ", port " + String(m_iOscSpatPort));
         jassertfalse;
@@ -381,7 +379,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     if (!areSame(fOldValue, newValue)){
         
         if (newValue == 0){
-            cout << "NEW VALUE IS ZERO\n";
+            cout << "TRYING (AND FAILING) TO SET PARAMETER " << index << " TO ZERO\n";
             return;
         }
 
@@ -474,7 +472,6 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
-    cout << "set InputOutputMode ";
     mInputOutputMode = p_iInputOutputMode-1;
     
     switch (mInputOutputMode){
@@ -634,10 +631,8 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
-//        cout << "mNumberOfSources is " << mNumberOfSources << ", returning from setNumberOfSources\n";
         return;
     } else {
-//        cout << "changing mNumberOfSources from " << mNumberOfSources << " to " << p_iNewNumberOfSources << newLine;
         mIsNumberSourcesChanged = true;
     }
     
@@ -1224,7 +1219,7 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	output[f] += s * output_adj;
     
     if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .9){
-        cout << "click?";
+        cout << "#47: click?";
     }
 }
 
@@ -2064,9 +2059,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 String srcY = "src" + to_string(i) + "y";
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
                 mParameters.set(getParamForSourceY(i), fY01);
-                
-                cout << "src " << i << " (" << fX01 << ", " << fY01 << ")\n";
-                
                 FPoint curPoint = FPoint(fX01, fY01);
                 mOldSrcLocRT[i] = convertXy012Rt(curPoint);
                 String srcD = "src" + to_string(i) + "d";
