@@ -253,8 +253,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 
     std::unique_ptr<SourceMover> pMover(new SourceMover(this));
     m_pMover = std::move(pMover);
-    
-    cout << "constructor done\n";
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
