@@ -92,7 +92,7 @@ Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, fl
 	mTotalDuration = mDurationSingleTraj * times;
 }
 
-JUCE_COMPILER_WARNING("should this be a shared_ptr instead? is this thing copied?")
+//using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
 std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleDirections(int p_iTrajectory){
     unique_ptr<vector<String>> vDirections (new vector<String>);
     
