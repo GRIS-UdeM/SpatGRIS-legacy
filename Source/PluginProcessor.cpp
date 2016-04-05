@@ -78,7 +78,7 @@ public:
     : Thread ("OscSpatThread")
     , m_iInterval(25)
     , m_pProcessor(p_pProcessor) {
-        startThread ();
+
     }
     
     ~OscSpatThread() {
@@ -305,6 +305,7 @@ void SpatGrisAudioProcessor::connectOscSpat(){
     m_bOscSpatSenderIsConnected = mOscSpatSender.connect(m_sOscIpAddress, m_iOscSpatPort);
     if(m_bOscSpatSenderIsConnected){
         m_pOscSpatThread->startThread();
+        cout << "m_pOscSpatThread->startThread()\n";
     } else {
         DBG("OSC cannot connect to " + String(mOscSendIp) + ", port " + String(m_iOscSpatPort));
         jassertfalse;
@@ -380,14 +381,40 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     if (!areSame(fOldValue, newValue)){
         mParameters.set(index, newValue);
 
-        if      (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(0) || index == getParamForSourceY(0))) { setSourceLocationChanged(0);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(1) || index == getParamForSourceY(1))) { setSourceLocationChanged(1);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(2) || index == getParamForSourceY(2))) { setSourceLocationChanged(2);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(3) || index == getParamForSourceY(3))) { setSourceLocationChanged(3);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(4) || index == getParamForSourceY(4))) { setSourceLocationChanged(4);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(5) || index == getParamForSourceY(5))) { setSourceLocationChanged(5);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(6) || index == getParamForSourceY(6))) { setSourceLocationChanged(6);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(7) || index == getParamForSourceY(7))) { setSourceLocationChanged(7);}
+        if      (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(0) || index == getParamForSourceY(0))) {
+            setSourceLocationChanged(0);
+            FPoint point = getSourceXY01(0);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(1) || index == getParamForSourceY(1))) {
+            setSourceLocationChanged(1);
+            FPoint point = getSourceXY01(1);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(2) || index == getParamForSourceY(2))) {
+            setSourceLocationChanged(2);
+            FPoint point = getSourceXY01(2);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(3) || index == getParamForSourceY(3))) {
+            setSourceLocationChanged(3);
+            FPoint point = getSourceXY01(3);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(4) || index == getParamForSourceY(4))) {
+            setSourceLocationChanged(4);
+            FPoint point = getSourceXY01(4);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(5) || index == getParamForSourceY(5))) {
+            setSourceLocationChanged(5);
+            FPoint point = getSourceXY01(5);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(6) || index == getParamForSourceY(6))) {
+            setSourceLocationChanged(6);
+            FPoint point = getSourceXY01(6);
+            jassert(!(point.x == 0 && point.y ==0));
+        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(7) || index == getParamForSourceY(7))) {
+            setSourceLocationChanged(7);
+            FPoint point = getSourceXY01(7);
+            jassert(!(point.x == 0 && point.y ==0));
+        }
+        
         mHostChangedParameter++;
     }
 }
@@ -616,10 +643,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
-        cout << "mNumberOfSources is " << mNumberOfSources << ", returning from setNumberOfSources\n";
+//        cout << "mNumberOfSources is " << mNumberOfSources << ", returning from setNumberOfSources\n";
         return;
     } else {
-        cout << "changing mNumberOfSources from " << mNumberOfSources << " to " << p_iNewNumberOfSources << newLine;
+//        cout << "changing mNumberOfSources from " << mNumberOfSources << " to " << p_iNewNumberOfSources << newLine;
         mIsNumberSourcesChanged = true;
     }
     
@@ -849,7 +876,6 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     if (m_bAllowInputOutputModeSelection) {
-        cout << "prepare to play ";
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
         int iTotalSources = getTotalNumInputChannels();
         if (iTotalSources < mNumberOfSources){
@@ -2008,7 +2034,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mProcessMode        = xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode);
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
             
-//            mInputOutputMode    = xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode);
             setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
             
             mSrcPlacementMode   = xmlState->getIntAttribute ("mSrcPlacementMode", 1);
@@ -2048,6 +2073,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 String srcY = "src" + to_string(i) + "y";
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
                 mParameters.set(getParamForSourceY(i), fY01);
+                
+                cout << "src " << i << " (" << fX01 << ", " << fY01 << ")\n";
+                
                 FPoint curPoint = FPoint(fX01, fY01);
                 mOldSrcLocRT[i] = convertXy012Rt(curPoint);
                 String srcD = "src" + to_string(i) + "d";

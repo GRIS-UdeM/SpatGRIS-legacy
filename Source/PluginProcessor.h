@@ -646,7 +646,10 @@ public:
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
     void setSourceLocationChanged(int i)   {
-        cout << "src changed: " << i << newLine;
+
+        FPoint point = getSourceXY01(i);
+        cout << "src changed: " << i << " (" << point.x << ", " << point.y << ")\n";
+        
         m_iSourceLocationChanged = i;
     }
     int  getSourceLocationChanged()        { return m_iSourceLocationChanged;  }
