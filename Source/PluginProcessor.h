@@ -647,9 +647,10 @@ public:
 
     void setSourceLocationChanged(int i)   {
 
-        FPoint point = getSourceXY01(i);
-        cout << "src changed: " << i << " (" << point.x << ", " << point.y << ")\n";
-        
+        if (i != -1){
+            FPoint point = getSourceXY01(i);
+            cout << "src changed: " << i << " (" << point.x << ", " << point.y << ")\n";
+        }
         m_iSourceLocationChanged = i;
     }
     int  getSourceLocationChanged()        { return m_iSourceLocationChanged;  }

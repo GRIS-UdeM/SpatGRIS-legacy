@@ -379,47 +379,30 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     float fOldValue = mParameters.getUnchecked(index);
     
     if (!areSame(fOldValue, newValue)){
+        
+        if (newValue == 0){
+            cout << "NEW VALUE IS ZERO\n";
+            return;
+        }
 
-        if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(0) || index == getParamForSourceY(0))) {
-            setSourceLocationChanged(0);
-            FPoint point = getSourceXY01(0);
-            cout << "source 0 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(1) || index == getParamForSourceY(1))) {
-            setSourceLocationChanged(1);
-            FPoint point = getSourceXY01(1);
-            cout << "source 1 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(2) || index == getParamForSourceY(2))) {
-            setSourceLocationChanged(2);
-            FPoint point = getSourceXY01(2);
-            cout << "source 2 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(3) || index == getParamForSourceY(3))) {
-            setSourceLocationChanged(3);
-            FPoint point = getSourceXY01(3);
-            cout << "source 3 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(4) || index == getParamForSourceY(4))) {
-            setSourceLocationChanged(4);
-            FPoint point = getSourceXY01(4);
-            cout << "source 4 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(5) || index == getParamForSourceY(5))) {
-            setSourceLocationChanged(5);
-            FPoint point = getSourceXY01(5);
-            cout << "source 5 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(6) || index == getParamForSourceY(6))) {
-            setSourceLocationChanged(6);
-            FPoint point = getSourceXY01(6);
-            cout << "source 6 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
-        } else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(7) || index == getParamForSourceY(7))) {
-            setSourceLocationChanged(7);
-            FPoint point = getSourceXY01(7);
-            cout << "source 7 (" << point.x << ", " << point.y << ")\n";
-            jassert(point.x != 0 && point.y !=0);
+        if (!m_bPreventSourceLocationUpdate){
+            if (index == getParamForSourceX(0) || index == getParamForSourceY(0)) {
+                setSourceLocationChanged(0);
+            } else if (index == getParamForSourceX(1) || index == getParamForSourceY(1)) {
+                setSourceLocationChanged(1);
+            } else if (index == getParamForSourceX(2) || index == getParamForSourceY(2)) {
+                setSourceLocationChanged(2);
+            } else if (index == getParamForSourceX(3) || index == getParamForSourceY(3)) {
+                setSourceLocationChanged(3);
+            } else if (index == getParamForSourceX(4) || index == getParamForSourceY(4)) {
+                setSourceLocationChanged(4);
+            } else if (index == getParamForSourceX(5) || index == getParamForSourceY(5)) {
+                setSourceLocationChanged(5);
+            } else if (index == getParamForSourceX(6) || index == getParamForSourceY(6)) {
+                setSourceLocationChanged(6);
+            } else if (index == getParamForSourceX(7) || index == getParamForSourceY(7)) {
+                setSourceLocationChanged(7);
+            }
         }
 
         mParameters.set(index, newValue);
