@@ -379,8 +379,8 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     if (!areSame(fOldValue, newValue)){
         
         if (newValue == 0){
-            cout << "TRYING (AND FAILING) TO SET PARAMETER " << index << " TO ZERO\n";
-            return;
+            cout << "TRYING TO SET PARAMETER " << index << " TO ZERO\n";
+//            return;
         }
 
         if (!m_bPreventSourceLocationUpdate){
