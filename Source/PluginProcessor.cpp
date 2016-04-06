@@ -382,6 +382,8 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
             cout << "#54: TRYING TO SET PARAMETER " << index << " TO ZERO\n";
 //            return;
         }
+        
+        mParameters.set(index, newValue);
 
         if (!m_bPreventSourceLocationUpdate){
             if (index == getParamForSourceX(0) || index == getParamForSourceY(0)) {
@@ -403,7 +405,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
             }
         }
 
-        mParameters.set(index, newValue);
+        
         mHostChangedParameter++;
     }
 }
