@@ -426,7 +426,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         
         if (newValue == 0){
             cout << "#54: TRYING TO SET PARAMETER " << index << " TO ZERO\n";
-//            return;
+            return;
         }
         
         mParameters.set(index, newValue);
