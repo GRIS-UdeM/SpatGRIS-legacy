@@ -69,6 +69,34 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 }
 #endif
 
+JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
+//==================================== SourceUpdateThread ===================================================================
+class SourceUpdateThread : public Thread
+{
+public:
+    SourceUpdateThread(SpatGrisAudioProcessor* p_pProcessor)
+    : Thread ("SourceUpdateThread")
+    ,m_iInterval(50)
+    ,m_pProcessor(p_pProcessor)
+    { }
+    
+    ~SourceUpdateThread() {
+        stopThread (500);
+    }
+    
+    void run() override {
+        while (! threadShouldExit()) {
+            m_pProcessor->updateNonSelectedSourcePositions();
+            wait (m_iInterval);
+        }
+    }
+    
+private:
+    int m_iInterval;
+    SpatGrisAudioProcessor* m_pProcessor;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
+};
 
 
 //====================================== OscSpatThread ========================================
@@ -189,7 +217,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
-	mMovementMode = 0;
+	setMovementMode(0);
 	mShowGridLines = false;
 	mTrSeparateAutomationMode = false;
     mIsNumberSourcesChanged = false;
@@ -262,9 +290,25 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     }
 }
 
+void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
+//    if (!m_bIsRecordingAutomation && m_iMovementMode != 0 && m_iSourceLocationChanged != -1) {
+//        if (!m_pSourceUpdateThread->isThreadRunning()){
+//            m_pSourceUpdateThread->startThread();
+//        }
+//    } else if (m_pSourceUpdateThread->isThreadRunning()){
+//        m_pSourceUpdateThread->stopThread(500);
+//    }
+    
+    if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
+        m_pSourceUpdateThread->stopThread(500);
+    } else if (!m_pSourceUpdateThread->isThreadRunning()){
+        m_pSourceUpdateThread->startThread();
+    }
+
+}
+
 void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
-    //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
         JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
         if (m_pMover != nullptr){
@@ -1923,7 +1967,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("kDataVersion", kDataVersion);
     xml.setAttribute ("mShowGridLines", mShowGridLines);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
-    xml.setAttribute ("mMovementMode", mMovementMode);
+    xml.setAttribute ("m_iMovementMode", m_iMovementMode);
     xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
     xml.setAttribute ("mLinkAzimSpan", mLinkAzimSpan);
     xml.setAttribute ("mLinkElevSpan", mLinkElevSpan);
@@ -2008,7 +2052,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             }
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
-            mMovementMode       = xmlState->getIntAttribute ("mMovementMode", 0);
+            setMovementMode(xmlState->getIntAttribute ("m_iMovementMode", 0));
             mLinkSurfaceOrPan   = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
             mLinkAzimSpan       = xmlState->getIntAttribute ("mLinkAzimSpan", 0);
             mLinkElevSpan       = xmlState->getIntAttribute ("mLinkElevSpan", 0);

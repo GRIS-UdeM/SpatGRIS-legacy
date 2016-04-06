@@ -91,3 +91,10 @@ ok. probleme bizarre ici, issue #59. Quel est le path de vie du mover?
 * passé au constructor de FieldComponent dans editor constructor
 * passe au constructor de trajectories dans buttonClicked()
 * editor::getMover() sends the mover to HIDDelegate, OctoLeap, OscComponent
+
+
+Alright, i don't see any obvious problems with the mover pointer, so looking into when sourceUpdateThread is run and stopped. 
+It should run when 
+    * we have more than 1 source
+    * we're not recording automation
+    * we're in a dependent mode

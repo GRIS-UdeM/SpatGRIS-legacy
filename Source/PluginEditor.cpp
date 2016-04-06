@@ -199,10 +199,6 @@ AudioProcessorEditor (ownerFilter)
         LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
     }
     
-    JUCE_COMPILER_WARNING("delete these sourceUpdateThread comments")
-//    m_pSourceUpdateThread = new SourceUpdateThread(this);
-//    mComponents.add(m_pSourceUpdateThread);
-
 //    m_pJoystickUpdateThread = new JoystickUpdateThread(this);
 //    mComponents.add(m_pJoystickUpdateThread);
     
@@ -1878,7 +1874,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
             
-            mFilter->getSourceUpdateThread()->stopThread(500);
+//            mFilter->getSourceUpdateThread()->stopThread(500);
             switch (iSelectedMode) {
                 case 2:
                     m_pMover->setEqualRadius();
@@ -1898,7 +1894,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 default:
                     break;
             }
-            mFilter->getSourceUpdateThread()->startThread();
+//            mFilter->getSourceUpdateThread()->startThread();
         }
     }
     else if (comboBox == mRoutingModeCombo) {
@@ -2113,14 +2109,14 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             updateInputOutputCombo();
         }
     }
-JUCE_COMPILER_WARNING("all this getSourceUpdateThread() business should probably be done directly in processor")
-    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && mFilter->getSourceLocationChanged() != -1) {
-        if(!mFilter->getSourceUpdateThread()->isThreadRunning()){
-            mFilter->getSourceUpdateThread()->startThread();
-        }
-    } else if (mFilter->getSourceUpdateThread()->isThreadRunning()){
-            mFilter->getSourceUpdateThread()->stopThread(500);
-    }
+    
+//JUCE_COMPILER_WARNING("all this getSourceUpdateThread() business should probably be done directly in processor")
+//    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && mFilter->getSourceLocationChanged() != -1 && !mFilter->getSourceUpdateThread()->isThreadRunning()) {
+//        mFilter->getSourceUpdateThread()->startThread();
+//    } else if (mFilter->getSourceUpdateThread()->isThreadRunning()){
+//            mFilter->getSourceUpdateThread()->stopThread(500);
+//    }
+    
     mNeedRepaint = false;
     mFieldNeedRepaint = false;
     

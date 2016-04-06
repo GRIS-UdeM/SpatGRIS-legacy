@@ -295,8 +295,12 @@ public:
     bool getIndependentMode() const { return mTrSeparateAutomationMode; }
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
     
-	int getMovementMode() const { return mMovementMode; }
-	void setMovementMode(int s) { mMovementMode = s; }
+	int getMovementMode() const { return m_iMovementMode; }
+
+    void setMovementMode(int s) {
+        startOrStopSourceUpdateThread();
+        m_iMovementMode = s;
+    }
 	
 	bool getLinkDistance() const { return mLinkSurfaceOrPan; }
 	void setLinkDistance(bool s) { mLinkSurfaceOrPan = s; }
@@ -632,13 +636,12 @@ public:
     
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
+        startOrStopSourceUpdateThread();
     }
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
-    void setSourceLocationChanged(int i)   {
-        m_iSourceLocationChanged = i;
-    }
-    int  getSourceLocationChanged()        { return m_iSourceLocationChanged;  }
+    void setSourceLocationChanged(int i)    {  m_iSourceLocationChanged = i;    }
+    int  getSourceLocationChanged()         { return m_iSourceLocationChanged;  }
 
     int getSrcSelected() const {return mSrcSelected;}
     int getSpSelected() const  {return mSpSelected;}
@@ -668,12 +671,13 @@ public:
     void    setOldSrcLocRT(int id, FPoint pointRT){
         mOldSrcLocRT[id] = pointRT;
     }
-    
-    SourceUpdateThread* getSourceUpdateThread(){
-        return m_pSourceUpdateThread;
-    }
-    
+//    
+//    SourceUpdateThread* getSourceUpdateThread(){
+//        return m_pSourceUpdateThread;
+//    }
+//    
     void updateNonSelectedSourcePositions();
+    void startOrStopSourceUpdateThread();
     
 private:
 
@@ -692,7 +696,7 @@ private:
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
     bool mLinkElevSpan;
-	int mMovementMode;
+	int m_iMovementMode;
 	bool mShowGridLines;
     bool mTrSeparateAutomationMode;
     int mGuiWidth;
@@ -795,34 +799,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
 
-JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
-//==================================== SourceUpdateThread ===================================================================
-class SourceUpdateThread : public Thread
-{
-public:
-    SourceUpdateThread(SpatGrisAudioProcessor* p_pProcessor)
-    : Thread ("SourceUpdateThread")
-    ,m_iInterval(50)
-    ,m_pProcessor(p_pProcessor)
-    { }
-    
-    ~SourceUpdateThread() {
-        stopThread (500);
-    }
-    
-    void run() override {
-        while (! threadShouldExit()) {
-            wait (m_iInterval);
-            m_pProcessor->updateNonSelectedSourcePositions();
-        }
-    }
-    
-private:
-    int m_iInterval;
-    SpatGrisAudioProcessor* m_pProcessor;
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
-};
 
 
 #endif  // PLUGINPROCESSOR_H_INCLUDED
