@@ -125,6 +125,7 @@ public:
                 return;
             
             // now we've got the UI thread locked, we can mess about with the components
+            cout << "OscSpatThread\n";
             m_pProcessor->sendOscSpatValues();
         }
     }
@@ -291,14 +292,6 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
 }
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
-//    if (!m_bIsRecordingAutomation && m_iMovementMode != 0 && m_iSourceLocationChanged != -1) {
-//        if (!m_pSourceUpdateThread->isThreadRunning()){
-//            m_pSourceUpdateThread->startThread();
-//        }
-//    } else if (m_pSourceUpdateThread->isThreadRunning()){
-//        m_pSourceUpdateThread->stopThread(500);
-//    }
-    
     if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
         m_pSourceUpdateThread->stopThread(500);
     } else if (!m_pSourceUpdateThread->isThreadRunning()){
@@ -311,11 +304,10 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
         JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
-//        if (m_pMover != nullptr){
-            m_pMover->begin(iSourceChanged, kSourceThread);
-            m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
-            m_pMover->end(kSourceThread);
-//        }
+        m_pMover->begin(iSourceChanged, kSourceThread);
+        m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
+        m_pMover->end(kSourceThread);
+        cout << "SourceUpdateThread\n";
         setSourceLocationChanged(-1);
     }
 }
@@ -1266,14 +1258,14 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	float *output = outputs[o];
 	output[f] += s * output_adj;
     
-    if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .9){
+    if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .25){
         cout << "#47: click?";
     }
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
 	
-	// ramp all parameters, except constant ones and speaker thetas
+	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
     const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
 	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
     for (int i = 0; i < (kNumberOfParameters - kConstantParameters); ++i) {
@@ -1303,7 +1295,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 		memset(output, 0, frames * sizeof(float));
 	}
 
-	// Compute output[]
+	// Compute output[] for each source
 	for (int i = 0; i < mNumberOfSources; ++i) {
 		float *input = inputs[i];
 		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;

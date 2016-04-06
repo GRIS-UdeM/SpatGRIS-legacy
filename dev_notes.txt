@@ -98,3 +98,9 @@ It should run when
     * we have more than 1 source
     * we're not recording automation
     * we're in a dependent mode
+
+--- #47 ---
+audio clicks. they don't seem to be due to a sudden big transient, although only tested difference between 2 samples, could be something more complicated... 
+What if it is due to having all speakers activated at once? Or something similar, like the angle problem in the center? Looking at ProcessDataPanVolumeMode(). 
+
+

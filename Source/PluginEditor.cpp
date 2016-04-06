@@ -1873,7 +1873,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         int iSelectedMode = comboBox->getSelectedId() - 1;
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
-            
+            JUCE_COMPILER_WARNING("need to test if can change movement contrainst")
 //            mFilter->getSourceUpdateThread()->stopThread(500);
             switch (iSelectedMode) {
                 case 2:
@@ -2109,13 +2109,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             updateInputOutputCombo();
         }
     }
-    
-//JUCE_COMPILER_WARNING("all this getSourceUpdateThread() business should probably be done directly in processor")
-//    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && mFilter->getSourceLocationChanged() != -1 && !mFilter->getSourceUpdateThread()->isThreadRunning()) {
-//        mFilter->getSourceUpdateThread()->startThread();
-//    } else if (mFilter->getSourceUpdateThread()->isThreadRunning()){
-//            mFilter->getSourceUpdateThread()->stopThread(500);
-//    }
     
     mNeedRepaint = false;
     mFieldNeedRepaint = false;
