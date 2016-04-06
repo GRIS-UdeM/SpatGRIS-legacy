@@ -82,4 +82,5 @@ searching for ksmooth, I see that param smoothing is used in all process modes, 
 I think this can be fixed at the same time as #52 (source update thread not running when editor is
 closed). 
 Both threads need to run in the processor, and be deleted using an owned array.
-
+----------- 2016-04-06 -----------
+cur: 1e8e158a97fc260366d6d9505e0f38526750d940

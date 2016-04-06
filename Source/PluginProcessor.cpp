@@ -267,9 +267,11 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
         JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
-        m_pMover->begin(iSourceChanged, kSourceThread);
-        m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
-        m_pMover->end(kSourceThread);
+        if (m_pMover != nullptr){
+            m_pMover->begin(iSourceChanged, kSourceThread);
+            m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
+            m_pMover->end(kSourceThread);
+        }
         setSourceLocationChanged(-1);
     }
 }
