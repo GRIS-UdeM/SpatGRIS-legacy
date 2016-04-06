@@ -199,6 +199,7 @@ AudioProcessorEditor (ownerFilter)
         LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
     }
     
+    JUCE_COMPILER_WARNING("delete these sourceUpdateThread comments")
 //    m_pSourceUpdateThread = new SourceUpdateThread(this);
 //    mComponents.add(m_pSourceUpdateThread);
 
@@ -1192,8 +1193,8 @@ SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
 		gIsLeapConnected = 0;
 		mController.release();
 	}
-    getMover()->end(kLeap);
-    getMover()->end(kHID);
+    m_pMover->end(kLeap);
+    m_pMover->end(kHID);
 #endif
 }
 

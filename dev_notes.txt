@@ -84,3 +84,10 @@ closed).
 Both threads need to run in the processor, and be deleted using an owned array.
 ----------- 2016-04-06 -----------
 cur: 1e8e158a97fc260366d6d9505e0f38526750d940
+ok. probleme bizarre ici, issue #59. Quel est le path de vie du mover?
+* unique_ptr dans processor.h
+* instancié fin du constructor processor
+* passé au constructor de l'editor dans createEditor(), en tant que pointer normal (seems to be ok if nothing is messing with pointer ownership...).
+* passé au constructor de FieldComponent dans editor constructor
+* passe au constructor de trajectories dans buttonClicked()
+* editor::getMover() sends the mover to HIDDelegate, OctoLeap, OscComponent
