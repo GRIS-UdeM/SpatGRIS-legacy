@@ -311,11 +311,11 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
         JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
-        if (m_pMover != nullptr){
+//        if (m_pMover != nullptr){
             m_pMover->begin(iSourceChanged, kSourceThread);
             m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
             m_pMover->end(kSourceThread);
-        }
+//        }
         setSourceLocationChanged(-1);
     }
 }
