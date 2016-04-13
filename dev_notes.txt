@@ -144,3 +144,17 @@ Donc, on a:
                             * looking at juce demo for ideas to optimise trace and other GUI things, I found the chain demo
                               in box2d, which is someone else's tests in opengl or something. Probably worth checking out
                               at some point...
+        * DP 
+            * CPU with trace, octogris 3.0.2
+                * repos, interface ou pas 15%
+                * ecriture manuelle 78-88%
+                * lecture 68-70%
+            *sans trace
+                * repos, interface ou pas, 16-18%
+                * ecriture 75-80%
+                    * quand meme laggy a fond.
+            * spatgris
+                * repos 23-24
+                * ecriture manuelle 86-87%, increasing with trace, better than octogris for sure
+                * lecture 63%
+                * lecture 60-70

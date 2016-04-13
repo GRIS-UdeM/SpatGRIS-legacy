@@ -125,7 +125,6 @@ public:
                 return;
             
             // now we've got the UI thread locked, we can mess about with the components
-            cout << "OscSpatThread\n";
             m_pProcessor->sendOscSpatValues();
         }
     }
@@ -307,7 +306,6 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
-        cout << "SourceUpdateThread\n";
         setSourceLocationChanged(-1);
     }
 }
@@ -417,7 +415,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     if (!areSame(fOldValue, newValue)){
         
         if (newValue == 0){
-            cout << "#54: TRYING TO SET PARAMETER " << index << " TO ZERO\n";
+            DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
             return;
         }
         
@@ -1259,7 +1257,7 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	output[f] += s * output_adj;
     
     if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .25){
-        cout << "#47: click?";
+        DBG("#47: click?");
     }
 }
 
