@@ -138,3 +138,9 @@ Donc, on a:
                     * repos, interface ou pas, 4-5%
                     * écriture automation manuelle: 58-68%, augmentation avec le temps, probablement a cause de la trace
                     * octogris 301 is cout-ing stuff!!!!
+                        * removed them in 302, doesn't change performance...
+                        * what about removing the trace?
+                            * ecriture: peak 77%, lecture 56%, mieux mais pas parfait.
+                            * looking at juce demo for ideas to optimise trace and other GUI things, I found the chain demo
+                              in box2d, which is someone else's tests in opengl or something. Probably worth checking out
+                              at some point...
