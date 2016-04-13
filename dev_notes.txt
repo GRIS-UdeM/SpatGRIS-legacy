@@ -119,7 +119,14 @@ Robert s'inquiète beaucoup de #114.
 Donc, on a:
     * AU vs VST
         * test this in reaper
+            * 301: aucun problème
+                * les CPU de Octogris VST, AU et grm spaces sont comparables.
+                    * repos, sans interface: 9-10%
+                    * repos, interface: 9-11%
+                    * lecture automation 46% 
+                    * ecriture: 57-58%
     * 225 vs 228
         * test this in DP
     * Octogris en general vs Spatgris
         * test this in logic
+            
