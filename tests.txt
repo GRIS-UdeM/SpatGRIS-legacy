@@ -1,1 +1,0 @@
-Écrire une automation à plusieurs sources, et déplacer le curseur de playback sur l'automation. S'assurer que toutes les positions de sources sont mises à jour et les informations sour l'onglet source.
