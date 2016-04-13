@@ -103,4 +103,23 @@ It should run when
 audio clicks. they don't seem to be due to a sudden big transient, although only tested difference between 2 samples, could be something more complicated... 
 What if it is due to having all speakers activated at once? Or something similar, like the angle problem in the center? Looking at ProcessDataPanVolumeMode(). 
 
+--------------------- 2016-04-13 ------------------
+OK. problèmes en lien avec les performances:
+    * Octogris #114: lag automation manuelles
+    * Spatgris # 60: CPU prends trop de jus
 
+Robert s'inquiète beaucoup de #114. 
+    * DP (AU): 
+        * dernier octogris (301) plus lent que spatgris
+        * octogris 213 également a chier
+        * octogris 225 > 226 (où arrive la trace) > 228 (trace est blanche)  
+    * Logic(AU): spatgris aussi bad que octogris 301
+    * Reaper: vst all good...!
+
+Donc, on a:
+    * AU vs VST
+        * test this in reaper
+    * 225 vs 228
+        * test this in DP
+    * Octogris en general vs Spatgris
+        * test this in logic
