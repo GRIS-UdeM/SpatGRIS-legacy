@@ -163,10 +163,12 @@ TIMING AND TRYING THINGS
     I added a vector in which i push times from editor::timerCallBack. NEED TO TURN TIMING_THINGS MACRO OFF. Here are the various things I tried turning off:
 
     * trace
-        helps a big
-    //* speaker levels
+        helps a bit, try to print only last X subpaths
+    * speaker levels
         * Turns out displaying speaker levels takes a lot of CPU, and not displaying them removes any visual lag from DP...!
         * so far this makes the biggest difference on gui and automation
+        * disabled this when writing automation
     *these 2 calls take most of the time in repaint and are not useful at al during automation: updateSourceLocationTextEditor() and updateSpeakerLocationTextEditor(). 
         * but removing them make no difference on gui/automation lag
+        * still deactivated them, because spending this much time on this is ludicrous!
         
