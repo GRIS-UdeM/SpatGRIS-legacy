@@ -123,10 +123,18 @@ Donc, on a:
                 * les CPU de Octogris VST, AU et grm spaces sont comparables.
                     * repos, sans interface: 9-10%
                     * repos, interface: 9-11%
-                    * lecture automation 46% 
-                    * ecriture: 57-58%
+                    * lecture automation, interface: 46% 
+                    * ecriture automation manuelle: 57-58%
     * 225 vs 228
         * test this in DP
     * Octogris en general vs Spatgris
         * test this in logic
-            
+            * CPU
+                * spatgris 011
+                    * repos, interface ou pas : 3-4%
+                    * ecriture automation manuelle:  80-85%
+                    * lecture automation, interface: 51-60%
+                * octogris 301
+                    * repos, interface ou pas, 4-5%
+                    * écriture automation manuelle: 58-68%, augmentation avec le temps, probablement a cause de la trace
+                    * octogris 301 is cout-ing stuff!!!!
