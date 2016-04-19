@@ -41,14 +41,9 @@ void FirFilter::reset()
 	memset(mBuf, 0, sizeof(mBuf));
 }
 
-void FirFilter::setSampleRate(int sr)
-{
-	for (int i = 0; i < sizeof(kSampleRates)/sizeof(kSampleRates[0]); i++)
-	{
-		if (kSampleRates[i] == sr)
-		{
-//            std::cout << "mFir: " << mFir << std::endl;
-//            std::cout << "i: " << i << std::endl;
+void FirFilter::setSampleRate(int sr) {
+	for (int i = 0; i < sizeof(kSampleRates)/sizeof(kSampleRates[0]); i++) {
+		if (kSampleRates[i] == sr) {
 			mFir = i;
 			return;
 		}

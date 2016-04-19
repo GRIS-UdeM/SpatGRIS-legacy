@@ -82,4 +82,93 @@ searching for ksmooth, I see that param smoothing is used in all process modes, 
 I think this can be fixed at the same time as #52 (source update thread not running when editor is
 closed). 
 Both threads need to run in the processor, and be deleted using an owned array.
+----------- 2016-04-06 -----------
+cur: 1e8e158a97fc260366d6d9505e0f38526750d940
+ok. probleme bizarre ici, issue #59. Quel est le path de vie du mover?
+* unique_ptr dans processor.h
+* instancié fin du constructor processor
+* passé au constructor de l'editor dans createEditor(), en tant que pointer normal (seems to be ok if nothing is messing with pointer ownership...).
+* passé au constructor de FieldComponent dans editor constructor
+* passe au constructor de trajectories dans buttonClicked()
+* editor::getMover() sends the mover to HIDDelegate, OctoLeap, OscComponent
 
+
+Alright, i don't see any obvious problems with the mover pointer, so looking into when sourceUpdateThread is run and stopped. 
+It should run when 
+    * we have more than 1 source
+    * we're not recording automation
+    * we're in a dependent mode
+
+--- #47 ---
+audio clicks. they don't seem to be due to a sudden big transient, although only tested difference between 2 samples, could be something more complicated... 
+What if it is due to having all speakers activated at once? Or something similar, like the angle problem in the center? Looking at ProcessDataPanVolumeMode(). 
+
+--------------------- 2016-04-13 ------------------
+OK. problèmes en lien avec les performances:
+    * Octogris #114: lag automation manuelles
+    * Spatgris # 60: CPU prends trop de jus
+
+Robert s'inquiète beaucoup de #114. 
+    * DP (AU): 
+        * dernier octogris (301) plus lent que spatgris
+        * octogris 213 également a chier
+        * octogris 225 > 226 (où arrive la trace) > 228 (trace est blanche)  
+    * Logic(AU): spatgris aussi bad que octogris 301
+    * Reaper: vst all good...!
+
+Donc, on a:
+    * AU vs VST
+        * test this in reaper
+            * 301: aucun problème
+                * les CPU de Octogris VST, AU et grm spaces sont comparables.
+                    * repos, sans interface: 9-10%
+                    * repos, interface: 9-11%
+                    * lecture automation, interface: 46% 
+                    * ecriture automation manuelle: 57-58%
+    * 225 vs 228
+        * test this in DP
+    * Octogris en general vs Spatgris
+        * test this in logic
+            * CPU
+                * spatgris 011
+                    * repos, interface ou pas : 3-4%
+                    * ecriture automation manuelle:  80-85%
+                    * lecture automation, interface: 51-60%
+                * octogris 301
+                    * repos, interface ou pas, 4-5%
+                    * écriture automation manuelle: 58-68%, augmentation avec le temps, probablement a cause de la trace
+                    * octogris 301 is cout-ing stuff!!!!
+                        * removed them in 302, doesn't change performance...
+                        * what about removing the trace?
+                            * ecriture: peak 77%, lecture 56%, mieux mais pas parfait.
+                            * looking at juce demo for ideas to optimise trace and other GUI things, I found the chain demo
+                              in box2d, which is someone else's tests in opengl or something. Probably worth checking out
+                              at some point...
+        * DP 
+            * CPU with trace, octogris 3.0.2
+                * repos, interface ou pas 15%
+                * ecriture manuelle 78-88%
+                * lecture 68-70%
+            *sans trace
+                * repos, interface ou pas, 16-18%
+                * ecriture 75-80%
+                    * quand meme laggy a fond.
+            * spatgris
+                * repos 23-24
+                * ecriture manuelle 86-87%, increasing with trace, better than octogris for sure
+                * lecture 63%
+                * lecture 60-70
+
+TIMING AND TRYING THINGS
+    I added a vector in which i push times from editor::timerCallBack. NEED TO TURN TIMING_THINGS MACRO OFF. Here are the various things I tried turning off:
+
+    * trace
+        helps a bit, try to print only last X subpaths
+    * speaker levels
+        * Turns out displaying speaker levels takes a lot of CPU, and not displaying them removes any visual lag from DP...!
+        * so far this makes the biggest difference on gui and automation
+        * disabled this when writing automation
+    *these 2 calls take most of the time in repaint and are not useful at al during automation: updateSourceLocationTextEditor() and updateSpeakerLocationTextEditor(). 
+        * but removing them make no difference on gui/automation lag
+        * still deactivated them, because spending this much time on this is ludicrous!
+        

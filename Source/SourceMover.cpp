@@ -44,7 +44,6 @@ void SourceMover::begin(int s, MoverType mt) {
 	
     if (mMoverType != kSourceThread){
         mFilter->setIsRecordingAutomation(true);
-        cout << "begin\n";
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
     }
@@ -159,10 +158,9 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
 }
 
 void SourceMover::end(MoverType mt) {
-    if (mMoverType != mt) return;
-    
-    if (mMoverType != kSourceThread){
-        cout << "end\n";
+    if (mMoverType != mt){
+        return;
+    } else if (mMoverType != kSourceThread){
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
         mFilter->setIsRecordingAutomation(false);

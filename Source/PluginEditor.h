@@ -277,7 +277,6 @@ private:
     TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
 	Slider* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
     
-//    SourceUpdateThread*     m_pSourceUpdateThread;
 //    JoystickUpdateThread*   m_pJoystickUpdateThread;
     
     //! Bounds of the resizable window

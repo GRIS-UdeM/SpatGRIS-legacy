@@ -92,7 +92,7 @@ Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, fl
 	mTotalDuration = mDurationSingleTraj * times;
 }
 
-JUCE_COMPILER_WARNING("should this be a shared_ptr instead? is this thing copied?")
+//using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
 std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleDirections(int p_iTrajectory){
     unique_ptr<vector<String>> vDirections (new vector<String>);
     
@@ -304,8 +304,8 @@ protected:
         FPoint pointXY = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         m_fStartPair.first  = pointXY.x;
         m_fStartPair.second = pointXY.y;
-        
-        if (m_fEndPair.first != m_fStartPair.first){
+
+        if (!areSame(m_fEndPair.first, m_fStartPair.first)){
             m_bYisDependent = true;
             m_fM = (m_fEndPair.second - m_fStartPair.second) / (m_fEndPair.first - m_fStartPair.first);
             m_fB = m_fStartPair.second - m_fM * m_fStartPair.first;
@@ -331,7 +331,6 @@ protected:
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = fCurStartX01 + fCurrentProgress;
             newY01 = m_fM * newX01 + m_fB;
-            
         } else {
             fCurrentProgress = (m_fEndPair.second - m_fStartPair.second) * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = m_fStartPair.first;

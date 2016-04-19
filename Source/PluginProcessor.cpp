@@ -69,6 +69,34 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 }
 #endif
 
+JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
+//==================================== SourceUpdateThread ===================================================================
+class SourceUpdateThread : public Thread
+{
+public:
+    SourceUpdateThread(SpatGrisAudioProcessor* p_pProcessor)
+    : Thread ("SourceUpdateThread")
+    ,m_iInterval(50)
+    ,m_pProcessor(p_pProcessor)
+    { }
+    
+    ~SourceUpdateThread() {
+        stopThread (500);
+    }
+    
+    void run() override {
+        while (! threadShouldExit()) {
+            m_pProcessor->updateNonSelectedSourcePositions();
+            wait (m_iInterval);
+        }
+    }
+    
+private:
+    int m_iInterval;
+    SpatGrisAudioProcessor* m_pProcessor;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
+};
 
 
 //====================================== OscSpatThread ========================================
@@ -78,7 +106,7 @@ public:
     : Thread ("OscSpatThread")
     , m_iInterval(25)
     , m_pProcessor(p_pProcessor) {
-        startThread ();
+
     }
     
     ~OscSpatThread() {
@@ -189,7 +217,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
-	mMovementMode = 0;
+	setMovementMode(0);
 	mShowGridLines = false;
 	mTrSeparateAutomationMode = false;
     mIsNumberSourcesChanged = false;
@@ -253,8 +281,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 
     std::unique_ptr<SourceMover> pMover(new SourceMover(this));
     m_pMover = std::move(pMover);
-    
-    cout << "constructor done\n";
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
@@ -264,12 +290,19 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     }
 }
 
-//THIS NEEDS TO BE MOVED TO PROCESSOR. mover needs to be copied around, like it is done for fieldComponent
+void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
+    if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
+        m_pSourceUpdateThread->stopThread(500);
+    } else if (!m_pSourceUpdateThread->isThreadRunning()){
+        m_pSourceUpdateThread->startThread();
+    }
+
+}
+
 void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
-    //    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && iSourceChanged != -1) {
     if (iSourceChanged != -1){
-        cout << "updateNonSelectedSourcePositions\n";
+        JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
@@ -380,16 +413,35 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     float fOldValue = mParameters.getUnchecked(index);
     
     if (!areSame(fOldValue, newValue)){
+        
+        if (newValue == 0){
+            DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
+            return;
+        }
+        
         mParameters.set(index, newValue);
 
-        if      (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(0) || index == getParamForSourceY(0))) { setSourceLocationChanged(0);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(1) || index == getParamForSourceY(1))) { setSourceLocationChanged(1);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(2) || index == getParamForSourceY(2))) { setSourceLocationChanged(2);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(3) || index == getParamForSourceY(3))) { setSourceLocationChanged(3);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(4) || index == getParamForSourceY(4))) { setSourceLocationChanged(4);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(5) || index == getParamForSourceY(5))) { setSourceLocationChanged(5);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(6) || index == getParamForSourceY(6))) { setSourceLocationChanged(6);}
-        else if (!m_bPreventSourceLocationUpdate && (index == getParamForSourceX(7) || index == getParamForSourceY(7))) { setSourceLocationChanged(7);}
+        if (!m_bPreventSourceLocationUpdate){
+            if (index == getParamForSourceX(0) || index == getParamForSourceY(0)) {
+                setSourceLocationChanged(0);
+            } else if (index == getParamForSourceX(1) || index == getParamForSourceY(1)) {
+                setSourceLocationChanged(1);
+            } else if (index == getParamForSourceX(2) || index == getParamForSourceY(2)) {
+                setSourceLocationChanged(2);
+            } else if (index == getParamForSourceX(3) || index == getParamForSourceY(3)) {
+                setSourceLocationChanged(3);
+            } else if (index == getParamForSourceX(4) || index == getParamForSourceY(4)) {
+                setSourceLocationChanged(4);
+            } else if (index == getParamForSourceX(5) || index == getParamForSourceY(5)) {
+                setSourceLocationChanged(5);
+            } else if (index == getParamForSourceX(6) || index == getParamForSourceY(6)) {
+                setSourceLocationChanged(6);
+            } else if (index == getParamForSourceX(7) || index == getParamForSourceY(7)) {
+                setSourceLocationChanged(7);
+            }
+        }
+
+        
         mHostChangedParameter++;
     }
 }
@@ -407,7 +459,7 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
 //    else if (index == getParamForSourceX(5) || index == getParamForSourceY(5)) { setSourceLocationChanged(5);}
 //    else if (index == getParamForSourceX(6) || index == getParamForSourceY(6)) { setSourceLocationChanged(6);}
 //    else if (index == getParamForSourceX(7) || index == getParamForSourceY(7)) { setSourceLocationChanged(7);}
-    
+
     sendParamChangeMessageToListeners(index, newValue);
 }
 
@@ -458,7 +510,6 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
-    cout << "set InputOutputMode ";
     mInputOutputMode = p_iInputOutputMode-1;
     
     switch (mInputOutputMode){
@@ -618,10 +669,8 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
-        cout << "mNumberOfSources is " << mNumberOfSources << ", returning from setNumberOfSources\n";
         return;
     } else {
-        cout << "changing mNumberOfSources from " << mNumberOfSources << " to " << p_iNewNumberOfSources << newLine;
         mIsNumberSourcesChanged = true;
     }
     
@@ -851,7 +900,6 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     if (m_bAllowInputOutputModeSelection) {
-        cout << "prepare to play ";
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
         int iTotalSources = getTotalNumInputChannels();
         if (iTotalSources < mNumberOfSources){
@@ -1208,14 +1256,14 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	float *output = outputs[o];
 	output[f] += s * output_adj;
     
-    if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .9){
-        cout << "click?";
+    if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .25){
+        DBG("#47: click?");
     }
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
 	
-	// ramp all parameters, except constant ones and speaker thetas
+	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
     const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
 	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
     for (int i = 0; i < (kNumberOfParameters - kConstantParameters); ++i) {
@@ -1245,7 +1293,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 		memset(output, 0, frames * sizeof(float));
 	}
 
-	// Compute output[]
+	// Compute output[] for each source
 	for (int i = 0; i < mNumberOfSources; ++i) {
 		float *input = inputs[i];
 		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
@@ -1909,7 +1957,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("kDataVersion", kDataVersion);
     xml.setAttribute ("mShowGridLines", mShowGridLines);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
-    xml.setAttribute ("mMovementMode", mMovementMode);
+    xml.setAttribute ("m_iMovementMode", m_iMovementMode);
     xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
     xml.setAttribute ("mLinkAzimSpan", mLinkAzimSpan);
     xml.setAttribute ("mLinkElevSpan", mLinkElevSpan);
@@ -1994,7 +2042,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             }
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
-            mMovementMode       = xmlState->getIntAttribute ("mMovementMode", 0);
+            setMovementMode(xmlState->getIntAttribute ("m_iMovementMode", 0));
             mLinkSurfaceOrPan   = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
             mLinkAzimSpan       = xmlState->getIntAttribute ("mLinkAzimSpan", 0);
             mLinkElevSpan       = xmlState->getIntAttribute ("mLinkElevSpan", 0);
@@ -2010,7 +2058,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mProcessMode        = xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode);
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
             
-//            mInputOutputMode    = xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode);
             setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
             
             mSrcPlacementMode   = xmlState->getIntAttribute ("mSrcPlacementMode", 1);

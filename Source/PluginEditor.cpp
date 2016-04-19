@@ -198,7 +198,6 @@ AudioProcessorEditor (ownerFilter)
     } else {
         LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
     }
-
 //    m_pJoystickUpdateThread = new JoystickUpdateThread(this);
 //    mComponents.add(m_pJoystickUpdateThread);
     
@@ -323,7 +322,6 @@ AudioProcessorEditor (ownerFilter)
         JUCE_COMPILER_WARNING("THIS NEEDS TO BE IN CONSTRUCTOR! because otherwise we need the editor for the plugin to work correctly!")
         //believe it or not, this actually does something useful...! Not quite sure what, but removing it messes up the number of sources and speakers when loading some presets
 //        if (mFilter->getIsAllowInputOutputModeSelection()){
-//            cout << "editor ";
 //            mFilter->setInputOutputMode(mFilter->getInputOutputMode());
 //        }
         updateSources(true);
@@ -1190,8 +1188,8 @@ SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
 		gIsLeapConnected = 0;
 		mController.release();
 	}
-    getMover()->end(kLeap);
-    getMover()->end(kHID);
+    m_pMover->end(kLeap);
+    m_pMover->end(kHID);
 #endif
 }
 
@@ -1874,8 +1872,8 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         int iSelectedMode = comboBox->getSelectedId() - 1;
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
-            
-            mFilter->getSourceUpdateThread()->stopThread(500);
+            JUCE_COMPILER_WARNING("need to test if can change movement contrainst")
+//            mFilter->getSourceUpdateThread()->stopThread(500);
             switch (iSelectedMode) {
                 case 2:
                     m_pMover->setEqualRadius();
@@ -1895,7 +1893,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 default:
                     break;
             }
-            mFilter->getSourceUpdateThread()->startThread();
+//            mFilter->getSourceUpdateThread()->startThread();
         }
     }
     else if (comboBox == mRoutingModeCombo) {
@@ -2110,14 +2108,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             updateInputOutputCombo();
         }
     }
-JUCE_COMPILER_WARNING("all this getSourceUpdateThread() business should probably be done directly in processor")
-    if (!mFilter->getIsRecordingAutomation() && mFilter->getMovementMode() != 0 && mFilter->getSourceLocationChanged() != -1) {
-        if(!mFilter->getSourceUpdateThread()->isThreadRunning()){
-            mFilter->getSourceUpdateThread()->startThread();
-        }
-    } else if (mFilter->getSourceUpdateThread()->isThreadRunning()){
-            mFilter->getSourceUpdateThread()->stopThread(500);
-    }
+    
     mNeedRepaint = false;
     mFieldNeedRepaint = false;
     

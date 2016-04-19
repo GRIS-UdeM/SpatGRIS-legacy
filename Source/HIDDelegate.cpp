@@ -32,8 +32,7 @@
 HIDDelegate::HIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
 mFilter (filter),
 mEditor (editor),
-nbButton(0),
-buttonPressedTab(NULL),
+m_iNbOfJoystickButtons(0),
 vx(0),
 vy(0),
 deviceSetRef(NULL),
@@ -198,16 +197,16 @@ OSStatus HIDDelegate::Initialize_HID(void *inContext) {
                 if (! (IOHIDDeviceConformsTo(deviceRef, page, joystickUsage) || IOHIDDeviceConformsTo(deviceRef, page, gamepadUsage))) {
                     continue;
                 }
-                //std::cout << "Joystick number 1 " +  std::to_string(nbJoysticks) + " joysticks connected \n ";
                 
                 CFArrayRef elementRefTab = IOHIDDeviceCopyMatchingElements(deviceRef, NULL, kIOHIDOptionsTypeNone);
                 
                 IOHIDDeviceScheduleWithRunLoop(deviceRef, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
                 
                 CFIndex nbElement = CFArrayGetCount(elementRefTab);
-                nbButton = nbElement-13;
-                JUCE_COMPILER_WARNING("this array is just wrong. fix this bullshit")
-                buttonPressedTab = new bool[nbButton]{false};
+                m_iNbOfJoystickButtons = nbElement-13;
+                
+                m_bJoystickButtonsCurentlyPressed = vector<bool>(m_iNbOfJoystickButtons, false);
+                
                 gElementCFArrayRef =  IOHIDDeviceCopyMatchingElements(deviceRef, NULL, kIOHIDOptionsTypeNone);
                 
                 if (!gElementCFArrayRef) {
@@ -295,7 +294,7 @@ OSStatus HIDDelegate::Initialize_HID(void *inContext) {
 void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValue, double maxValue) {
     
     for(int iCurBut = 0; iCurBut < getNbButton(); ++iCurBut) {    //Sweep accross all the joystick buttons to check which is being pressed
-        if(!this->getButtonPressedTab(iCurBut)) {
+        if(!m_bJoystickButtonsCurentlyPressed[iCurBut]) {
             continue;
         }
         FPoint newPoint;
@@ -341,11 +340,7 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
 
 void HIDDelegate::setButtonPressedTab(u_int32_t usage, bool state)  //Get and Set to use the button pressed array
 {
-    buttonPressedTab[usage-1]=state;
-}
-bool HIDDelegate::getButtonPressedTab(u_int32_t index)
-{
-    return buttonPressedTab[index];
+    m_bJoystickButtonsCurentlyPressed[usage-1]=state;
 }
 HIDDelegate::Ptr HIDDelegate::CreateHIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {

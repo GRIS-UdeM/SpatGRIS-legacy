@@ -37,6 +37,7 @@ FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *move
 , m_fEndPathY(-1)
 , m_bPathJustStarted(false)
 {
+    JUCE_COMPILER_WARNING("this is weird. why does the mover need to know about the field component and vice versa?")
     m_pMover->setFieldComponent(this);
 }
 
