@@ -124,8 +124,6 @@ public:
     //! Return the number of sources form the processor
     int getNbSources();
     
-//    void updateNonSelectedSourcePositions();
-    
     void setDefaultPendulumEndpoint();
     
 private:

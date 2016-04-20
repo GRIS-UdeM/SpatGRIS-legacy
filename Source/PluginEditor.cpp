@@ -1870,10 +1870,15 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
     if (comboBox == mMovementModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
+        JUCE_COMPILER_WARNING("need to implement isPlaying from octogris")
+        if(!mFilter->isPlaying()){
+            mFilter->setMovementMode(iSelectedMode);
+        } else {
+            int iCurMode = mFilter->getMovementMode() + 1;
+            mMovementModeCombo->setSelectedId(iCurMode);
+        }
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
-            JUCE_COMPILER_WARNING("need to test if can change movement contrainst")
-//            mFilter->getSourceUpdateThread()->stopThread(500);
             switch (iSelectedMode) {
                 case 2:
                     m_pMover->setEqualRadius();
@@ -1893,7 +1898,6 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 default:
                     break;
             }
-//            mFilter->getSourceUpdateThread()->startThread();
         }
     }
     else if (comboBox == mRoutingModeCombo) {
