@@ -298,8 +298,8 @@ public:
 	int getMovementMode() const { return m_iMovementMode; }
 
     void setMovementMode(int s) {
-        startOrStopSourceUpdateThread();
         m_iMovementMode = s;
+        startOrStopSourceUpdateThread();
     }
 	
 	bool getLinkDistance() const { return mLinkSurfaceOrPan; }

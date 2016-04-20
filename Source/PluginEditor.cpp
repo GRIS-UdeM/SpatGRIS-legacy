@@ -1871,12 +1871,12 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     if (comboBox == mMovementModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
         JUCE_COMPILER_WARNING("need to implement isPlaying from octogris")
-        if(!mFilter->isPlaying()){
-            mFilter->setMovementMode(iSelectedMode);
-        } else {
-            int iCurMode = mFilter->getMovementMode() + 1;
-            mMovementModeCombo->setSelectedId(iCurMode);
-        }
+//        if(!mFilter->isPlaying()){
+//            mFilter->setMovementMode(iSelectedMode);
+//        } else {
+//            int iCurMode = mFilter->getMovementMode() + 1;
+//            mMovementModeCombo->setSelectedId(iCurMode);
+//        }
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
             switch (iSelectedMode) {
