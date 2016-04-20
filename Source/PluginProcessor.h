@@ -671,11 +671,7 @@ public:
     void    setOldSrcLocRT(int id, FPoint pointRT){
         mOldSrcLocRT[id] = pointRT;
     }
-//    
-//    SourceUpdateThread* getSourceUpdateThread(){
-//        return m_pSourceUpdateThread;
-//    }
-//    
+
     void updateNonSelectedSourcePositions();
     void startOrStopSourceUpdateThread();
     

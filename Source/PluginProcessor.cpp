@@ -296,7 +296,6 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
     } else if (!m_pSourceUpdateThread->isThreadRunning()){
         m_pSourceUpdateThread->startThread();
     }
-
 }
 
 void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
