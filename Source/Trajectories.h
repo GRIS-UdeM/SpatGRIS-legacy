@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -29,10 +33,17 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <memory>
+<<<<<<< HEAD
 
 class SpatGrisAudioProcessor;
 class SourceMover;
 
+=======
+
+class OctogrisAudioProcessor;
+class SourceMover;
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 
 enum AllTrajectoryDirections {
@@ -57,7 +68,11 @@ public:
 
 	static int NumberOfTrajectories();
 	static String GetTrajectoryName(int i);
+<<<<<<< HEAD
 	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair);
+=======
+	static Trajectory::Ptr CreateTrajectory(int i, OctogrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     static std::unique_ptr<std::vector<String>> getTrajectoryPossibleDirections(int p_iTrajectory);
     static std::unique_ptr<AllTrajectoryDirections> getTrajectoryDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
     static std::unique_ptr<std::vector<String>> getTrajectoryPossibleReturns(int p_iTrajectory);
@@ -79,9 +94,15 @@ private:
 	void start();
 	
 protected:
+<<<<<<< HEAD
 	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);	
 	SpatGrisAudioProcessor *mFilter;
     SourceMover *m_pMover;
+=======
+	Trajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);	
+	OctogrisAudioProcessor *mFilter;
+    SourceMover *mMover;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	bool mStarted, mStopped;
 	float mDone;
 	float mDurationSingleTraj;

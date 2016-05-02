@@ -1,12 +1,20 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
  PluginEditor.h
  
+<<<<<<< HEAD
  Developers: Antoine Missout, Vincent Berthiaume, Antoine Landrieu
+=======
+ Developers: Antoine Missout, Vincent Berthiaume
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -41,7 +49,12 @@ class SourceUpdateThread;
 //class JoystickUpdateThread;
 class Box;
 
+<<<<<<< HEAD
 enum paramTypes {
+=======
+enum
+{
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	kParamSource,
 	kParamUnused,
 	kParamSmooth,
@@ -52,9 +65,13 @@ enum paramTypes {
 	kParamFilterMid,
 	kParamFilterNear,
 	kParamMaxSpanVolume,
+<<<<<<< HEAD
 	kParamRoutingVolume,
     kParamAzimSpan,
     kParamElevSpan,
+=======
+	kParamRoutingVolume
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 };
 
 enum placement{
@@ -87,8 +104,13 @@ class SpatGrisAudioProcessorEditor  : public AudioProcessorEditor,
 									  private Timer
 {
 public:
+<<<<<<< HEAD
     SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter, SourceMover *mover);
     ~SpatGrisAudioProcessorEditor();
+=======
+    OctogrisAudioProcessorEditor (OctogrisAudioProcessor* ownerFilter, SourceMover* p_pMover);
+    ~OctogrisAudioProcessorEditor();
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
     //==============================================================================
     void paint(Graphics& g);
@@ -127,12 +149,17 @@ public:
     void setDefaultPendulumEndpoint();
     
 private:
+<<<<<<< HEAD
 	SpatGrisAudioProcessor *mFilter;
 
     LookAndFeel_V2 mV2Feel;
     GrisLookAndFeel mGrisFeel;
     
 	SourceMover *m_pMover;
+=======
+	OctogrisAudioProcessor *mFilter;
+	SourceMover* m_pMover;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	
 	// for memory management:
 	OwnedArray<Component> mComponents;
@@ -145,6 +172,7 @@ private:
     bool m_bLoadingPreset;
     uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
+<<<<<<< HEAD
     
     Slider          *mSurfaceOrPanSlider;
     ToggleButton    *mSurfaceOrPanLinkButton;
@@ -165,13 +193,29 @@ private:
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
     
+=======
+	Array<Slider*> mDistances;
+	Array<Component*> mLabels;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	Array<ToggleButton*> mMutes;
+    
+#if USE_DB_METERS
 	Array<LevelComponent*> mLevels;
+<<<<<<< HEAD
+=======
+   	Array<Slider*> mAttenuations;
+#endif
+    
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     ToggleButton *mEnableJoystick;
     ToggleButton *mEnableLeap;
 	ToggleButton *mShowGridLines;
     ToggleButton *mTrSeparateAutomationMode;
+<<<<<<< HEAD
 
+=======
+	ToggleButton *mLinkDistances;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     ToggleButton *mApplyFilter;
 	ComboBox *mMovementModeCombo;
     ComboBox *mInputOutputModeCombo;
@@ -186,12 +230,17 @@ private:
 	Slider *mFilterFar;
 	Slider *mFilterMid;
 	Slider *mFilterNear;
+<<<<<<< HEAD
 	Slider *mMaxSpanVolumeSlider;
     Component *mMaxSpanVolumeLabel;
+=======
+	Slider *mMaxSpanVolume;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     //Label *mShowChange;
     Label *mStateLeap;
     Label *mStateJoystick;
     Label *m_VersionLabel;
+<<<<<<< HEAD
 	
 	ComboBox *mRoutingModeCombo;
     Component *mRoutingModeLabel;
@@ -199,6 +248,14 @@ private:
     
     ImageComponent m_logoImage;
 	
+=======
+	
+	ComboBox *mRoutingMode;
+	Slider *mRoutingVolume;
+    
+    ImageComponent m_logoImage;
+	
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #if USE_LEAP
     ScopedPointer<Leap::Controller> mController;
     Leap::Listener leapList;
@@ -266,14 +323,21 @@ private:
     void updateMovementModeCombo();
     void updateTrajectoryComponents();
     void updateEndLocationTextEditors();
+<<<<<<< HEAD
     void updateInputOutputCombo(bool p_bResetSrcAndSpkPositions = true);
     void updateProcessModeComponents();
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	
 	Component* addLabel(const String &s, int x, int y, int w, int h, Component *into);
 	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
 	TextButton* addButton(const String &s, int x, int y, int w, int h, Component *into);
     TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
+<<<<<<< HEAD
 	Slider* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
+=======
+	Slider* addParamSlider(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
 //    JoystickUpdateThread*   m_pJoystickUpdateThread;
     
@@ -281,6 +345,7 @@ private:
     ComponentBoundsConstrainer m_oResizeLimits;
     ScopedPointer<ResizableCornerComponent> m_pResizer;
     
+<<<<<<< HEAD
 
 
     Component  *mOscSpat1stSrcIdLabel;
@@ -292,6 +357,12 @@ private:
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
 
+=======
+    LookAndFeel_V2 mV2Feel;
+    GrisLookAndFeel mGrisFeel;
+    
+    std::vector<string> mTimingVector;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

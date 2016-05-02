@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -28,9 +32,14 @@
 #define FIELDCOMPONENT_H_INCLUDED
 
 #include "PluginProcessor.h"
+<<<<<<< HEAD
 #include "GrisLookAndFeel.h"
 class SourceMover;
 
+=======
+#include "SourceMover.h"
+#include "deque"
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 typedef enum
 {
@@ -68,6 +77,7 @@ private:
 	float mSavedValue;
 
 	FPoint convertSourceRT(float r, float t);
+<<<<<<< HEAD
     Path m_oTrajectoryPath;
     float m_fStartPathX;
     float m_fStartPathY;
@@ -87,6 +97,11 @@ private:
     }
     
     GrisLookAndFeel mGrisFeel;
+=======
+    int m_iCurPathLines;
+    int m_iMaxPathLines;
+    std::deque<FPoint> m_dqAllPathPoints;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

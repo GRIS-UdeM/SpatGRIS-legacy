@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -25,7 +29,11 @@
  */
 
 #include "OscComponent.h"
+<<<<<<< HEAD
 #if USE_TOUCH_OSC
+=======
+#if USE_OSC
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 const String kOscPathSourceXY = "/Octo/SourceXY";
 const String kOscPathSelectSource = "/Octo/Source";
 
@@ -57,10 +65,17 @@ class OscComponent : public HeartbeatComponent, public Button::Listener, public 
 	private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
+<<<<<<< HEAD
     OscComponent(SpatGrisAudioProcessor* filter, SpatGrisAudioProcessorEditor *editor)
 	:mFilter(filter)
     ,mEditor(editor)
     ,mOscSendIpAddress(NULL)
+=======
+    OscComponent(OctogrisAudioProcessor* filter, OctogrisAudioProcessorEditor *editor)
+	:mFilter(filter)
+    ,mEditor(editor)
+    ,mOscIpAddress(NULL)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     ,mNeedToEnd(false)
 	{
         
@@ -80,6 +95,7 @@ public:
         
         mReceiveIp = new TextEditor();
         mReceiveIp->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+<<<<<<< HEAD
         mReceiveIp->setFont(mGrisFeel.getFont());
         mReceiveIp->setSize(iw, dh);
         mReceiveIp->setTopLeftPosition(x, y);
@@ -90,6 +106,13 @@ public:
             mReceiveIp->setReadOnly(true);
             mReceiveIp->setCaretVisible(false);
         }
+=======
+        mReceiveIp->setText(getLocalIPAddress());
+        mReceiveIp->setSize(iw, dh);
+        mReceiveIp->setTopLeftPosition(x, y);
+        mReceiveIp->setReadOnly(true);
+        mReceiveIp->setCaretVisible(false);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         addAndMakeVisible(mReceiveIp);
         
         x += iw + m;
@@ -116,7 +139,10 @@ public:
 		x += cw + m;
 		
 		mSendIp = new TextEditor();
+<<<<<<< HEAD
         mSendIp->setFont(mGrisFeel.getFont());
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 		mSendIp->setText(mFilter->getOscSendIp());
 		mSendIp->setSize(iw, dh);
         mSendIp->addListener(this);
@@ -167,7 +193,11 @@ public:
     void buttonClicked (Button *button) override{
         try {
             if (button == mReceive){
+<<<<<<< HEAD
                 //try to connect to receiving port on one of the local ip addresses
+=======
+                //we're trying to connect
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                 if (mReceive->getToggleState()) {
                     int p = mReceivePort->getText().getIntValue();
                     if (!connect(p)) {
@@ -196,9 +226,15 @@ public:
             } else if (button == mSend) {
 
                 if (mSend->getToggleState()) {
+<<<<<<< HEAD
                     mOscSendIpAddress = mSendIp->getText();
                     int iSendPort = mSendPort->getText().getIntValue();
                     if(!mOscSender.connect(mOscSendIpAddress, iSendPort)){
+=======
+                    mOscIpAddress = mSendIp->getText();
+                    int iSendPort = mSendPort->getText().getIntValue();
+                    if(!mOscSender.connect(mOscIpAddress, iSendPort)){
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                         DBG("OSC cannot connect");
                         mSend->setToggleState(false, dontSendNotification);
                         mSendIp->setEnabled(true);
@@ -257,6 +293,10 @@ public:
         if (!mSend->getToggleState()){
             return;
         }
+<<<<<<< HEAD
+=======
+#if USE_OSC
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 		int src = mEditor->getOscLeapSource();
 		if (src != mSource) {
 			String s = "Source "; 
@@ -268,15 +308,26 @@ public:
 		}
 		FPoint p = mFilter->getSourceXY01(src);
 		if (mSourceXY != p) {
+<<<<<<< HEAD
             OSCAddressPattern oscPattern(kOscPathSourceXY);
 			OSCMessage message(oscPattern);
 			message.addFloat32(p.y);
 			message.addFloat32(p.x);
+=======
+            JUCE_COMPILER_WARNING("make kOscPathSourceXY a String")
+            String ridiculous(kOscPathSourceXY);
+            OSCAddressPattern oscPattern(ridiculous);
+			OSCMessage message(oscPattern);
+			message.addFloat32(p.y);
+			message.addFloat32(p.x);
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 			if (!mOscSender.send(message)) {
 				DBG("Error: could not send OSC message.");
 			}
 			mSourceXY = p;
 		}
+#endif
 	}
 
 private:
@@ -290,8 +341,15 @@ private:
 	ScopedPointer<ToggleButton> mSend;
 	ScopedPointer<TextEditor> mSendIp;
 	ScopedPointer<TextEditor> mSendPort;
+<<<<<<< HEAD
 	OSCSender mOscSender;
 	String mOscSendIpAddress;
+=======
+#if USE_OSC
+	OSCSender mOscSender;
+#endif
+	String mOscIpAddress;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	
 	bool mNeedToEnd;
 	Time mLastXYTime;
@@ -303,7 +361,11 @@ private:
 	
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscComponent)
 };
+<<<<<<< HEAD
 HeartbeatComponent * CreateOscComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor){
+=======
+HeartbeatComponent * CreateOscComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor){
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	return new OscComponent(filter, editor);
 }
 void updateOscComponent(HeartbeatComponent* oscComponent){

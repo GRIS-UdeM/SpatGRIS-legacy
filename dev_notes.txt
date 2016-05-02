@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---------- 2016-02-04 ----------------
 some notes on osc.
     * ZirkOSC only has a sending connection, to the local ip address 127.0.0.1, port 18032
@@ -172,3 +173,259 @@ TIMING AND TRYING THINGS
         * but removing them make no difference on gui/automation lag
         * still deactivated them, because spending this much time on this is ludicrous!
         
+=======
+---------------------- 2015 08 14 ----------------------
+
+ok, so need to test presets in current octogris version--DONE
+
+now i need to make this oneSource business work. How to proceed? 
+need to have concept of selected source
+then mover only moves selected source
+and thread moves non-selected sources
+
+
+in zirkosc
+mouseDown/Up and slidersDragStarted/ended call begin/endParameterGesture on selectedsource only
+everyone calls processor::move, which
+    calls setParameterNotifyingHost for the source passed as argument
+        which sets m_iSourceLocationChanged to the source passed as argument
+    if independent, we simply set the old values
+    if not, call moveCircular(or other)
+        which calculates delta between the selected source position (argument) and the old one
+        then cycles through all sources
+            for selected one, simply set old values
+            for unselected, move by delta DIRECTLY (ie not telling host so no automation, not
+                setting srcLocation) and set old values
+
+the thread moves sources if
+    X-!m_bIsRecordingAutomation
+        set whenever an automation begins+ends (mousedown/up, sliderDragStarted/ended
+    X-m_iMovementConstraint != Independent
+        just get this from processor
+    m_iSourceLocationChanged != -1
+        set to source number that is changed in setParameters
+
+IN OCTOGRIS
+everyone calls mover::begin, which
+    calls beginParameterGesture
+        X-need to have this only for selected source
+    FIGURES OUT ANGLES IF ANGLES ARE FIXED. This needs to be an instantaneous call instead of being
+    figured out here and used in move. Well actually, i don't think this is critical.
+then everyone calls mover::move, which 
+    moves selectedSource
+    moves the other sources in circular or delta. THOSE WILL BE THE 2 ONLY MODES ONCE I HAVE MADE
+    THE MOVEMENT CONSTRAINT CHANGES INSTANTANEOUS
+        NOW HERE. need to figure out how to move unselected sources using the delta of the selected
+        source. Some kind of similar mechanism is already in place. 
+    then of fucking course, there are the specific symmetric x/y fucking modes which i also need to
+    figure out
+    
+---------------------- 2015 08 17 ----------------------
+Ah, i need to NOT record automations when move() is called NOT from kSourceThread
+
+-cliquer sur start trajectore fait des automations from sourceThread, because changing the number of
+sources calls it. should only happen once
+
+somthing isn't right. the thread is setting srcLocationChanged. that should really not happen
+we got
+    thread calls
+        mover.begin
+        mover.move
+            mFilter->setSourceXY01() for selected source (this should not happen, right?)
+                this sets the srcLocationChanged for the selected source
+            mFilter->setSourceRT for non selected sources
+                this sets the srcLocationChanged for all non-selected sources (shouldn't happen,
+                right?)
+        mover.end
+
+ok, so now i cleaned a bunch of code, and there are no automations written when changing movement
+constraints, BUT there is when starting a trajectory
+NOW HERE: can record automation on one source, but not read them. I think the problems are that
+-thread is not calculating delta properly (probably)
+===================================================================
+-when writing trajectories we should use the mover (which we do?), somehow sources are not moving
+when writing trajectories. ah, it's probably because i force selected source 0, so i need a special
+case to have all sources move when kSourceThread
+
+
+-----------------------------------
+-Changing constraint does activate the thread once, with a delta of 0, should not
+-clicking trajectory button also activates the thread once
+-writing trajectory, thread is activated... is that so also in zirkosc? it should not. the regular
+move should set the parameters directly, then the gui should update based on its reading of the
+processor
+    right, there should be a writingAutomation flag set
+    it is not set because the trajectory does not use the mover. this is bad. Ah, that's because
+    antoine used my code, which does not have a mover. right. 
+in zirk
+    thread called once when setting to circular
+    and once on mouse up
+    once at the end of writing a trajectory
+    continuously when reading trajectory/automation
+________________________________________
+-ok, DOING THIS FOR REEELZZZZ
+reading automation only moves automated source. So delta must be wrong. i think the problem was that the delta was calculated inside the loop rather than outside, thus overwriting itself? can now read automations.
+
+REMAINING PROBLEMS
+X-trajectories write on all sources
+-plugin is using too much CPU (reduce refresh rate, avoid mover::begin/end by making sort instantaneous)
+	apparently just lowering refresh rate form 25 to 50 helped a lot, but not enough
+X-refactor move to remove extra 2 source case
+	-need to check that can load project with 2 sources with automations using the 2-source-constraints modes
+	1->6, 2-7, 3-8
+	4-1,5-2,6-3,7-4,8-5	
+- trajectories
+	automation written when trajectory stops, because we are restoring the stored source locations. Forcing restoration only on source 0, which could need to be changed to selected Source if ever we have that concept. 
+	
+	**************	IMPORTANT NOTE: with one-source-automations, it is impossible to have unique random trajectories for the different sources. all trajectories have to follow the selected source. Unless we force randomization, which will be different every time we run the automation************	
+______________________________________________
+ok, so trajectories are not read. how can that be? delta of 0. because old or new values are not set
+when reading? 
+
+loading a preset with a non-independent contraint is bad, because it triggers a call to the thread,
+because it changes the position of sources
+___________________
+
+NOW HERE: NEED TO EXTRA STUFF IN MOVER THAT IS IN CHARGE OF MOVING WITH EQUAL ANGLES AND PUT IT IN
+SETEQUALANGLES (NEW FUNCTION). ALSO NEED TO REMOVE STUFF FOR EQUAL RADIUS. SO IN FACT MOVER::MOVE
+WILL ONLY HAVE 2 MODES: INDEPENDENT CIRCULAR DELTA
+____________________________________
+SETTING UP OCTOGRIS TO WORK WITH AUDIO
+LOGIC
+    * cannot get it in 7.1, but it was relatively easy to figure out in the options
+    * open project, start random traj, sources don't come back to original position
+REAPER
+    * also easy to configure, just select 8 outputs in master and track routing
+    * sources don't come back to original position
+    * in touch mode, not write, circle (and spiral...) do more than 1 turn
+DP
+    * need to select fireface interface, then go in Studio/Bundles, add a surround bundle, then
+    * drag all square so they start at 1
+    * need to also do a bundle for stereo inputs. really a pain
+    * and could not figure how to loop, had to copy a bunch of files
+_________________________________________________________
+SETTING UP FOR ZIRKOSC
+LOGIC
+    * is working!
+REAPER
+    * is not seen in jack (either 64 or 32 bits version)
+        * the doc says this might be because some apps need to send audio to be detected
+DP
+    * no sound in either my new or old project, probably problem with bundles
+
+___________________________
+DP: 
+    * faders are not behaving... i added a bunch of debug code, but hard to pin down and not  happening often
+___________________________
+#44: loading presets from 213 doesn't work
+
+* DOWNGRADING opening project with 224 with only 213 installed crashes DP. Hard to test because debugging in xcode will generate 224
+    * but let's assume downgrading is really rare. and let's concentrate ourselves with upgrading
+* UPGRADING
+    * need to load project with 213, save, then reopen with 224
+
+ok i have a hunch that in DP in 213, the inputoutput mode was not correctly saved. need to go back in git and debug.
+_________________________________
+#40
+so this is weird. the slider controlling the volume is mVolumeNear, but it is barely used in the code. i think the way this is mostly used is that this slider affects a parameter in the processor's parameter array, params[kVolumeNear].
+
+* mVolumeNear is a paramSlider, and all paramSliders have ranges between 0 and 1. 
+ok, all i had to do was change kVolumeNearMin in processor.h
+________________________________
+#45
+need to be in studio to do that one.
+ok, so in studio, the problem is that DP just never calls the juce bypass function. so there's nothing we can do to bypass a 2->8 track, other than implement our own bypass.
+________________________________
+#46
+possible problems:
+* previous versions will not know what mode to load (not in presets)
+* playback crash?
+    *DP: 
+        * in wrong mode, audio is bypassed
+        * opening previous version is messed up
+
+ok. how does the combo box influence the other things?
+if m_bAllowInputOutputModeSelection, we setNumberOfSources to whatever is in mNumberOfSources. In case of old version, we get 8x16, the default. In case of newer versions, we'd get what was saved in presets (mInputOutputMode is saved)
+
+ok. so what we want, is 
+    * when new instance: 8x16
+    * when old instance, no inputOutputMode saved: follow track info
+    * when old instance inputOutputMode saved: use inputOutputMode
+
+so, i think we may have to have a version 3 for this. The problem is that there is no way to know that the mInputMode was not saved. it was saved as the default 8x16 mode. That means that if the user actually wants a 8x16 track on a track that doesn't have 8x16, we'd force it to what the track actually is. I guess that will happen very rarily. In the new mode, we'll have 2x2 tracks... actually i don't know how to use the internal routing mode. So i'll just wait for this issue...        
+**** Continuing the thought here... actually this issue has nothing to do with the internal routing. We just want to be able to have less sources than the track says, e.g., in logic.  
+
+2015-12-2, Alright, so I tested the audio for this fix in the lab and it works. The only problem is that the combo box initial state is blank when it wasn't saved in a preset. I think the reason it is blank is because it was saved as a random value in the presets. It used to be 
+
+preset was saved as 1, which is 1x4, and is what we're seeing 
+but both the movement constraint combo and the input/ouput mode combo are blank, why?
+
+* the movement constraint was due to a bug, which i fixed.
+* but the input/output mode problem really will require an upgrate to version 3. The problem really is that in previous versions, we saved the default mode in the presets (which, depending on the version is 1 or 18), so when opening an old preset with a new version, the input/output mode will always be 1 or 18. 
+
+________________________
+#56
+ok so the deal with that is that the components in the osc tab is within an osc component, while the stuff in the interface tab (and all other tabs) is in the editor. So I think i should grab all the gui stuff from the osc component and put them in the editor...? That seems like a lot of work for not that great a reason...What are the fucntions related to GUI?
+
+*updateInfo() is called by updateOscComponent() which is called by the editor timercallback()
+
+* perhaps the easiest thing would be to make a few functions that return the gui elements from the osccomponent, and display them in the editor. leaving as much stuff as possible in it? 
+_________________________________________
+#58
+i got this code from the juce demo, potentially related to #58? this goes in processBlock()
+
+// In case we have more outputs than inputs, we'll clear any output
+// channels that didn't contain input data, (because these aren't
+// guaranteed to be empty - they may contain garbage).
+for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i){
+        buffer.clear (i, 0, buffer.getNumSamples());
+}
+
+SO FIRST REAL CLUE: processor line 914, AFTER pan processing, the content of output[f], thus of outputs[o][f], start to be invalid at o = 2 and f = 256. we have 2 inputs in this case, What is special about f = 256?
+
+in processDataPan, we add samples to the output bu calling addToOutputs()
+
+_________________________
+v2.2.5
+should fix #60, #61, and potentially #63, if confirmed that it is a non-issue.
+________________________
+#41. 
+
+the question is, do i need a new branch for this? i don't think so. bah, surement. si ils me demande une nouvelle version rapido. ouain. calvere ca me coute rien de faire une nouvelle branche. mais en meme temps, ca me prendra pas de temps faire ca
+
+let's see. need to add for 
+* spiral 
+    * missing end point
+    * missing turns 
+* pendulum
+    * missing end point
+    * missing deviation
+    * missing dampening
+
+
+Dampening and deviation are probably the easiest parts. end point needs to interact with the mover part. which is a pain. 
+
+_________________
+#68: robert dit qu'en mode independent, toutes les sources devraient bouger de facon independente
+-i had added bUniqueTarget to force the random trajectories to have a unique random target with non-independent constraints. This is false when independent, so good. 
+-the problem is having all sources move then independent and random trajectory. this needs to be done at the mover level, i think. I tried stuff but it didn't work quickly so i undid it and left. 
+_______________________
+#91
+ok, so let's try and understand how the joystick works
+* mJoystick is a member of editor
+* Missout avait mis le leap aussi dans the editor, but landrieux commented his update in timer callback, editor line 2056. In fact, updateLeapComponent seems to not exist anymore... 
+* ok, so nevermind the leap for now (it has its own callback methods, although it is instantiated or somehting in the editor callback, which is probably wrong)
+* what I think should happen, or the simplest thing at least, would be to create a thread for the joystick, that calls whatever is in the timer callback. 
+__________________________
+display things
+* add direction to pendulum in position 1
+* remove continuous in random target pos 1, and slide for-sep-auto from pos 2 to 1
+* add return in random target pos 1
+so pendulum will have direction return
+and rand tar will have force-sep-auto return
+_________________________
+enregistrer plusieurs automations en meme temps
+
+-2.2.8 2 spirales en meme temps chie ben raide, drette au debut
+ok, robert dit d'oublier ça pour l'instant...
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534

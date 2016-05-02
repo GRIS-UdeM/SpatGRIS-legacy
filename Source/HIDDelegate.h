@@ -24,7 +24,10 @@
 #include <stdio.h>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginEditor.h"
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #include "HID_Utilities_External.h"
 
 class HIDDelegate : public ReferenceCountedObject
@@ -33,9 +36,15 @@ public:
     typedef ReferenceCountedObjectPtr<HIDDelegate> Ptr;
     
     //! Interface to call the builder using the ReferenceCountedObject benefits
+<<<<<<< HEAD
     static HIDDelegate::Ptr CreateHIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor);
     //! Builder
     HIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor);
+=======
+    static HIDDelegate::Ptr CreateHIDDelegate(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor);
+    //! Builder
+    HIDDelegate(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     //! Initializing all the member with the data from the joystick
     OSStatus Initialize_HID(void *inContext);
     
@@ -51,25 +60,46 @@ public:
     CFDictionaryRef hu_CreateMatchingDictionary(uint32_t inUsagePage, uint32_t inUsage);
     //! Set for the table memorizing button states
     void setButtonPressedTab(u_int32_t index, bool state);
+<<<<<<< HEAD
     //! Return the number of button counted on the joystick
     int getNbButton(){return m_iNbOfJoystickButtons;};
+=======
+    //! Get for the table memorizing button states
+    bool getButtonPressedTab(u_int32_t index);
+    //! Return the number of button counted on the joystick
+    int getNbButton(){return nbButton;};
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     //! Return the address of the device
     IOHIDDeviceRef getDeviceRef(){return deviceRef;}
     //! Return the address of the set of devices
     CFSetRef getDeviceSetRef(){return deviceSetRef;}
     
 //    void readAndUseJoystickValues();
+<<<<<<< HEAD
 
+=======
+    
+    //! Destroyer
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     virtual ~HIDDelegate() {};
     
 private:
     
+<<<<<<< HEAD
     SpatGrisAudioProcessor *mFilter;
     SpatGrisAudioProcessorEditor *mEditor;
     //! Number of counted buttons
     int m_iNbOfJoystickButtons;
     //! Table memorizing button states
     vector<bool> m_bJoystickButtonsCurentlyPressed;
+=======
+    OctogrisAudioProcessor *mFilter;
+    OctogrisAudioProcessorEditor *mEditor;
+    //! Number of counted buttons
+    int nbButton;
+    //! Table memorizing button states
+    bool* buttonPressedTab;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     //! Variables recording the last and present coordinates (calculated or not)
     float vx, vy;
     //! Set of devices address

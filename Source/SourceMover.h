@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -65,7 +69,11 @@ public:
     }
 	
 private:
+<<<<<<< HEAD
 	SpatGrisAudioProcessor *mFilter;
+=======
+	OctogrisAudioProcessor *mFilter;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	MoverType mMoverType;
 	int mSelectedSrc;
 	

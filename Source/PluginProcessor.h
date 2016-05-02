@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -22,6 +26,27 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==============================================================================
  */
+<<<<<<< HEAD
+=======
+
+#ifndef USE_LEAP
+#define USE_LEAP 1
+#endif
+
+//#ifndef USE_DB_METERS
+//#define USE_DB_METERS 1
+//#endif
+
+#ifndef USE_OSC
+#define USE_OSC 1
+#endif
+
+#if !WIN32
+#ifndef USE_JOYSTICK
+#define USE_JOYSTICK 1
+#endif
+#endif
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
@@ -33,6 +58,7 @@
 #if WIN32
 #define M_PI 3.14159265358979323846264338327950288
 #endif
+<<<<<<< HEAD
 #if !WIN32
 #ifndef USE_LEAP
 #define USE_LEAP 1
@@ -45,6 +71,8 @@
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
 static const bool s_bUseNewGui = true;
 
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 #include <stdint.h>
 
@@ -57,6 +85,10 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #include "FirFilter.h"
 #include "Trajectories.h"
 #include "Routing.h"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #include <memory>
 using namespace std;
 
@@ -78,14 +110,43 @@ enum speakerParameters{
     kSpeakerY,
     kSpeakerUnused1,
     kSpeakerM,
+<<<<<<< HEAD
     kSpeakerUnused2,
     kParamsPerSpeakers
 };
+=======
+    kSpeakerUnused,
+    kParamsPerSpeakers
+};
 
+enum
+{
+    kTrReady,
+    kTrWriting
+};
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
+
+enum AllTrajectoryTypes {
+    Circle = 1,
+    EllipseTr, //Ellipse was clashing with some random windows class...
+    Spiral,
+    Pendulum,
+    RandomTrajectory,
+    RandomTarget,
+    SymXTarget,
+    SymYTarget,
+    ClosestSpeakerTarget,
+    TotalNumberTrajectories
+};
 
 #define kConstantOffset (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
 
+<<<<<<< HEAD
 enum constantParameters{
+=======
+enum
+{
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	kSmooth =				0 + kConstantOffset,
 	kVolumeNear =			1 + kConstantOffset,
 	kVolumeMid =			2 + kConstantOffset,
@@ -100,6 +161,7 @@ enum constantParameters{
 
 #define kNumberOfParameters (kConstantParameters + kConstantOffset)
 
+<<<<<<< HEAD
 //==============================================================================
 static const float kSourceRadius = 10;
 static const float kSourceDiameter = kSourceRadius * 2;
@@ -124,13 +186,27 @@ enum AllTrajectoryTypes {
     ClosestSpeakerTarget,
     TotalNumberTrajectories
 };
+=======
+static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
+static const bool s_bUseNewGui = false;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 //these have to start at 0 because of backwards-compatibility
 enum InputOutputModes {
     i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16
 };
 
+<<<<<<< HEAD
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
+=======
+enum
+{
+	kFreeVolumeMode = 0,
+	kPanVolumeMode = 1,
+	kPanSpanMode = 2,
+	kNumberOfModes = 3
+};
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 //==============================================================================
 // these must be normalized/denormalized for processing
@@ -142,19 +218,19 @@ static const float kSpeakerDefaultAttenuation = 0;
 
 static const float kSmoothMin = 1;
 static const float kSmoothMax = 200;
-static const float kSmoothDefault = 10;
+static const float kSmoothDefault = 50;
 
 static const float kVolumeNearMin = -10;
 static const float kVolumeNearMax = 30;
-static const float kVolumeNearDefault = 0;
+static const float kVolumeNearDefault = 6;
 
 static const float kVolumeMidMin = -30;
 static const float kVolumeMidMax = 10;
-static const float kVolumeMidDefault = -6;
+static const float kVolumeMidDefault = 0;
 
 static const float kVolumeFarMin = -120;
 static const float kVolumeFarMax = 0;
-static const float kVolumeFarDefault = -40;
+static const float kVolumeFarDefault = -36;
 
 static const float kMaxDistance = 2000;
 
@@ -164,11 +240,11 @@ static const float kFilterNearDefault = 0;
 
 static const float kFilterMidMin = kMaxDistance;
 static const float kFilterMidMax = 0;
-static const float kFilterMidDefault = 0;
+static const float kFilterMidDefault = kMaxDistance / 10;
 
 static const float kFilterFarMin = kMaxDistance;
 static const float kFilterFarMax = 0;
-static const float kFilterFarDefault = kMaxDistance;
+static const float kFilterFarDefault = kMaxDistance / 2;
 
 static const float kMaxSpanVolumeMin = 0;
 static const float kMaxSpanVolumeMax = 20;
@@ -178,10 +254,13 @@ static const float kRoutingVolumeMin = -120;
 static const float kRoutingVolumeMax = 6;
 static const float kRoutingVolumeDefault = 0;
 
+<<<<<<< HEAD
 static const float kSpanMin = 0;
 static const float kSpanMax = 2;
 static const float kSpanDefault = 0;
 
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
@@ -229,9 +308,13 @@ typedef struct
 } IndexedAngle;
 int IndexedAngleCompare(const void *a, const void *b);
 
+<<<<<<< HEAD
 class OscSpatThread;
 class SourceUpdateThread;
 class SourceMover;
+=======
+class SourceUpdateThread;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor
@@ -286,6 +369,33 @@ public:
     void setStateInformation (const void* data, int sizeInBytes);
 
     //==============================================================================
+<<<<<<< HEAD
+=======
+	// For editor
+	int getNumberOfSources() const { return mNumberOfSources; }
+	int getParamForSourceX(int index) const { return kSourceX + index * kParamsPerSource; }
+	int getParamForSourceY(int index) const { return kSourceY + index * kParamsPerSource; }
+	int getParamForSourceD(int index) const { return kSourceD + index * kParamsPerSource; }
+	
+	float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
+	float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
+	float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
+	float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
+	
+	int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
+    
+	inline int getParamForSpeakerX(int index) const { return kSpeakerX + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    inline int getParamForSpeakerY(int index) const { return kSpeakerY + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    inline int getParamForSpeakerA(int index) const { return kSpeakerA + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    inline int getParamForSpeakerM(int index) const { return kSpeakerM + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
+    
+    float getSpeakerX(int index) const { return mParameters.getUnchecked(getParamForSpeakerX(index)); }
+	float getSpeakerY(int index) const { return mParameters.getUnchecked(getParamForSpeakerY(index)); }
+	float getSpeakerA(int index) const { return mParameters.getUnchecked(getParamForSpeakerA(index)); }
+	float getSpeakerM(int index) const { return mParameters.getUnchecked(getParamForSpeakerM(index)); }
+	float getDenormedSpeakerA(int index) const { return denormalize(kSpeakerMinAttenuation, kSpeakerMaxAttenuation, getSpeakerA(index)); }
+	
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	bool getApplyFilter() const { return mApplyFilter; }
 	void setApplyFilter(bool s) { mApplyFilter = s; }
 	
@@ -295,6 +405,7 @@ public:
     bool getIndependentMode() const { return mTrSeparateAutomationMode; }
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
     
+<<<<<<< HEAD
 	int getMovementMode() const { return m_iMovementMode; }
 
     void setMovementMode(int s) {
@@ -313,6 +424,20 @@ public:
     
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
+=======
+	int getMovementMode() const { return mMovementMode; }
+	void setMovementMode(int s) {
+        mMovementMode = s;
+        startOrStopSourceUpdateThread();
+    }
+	
+	bool getLinkDistances() const { return mLinkDistances; }
+	void setLinkDistances(bool s) { mLinkDistances = s; }
+		
+	int getProcessMode() const { return mProcessMode; }
+	void setProcessMode(int s) { mProcessMode = s; jassert(mProcessMode >= 0 && mProcessMode < kNumberOfModes); }
+	
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
     bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
@@ -321,10 +446,17 @@ public:
 	void setRoutingMode(int s) {
         mRoutingMode = s;
         if (mRoutingMode == 1){
+<<<<<<< HEAD
             updateRoutingTempAudioBuffer();
         }
     }
 	void updateRoutingTempAudioBuffer();
+=======
+            updateRoutingTemp();
+        }
+    }
+	void updateRoutingTemp();
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     int getGuiWidth() const{return mGuiWidth;}
     int getGuiHeight() const{return mGuiHeight;}
@@ -361,6 +493,7 @@ public:
     void setTrUnits(int i){m_iTrUnits = i - 1;}
 
     float getTrRepeats() const {return m_fTrRepeats;}
+<<<<<<< HEAD
     void setTrRepeats(float f){m_fTrRepeats = f;}
 
     float getTrDampening() const {return m_fTrDampening;}
@@ -372,6 +505,13 @@ public:
     int getOscSpatPort() const{return m_iOscSpatPort;}
     void setOscSpatPort(int i){m_iOscSpatPort = i;}
 
+=======
+    void setTrRepeats(float i){m_fTrRepeats = i;}
+
+    float getTrDampening() const {return m_fTrDampening;}
+    void setTrDampening(float i){m_fTrDampening = i;}
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     float getTrDeviation() const {return m_fTrDeviation;}
     void setTrDeviation(float i){m_fTrDeviation = i;}
 
@@ -386,10 +526,13 @@ public:
         mGuiTab = s;
         ++mHostChangedParameter;
     }
+<<<<<<< HEAD
 
     void sendOscSpatValues();
     void connectOscSpat();
     void disconnectOscSpat();
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     int getIsJoystickEnabled() const { return mJoystickEnabled; }
     void setIsJoystickEnabled(int s) { mJoystickEnabled = s; }
@@ -418,7 +561,17 @@ public:
 	const String getOscSendIp() const { return mOscSendIp; }
 	void setOscSendIp(String s) { mOscSendIp = s;}
 	
+<<<<<<< HEAD
 	float getLevel(int index) const { return mLevels.getUnchecked(index); }
+=======
+	float getLevel(int index) const {
+#if USE_DB_METERS
+        return mLevels.getUnchecked(index);
+#else
+        return -1.f;
+#endif
+    }
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	void setCalculateLevels(bool c);
 	
 	bool getIsAllowInputOutputModeSelection(){
@@ -497,6 +650,7 @@ public:
 		return FPoint(r, t);
 	}
     
+<<<<<<< HEAD
     void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
     
     FPoint getSourceAzimElev(int i) {
@@ -518,13 +672,18 @@ public:
         return FPoint(fAzim, fElev);
     }
     
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     FPoint convertRt2Xy(FPoint p) {
         float x = p.x * cosf(p.y);
         float y = p.x * sinf(p.y);
         return FPoint(x, y);
     }
     
+<<<<<<< HEAD
     
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     //01 here means that the output is normalized to [0,1]
     FPoint convertRt2Xy01(float r, float t) {
         float x = r * cosf(t);
@@ -640,8 +799,15 @@ public:
     }
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
+<<<<<<< HEAD
     void setSourceLocationChanged(int i)    {  m_iSourceLocationChanged = i;    }
     int  getSourceLocationChanged()         { return m_iSourceLocationChanged;  }
+=======
+    void setSourceLocationChanged(int i)   {
+        m_iSourceLocationChanged = i;
+    }
+    int  getSourceLocationChanged()        { return m_iSourceLocationChanged;  }
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
     int getSrcSelected() const {return mSrcSelected;}
     int getSpSelected() const  {return mSpSelected;}
@@ -658,8 +824,13 @@ public:
     void setIsSettingEndPoint(bool isSetting){ m_bIsSettingEndPoint = isSetting; }
     bool isSettingEndPoint(){ return m_bIsSettingEndPoint; }
     
+<<<<<<< HEAD
     std::pair<float, float> getEndLocationXY01(){ return m_fEndLocationXY01; }
     void setEndLocationXY01(std::pair<float, float> pair){ m_fEndLocationXY01 = pair; }
+=======
+    std::pair<float, float> getEndLocationXY(){ return m_fEndLocationXY; }
+    void setEndLocationXY(std::pair<float, float> pair){ m_fEndLocationXY = pair; }
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     void storeCurrentLocations();
     void restoreCurrentLocations(int p_iLocToRestore = -1);
@@ -671,10 +842,18 @@ public:
     void    setOldSrcLocRT(int id, FPoint pointRT){
         mOldSrcLocRT[id] = pointRT;
     }
+<<<<<<< HEAD
 
     void updateNonSelectedSourcePositions();
     void startOrStopSourceUpdateThread();
     
+=======
+    
+    bool isPlaying(){ return m_bIsPlaying;}
+    void updateNonSelectedSourcePositions();
+    void startOrStopSourceUpdateThread();
+	
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 private:
 
 	bool m_bAllowInputOutputModeSelection;
@@ -686,8 +865,9 @@ private:
 	Array<float> mParameters;
 	
 	int mCalculateLevels;
+#if USE_DB_METERS
 	Array<float> mLevels;
-	
+#endif
 	bool mApplyFilter;
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
@@ -697,6 +877,11 @@ private:
     bool mTrSeparateAutomationMode;
     int mGuiWidth;
     int mGuiHeight;
+<<<<<<< HEAD
+=======
+
+    //version 9
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     int mInputOutputMode;
     int mSrcPlacementMode;
     int mSrcSelected;
@@ -707,6 +892,7 @@ private:
     int m_iTrDirection;
     int m_iTrReturn;
     
+<<<<<<< HEAD
     int     m_iTrSrcSelect;
     float   m_fTrDuration;
     int     m_iTrUnits; //0 = beats, 1 = seconds
@@ -719,6 +905,17 @@ private:
     int     m_iOscSpatPort;
     String  m_sOscIpAddress;
     
+=======
+    int m_iTrSrcSelect;
+    float m_fTrDuration;
+    int m_iTrUnits; //0 = beats, 1 = seconds
+    float m_fTrRepeats;
+    float m_fTrDampening;
+    float m_fTrTurns;
+    float m_fTrDeviation;
+    int mTrState;
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     int mGuiTab;
     int mJoystickEnabled;
     int mOscJoystickSource;
@@ -729,6 +926,7 @@ private:
 	int mOscSendEnabled;
 	int mOscSendPort;
     String mOscSendIp;
+<<<<<<< HEAD
 
 	uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
@@ -737,6 +935,17 @@ private:
 	int mProcessMode;
 	int mRoutingMode;
 	AudioSampleBuffer mRoutingTempAudioBuffer;
+=======
+	//char mOscSendIp[64]; // if changing size, change kDataVersion
+	uint64_t mHostChangedParameter;
+	uint64_t mHostChangedProperty;
+	uint64_t mProcessCounter;
+	//int64 mLastTimeInSamples;
+	
+	int mProcessMode;
+	int mRoutingMode;
+	AudioSampleBuffer mRoutingTemp;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     bool mIsNumberSourcesChanged;
     bool mIsNumberSpeakersChanged;
@@ -766,12 +975,20 @@ private:
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
+<<<<<<< HEAD
 	inline void addToOutput(float s, float **outputs, int o, int f);
+=======
+	void addToOutput(float s, float **outputs, int o, int f);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	void ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     int mNumberOfSources;
     int mNumberOfSpeakers;
     std::vector<FirFilter> mFilters;
@@ -780,6 +997,7 @@ private:
     
     bool m_bPreventSourceLocationUpdate;
     bool m_bIsSettingEndPoint;
+<<<<<<< HEAD
     std::pair <float, float> m_fEndLocationXY01;
     bool m_bJustSelectedEndPoint;
 
@@ -791,6 +1009,14 @@ private:
     float m_fFieldWidth;
 
 	unique_ptr<SourceMover> m_pMover;
+=======
+    std::pair <float, float> m_fEndLocationXY;
+    bool m_bJustSelectedEndPoint;
+    bool m_bIsPlaying;
+    SourceUpdateThread* m_pSourceUpdateThread;
+    OwnedArray<Thread>  m_OwnedThreads;
+    unique_ptr<SourceMover> m_pMover;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

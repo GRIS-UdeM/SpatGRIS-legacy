@@ -141,10 +141,17 @@
  #define JucePlugin_Build_AAX              0
 #endif
 #ifndef  JucePlugin_Name
+<<<<<<< HEAD
  #define JucePlugin_Name                   "SpatGris"
 #endif
 #ifndef  JucePlugin_Desc
  #define JucePlugin_Desc                   "SpatGris"
+=======
+ #define JucePlugin_Name                   "Octogris3"
+#endif
+#ifndef  JucePlugin_Desc
+ #define JucePlugin_Desc                   "Octogris3"
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #endif
 #ifndef  JucePlugin_Manufacturer
  #define JucePlugin_Manufacturer           "UdeM"
@@ -159,7 +166,11 @@
  #define JucePlugin_ManufacturerCode       'UdeM'
 #endif
 #ifndef  JucePlugin_PluginCode
+<<<<<<< HEAD
  #define JucePlugin_PluginCode             'Spat'
+=======
+ #define JucePlugin_PluginCode             'Oct3'
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
@@ -180,6 +191,7 @@
  #define JucePlugin_EditorRequiresKeyboardFocus  0
 #endif
 #ifndef  JucePlugin_Version
+<<<<<<< HEAD
  #define JucePlugin_Version                0.1.1
 #endif
 #ifndef  JucePlugin_VersionCode
@@ -187,6 +199,15 @@
 #endif
 #ifndef  JucePlugin_VersionString
  #define JucePlugin_VersionString          "0.1.1"
+=======
+ #define JucePlugin_Version                3.0.3
+#endif
+#ifndef  JucePlugin_VersionCode
+ #define JucePlugin_VersionCode            0x30003
+#endif
+#ifndef  JucePlugin_VersionString
+ #define JucePlugin_VersionString          "3.0.3"
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #endif
 #ifndef  JucePlugin_VSTUniqueID
  #define JucePlugin_VSTUniqueID            JucePlugin_PluginCode
@@ -210,7 +231,11 @@
  #define JucePlugin_AUManufacturerCode     JucePlugin_ManufacturerCode
 #endif
 #ifndef  JucePlugin_CFBundleIdentifier
+<<<<<<< HEAD
  #define JucePlugin_CFBundleIdentifier     com.UdeM.SpatGRIS
+=======
+ #define JucePlugin_CFBundleIdentifier     com.UdeM.Octogris3
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #endif
 #ifndef  JucePlugin_RTASCategory
  #define JucePlugin_RTASCategory           ePlugInCategory_None
@@ -228,7 +253,11 @@
  #define JucePlugin_RTASDisableMultiMono   0
 #endif
 #ifndef  JucePlugin_AAXIdentifier
+<<<<<<< HEAD
  #define JucePlugin_AAXIdentifier          com.UdeM.SpatGris
+=======
+ #define JucePlugin_AAXIdentifier          com.UdeM.Octogris3
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #endif
 #ifndef  JucePlugin_AAXManufacturerCode
  #define JucePlugin_AAXManufacturerCode    JucePlugin_ManufacturerCode

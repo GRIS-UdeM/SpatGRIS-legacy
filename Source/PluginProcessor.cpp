@@ -67,6 +67,17 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
         return src_len;
     }
 }
+
+#include <sstream>
+#include <string>
+#include <windows.h>
+
+	template<class T>
+	string toString(const T &value) {
+		ostringstream os;
+		os << value;
+		return os.str();
+	}
 #endif
 
 JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
@@ -97,7 +108,6 @@ private:
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
 };
-
 
 //====================================== OscSpatThread ========================================
 class OscSpatThread : public Thread {
@@ -133,7 +143,6 @@ private:
     SpatGrisAudioProcessor* m_pProcessor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OscSpatThread)
 };
-
 
 //==============================================================================
 int IndexedAngleCompare(const void *a, const void *b)
@@ -184,6 +193,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
 	for (int i = 0; i < kNumberOfParameters; i++) 
 		mSmoothedParameters.add(0);
+
     
     mNumberOfSources = -1;
     mNumberOfSpeakers = -1;
@@ -205,8 +215,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	}
     
     //SET SOURCES AND SPEAKERS
-//    setNumberOfSources(JucePlugin_MaxNumInputChannels, true);
-//    setNumberOfSpeakers(JucePlugin_MaxNumOutputChannels, true);
     int iSources = getTotalNumInputChannels();
     int iSpeakers = getTotalNumOutputChannels();
     setNumberOfSources(iSources, true);
@@ -218,6 +226,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
 	setMovementMode(0);
+    
+    
 	mShowGridLines = false;
 	mTrSeparateAutomationMode = false;
     mIsNumberSourcesChanged = false;
@@ -232,7 +242,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mProcessMode = kPanVolumeMode;
 	mRoutingMode = 0;
     //version 9
-//    mInputOutputMode = i8o16;  //by default we have 8 inputs and 16 outputs
     updateInputOutputMode();
     mSrcPlacementMode = 1;
     mSrcSelected = 0;
@@ -278,7 +287,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
-
     std::unique_ptr<SourceMover> pMover(new SourceMover(this));
     m_pMover = std::move(pMover);
 }
@@ -288,15 +296,14 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     if (t){
         t->stop();
     }
-}
 
-void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
-    if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
-        m_pSourceUpdateThread->stopThread(500);
-    } else if (!m_pSourceUpdateThread->isThreadRunning()){
-        m_pSourceUpdateThread->startThread();
+    void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
+        if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
+            m_pSourceUpdateThread->stopThread(500);
+        } else if (!m_pSourceUpdateThread->isThreadRunning()){
+            m_pSourceUpdateThread->startThread();
+        }
     }
-}
 
 void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
@@ -312,10 +319,13 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
 //==============================================================================
 void SpatGrisAudioProcessor::setCalculateLevels(bool c)
 {
-	if (!mCalculateLevels && c)
-		for (int i = 0; i < mNumberOfSpeakers; i++)
+#if USE_DB_METERS
+    if (!mCalculateLevels && c){
+        for (int i = 0; i < mNumberOfSpeakers; i++){
 			mLevels.setUnchecked(i, 0);
-
+        }
+    }
+#endif
 	// keep count of number of editors
 	if (c) mCalculateLevels++;
 	else mCalculateLevels--;
@@ -412,7 +422,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     float fOldValue = mParameters.getUnchecked(index);
     
     if (!areSame(fOldValue, newValue)){
-        
         if (newValue == 0){
             DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
             return;
@@ -440,14 +449,12 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
             }
         }
 
-        
         mHostChangedParameter++;
     }
 }
 
 
-void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue)
-{
+void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
 	mParameters.set(index, newValue);
     
 //    if      (index == getParamForSourceX(0) || index == getParamForSourceY(0)) { setSourceLocationChanged(0);}
@@ -458,7 +465,6 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
 //    else if (index == getParamForSourceX(5) || index == getParamForSourceY(5)) { setSourceLocationChanged(5);}
 //    else if (index == getParamForSourceX(6) || index == getParamForSourceY(6)) { setSourceLocationChanged(6);}
 //    else if (index == getParamForSourceX(7) || index == getParamForSourceY(7)) { setSourceLocationChanged(7);}
-
     sendParamChangeMessageToListeners(index, newValue);
 }
 
@@ -487,7 +493,6 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
             case kSourceAzimSpan:   s << " -AS"; break;
             case kSourceElevSpan:   s << " -ES"; break;
             default: return String::empty;
-
 		}
 		return s;
 	}
@@ -740,7 +745,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
-    
+   
     //if new number of speakers is same as before, return
     if (p_iNewNumberOfSpeakers == mNumberOfSpeakers){
         return;
@@ -756,33 +761,29 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
         
         mNumberOfSpeakers = p_iNewNumberOfSpeakers;
         
-        mLevels.ensureStorageAllocated(mNumberOfSpeakers);
         if (mRoutingMode == 1) {
             updateRoutingTempAudioBuffer();
         }
+#if USE_DB_METERS
+        mLevels.ensureStorageAllocated(mNumberOfSpeakers);
         for (int i = 0; i < mNumberOfSpeakers; i++){
             mLevels.add(0);
         }
-        
+#endif
         if (bUseDefaultValues){
-            //updateSpeakerLocation(true, false, true);
             updateSpeakerLocation(true, false, false);
         }
-        
-        
         mHostChangedParameter++;
     }
     //starts audio processing again
     suspendProcessing (false);
 }
 
-void SpatGrisAudioProcessor::updateRoutingTempAudioBuffer()
-{
+void SpatGrisAudioProcessor::updateRoutingTempAudioBuffer() {
 	mRoutingTempAudioBuffer.setSize(mNumberOfSpeakers, kMaxSize);
 }
 
 void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise){
-
     float anglePerSp = kThetaMax / getNumberOfSpeakers();
     
     if (p_bAlternate)
@@ -820,7 +821,6 @@ void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
 const String SpatGrisAudioProcessor::getParameterText (int index)
 {
     return String::empty;
-	// return String (getParameter (index), 2);
 }
 
 const String SpatGrisAudioProcessor::getInputChannelName (int channelIndex) const
@@ -921,20 +921,23 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
 }
 
-void SpatGrisAudioProcessor::reset()
-{
-	if (mCalculateLevels)
-		for (int i = 0; i < mNumberOfSpeakers; i++)
-			mLevels.setUnchecked(i, 0);
-		
-	mSmoothedParametersInited = false;
-
-	for (int i = 0; i < mNumberOfSources; i++)
-    {
+void SpatGrisAudioProcessor::reset() {
+#if USE_DB_METERS
+    if (mCalculateLevels){
+        for (int i = 0; i < mNumberOfSpeakers; i++){
+            mLevels.setUnchecked(i, 0);
+        }
+    }
+#endif
+    
+    mSmoothedParametersInited = false;
+    
+    for (int i = 0; i < mNumberOfSources; i++) {
         mFilters[i].reset();
     }
-	
-	Router::instance().reset();
+    
+    
+    Router::instance().reset();
 }
 
 void SpatGrisAudioProcessor::releaseResources()
@@ -956,7 +959,11 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		printf("unexpected channel count %d vs %dx%d rmode: %d\n", buffer.getNumChannels(), mNumberOfSources, mNumberOfSpeakers, mRoutingMode);
 		return;
 	}
-
+    
+    AudioPlayHead::CurrentPositionInfo cpi;
+    getPlayHead()->getCurrentPosition(cpi);
+    m_bIsPlaying = cpi.isPlaying;
+    
 	unsigned int oriFramesToProcess = buffer.getNumSamples();
 	
 	if (mRoutingMode > 1) {
@@ -975,13 +982,8 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	unsigned int inFramesToProcess = oriFramesToProcess;
 	
 	Trajectory::Ptr trajectory = mTrajectory;
-	if (trajectory)
-	{
-		AudioPlayHead::CurrentPositionInfo cpi;
-		getPlayHead()->getCurrentPosition(cpi);
-		
-        if (cpi.isPlaying) // (cpi.timeInSamples != mLastTimeInSamples)
-		{
+	if (trajectory) {
+        if (m_bIsPlaying) {
 			// we're playing!
 			//mLastTimeInSamples = cpi.timeInSamples;
 	
@@ -1040,6 +1042,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	float **outputs = new float*[mNumberOfSpeakers];
 	for (int o = 0; o < mNumberOfSpeakers; o++)
 	{
+
 		outputs[o] = (mRoutingMode == 1) ? mRoutingTempAudioBuffer.getWritePointer(o) : buffer.getWritePointer(o);
         
 		if (mProcessMode == kFreeVolumeMode)
@@ -1122,7 +1125,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 				output[f] *= ramp[f];
 		}
 	}
-	
+#if USE_DB_METERS
 	if (mCalculateLevels) {
 		const float attack = kLevelAttackDefault; //params[kLevelAttackParam]; // milliseconds
 		const float release = kLevelReleaseDefault; //params[kLevelReleaseParam]; // milliseconds
@@ -1141,9 +1144,9 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 			mLevels.setUnchecked(o, env);
 		}
 	}
-	
-	if (mRoutingMode == 1)
-	{
+#endif
+    
+	if (mRoutingMode == 1) {
 		// accumulate in internal buffer
 		Router::instance().accumulate(mNumberOfSpeakers, oriFramesToProcess, mRoutingTempAudioBuffer);
 		buffer.clear();
@@ -1924,7 +1927,6 @@ void SpatGrisAudioProcessor::storeCurrentLocations(){
 }
 //p_iLocToRestore == -1 by default, meaning restore all locations
 void SpatGrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
-    
     if (p_iLocToRestore == -1){
         for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
             mParameters.set(getParamForSourceX(i), mBufferSrcLocX[i]);

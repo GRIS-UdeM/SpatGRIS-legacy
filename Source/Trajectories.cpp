@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -24,14 +28,21 @@
  ==============================================================================
  */
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #include "Trajectories.h"
 #include "PluginProcessor.h"
 #include "SourceMover.h"
 
 // ==============================================================================
 void Trajectory::start() {
+<<<<<<< HEAD
     m_pMover->begin(mFilter->getSrcSelected(), kTrajectory);
+=======
+    mMover->begin(mFilter->getSrcSelected(), kTrajectory);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     for (int i = 0; i < mFilter->getNumberOfSources(); i++){
         mSourcesInitialPositionRT.add(mFilter->getSourceRT(i));
     }
@@ -74,6 +85,7 @@ float Trajectory::progressCycle(){
 void Trajectory::stop()
 {
 	if (!mStarted || mStopped) return;
+<<<<<<< HEAD
     m_pMover->end(kTrajectory);
 	mStopped = true;
 }
@@ -81,6 +93,15 @@ void Trajectory::stop()
 Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
     :mFilter(filter)
     ,m_pMover(p_pMover)
+=======
+    mMover->end(kTrajectory);
+	mStopped = true;
+}
+
+Trajectory::Trajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+    :mFilter(filter)
+    ,mMover(p_pMover)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	,mStarted(false)
 	,mStopped(false)
 	,mDone(0)
@@ -92,7 +113,10 @@ Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, fl
 	mTotalDuration = mDurationSingleTraj * times;
 }
 
+<<<<<<< HEAD
 //using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
+=======
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleDirections(int p_iTrajectory){
     unique_ptr<vector<String>> vDirections (new vector<String>);
     
@@ -167,10 +191,20 @@ std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleReturns(int p_i
     switch(p_iTrajectory) {
         case Spiral:
         case Pendulum:
+<<<<<<< HEAD
         case RandomTarget:
             vReturns->push_back("One Way");
             vReturns->push_back("Return");
             break;
+=======
+            vReturns->push_back("One Way");
+            vReturns->push_back("Return");
+            break;
+        case RandomTarget:
+            vReturns->push_back("Continuous");
+            vReturns->push_back("Discontinuous");
+            break;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         case Circle:
         case EllipseTr:
         case RandomTrajectory:
@@ -191,7 +225,11 @@ std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleReturns(int p_i
 class CircleTrajectory : public Trajectory
 {
 public:
+<<<<<<< HEAD
     CircleTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
+=======
+    CircleTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     : Trajectory(filter, p_pMover, duration, beats, times)
     , mCCW(ccw)
     , m_fTurns(p_fTurns)
@@ -205,7 +243,11 @@ protected:
         if (!mCCW) da = -da;
     
         FPoint p = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+<<<<<<< HEAD
         m_pMover->move(mFilter->convertRt2Xy01(p.x, p.y+da*2*M_PI), kTrajectory);
+=======
+        mMover->move(mFilter->convertRt2Xy01(p.x, p.y+da*2*M_PI), kTrajectory);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     }
 	
 private:
@@ -217,14 +259,23 @@ private:
 class SpiralTrajectory : public Trajectory
 {
 public:
+<<<<<<< HEAD
     SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
     : Trajectory(filter, p_pMover, duration, beats, times)
+=======
+	SpiralTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
+	: Trajectory(filter, p_pMover, duration, beats, times)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     , mCCW(ccw)
     , mRT(rt)
     , m_fTurns(p_fTurns)
     , m_fEndPairXY01(endPair)
     { }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 protected:
     void spInit() {
         FPoint startPoint = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
@@ -265,7 +316,11 @@ protected:
         
         //convert rt to xy and do translation
         FPoint curPointXY01 = mFilter->convertRt2Xy01(r, t);
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         if (mIn){
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
@@ -274,11 +329,19 @@ protected:
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first - untranslatedEndOutPointXY.x);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second- untranslatedEndOutPointXY.y);
         }
+<<<<<<< HEAD
         m_pMover->move(curPointXY01, kTrajectory);
     }
     
 private:
     bool mCCW, mIn, mRT;
+=======
+        mMover->move(curPointXY01, kTrajectory);
+    }
+
+private:
+	bool mCCW, mIn, mRT;
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     float m_fTurns;
     std::pair<float, float> m_fEndPairXY01;
     FPoint m_fEndPointRt;
@@ -288,7 +351,11 @@ private:
 class PendulumTrajectory : public Trajectory
 {
 public:
+<<<<<<< HEAD
     PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const std::pair<float, float> &endPoint)
+=======
+    PendulumTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const std::pair<float, float> &endPoint)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     :Trajectory(filter, p_pMover, duration, beats, times)
     ,mCCW(ccw)
     ,m_bRT(rt)
@@ -304,7 +371,11 @@ protected:
         FPoint pointXY = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         m_fStartPair.first  = pointXY.x;
         m_fStartPair.second = pointXY.y;
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         if (!areSame(m_fEndPair.first, m_fStartPair.first)){
             m_bYisDependent = true;
             m_fM = (m_fEndPair.second - m_fStartPair.second) / (m_fEndPair.first - m_fStartPair.first);
@@ -331,6 +402,10 @@ protected:
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = fCurStartX01 + fCurrentProgress;
             newY01 = m_fM * newX01 + m_fB;
+<<<<<<< HEAD
+=======
+            
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         } else {
             fCurrentProgress = (m_fEndPair.second - m_fStartPair.second) * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = m_fStartPair.first;
@@ -350,7 +425,11 @@ protected:
         
         FPoint pointXY01 = mFilter->convertRt2Xy01(pointRT.x, pointRT.y + deviationAngle);
         
+<<<<<<< HEAD
         m_pMover->move(pointXY01, kTrajectory);
+=======
+        mMover->move(pointXY01, kTrajectory);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     }
 private:
     bool mCCW, m_bRT, m_bYisDependent;
@@ -367,7 +446,11 @@ private:
 class EllipseTrajectory : public Trajectory
 {
 public:
+<<<<<<< HEAD
 	EllipseTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
+=======
+	EllipseTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: Trajectory(filter, p_pMover, duration, beats, times)
     , mCCW(ccw)
     , m_fTurns(p_fTurns)
@@ -391,7 +474,11 @@ protected:
         float cosDa2 = cosDa*cosDa;
         float r2 = (a2*b2)/((b2-a2)*cosDa2+a2);
         float r = sqrt(r2);
+<<<<<<< HEAD
         m_pMover->move(mFilter->convertRt2Xy01(p.x * r, p.y + da), kTrajectory);
+=======
+        mMover->move(mFilter->convertRt2Xy01(p.x * r, p.y + da), kTrajectory);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     }
 	
 private:
@@ -453,7 +540,11 @@ private:
 class RandomTrajectoryClass : public Trajectory
 {
 public:
+<<<<<<< HEAD
 	RandomTrajectoryClass(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, float speed)
+=======
+	RandomTrajectoryClass(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, float speed)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: Trajectory(filter, p_pMover, duration, beats, times)
     , mClock(0)
     , mSpeed(speed)
@@ -504,7 +595,11 @@ protected:
                 p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                 p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
                 if (mFilter->getIndependentMode()){}
+<<<<<<< HEAD
                 m_pMover->move(p, kTrajectory);
+=======
+                mMover->move(p, kTrajectory);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
             }
         }
     }
@@ -520,7 +615,11 @@ private:
 class TargetTrajectory : public Trajectory
 {
 public:
+<<<<<<< HEAD
 	TargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool p_bReturn = false)
+=======
+	TargetTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool p_bReturn = false)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: Trajectory(filter, p_pMover, duration, beats, times)
     , mCycle(-1)
     , m_bReturn(p_bReturn)
@@ -570,7 +669,11 @@ protected:
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
+<<<<<<< HEAD
                     m_pMover->move(p, kTrajectory);
+=======
+                    mMover->move(p, kTrajectory);
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                 }
             }
         }
@@ -592,7 +695,11 @@ private:
 class RandomTargetTrajectory : public TargetTrajectory
 {
 public:
+<<<<<<< HEAD
 	RandomTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool p_bReturn)
+=======
+	RandomTargetTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool p_bReturn)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: TargetTrajectory(filter, p_pMover, duration, beats, times, p_bReturn) {}
 	
 protected:
@@ -624,7 +731,11 @@ private:
 class SymXTargetTrajectory : public TargetTrajectory
 {
 public:
+<<<<<<< HEAD
 	SymXTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+=======
+	SymXTargetTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
 	
 protected:
@@ -638,7 +749,11 @@ protected:
 class SymYTargetTrajectory : public TargetTrajectory
 {
 public:
+<<<<<<< HEAD
 	SymYTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+=======
+	SymYTargetTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
 	
 protected:
@@ -652,7 +767,11 @@ protected:
 class ClosestSpeakerTargetTrajectory : public TargetTrajectory
 {
 public:
+<<<<<<< HEAD
 	ClosestSpeakerTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+=======
+	ClosestSpeakerTargetTrajectory(OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
 	
 protected:
@@ -696,7 +815,11 @@ String Trajectory::GetTrajectoryName(int i)
     return "";
 }
 
+<<<<<<< HEAD
 Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats,
+=======
+Trajectory::Ptr Trajectory::CreateTrajectory(int type, OctogrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats,
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                                              AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair)
 {
     
