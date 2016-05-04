@@ -2171,9 +2171,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mElevSpanSlider->setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
 
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-#if USE_DB_METERS
-            mAttenuations.getUnchecked(i)->setValue(mFilter->getSpeakerA(i), dontSendNotification);
-#endif
             mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
         }
 #if TIME_THINGS

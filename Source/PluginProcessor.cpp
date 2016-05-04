@@ -1258,10 +1258,6 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	float output_adj = a * m;
 	float *output = outputs[o];
 	output[f] += s * output_adj;
-    
-    if (f > 0 && abs(abs(output[f]) - abs(output[f-1])) > .25){
-        DBG("#47: click?");
-    }
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {

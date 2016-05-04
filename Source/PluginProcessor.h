@@ -39,9 +39,9 @@
 using namespace std;
 
 
-//#ifndef USE_DB_METERS
-//#define USE_DB_METERS 1
-//#endif
+#ifndef USE_DB_METERS
+#define USE_DB_METERS 1
+#endif
 
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
