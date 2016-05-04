@@ -32,14 +32,9 @@
 #define FIELDCOMPONENT_H_INCLUDED
 
 #include "PluginProcessor.h"
-<<<<<<< HEAD
 #include "GrisLookAndFeel.h"
-class SourceMover;
-
-=======
 #include "SourceMover.h"
 #include "deque"
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 typedef enum
 {

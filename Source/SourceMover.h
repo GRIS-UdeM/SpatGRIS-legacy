@@ -69,11 +69,7 @@ public:
     }
 	
 private:
-<<<<<<< HEAD
 	SpatGrisAudioProcessor *mFilter;
-=======
-	OctogrisAudioProcessor *mFilter;
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	MoverType mMoverType;
 	int mSelectedSrc;
 	

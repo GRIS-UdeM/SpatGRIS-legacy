@@ -1,16 +1,6 @@
 /*
-<<<<<<< HEAD
-  ==============================================================================
-
-    Routing.h
-    Created: 31 Mar 2015 6:06:27am
-    Author:  makira
-
-  ==============================================================================
-*/
-=======
  ==============================================================================
- Octogris2: multichannel sound spatialization plug-in.
+ SpatGRIS: multichannel sound spatialization plug-in.
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -32,7 +22,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==============================================================================
  */
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 #ifndef ROUTING_H_INCLUDED
 #define ROUTING_H_INCLUDED
