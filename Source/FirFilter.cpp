@@ -1,10 +1,6 @@
 /*
  ==============================================================================
-<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
-=======
- Octogris2: multichannel sound spatialization plug-in.
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -45,18 +41,9 @@ void FirFilter::reset()
 	memset(mBuf, 0, sizeof(mBuf));
 }
 
-<<<<<<< HEAD
 void FirFilter::setSampleRate(int sr) {
 	for (int i = 0; i < sizeof(kSampleRates)/sizeof(kSampleRates[0]); i++) {
 		if (kSampleRates[i] == sr) {
-=======
-void FirFilter::setSampleRate(int sr)
-{
-	for (int i = 0; i < sizeof(kSampleRates)/sizeof(kSampleRates[0]); i++)
-	{
-		if (kSampleRates[i] == sr)
-		{
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 			mFir = i;
 			return;
 		}

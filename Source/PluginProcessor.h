@@ -43,11 +43,6 @@ using namespace std;
 //#define USE_DB_METERS 1
 //#endif
 
-JUCE_COMPILER_WARNING("which of these OSC macros do we need/use?")
-#ifndef USE_OSC
-    #define USE_OSC 1
-#endif
-
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
 #endif

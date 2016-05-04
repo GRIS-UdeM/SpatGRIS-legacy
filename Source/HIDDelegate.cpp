@@ -7,17 +7,10 @@
  
  ==============================================================================
  */
-<<<<<<< HEAD
-
 #include "HIDDelegate.h"
 
 #if USE_JOYSTICK
 
-=======
-#include "HIDDelegate.h"
-
-#if USE_JOYSTICK
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 #include <iostream>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "FieldComponent.h"
@@ -39,18 +32,10 @@
 
 /** HIDDelegate constructor taking two arguments and initializaing its others components by default */
 
-<<<<<<< HEAD
 HIDDelegate::HIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
 mFilter (filter),
 mEditor (editor),
 m_iNbOfJoystickButtons(0),
-=======
-HIDDelegate::HIDDelegate(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor):
-mFilter (filter),
-mEditor (editor),
-nbButton(0),
-buttonPressedTab(NULL),
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 vx(0),
 vy(0),
 deviceSetRef(NULL),
@@ -80,11 +65,7 @@ void HIDDelegate::Handle_DeviceRemovalCallback(void *inContext, IOReturn inResul
 #pragma unused (  inContext, inResult, inSender )
     
 //    printf("(context: %p, result: 0x%08X, sender: %p, device: %p).\n", inContext, inResult, inSender, (void *) inIOHIDDeviceRef);
-<<<<<<< HEAD
     SpatGrisAudioProcessorEditor * tempEditor = (SpatGrisAudioProcessorEditor*) inContext;
-=======
-    OctogrisAudioProcessorEditor * tempEditor = (OctogrisAudioProcessorEditor*) inContext;
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     tempEditor->uncheckJoystickButton();
     
     //what to do when a joystick get unplugged
@@ -107,11 +88,7 @@ void HIDDelegate::joystickPositionCallback(
         double max          = IOHIDElementGetPhysicalMax(tIOHIDElementRef);
         
         double value = IOHIDValueGetScaledValue(inIOHIDValueRef, kIOHIDValueScaleTypePhysical);
-<<<<<<< HEAD
         SpatGrisAudioProcessorEditor* tempEditor = (SpatGrisAudioProcessorEditor*) inContext;  //we get the editor from the context
-=======
-        OctogrisAudioProcessorEditor* tempEditor = (OctogrisAudioProcessorEditor*) inContext;  //we get the editor from the context
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         if(tempEditor->getHIDDel() != NULL) {
             if(usagePage==1) {   //axis
                 tempEditor->getHIDDel()->JoystickUsed(usage, value,min,max);  //calling Joystick used the function that will modify the source position
@@ -229,16 +206,10 @@ OSStatus HIDDelegate::Initialize_HID(void *inContext) {
                 IOHIDDeviceScheduleWithRunLoop(deviceRef, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
                 
                 CFIndex nbElement = CFArrayGetCount(elementRefTab);
-<<<<<<< HEAD
                 m_iNbOfJoystickButtons = nbElement-13;
                 
                 m_bJoystickButtonsCurentlyPressed = vector<bool>(m_iNbOfJoystickButtons, false);
                 
-=======
-                nbButton = nbElement-13;
-                JUCE_COMPILER_WARNING("this array is just wrong. fix this bullshit")
-                buttonPressedTab = new bool[nbButton]{false};
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                 gElementCFArrayRef =  IOHIDDeviceCopyMatchingElements(deviceRef, NULL, kIOHIDOptionsTypeNone);
                 
                 if (!gElementCFArrayRef) {
@@ -326,11 +297,7 @@ OSStatus HIDDelegate::Initialize_HID(void *inContext) {
 void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValue, double maxValue) {
     
     for(int iCurBut = 0; iCurBut < getNbButton(); ++iCurBut) {    //Sweep accross all the joystick buttons to check which is being pressed
-<<<<<<< HEAD
         if(!m_bJoystickButtonsCurentlyPressed[iCurBut]) {
-=======
-        if(!this->getButtonPressedTab(iCurBut)) {
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
             continue;
         }
         FPoint newPoint;
@@ -376,19 +343,9 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
 
 void HIDDelegate::setButtonPressedTab(u_int32_t usage, bool state)  //Get and Set to use the button pressed array
 {
-<<<<<<< HEAD
     m_bJoystickButtonsCurentlyPressed[usage-1]=state;
 }
 HIDDelegate::Ptr HIDDelegate::CreateHIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
-=======
-    buttonPressedTab[usage-1]=state;
-}
-bool HIDDelegate::getButtonPressedTab(u_int32_t index)
-{
-    return buttonPressedTab[index];
-}
-HIDDelegate::Ptr HIDDelegate::CreateHIDDelegate(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 {
     return new HIDDelegate(filter, editor);
 }

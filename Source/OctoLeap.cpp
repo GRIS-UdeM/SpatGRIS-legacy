@@ -107,7 +107,6 @@ void OctoLeap::onFrame(const Leap::Controller& controller) {
     }
 }
 
-<<<<<<< HEAD
 OctoLeap::Ptr OctoLeap::CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
     return new OctoLeap(filter, editor);
@@ -120,23 +119,7 @@ class SpatGrisAudioProcessor;
 class SpatGrisAudioProcessorEditor;
 Component * CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
-    
-=======
-OctoLeap::Ptr OctoLeap::CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
-{
-    return new OctoLeap(filter, editor);
-}
-
-#else
-
-//class Component;
-class OctogrisAudioProcessor;
-class OctogrisAudioProcessorEditor;
-Component * CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
-{
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
-    
-	// not implemented yet on windows
-	return NULL;
+    // not implemented yet on windows
+    return NULL;
 }
 #endif

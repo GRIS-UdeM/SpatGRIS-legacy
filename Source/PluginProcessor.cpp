@@ -296,8 +296,9 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     if (t){
         t->stop();
     }
+}
 
-    void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
+void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
         if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
             m_pSourceUpdateThread->stopThread(500);
         } else if (!m_pSourceUpdateThread->isThreadRunning()){
