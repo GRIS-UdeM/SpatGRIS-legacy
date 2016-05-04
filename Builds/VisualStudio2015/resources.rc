@@ -7,28 +7,17 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-<<<<<<< HEAD
 FILEVERSION  0,1,1,0
-=======
-FILEVERSION  3,0,3,0
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
-<<<<<<< HEAD
       VALUE "CompanyName",  "UdeM\0"
       VALUE "FileDescription",  "SpatGRIS\0"
       VALUE "FileVersion",  "0.1.1\0"
       VALUE "ProductName",  "SpatGRIS\0"
       VALUE "ProductVersion",  "0.1.1\0"
-=======
-      VALUE "FileDescription",  "Octogris\0"
-      VALUE "FileVersion",  "3.0.3\0"
-      VALUE "ProductName",  "Octogris\0"
-      VALUE "ProductVersion",  "3.0.3\0"
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     END
   END
 

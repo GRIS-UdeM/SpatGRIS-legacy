@@ -26,73 +26,51 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==============================================================================
  */
-<<<<<<< HEAD
-=======
 
-#ifndef USE_LEAP
-#define USE_LEAP 1
-#endif
+#ifndef PLUGINPROCESSOR_H_INCLUDED
+#define PLUGINPROCESSOR_H_INCLUDED
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include <stdint.h>
+#include "FirFilter.h"
+#include "Trajectories.h"
+#include "Routing.h"
+#include <memory>
+using namespace std;
+
 
 //#ifndef USE_DB_METERS
 //#define USE_DB_METERS 1
 //#endif
 
+JUCE_COMPILER_WARNING("which of these OSC macros do we need/use?")
 #ifndef USE_OSC
-#define USE_OSC 1
+    #define USE_OSC 1
 #endif
-
-#if !WIN32
-#ifndef USE_JOYSTICK
-#define USE_JOYSTICK 1
-#endif
-#endif
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
-
-#ifndef PLUGINPROCESSOR_H_INCLUDED
-#define PLUGINPROCESSOR_H_INCLUDED
 
 #ifndef USE_TOUCH_OSC
-#define USE_TOUCH_OSC 1
+    #define USE_TOUCH_OSC 1
 #endif
 
 #if WIN32
-#define M_PI 3.14159265358979323846264338327950288
+    #define M_PI 3.14159265358979323846264338327950288
+#else
+    #ifndef USE_LEAP
+        #define USE_LEAP 1
+    #endif
+    #ifndef USE_JOYSTICK
+        #define USE_JOYSTICK 1
+    #endif
 #endif
-<<<<<<< HEAD
-#if !WIN32
-#ifndef USE_LEAP
-#define USE_LEAP 1
+
+#if JUCE_MSVC
+    size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #endif
-#ifndef USE_JOYSTICK
-#define USE_JOYSTICK 1
-#endif
-#endif
+
+//==============================================================================
 
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
 static const bool s_bUseNewGui = true;
-
-=======
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
-
-#include <stdint.h>
-
-#include "../JuceLibraryCode/JuceHeader.h"
-
-#if JUCE_MSVC
-size_t strlcpy(char * dst, const char * src, size_t dstsize);
-#endif
-
-#include "FirFilter.h"
-#include "Trajectories.h"
-#include "Routing.h"
-<<<<<<< HEAD
-=======
-
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
-#include <memory>
-using namespace std;
-
-//==============================================================================
 
 // x, y, distance
 enum sourceParameters{
@@ -110,21 +88,9 @@ enum speakerParameters{
     kSpeakerY,
     kSpeakerUnused1,
     kSpeakerM,
-<<<<<<< HEAD
     kSpeakerUnused2,
     kParamsPerSpeakers
 };
-=======
-    kSpeakerUnused,
-    kParamsPerSpeakers
-};
-
-enum
-{
-    kTrReady,
-    kTrWriting
-};
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 enum AllTrajectoryTypes {
     Circle = 1,
@@ -141,12 +107,8 @@ enum AllTrajectoryTypes {
 
 #define kConstantOffset (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
 
-<<<<<<< HEAD
+
 enum constantParameters{
-=======
-enum
-{
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 	kSmooth =				0 + kConstantOffset,
 	kVolumeNear =			1 + kConstantOffset,
 	kVolumeMid =			2 + kConstantOffset,
@@ -161,7 +123,6 @@ enum
 
 #define kNumberOfParameters (kConstantParameters + kConstantOffset)
 
-<<<<<<< HEAD
 //==============================================================================
 static const float kSourceRadius = 10;
 static const float kSourceDiameter = kSourceRadius * 2;
@@ -186,27 +147,14 @@ enum AllTrajectoryTypes {
     ClosestSpeakerTarget,
     TotalNumberTrajectories
 };
-=======
-static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
-static const bool s_bUseNewGui = false;
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
+
 
 //these have to start at 0 because of backwards-compatibility
 enum InputOutputModes {
     i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16
 };
 
-<<<<<<< HEAD
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
-=======
-enum
-{
-	kFreeVolumeMode = 0,
-	kPanVolumeMode = 1,
-	kPanSpanMode = 2,
-	kNumberOfModes = 3
-};
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 //==============================================================================
 // these must be normalized/denormalized for processing
@@ -254,13 +202,10 @@ static const float kRoutingVolumeMin = -120;
 static const float kRoutingVolumeMax = 6;
 static const float kRoutingVolumeDefault = 0;
 
-<<<<<<< HEAD
 static const float kSpanMin = 0;
 static const float kSpanMax = 2;
 static const float kSpanDefault = 0;
 
-=======
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
@@ -308,13 +253,10 @@ typedef struct
 } IndexedAngle;
 int IndexedAngleCompare(const void *a, const void *b);
 
-<<<<<<< HEAD
+
 class OscSpatThread;
 class SourceUpdateThread;
 class SourceMover;
-=======
-class SourceUpdateThread;
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor
