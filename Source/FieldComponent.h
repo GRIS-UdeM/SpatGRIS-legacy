@@ -72,13 +72,6 @@ private:
 	float mSavedValue;
 
 	FPoint convertSourceRT(float r, float t);
-<<<<<<< HEAD
-    Path m_oTrajectoryPath;
-    float m_fStartPathX;
-    float m_fStartPathY;
-    float m_fEndPathX;
-    float m_fEndPathY;
-    bool m_bPathJustStarted;
 
     inline double degreeToRadian (float degree){
         return ((degree/360.0)* 2 * M_PI);
@@ -92,11 +85,9 @@ private:
     }
     
     GrisLookAndFeel mGrisFeel;
-=======
     int m_iCurPathLines;
     int m_iMaxPathLines;
     std::deque<FPoint> m_dqAllPathPoints;
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

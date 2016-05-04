@@ -35,11 +35,7 @@
 
 int gIsLeapConnected = NULL;
 
-<<<<<<< HEAD
 OctoLeap::OctoLeap(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
-=======
-OctoLeap::OctoLeap(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor):
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 mFilter(filter),
 mEditor(editor),
 mController(nullptr),
@@ -67,37 +63,21 @@ void OctoLeap::onFrame(const Leap::Controller& controller) {
             if (!p.isValid() || !p.isExtended()) {
                 mPointableId = -1;
                 mLastPositionValid = false;
-<<<<<<< HEAD
                 mEditor->getMover()->end(kLeap);
             } else {
                 Leap::Vector pos = p.tipPosition();
-=======
-                
-                mEditor->getMover()->end(kLeap);
-            } else {
-                Leap::Vector pos = p.tipPosition();
-                
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                 const float zPlane1 = 50;	// 5 cm
                 const float zPlane2 = 100;	// 10 cm
                 
                 if (pos.z < zPlane2) {
                     if (mLastPositionValid) {
                         Leap::Vector delta = pos - mLastPosition;
-<<<<<<< HEAD
-=======
-                        
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                         float scale = 1 / 100.;
                         if (pos.z > zPlane1) {
                             float s = 1 - (pos.z - zPlane1) / (zPlane2 - zPlane1);
                             scale *= s;
                             
                         }
-<<<<<<< HEAD
-=======
-                        
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
                         int src = mEditor->getOscLeapSource();
                         
                         FPoint sp = mFilter->getSourceXY01(src);
@@ -140,6 +120,7 @@ class SpatGrisAudioProcessor;
 class SpatGrisAudioProcessorEditor;
 Component * CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
+    
 =======
 OctoLeap::Ptr OctoLeap::CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
 {
@@ -154,6 +135,7 @@ class OctogrisAudioProcessorEditor;
 Component * CreateLeapComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
 {
 >>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
+    
 	// not implemented yet on windows
 	return NULL;
 }

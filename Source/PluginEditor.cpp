@@ -2155,16 +2155,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         clock_t timeTextEd = clock();
         oss << "TextEd\t" << timeTextEd - timeValues << "\t";
 #endif
-        
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-			mDistances.getUnchecked(i)->setValue(1.f - mFilter->getSourceD(i), dontSendNotification);
-        }
-
-#if TIME_THINGS
-        clock_t timeSources = clock();
-        oss << "Sources\t" << timeSources - timeTextEd << "\t";
-#endif
-        
+      
 
         updateSourceLocationTextEditor(false);
         updateSpeakerLocationTextEditor();

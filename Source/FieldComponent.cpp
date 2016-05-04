@@ -32,35 +32,14 @@
 #include "FieldComponent.h"
 #include "SourceMover.h"
 
-<<<<<<< HEAD
+//==============================================================================
 FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover)
 : mFilter(filter)
 , m_pMover(mover)
-, m_fStartPathX(-1)
-, m_fStartPathY(-1)
-, m_fEndPathX(-1)
-, m_fEndPathY(-1)
-, m_bPathJustStarted(false)
-{
-    JUCE_COMPILER_WARNING("this is weird. why does the mover need to know about the field component and vice versa?")
-    m_pMover->setFieldComponent(this);
-=======
-
-//==============================================================================
-static const float kSourceRadius = 10;
-static const float kSourceDiameter = kSourceRadius * 2;
-static const float kSpeakerRadius = 10;
-static const float kSpeakerDiameter = kSpeakerRadius * 2;
-
-//==============================================================================
-FieldComponent::FieldComponent(OctogrisAudioProcessor* filter, SourceMover *mover)
-: mFilter(filter)
-, mMover(mover)
 , m_iCurPathLines(0)
 , m_iMaxPathLines(10)
 {
-    mMover->setFieldComponent(this);
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
+    m_pMover->setFieldComponent(this);
 }
 
 FieldComponent::~FieldComponent()
@@ -68,31 +47,13 @@ FieldComponent::~FieldComponent()
 }
 
 void FieldComponent::clearTrajectoryPath(){
-<<<<<<< HEAD
-    m_fStartPathX = -1, m_fEndPathX = -1, m_fStartPathY = -1, m_fEndPathY = -1;
-    m_oTrajectoryPath.clear();
-=======
     m_dqAllPathPoints.clear();
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){
     float fAbsoluteX = p_fX * getWidth();
     float fAbsoluteY = (1-p_fY) * getHeight();
-<<<<<<< HEAD
-    if (m_fEndPathX == -1){         //we have not started the path yet, so start at absolute point
-        m_bPathJustStarted = true;
-        m_fStartPathX = fAbsoluteX;
-        m_fStartPathY = fAbsoluteY;
-    } else {                        //we've already started, so start from previous point
-        m_fStartPathX = m_fEndPathX;
-        m_fStartPathY = m_fEndPathY;
-    }
-    m_fEndPathX = fAbsoluteX;
-    m_fEndPathY = fAbsoluteY;
-=======
     m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 }
 
 FPoint FieldComponent::getSourcePoint(int i)
@@ -143,14 +104,9 @@ void FieldComponent::paint (Graphics& g)
 	// draw back circles
 	// - - - - - - - - - - - -
 	g.setColour(Colours::white);
-<<<<<<< HEAD
     float iCurRadius = 1;//(processMode == kOscSpatMode) ? kRadiusMax : 1;
 	for (; iCurRadius <= kRadiusMax; iCurRadius += 1) {
 		float w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
-=======
-	for (float i = 1; i <= kRadiusMax; i += 1) {
-		float w = (i / kRadiusMax) * (fieldWidth - kSourceDiameter);
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 		float x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 	}
@@ -181,7 +137,6 @@ void FieldComponent::paint (Graphics& g)
 	// - - - - - - - - - - - -
 	// draw translucid circles
 	// - - - - - - - - - - - -
-<<<<<<< HEAD
     if (processMode == kFreeVolumeMode){
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
             float sourceDist = mFilter->getDenormedSourceD(i);
@@ -201,28 +156,6 @@ void FieldComponent::paint (Graphics& g)
             g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
         }
     } else if (processMode == kPanSpanMode){
-=======
-	if (processMode == kFreeVolumeMode)
-	for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-		float sourceDist = mFilter->getDenormedSourceD(i);
-		float reachDist = 1 / (adj_factor * sourceDist);
-		
-		float radius = (reachDist / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter);
-		float diameter = radius * 2;
-		
-		FPoint p = getSourcePoint(i);
-	
-		float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
-		if (hue > 1) hue -= 1;
-	
-		g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
-		g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
-		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
-		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
-	}
-	
-    if (processMode == kPanSpanMode){
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
             float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
             if (hue > 1){
@@ -264,7 +197,6 @@ void FieldComponent::paint (Graphics& g)
                 }
             }
         }
-<<<<<<< HEAD
     } else if (processMode == kOscSpatMode){
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
             float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
@@ -345,28 +277,7 @@ void FieldComponent::paint (Graphics& g)
             g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
         }
     }
-=======
-    }
-	// - - - - - - - - - - - -
-	// draw speakers
-	// - - - - - - - - - - - -
-	for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
-		const float radius = kSpeakerRadius, diameter = kSpeakerDiameter;
-		FPoint p = getSpeakerPoint(i);
-		g.setColour(Colour::fromHSV(2.f/3.f, 0, 0.5, 1));
-		g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
-		
-		g.setColour(Colours::white);
-		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
-		
-		String s; s << i+1;
-		g.setColour(Colours::black);
-		g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
-		g.setColour(Colours::white);
-		g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
-	}
-    
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
+
     // - - - - - - - - - - - -
     //draw line and circle for selected source
     // - - - - - - - - - - - -
@@ -392,11 +303,8 @@ void FieldComponent::paint (Graphics& g)
 		if (hue > 1) hue -= 1;
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
-<<<<<<< HEAD
+
 		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
-=======
-		if (processMode != kFreeVolumeMode) {
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 			FPoint rt = mFilter->getSourceRT(i);
 			float r = rt.x;
 			float t = rt.y;
@@ -428,18 +336,7 @@ void FieldComponent::paint (Graphics& g)
 		g.drawText(s, p.x - radius, p.y - radius, diameter, diameter,
 					Justification(Justification::centred), false);
 	}
-<<<<<<< HEAD
     // TRAJECTORY PATH
-    if (m_fStartPathX != -1 && m_fEndPathX != -1){
-        if (m_bPathJustStarted){
-            m_oTrajectoryPath.startNewSubPath (m_fStartPathX, m_fStartPathY);
-            m_bPathJustStarted = false;
-        }
-        m_oTrajectoryPath.lineTo (m_fEndPathX, m_fEndPathY);
-        g.setColour(Colour(0, 102, 255));
-        g.strokePath (m_oTrajectoryPath, PathStrokeType (2.0f, PathStrokeType::JointStyle::curved));
-=======
-    
     if (m_dqAllPathPoints.size() > 2){
         Path trajectoryPath;
         FPoint startPoint = m_dqAllPathPoints[0];
@@ -453,10 +350,8 @@ void FieldComponent::paint (Graphics& g)
     
     if (m_dqAllPathPoints.size() > m_iMaxPathLines){
         m_dqAllPathPoints.pop_front();
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
     }
 }
-
 
 void FieldComponent::mouseDown(const MouseEvent &event)
 {
@@ -476,16 +371,9 @@ void FieldComponent::mouseDown(const MouseEvent &event)
     //if assigning end location
     if (mFilter->isSettingEndPoint()) {
         //get point of current event
-<<<<<<< HEAD
         float fCenteredX01 = (float)event.x/fieldWidth;//-_ZirkOSC_Center_X;
         float fCenteredY01 = (float)event.y/fieldHeight;//-_ZirkOSC_Center_Y;
         mFilter->setEndLocationXY01(make_pair (fCenteredX01, fCenteredY01));
-=======
-        float fCenteredX = (float)event.x/fieldWidth;//-_ZirkOSC_Center_X;
-        float fCenteredY = (float)event.y/fieldHeight;//-_ZirkOSC_Center_Y;
-        mFilter->setEndLocationXY(make_pair (fCenteredX, fCenteredY));
-        
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
         mFilter->setIsSettingEndPoint(false);
         mFilter->setJustSelectedEndPoint(true);
     }
@@ -506,11 +394,7 @@ void FieldComponent::mouseDown(const MouseEvent &event)
 				mSavedValue = mFilter->getSourceRT(mSelectedItem).x;
 			mLastKeys = event.mods;
 			
-<<<<<<< HEAD
 			m_pMover->begin(i, kField);
-=======
-			mMover->begin(i, kField);
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 			return;
 		}
 	}
@@ -576,11 +460,7 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 			}
 			mLastKeys = event.mods;
            
-<<<<<<< HEAD
 			m_pMover->move(FPoint(vx, vy), kField);
-=======
-			mMover->move(FPoint(vx, vy), kField);
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 			break;
 		}
 			
@@ -603,11 +483,7 @@ void FieldComponent::mouseUp(const MouseEvent &event) {
 		case kNoSelection:
 			return;
 		case kSelectedSource:
-<<<<<<< HEAD
 			m_pMover->end(kField);
-=======
-			mMover->end(kField);
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
 			break;
 		case kSelectedSpeaker:
 			break;
