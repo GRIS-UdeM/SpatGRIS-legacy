@@ -652,7 +652,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Volume center (dB):", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamVolumeNear, kVolumeNear, mFilter->getParameter(kVolumeNear), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamVolumeNear, kVolumeNear, mFilter->getParameter(kVolumeNear), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeNear = ds;
             y += dh + 5;
@@ -662,7 +662,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Filter center:", x, y, w, dh, box);
             y += dh + 5;
             
-            Slider *ds = addParamSlider(kParamFilterNear, kFilterNear, mFilter->getParameter(kFilterNear), x, y, w, dh, box);
+            Slider *ds = addParamSliderGRIS(kParamFilterNear, kFilterNear, mFilter->getParameter(kFilterNear), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterNear = ds;
             y += dh + 5;
@@ -1598,7 +1598,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
 
             mFilter->setIsRecordingAutomation(true);
             mFilter->storeCurrentLocations();
-            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY()));
+            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY01()));
             mTrWriteButton->setButtonText("Cancel");
             mTrStateEditor = kTrWriting;
             mFilter->setTrState(mTrStateEditor);
@@ -1632,7 +1632,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             setDefaultPendulumEndpoint();
         } else {
             pair<float, float> pair = make_pair(.5, .5);
-            mFilter->setEndLocationXY(pair);
+            mFilter->setEndLocationXY01(pair);
         }
         updateEndLocationTextEditors();
     }
