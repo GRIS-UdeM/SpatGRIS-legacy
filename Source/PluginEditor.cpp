@@ -1,5 +1,6 @@
 /*
  ==============================================================================
+
  SpatGRIS: multichannel sound spatialization plug-in.
  
  Copyright (C) 2015  GRIS-UdeM
@@ -49,6 +50,11 @@ string toString(const T &value) {
 #include "HID_Utilities_External.h"
 #endif
 
+#define TIME_THINGS 0
+#if TIME_THINGS
+    #include <ctime>
+#endif
+
 #define STRING2(x) #x
 #define STRING(x) STRING2(x)
 //==============================================================================
@@ -64,6 +70,7 @@ public:
     MiniProgressBar() : mValue(0) {}
     void paint(Graphics &g)
     {
+
         juce::Rectangle<int> box = getLocalBounds();
         
         g.setColour(Colours::black);
@@ -97,12 +104,6 @@ public:
     }
     
     void initDone() { mInited = true; }
-    
-    ~OctTabbedComponent() override
-    {
-//        clearTabs();
-//        tabs = nullptr;
-    }
     
 private:
     SpatGrisAudioProcessor *mFilter;
@@ -183,6 +184,7 @@ private:
 //    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JoystickUpdateThread)
 //};
 
+
 //==================================== EDITOR ===================================================================
 
 SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter, SourceMover *mover):
@@ -209,7 +211,6 @@ AudioProcessorEditor (ownerFilter)
 	m_bLoadingPreset = false;
     JUCE_COMPILER_WARNING("isn't there a macro for this?")
     bool leapSupported = true;
-    
     mFilter->addListener(this);
     
     // main field
@@ -229,6 +230,7 @@ AudioProcessorEditor (ownerFilter)
     version += STRING(__TIME__);
 #endif
     
+
     m_VersionLabel->setText("SpatGRIS" + version,  dontSendNotification);
     m_VersionLabel->setJustificationType(Justification(Justification::right));
     m_VersionLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
@@ -319,11 +321,6 @@ AudioProcessorEditor (ownerFilter)
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelectCombo);
         mComponents.add(mSrcSelectCombo);
         mSrcSelectCombo->addListener(this);
-        JUCE_COMPILER_WARNING("THIS NEEDS TO BE IN CONSTRUCTOR! because otherwise we need the editor for the plugin to work correctly!")
-        //believe it or not, this actually does something useful...! Not quite sure what, but removing it messes up the number of sources and speakers when loading some presets
-//        if (mFilter->getIsAllowInputOutputModeSelection()){
-//            mFilter->setInputOutputMode(mFilter->getInputOutputMode());
-//        }
         updateSources(true);
     }
     
@@ -344,7 +341,9 @@ AudioProcessorEditor (ownerFilter)
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
         addLabel("Mute", x, y, muteWidth, dh, ct);
+#if USE_DB_METERS
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
+#endif
         addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
         y += dh;
         mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
@@ -356,7 +355,6 @@ AudioProcessorEditor (ownerFilter)
         mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelectCombo);
         mComponents.add(mSpSelectCombo);
         mSpSelectCombo->addListener(this);
-
         updateSpeakers(true);
     }
 
@@ -683,6 +681,7 @@ AudioProcessorEditor (ownerFilter)
             addLabel("Volume speakers (dB):", x, y, w, dh, box);
             y += dh + 5;
             
+
             Slider *ds = addParamSliderGRIS(kParamVolumeMid, kVolumeMid, mFilter->getParameter(kVolumeMid), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeMid = ds;
@@ -749,6 +748,7 @@ AudioProcessorEditor (ownerFilter)
         mSrcPlacementCombo->setTopLeftPosition(x, y);
         mSrcPlacementCombo->setExplicitFocusOrder(5);
         //mSrcPlacementCombo->addListener(this);
+        
         y += dh + 5;
         mApplySrcPlacementButton = addButton("Apply", x, y, iButtonW, dh, box);
         
@@ -791,7 +791,6 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Speaker placement:", x, y, w, dh, box);
         y += dh + 5;
         
-
         mSpPlacementCombo->addItem("Left Alternate", kLeftAlternate);
         mSpPlacementCombo->addItem("Left Clockwise", kLeftClockwise);
         mSpPlacementCombo->addItem("Left Counter Clockwise", kLeftCounterClockWise);
@@ -1242,6 +1241,7 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     //update number of sources in mover. this puts all sources at 0,0, ie, bottom left corner
     m_pMover->updateNumberOfSources();
     
+
     //if we're not in constructor, reset source placement
     if (!p_bCalledFromConstructor){
         buttonClicked(mApplySrcPlacementButton);
@@ -1259,17 +1259,20 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
 
 
 void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor){
-
     //remove old stuff
     Component *ct = mSpeakersBox->getContent();
-    for (int iCurLevelComponent = 0; iCurLevelComponent < mLevels.size(); ++iCurLevelComponent){
+    for (int iCurLevelComponent = 0; iCurLevelComponent < mMutes.size(); ++iCurLevelComponent){
         ct->removeChildComponent(mMutes.getUnchecked(iCurLevelComponent));
+#if USE_DB_METERS
         ct->removeChildComponent(mLevels.getUnchecked(iCurLevelComponent));
         mComponents.removeObject(mLevels.getUnchecked(iCurLevelComponent));
+#endif
     }
     mMutes.clear();
-    mLevels.clear();
     mSpSelectCombo->clear();
+#if USE_DB_METERS
+    mLevels.clear();
+#endif
     
     //put new stuff
     int iCurSpeakers = mFilter->getNumberOfSpeakers();
@@ -1279,20 +1282,24 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     y += dh + 5;
 
     for (int i = 0; i < iCurSpeakers; i++){
-        String s; s << i+1; s << ":";
+        String s; s << i+1;
+#if USE_DB_METERS
+        s << ":";
+#endif
         
 		float fMute = mFilter->getSpeakerM(i);
 		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
         mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
         mMutes.add(mute);
         const int muteWidth = 50;
+#if USE_DB_METERS
         juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
-        
         LevelComponent *lc = new LevelComponent(mFilter, i);
         lc->setBounds(level);
         ct->addAndMakeVisible(lc);
         mComponents.add(lc);
         mLevels.add(lc);
+#endif
         
         y += dh + 5;
     }
@@ -1332,7 +1339,7 @@ void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
     int iCurMode = mFilter->getMovementMode() + 1;
     if (mMovementModeCombo->getItemText(iCurMode-1) == ""){
         mMovementModeCombo->setSelectedId(1);
-        mFilter->setMovementMode(0);
+        mFilter->setMovementMode(0);    //0 is independent
     } else {
         mMovementModeCombo->setSelectedId(iCurMode);
     }
@@ -1507,6 +1514,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
     }
+
     else if (&textEditor == mOscSpat1stSrcIdTextEditor){
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
         if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
@@ -1534,8 +1542,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
             mFilter->setEndLocationXY01(make_pair (endPoint.x, 1-endPoint.y));
         }
         updateEndLocationTextEditors();
-    }
-    else {
+    } else {
         printf("unknown TextEditor clicked...\n");
     }
     
@@ -1545,6 +1552,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     }
     
 }
+
 
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
@@ -1557,6 +1565,12 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     
     if (button == mTrWriteButton) {
+#if TIME_THINGS
+        for(auto line : mTimingVector){
+            cout << line << newLine;
+            mTimingVector.clear();
+        }
+#endif
         Trajectory::Ptr t = mFilter->getTrajectory();
         //a trajectory exists, so we want to cancel it
         if (t) {
@@ -1621,6 +1635,13 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mFilter->setEndLocationXY01(pair);
         }
         updateEndLocationTextEditors();
+    }
+    else if (button == mApplySrcPlacementButton) {
+        
+        if (mFilter->getNumberOfSources() == 1){
+            mFilter->setSourceRT(0, FPoint(0, 0));
+            return;
+        }
     }
     else if (mFilter->getIsAllowInputOutputModeSelection() && button == mApplyInputOutputModeButton) {
         //update mode in processor, which will update its number of sources and speakers
@@ -1703,7 +1724,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
                 gIOHIDManagerRef = NULL;
                 gDeviceCFArrayRef = NULL;
                 gElementCFArrayRef = NULL;
-//                m_pJoystickUpdateThread->stopThread(100);
                 mJoystick = NULL;
                 mStateJoystick->setText("", dontSendNotification);
             }
@@ -1861,6 +1881,7 @@ void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
 
 
 void SpatGrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor){
+
     m_bIsReturnKeyPressedCalledFromFocusLost = true;
     textEditorReturnKeyPressed(textEditor);
     m_bIsReturnKeyPressedCalledFromFocusLost = false;
@@ -1869,34 +1890,35 @@ void SpatGrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor){
 void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
     if (comboBox == mMovementModeCombo) {
+        
         int iSelectedMode = comboBox->getSelectedId() - 1;
-        JUCE_COMPILER_WARNING("need to implement isPlaying from octogris")
-//        if(!mFilter->isPlaying()){
-//            mFilter->setMovementMode(iSelectedMode);
-//        } else {
-//            int iCurMode = mFilter->getMovementMode() + 1;
-//            mMovementModeCombo->setSelectedId(iCurMode);
-//        }
-        mFilter->setMovementMode(iSelectedMode);
-        if(mFilter->getNumberOfSources() > 1){
-            switch (iSelectedMode) {
-                case 2:
-                    m_pMover->setEqualRadius();
-                    break;
-                case 3:
-                    m_pMover->setEqualAngles();
-                    break;
-                case 4:
-                    m_pMover->setEqualRadiusAndAngles();
-                    break;
-                case 6:
-                    m_pMover->setSymmetricX();
-                    break;
-                case 7:
-                    m_pMover->setSymmetricY();
-                    break;
-                default:
-                    break;
+        //if we're playing, just set combobox back to what it was and return
+        if(mFilter->isPlaying()){
+            int iCurMode = mFilter->getMovementMode() + 1;
+            mMovementModeCombo->setSelectedId(iCurMode);
+            return;
+        } else {
+            mFilter->setMovementMode(iSelectedMode);
+            if(mFilter->getNumberOfSources() > 1){
+                switch (iSelectedMode) {
+                    case 2:
+                        m_pMover->setEqualRadius();
+                        break;
+                    case 3:
+                        m_pMover->setEqualAngles();
+                        break;
+                    case 4:
+                        m_pMover->setEqualRadiusAndAngles();
+                        break;
+                    case 6:
+                        m_pMover->setSymmetricX();
+                        break;
+                    case 7:
+                        m_pMover->setSymmetricY();
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
@@ -1968,7 +1990,12 @@ void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
-	switch(mTrStateEditor)	{
+#if TIME_THINGS
+    std::ostringstream oss;
+    clock_t init = clock();
+#endif
+
+    switch(mTrStateEditor)	{
 		case kTrWriting: {
 			Trajectory::Ptr t = mFilter->getTrajectory();
 			if (t) {
@@ -1993,6 +2020,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 		break;
 	}
     
+#if TIME_THINGS
+    clock_t timeTraj = clock();
+    oss << "traj\t" << timeTraj - init << "\t";
+#endif
     if (mFilter->justSelectedEndPoint()){
         updateEndLocationTextEditors();
         mTrEndPointButton->setToggleState(false, dontSendNotification);
@@ -2049,6 +2080,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
     }
     
+#if TIME_THINGS
+    clock_t timeProperty = clock();
+    oss << "property\t" << timeProperty - timeTraj << "\t";
+#endif
+
     hcp = mFilter->getHostChangedParameter();
     if (hcp != mHostChangedParameter) {
         mHostChangedParameter = hcp;
@@ -2058,9 +2094,23 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     if (mFieldNeedRepaint || mNeedRepaint){
         mField->repaint();
     }
-    
-    for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++)
+
+#if TIME_THINGS
+    clock_t timeField = clock();
+    oss << "field\t" << timeField - timeProperty << "\t";
+#endif
+#if USE_DB_METERS
+    if (!mFilter->getIsRecordingAutomation()){
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
         mLevels.getUnchecked(i)->refreshIfNeeded();
+        }
+    }
+#endif
+
+#if TIME_THINGS
+    clock_t timeLevels = clock();
+    oss << "levels\t" << timeLevels - timeField << "\t";
+#endif
     
     if (mNeedRepaint){
         if(mFilter->getGuiTab() == 0){
@@ -2077,17 +2127,36 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             mTabs->getTabContentComponent(1)->addAndMakeVisible(mMovementModeCombo);
         }
         
+        
+#if TIME_THINGS
+        clock_t timeGuiTab = clock();
+        oss << "GuiTab\t" << timeGuiTab - timeLevels << "\t";
+#endif
+      
         mSmoothingSlider->setValue(mFilter->getParameter(kSmooth));
         mVolumeFar->setValue(mFilter->getParameter(kVolumeFar));
         mVolumeMid->setValue(mFilter->getParameter(kVolumeMid));
         mVolumeNear->setValue(mFilter->getParameter(kVolumeNear));
         mMaxSpanVolumeSlider->setValue(mFilter->getParameter(kMaxSpanVolume));
-        mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
-        
         mFilterNear->setValue(mFilter->getParameter(kFilterNear));
         mFilterMid->setValue(mFilter->getParameter(kFilterMid));
         mFilterFar->setValue(mFilter->getParameter(kFilterFar));
+        mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
+#if TIME_THINGS
+        clock_t timeValues = clock();
+        oss << "Values\t" << timeValues - timeGuiTab << "\t";
+#endif
+        if (!mFilter->isPlaying()){
+            updateSourceLocationTextEditor(false);
+            updateSpeakerLocationTextEditor();
+        }
         
+#if TIME_THINGS
+        clock_t timeTextEd = clock();
+        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
+#endif
+      
+
         updateSourceLocationTextEditor(false);
         updateSpeakerLocationTextEditor();
         
@@ -2102,23 +2171,37 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mElevSpanSlider->setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
 
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-			mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
+            mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
         }
-        
-        //check if the inputOutput mode was changed by mFilter->prepareToPlay()
-        int iCurInOutMode = mFilter->getInputOutputMode();
-        if (mInputOutputModeCombo->getSelectedId() != iCurInOutMode){
-            mInputOutputModeCombo->setSelectedId(iCurInOutMode);
-            updateInputOutputCombo();
-        }
+#if TIME_THINGS
+        clock_t timeSpeakers = clock();
+        oss << "Speakers\t" << timeSpeakers - timeSources << "\t";
+#endif
     }
+    
+#if TIME_THINGS
+    clock_t timeRepaint = clock();
+    oss << "repaint\t" << timeRepaint - timeLevels << "\t";
+#endif
     
     mNeedRepaint = false;
     mFieldNeedRepaint = false;
     
-	if (mOsc) {
-		mOsc->heartbeat();
-	}
+#if TIME_THINGS
+    clock_t timeSourceUpdate = clock();
+    oss << "SourceUpdate\t" << timeSourceUpdate - timeRepaint << "\t";
+#endif
+    
+    if (mOsc) {
+        mOsc->heartbeat();
+    }
+    
+#if TIME_THINGS
+    clock_t timeOsc = clock();
+    oss << "osc\t" << timeOsc - timeSourceUpdate;
+    mTimingVector.push_back(oss.str());
+#endif
+    
     startTimer(kTimerDelay);
 }
 

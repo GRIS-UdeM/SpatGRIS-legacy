@@ -7,7 +7,6 @@
  
  ==============================================================================
  */
-
 #include "HIDDelegate.h"
 
 #if USE_JOYSTICK
@@ -17,7 +16,11 @@
 #include "FieldComponent.h"
 
 /*#if JUCE_WINDOWS
+<<<<<<< HEAD
  Component * CreateHIDComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
+=======
+ Component * CreateHIDComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  {
  // not implemented yet on windows
  return NULL;

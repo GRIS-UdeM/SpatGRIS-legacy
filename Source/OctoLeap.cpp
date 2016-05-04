@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -115,7 +119,7 @@ class SpatGrisAudioProcessor;
 class SpatGrisAudioProcessorEditor;
 Component * CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
 {
-	// not implemented yet on windows
-	return NULL;
+    // not implemented yet on windows
+    return NULL;
 }
 #endif

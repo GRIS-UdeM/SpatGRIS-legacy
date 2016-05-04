@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -26,41 +30,42 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
-#ifndef USE_TOUCH_OSC
-#define USE_TOUCH_OSC 1
-#endif
-
-#if WIN32
-#define M_PI 3.14159265358979323846264338327950288
-#endif
-#if !WIN32
-#ifndef USE_LEAP
-#define USE_LEAP 1
-#endif
-#ifndef USE_JOYSTICK
-#define USE_JOYSTICK 1
-#endif
-#endif
-
-static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
-static const bool s_bUseNewGui = true;
-
-
-#include <stdint.h>
-
 #include "../JuceLibraryCode/JuceHeader.h"
-
-#if JUCE_MSVC
-size_t strlcpy(char * dst, const char * src, size_t dstsize);
-#endif
-
+#include <stdint.h>
 #include "FirFilter.h"
 #include "Trajectories.h"
 #include "Routing.h"
 #include <memory>
 using namespace std;
 
+
+#ifndef USE_DB_METERS
+#define USE_DB_METERS 1
+#endif
+
+#ifndef USE_TOUCH_OSC
+    #define USE_TOUCH_OSC 1
+#endif
+
+#if WIN32
+    #define M_PI 3.14159265358979323846264338327950288
+#else
+    #ifndef USE_LEAP
+        #define USE_LEAP 1
+    #endif
+    #ifndef USE_JOYSTICK
+        #define USE_JOYSTICK 1
+    #endif
+#endif
+
+#if JUCE_MSVC
+    size_t strlcpy(char * dst, const char * src, size_t dstsize);
+#endif
+
 //==============================================================================
+
+static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
+static const bool s_bUseNewGui = true;
 
 // x, y, distance
 enum sourceParameters{
@@ -81,7 +86,6 @@ enum speakerParameters{
     kSpeakerUnused2,
     kParamsPerSpeakers
 };
-
 
 #define kConstantOffset (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
 
@@ -125,6 +129,7 @@ enum AllTrajectoryTypes {
     TotalNumberTrajectories
 };
 
+
 //these have to start at 0 because of backwards-compatibility
 enum InputOutputModes {
     i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16
@@ -142,19 +147,19 @@ static const float kSpeakerDefaultAttenuation = 0;
 
 static const float kSmoothMin = 1;
 static const float kSmoothMax = 200;
-static const float kSmoothDefault = 10;
+static const float kSmoothDefault = 50;
 
 static const float kVolumeNearMin = -10;
 static const float kVolumeNearMax = 30;
-static const float kVolumeNearDefault = 0;
+static const float kVolumeNearDefault = 6;
 
 static const float kVolumeMidMin = -30;
 static const float kVolumeMidMax = 10;
-static const float kVolumeMidDefault = -6;
+static const float kVolumeMidDefault = 0;
 
 static const float kVolumeFarMin = -120;
 static const float kVolumeFarMax = 0;
-static const float kVolumeFarDefault = -40;
+static const float kVolumeFarDefault = -36;
 
 static const float kMaxDistance = 2000;
 
@@ -164,11 +169,11 @@ static const float kFilterNearDefault = 0;
 
 static const float kFilterMidMin = kMaxDistance;
 static const float kFilterMidMax = 0;
-static const float kFilterMidDefault = 0;
+static const float kFilterMidDefault = kMaxDistance / 10;
 
 static const float kFilterFarMin = kMaxDistance;
 static const float kFilterFarMax = 0;
-static const float kFilterFarDefault = kMaxDistance;
+static const float kFilterFarDefault = kMaxDistance / 2;
 
 static const float kMaxSpanVolumeMin = 0;
 static const float kMaxSpanVolumeMax = 20;
@@ -229,6 +234,7 @@ typedef struct
 } IndexedAngle;
 int IndexedAngleCompare(const void *a, const void *b);
 
+
 class OscSpatThread;
 class SourceUpdateThread;
 class SourceMover;
@@ -286,6 +292,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes);
 
     //==============================================================================
+
 	bool getApplyFilter() const { return mApplyFilter; }
 	void setApplyFilter(bool s) { mApplyFilter = s; }
 	
@@ -418,7 +425,13 @@ public:
 	const String getOscSendIp() const { return mOscSendIp; }
 	void setOscSendIp(String s) { mOscSendIp = s;}
 	
-	float getLevel(int index) const { return mLevels.getUnchecked(index); }
+	float getLevel(int index) const {
+#if USE_DB_METERS
+        return mLevels.getUnchecked(index);
+#else
+        return -1.f;
+#endif
+    }
 	void setCalculateLevels(bool c);
 	
 	bool getIsAllowInputOutputModeSelection(){
@@ -523,7 +536,6 @@ public:
         float y = p.x * sinf(p.y);
         return FPoint(x, y);
     }
-    
     
     //01 here means that the output is normalized to [0,1]
     FPoint convertRt2Xy01(float r, float t) {
@@ -671,10 +683,10 @@ public:
     void    setOldSrcLocRT(int id, FPoint pointRT){
         mOldSrcLocRT[id] = pointRT;
     }
-
+    bool isPlaying(){ return m_bIsPlaying;}
     void updateNonSelectedSourcePositions();
     void startOrStopSourceUpdateThread();
-    
+	
 private:
 
 	bool m_bAllowInputOutputModeSelection;
@@ -686,8 +698,9 @@ private:
 	Array<float> mParameters;
 	
 	int mCalculateLevels;
+#if USE_DB_METERS
 	Array<float> mLevels;
-	
+#endif
 	bool mApplyFilter;
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
@@ -771,7 +784,6 @@ private:
 	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
-    
     int mNumberOfSources;
     int mNumberOfSpeakers;
     std::vector<FirFilter> mFilters;
@@ -791,6 +803,7 @@ private:
     float m_fFieldWidth;
 
 	unique_ptr<SourceMover> m_pMover;
+    bool m_bIsPlaying;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

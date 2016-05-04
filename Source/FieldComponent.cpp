@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -28,16 +32,13 @@
 #include "FieldComponent.h"
 #include "SourceMover.h"
 
+//==============================================================================
 FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover)
 : mFilter(filter)
 , m_pMover(mover)
-, m_fStartPathX(-1)
-, m_fStartPathY(-1)
-, m_fEndPathX(-1)
-, m_fEndPathY(-1)
-, m_bPathJustStarted(false)
+, m_iCurPathLines(0)
+, m_iMaxPathLines(10)
 {
-    JUCE_COMPILER_WARNING("this is weird. why does the mover need to know about the field component and vice versa?")
     m_pMover->setFieldComponent(this);
 }
 
@@ -46,23 +47,13 @@ FieldComponent::~FieldComponent()
 }
 
 void FieldComponent::clearTrajectoryPath(){
-    m_fStartPathX = -1, m_fEndPathX = -1, m_fStartPathY = -1, m_fEndPathY = -1;
-    m_oTrajectoryPath.clear();
+    m_dqAllPathPoints.clear();
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){
     float fAbsoluteX = p_fX * getWidth();
     float fAbsoluteY = (1-p_fY) * getHeight();
-    if (m_fEndPathX == -1){         //we have not started the path yet, so start at absolute point
-        m_bPathJustStarted = true;
-        m_fStartPathX = fAbsoluteX;
-        m_fStartPathY = fAbsoluteY;
-    } else {                        //we've already started, so start from previous point
-        m_fStartPathX = m_fEndPathX;
-        m_fStartPathY = m_fEndPathY;
-    }
-    m_fEndPathX = fAbsoluteX;
-    m_fEndPathY = fAbsoluteY;
+    m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
 }
 
 FPoint FieldComponent::getSourcePoint(int i)
@@ -73,7 +64,7 @@ FPoint FieldComponent::getSourcePoint(int i)
 	float y = p.y * (fieldWidth - kSourceDiameter) + kSourceRadius;
 	return FPoint(x, fieldWidth - y);
 }
-
+JUCE_COMPILER_WARNING("is this is a duplicate of one of the convert functions in processor.h?")
 FPoint FieldComponent::convertSourceRT(float r, float t)
 {
 	const int fieldWidth = getWidth();
@@ -286,6 +277,7 @@ void FieldComponent::paint (Graphics& g)
             g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
         }
     }
+
     // - - - - - - - - - - - -
     //draw line and circle for selected source
     // - - - - - - - - - - - -
@@ -311,6 +303,7 @@ void FieldComponent::paint (Graphics& g)
 		if (hue > 1) hue -= 1;
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
+
 		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
 			FPoint rt = mFilter->getSourceRT(i);
 			float r = rt.x;
@@ -344,17 +337,21 @@ void FieldComponent::paint (Graphics& g)
 					Justification(Justification::centred), false);
 	}
     // TRAJECTORY PATH
-    if (m_fStartPathX != -1 && m_fEndPathX != -1){
-        if (m_bPathJustStarted){
-            m_oTrajectoryPath.startNewSubPath (m_fStartPathX, m_fStartPathY);
-            m_bPathJustStarted = false;
+    if (m_dqAllPathPoints.size() > 2){
+        Path trajectoryPath;
+        FPoint startPoint = m_dqAllPathPoints[0];
+        trajectoryPath.startNewSubPath (startPoint.x, startPoint.y);
+        for (int iCurPoint = 1; iCurPoint < m_dqAllPathPoints.size(); ++iCurPoint){
+            trajectoryPath.lineTo (m_dqAllPathPoints[iCurPoint].x, m_dqAllPathPoints[iCurPoint].y);
         }
-        m_oTrajectoryPath.lineTo (m_fEndPathX, m_fEndPathY);
         g.setColour(Colour(0, 102, 255));
-        g.strokePath (m_oTrajectoryPath, PathStrokeType (2.0f, PathStrokeType::JointStyle::curved));
+        g.strokePath (trajectoryPath, PathStrokeType (2.0f, PathStrokeType::JointStyle::curved));
+    }
+    
+    if (m_dqAllPathPoints.size() > m_iMaxPathLines){
+        m_dqAllPathPoints.pop_front();
     }
 }
-
 
 void FieldComponent::mouseDown(const MouseEvent &event)
 {

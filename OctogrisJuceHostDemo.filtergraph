@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FILTERGRAPH>
+  <FILTER uid="1" x="0.5" y="0.10000000000000000555">
+    <PLUGIN name="Audio Input" descriptiveName="" format="Internal" category="I/O devices"
+            manufacturer="ROLI Ltd." version="1.0" file="" uid="246006c0"
+            isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="0"
+            numOutputs="2" isShell="0"/>
+    <STATE>0.</STATE>
+  </FILTER>
+  <FILTER uid="2" x="0.25" y="0.10000000000000000555">
+    <PLUGIN name="Midi Input" descriptiveName="" format="Internal" category="I/O devices"
+            manufacturer="ROLI Ltd." version="1.0" file="" uid="cb5fde0b"
+            isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="0"
+            numOutputs="0" isShell="0"/>
+    <STATE>0.</STATE>
+  </FILTER>
+  <FILTER uid="3" x="0.5" y="0.9000000000000000222">
+    <PLUGIN name="Audio Output" descriptiveName="" format="Internal" category="I/O devices"
+            manufacturer="ROLI Ltd." version="1.0" file="" uid="724248cb"
+            isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="2"
+            numOutputs="0" isShell="0"/>
+    <STATE>0.</STATE>
+  </FILTER>
+  <FILTER uid="8" x="0.53000000000000002665" y="0.40993788819875776053"
+          uiLastX_Normal="679" uiLastY_Normal="133" uiopen_Normal="0">
+    <PLUGIN name="JuceDemoPlugin" descriptiveName="Juce Demo Plugin" format="VST"
+            category="Effect" manufacturer="ROLI Ltd." version="V1.0.0" file="C:\Users\barth\Documents\git\JUCE\examples\audio plugin demo\Builds\VisualStudio2015\Debug\JuceDemoPlugin.dll"
+            uid="4a63646d" isInstrument="0" fileTime="1526052e05a" infoUpdateTime="1529df7f21f"
+            numInputs="1" numOutputs="1" isShell="0"/>
+    <STATE>259.CMlaKA....fQBMDZ....AnzXj0F....Y....A...............................................................................................................................................................................iY0PxDhV....7zTVPwTUGkjSSUDUTkjSGMEH0k1UoQFcn0iHz.CLh.RcogTYocFZz0iHx.CLh.xYgkla8HBLtTSLvLiL0PSNwPiL3LyM0HCMzDCMh.BYkwVX40iHv3RMh7hO..</STATE>
+  </FILTER>
+  <FILTER uid="17" x="0.28875000000000000666" y="0.3742236024844720621"
+          uiLastX_Normal="503" uiLastY_Normal="286" uiopen_Normal="1">
+    <PLUGIN name="sBMP4_Win32" descriptiveName="sBMP4" format="VST" category="Synth"
+            manufacturer="BMP4" version="V1.0.0" file="C:\Users\barth\Documents\git\sBMP4\Builds\VisualStudio2015\Debug\sBMP4_Win32.dll"
+            uid="73424d50" isInstrument="1" fileTime="1529df7abf9" infoUpdateTime="1529df7f222"
+            numInputs="1" numOutputs="1" isShell="0"/>
+    <STATE>377.CMlaKA....fQBMDZ....ALmPMAE....Y....A...............................................................................................................................................................................Ya0PxDBz....7LkPMAEMSUDUTkjSGMEH0k1UoQFcn0iHyPCLh.RcogTYocFZz0iHxDSMh.xYgkla8HRLh.BYkwVX40iHvHBH2Elck0iHv3xLyLyLyLyLzLiL1bCMz.yM4TSNh.hYowFckIWOh.iKzXSN4jSN4jCN3.yM4.yMw.CMzjiHfz1WlwjYuYjbHIWOh.iKyPCLv.CLv.yL0biMxbCN1fiM0HiHfz1WlEERx0iHv3BNw.CLv.CLvHyL3PSL3TyM4DCLxHBHs8kXLY1aIM2St0iHvHxK9..</STATE>
+  </FILTER>
+  <CONNECTION srcFilter="8" srcChannel="0" dstFilter="3" dstChannel="0"/>
+  <CONNECTION srcFilter="8" srcChannel="0" dstFilter="3" dstChannel="1"/>
+  <CONNECTION srcFilter="17" srcChannel="0" dstFilter="3" dstChannel="0"/>
+  <CONNECTION srcFilter="17" srcChannel="0" dstFilter="3" dstChannel="1"/>
+</FILTERGRAPH>

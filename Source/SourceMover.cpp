@@ -186,7 +186,6 @@ void SourceMover::updateNumberOfSources(){
     }
 }
 
-
 void SourceMover::sortAngles(){
     
     int iNbrSrc = mFilter->getNumberOfSources();
@@ -234,6 +233,7 @@ void SourceMover::setEqualRadius(){
     }
 }
 
+
 void SourceMover::setEqualAngles(){
     //first figure out the correct angles
     sortAngles();
@@ -279,6 +279,7 @@ void SourceMover::setEqualRadiusAndAngles(){
         mFilter->setOldSrcLocRT(iCurSrc, curSrcRT);
         mFilter->setPreventSourceLocationUpdate(false);
     }
+
 }
 
 void SourceMover::setSymmetricX(){
@@ -302,3 +303,9 @@ void SourceMover::setSymmetricY(){
     vxo = 1 - vxo;
     mFilter->setSourceXY01(mSlaveSrc, FPoint(vxo, vyo));
 }
+
+
+
+
+
+

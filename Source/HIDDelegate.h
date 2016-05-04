@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginEditor.h"
-
 #include "HID_Utilities_External.h"
 
 class HIDDelegate : public ReferenceCountedObject
@@ -59,7 +58,6 @@ public:
     CFSetRef getDeviceSetRef(){return deviceSetRef;}
     
 //    void readAndUseJoystickValues();
-
     virtual ~HIDDelegate() {};
     
 private:

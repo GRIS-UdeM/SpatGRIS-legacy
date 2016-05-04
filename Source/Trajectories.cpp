@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -23,7 +27,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==============================================================================
  */
-
 
 #include "Trajectories.h"
 #include "PluginProcessor.h"
@@ -167,9 +170,12 @@ std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleReturns(int p_i
     switch(p_iTrajectory) {
         case Spiral:
         case Pendulum:
-        case RandomTarget:
             vReturns->push_back("One Way");
             vReturns->push_back("Return");
+            break;
+        case RandomTarget:
+            vReturns->push_back("Continuous");
+            vReturns->push_back("Discontinuous");
             break;
         case Circle:
         case EllipseTr:
@@ -224,7 +230,7 @@ public:
     , m_fTurns(p_fTurns)
     , m_fEndPairXY01(endPair)
     { }
-    
+
 protected:
     void spInit() {
         FPoint startPoint = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
@@ -265,7 +271,6 @@ protected:
         
         //convert rt to xy and do translation
         FPoint curPointXY01 = mFilter->convertRt2Xy01(r, t);
-        
         if (mIn){
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
@@ -331,6 +336,7 @@ protected:
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = fCurStartX01 + fCurrentProgress;
             newY01 = m_fM * newX01 + m_fB;
+
         } else {
             fCurrentProgress = (m_fEndPair.second - m_fStartPair.second) * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = m_fStartPair.first;

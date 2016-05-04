@@ -1,12 +1,20 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
  PluginEditor.h
  
+<<<<<<< HEAD
  Developers: Antoine Missout, Vincent Berthiaume, Antoine Landrieu
+=======
+ Developers: Antoine Missout, Vincent Berthiaume
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -136,7 +144,6 @@ private:
 	
 	// for memory management:
 	OwnedArray<Component> mComponents;
-//    OwnedArray<LookAndFeel> lookAndFeels;
 	
 	// for interactions:
 	bool mNeedRepaint;
@@ -149,14 +156,7 @@ private:
     Slider          *mSurfaceOrPanSlider;
     ToggleButton    *mSurfaceOrPanLinkButton;
     Component       *mSurfaceOrPanLabel;
-
-//    Slider          *mAzimuthSlider;
-//    ToggleButton    *mAzimuthLinkButton;
-//    Component       *mAzimuthLabel;
-//    Slider          *mElevationSlider;
-//    ToggleButton    *mElevationLinkButton;
-//    Component       *mElevationLabel;
-    
+   
     Slider          *mAzimSpanSlider;
     ToggleButton    *mAzimSpanLinkButton;
     Component       *mAzimSpanLabel;
@@ -164,14 +164,18 @@ private:
     Slider          *mElevSpanSlider;
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
-    
+
 	Array<ToggleButton*> mMutes;
+    
+#if USE_DB_METERS
 	Array<LevelComponent*> mLevels;
+   	Array<Slider*> mAttenuations;
+#endif
+    
     ToggleButton *mEnableJoystick;
     ToggleButton *mEnableLeap;
 	ToggleButton *mShowGridLines;
     ToggleButton *mTrSeparateAutomationMode;
-
     ToggleButton *mApplyFilter;
 	ComboBox *mMovementModeCombo;
     ComboBox *mInputOutputModeCombo;
@@ -198,7 +202,7 @@ private:
 	Slider *mRoutingVolumeSlider;
     
     ImageComponent m_logoImage;
-	
+
 #if USE_LEAP
     ScopedPointer<Leap::Controller> mController;
     Leap::Listener leapList;
@@ -281,8 +285,6 @@ private:
     ComponentBoundsConstrainer m_oResizeLimits;
     ScopedPointer<ResizableCornerComponent> m_pResizer;
     
-
-
     Component  *mOscSpat1stSrcIdLabel;
     TextEditor *mOscSpat1stSrcIdTextEditor;
     
@@ -292,6 +294,8 @@ private:
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
 
+    
+    std::vector<string> mTimingVector;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

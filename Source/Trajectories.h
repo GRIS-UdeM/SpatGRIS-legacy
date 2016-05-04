@@ -1,6 +1,10 @@
 /*
  ==============================================================================
+<<<<<<< HEAD
  SpatGRIS: multichannel sound spatialization plug-in.
+=======
+ Octogris2: multichannel sound spatialization plug-in.
+>>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
  
  Copyright (C) 2015  GRIS-UdeM
  
@@ -32,8 +36,6 @@
 
 class SpatGrisAudioProcessor;
 class SourceMover;
-
-
 
 enum AllTrajectoryDirections {
     CW = 1,
@@ -79,7 +81,7 @@ private:
 	void start();
 	
 protected:
-	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);	
+	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);
 	SpatGrisAudioProcessor *mFilter;
     SourceMover *m_pMover;
 	bool mStarted, mStopped;
