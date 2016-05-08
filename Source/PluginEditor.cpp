@@ -209,8 +209,6 @@ AudioProcessorEditor (ownerFilter)
     mNeedRepaint = false;
     mFieldNeedRepaint = false;
 	m_bLoadingPreset = false;
-    JUCE_COMPILER_WARNING("isn't there a macro for this?")
-    bool leapSupported = true;
     mFilter->addListener(this);
     
     // main field
@@ -843,8 +841,11 @@ AudioProcessorEditor (ownerFilter)
         int x = kMargin, y = kMargin;
         const int m = 10, dh = 18, cw = 300;
         int comboW = 40, w = (box->getWidth() - kMargin) / 3 - kMargin;
-    
-        addLabel(leapSupported ? "OSC/Leap source:" : "OSC source:", x, y, w-comboW, dh, box);
+#if USE_LEAP
+        addLabel("OSC source:", x, y, w-comboW, dh, box);
+#else
+        addLabel("OSC/Leap source:", x, y, w-comboW, dh, box);
+#endif
         {
             mOscLeapSourceCb = new ComboBox();
             int index = 1;
