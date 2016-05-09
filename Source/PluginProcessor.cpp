@@ -318,8 +318,7 @@ void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
 }
 
 //==============================================================================
-void SpatGrisAudioProcessor::setCalculateLevels(bool c)
-{
+void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
 #if USE_DB_METERS
     if (!mCalculateLevels && c){
         for (int i = 0; i < mNumberOfSpeakers; i++){
@@ -413,15 +412,13 @@ int SpatGrisAudioProcessor::getNumParameters() {
     return kNumberOfParameters;
 }
 
-float SpatGrisAudioProcessor::getParameter (int index)
-{
+float SpatGrisAudioProcessor::getParameter (int index) {
     return mParameters[index];
 }
 
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     
     float fOldValue = mParameters.getUnchecked(index);
-    
     if (!areSame(fOldValue, newValue)){
         if (newValue == 0){
             DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
@@ -449,7 +446,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
                 setSourceLocationChanged(7);
             }
         }
-
         mHostChangedParameter++;
     }
 }
