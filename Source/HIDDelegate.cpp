@@ -1,12 +1,30 @@
 /*
  ==============================================================================
+ SpatGRIS: multichannel sound spatialization plug-in.
  
- HIDDelegate.cpp
- Created: 4 Aug 2014 1:23:01pm
- Author:  antoine l
+ Copyright (C) 2015  GRIS-UdeM
  
+ LevelComponent.cpp
+ Created: 23 Jan 2014 8:09:25am
+ 
+ Developers: Antoine Landrieux, Vincent Berthiaume
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==============================================================================
  */
+
+
 #include "HIDDelegate.h"
 
 #if USE_JOYSTICK
@@ -15,22 +33,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "FieldComponent.h"
 
-/*#if JUCE_WINDOWS
-<<<<<<< HEAD
- Component * CreateHIDComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor)
-=======
- Component * CreateHIDComponent(OctogrisAudioProcessor *filter, OctogrisAudioProcessorEditor *editor)
->>>>>>> 2588dc2f3221b0a2cc68818c05101612d949a534
- {
- // not implemented yet on windows
- return NULL;
- }
- #else*/
-
 //==============================================================================
 
-
-/** HIDDelegate constructor taking two arguments and initializaing its others components by default */
 
 HIDDelegate::HIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
 mFilter (filter),
