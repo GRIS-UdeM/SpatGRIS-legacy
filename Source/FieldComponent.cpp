@@ -64,7 +64,7 @@ FPoint FieldComponent::getSourcePoint(int i)
 	float y = p.y * (fieldWidth - kSourceDiameter) + kSourceRadius;
 	return FPoint(x, fieldWidth - y);
 }
-JUCE_COMPILER_WARNING("is this is a duplicate of one of the convert functions in processor.h?")
+//this is NOT a duplicate of one of the convert functions in processor.h
 FPoint FieldComponent::convertSourceRT(float r, float t)
 {
 	const int fieldWidth = getWidth();
@@ -310,6 +310,7 @@ void FieldComponent::paint (Graphics& g)
 			float t = rt.y;
 			FPoint p1 = convertSourceRT(1, t);
 			FPoint p2 = convertSourceRT((r >= .999) ? 2 : -1, t);
+            
 			//draw the line that goes with every source
             g.drawLine(Line<float>(p1, p2));
 		}
