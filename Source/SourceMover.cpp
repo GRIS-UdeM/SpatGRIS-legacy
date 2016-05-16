@@ -48,10 +48,9 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
     }
     
-    int iNbrSrc = mFilter->getNumberOfSources();
-
     //if we are not in independent mode and have more than 1 source
 	if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
+        int iNbrSrc = mFilter->getNumberOfSources();
 		for (int j = 0; j < iNbrSrc; j++) {
 			mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
 			mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
