@@ -680,7 +680,7 @@ public:
         mOldSrcLocRT[id] = pointRT;
     }
     bool isPlaying(){ return m_bIsPlaying;}
-    void updateNonSelectedSourcePositions();
+    void threadUpdateNonSelectedSourcePositions();
     void startOrStopSourceUpdateThread();
 	
 private:

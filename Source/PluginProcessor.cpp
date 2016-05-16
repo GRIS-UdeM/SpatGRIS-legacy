@@ -97,7 +97,7 @@ public:
     
     void run() override {
         while (! threadShouldExit()) {
-            m_pProcessor->updateNonSelectedSourcePositions();
+            m_pProcessor->threadUpdateNonSelectedSourcePositions();
             wait (m_iInterval);
         }
     }
@@ -306,7 +306,7 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
         }
     }
 
-void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
+void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
         JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
