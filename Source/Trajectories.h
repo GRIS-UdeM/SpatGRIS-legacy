@@ -55,7 +55,7 @@ public:
 
 	static int NumberOfTrajectories();
 	static String GetTrajectoryName(int i);
-	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair);
+	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, float p_fWidth, const std::pair<float, float> &endPair);
     static std::unique_ptr<std::vector<String>> getTrajectoryPossibleDirections(int p_iTrajectory);
     static std::unique_ptr<AllTrajectoryDirections> getTrajectoryDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
     static std::unique_ptr<std::vector<String>> getTrajectoryPossibleReturns(int p_iTrajectory);

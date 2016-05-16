@@ -566,9 +566,16 @@ AudioProcessorEditor (ownerFilter)
         }
         x += tew + kMargin;
         addLabel("per cycle", x, y, w, dh, box);
+        
         mTrDeviationTextEditor = addTextEditor(String(mFilter->getTrDeviation()*360), x2, y, tewShort, dh, box);
         mTrDeviationTextEditor->addListener(this);
         mTrDeviationLabel = addLabel("deviation", x2 + tewShort, y, w, dh, box);
+        
+        
+        mTrEllipseWidthTextEditor = addTextEditor(String(mFilter->getTrEllipseWidth()*2), x2, y, tewShort, dh, box);
+        mTrEllipseWidthTextEditor->addListener(this);
+        mTrEllipseWidthLabel = addLabel("width factor", x2 + tewShort, y, w, dh, box);
+
         
         //---------- ROW 3 -------------
         y += dh + 5;
@@ -1105,12 +1112,20 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
         mTrDeviationLabel->setVisible(false);
     }
     
-    if (iSelectedTrajectory >= Circle & iSelectedTrajectory <= Spiral){
+    if (iSelectedTrajectory == Circle || iSelectedTrajectory == EllipseTr || iSelectedTrajectory == Spiral){
         mTrTurnsTextEditor->setVisible(true);
         mTrTurnsLabel->setVisible(true);
     } else {
         mTrTurnsTextEditor->setVisible(false);
         mTrTurnsLabel->setVisible(false);
+    }
+
+    if (iSelectedTrajectory == EllipseTr){
+        mTrEllipseWidthTextEditor->setVisible(true);
+        mTrEllipseWidthLabel->setVisible(true);
+    } else {
+        mTrEllipseWidthTextEditor->setVisible(false);
+        mTrEllipseWidthLabel->setVisible(false);
     }
     
     if (iSelectedTrajectory == Spiral || iSelectedTrajectory == Pendulum){
@@ -1503,6 +1518,13 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         mTrDeviationTextEditor->setText(String(mFilter->getTrDeviation()*360));
     }
+    else if (&textEditor == mTrEllipseWidthTextEditor){
+        float fHalfWidth = mTrEllipseWidthTextEditor->getText().getFloatValue()/2;
+        if (fHalfWidth >= 0.05 && fHalfWidth <= 1){
+            mFilter->setTrEllipseWidth(fHalfWidth);
+        }
+        mTrEllipseWidthTextEditor->setText(String(mFilter->getTrEllipseWidth()*2));
+    }
     else if (&textEditor == mTrTurnsTextEditor){
         float Turns = mTrTurnsTextEditor->getText().getFloatValue();
         int iSelectedTrajectory = mFilter->getTrType();
@@ -1587,6 +1609,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         }
         //a trajectory does not exist, create one
         else {
+            JUCE_COMPILER_WARNING("we should probably use the values coming from the processor? And all conversions (like /360) should be done in processor, I think")
             float   duration        = mTrDuration->getText().getFloatValue();
             bool    beats           = mTrUnits->getSelectedId() == 1;
             float   repeats         = mTrRepeats->getText().getFloatValue();
@@ -1594,12 +1617,14 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             bool    bReturn         = (mTrReturnComboBox->getSelectedId() == 2);
             float   p_fDampening    = mTrDampeningTextEditor->getText().getFloatValue();
             float   p_fDeviation    = mTrDeviationTextEditor->getText().getFloatValue()/360;
+            float   p_fHalfWidth    = mTrEllipseWidthTextEditor->getText().getFloatValue();
             float   p_fTurns        = mTrTurnsTextEditor->getText().getFloatValue();
             unique_ptr<AllTrajectoryDirections> direction = Trajectory::getTrajectoryDirection(type, mTrDirectionComboBox->getSelectedId());
 
             mFilter->setIsRecordingAutomation(true);
             mFilter->storeCurrentLocations();
-            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, mFilter->getEndLocationXY01()));
+            JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
+            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
             mTrWriteButton->setButtonText("Cancel");
             mTrStateEditor = kTrWriting;
             mFilter->setTrState(mTrStateEditor);
@@ -2066,6 +2091,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mTrRepeats->setText(String(mFilter->getTrRepeats()));
         mTrDampeningTextEditor->setText(String(mFilter->getTrDampening()));
         mTrDeviationTextEditor->setText(String(mFilter->getTrDeviation()*360));
+        mTrEllipseWidthTextEditor->setText(String(mFilter->getTrEllipseWidth()*2));
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
         mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));

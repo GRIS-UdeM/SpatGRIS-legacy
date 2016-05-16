@@ -223,6 +223,9 @@ private:
     TextEditor *mTrDeviationTextEditor;
     Component  *mTrDeviationLabel;
     
+    TextEditor *mTrEllipseWidthTextEditor;
+    Component  *mTrEllipseWidthLabel;
+    
     TextEditor *mTrTurnsTextEditor;
     Component  *mTrTurnsLabel;
     

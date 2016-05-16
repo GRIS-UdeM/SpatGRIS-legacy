@@ -378,6 +378,9 @@ public:
     float getTrDeviation() const {return m_fTrDeviation;}
     void setTrDeviation(float i){m_fTrDeviation = i;}
 
+    float getTrEllipseWidth() const {return m_fTrEllipseWidth;}
+    void setTrEllipseWidth(float i){m_fTrEllipseWidth = i;}
+    
     float getTrTurns() const {return m_fTrTurns;}
     void setTrTurns(float i){m_fTrTurns = i;}
     
@@ -723,6 +726,7 @@ private:
     float   m_fTrDampening;
     float   m_fTrTurns;
     float   m_fTrDeviation;
+    float   m_fTrEllipseWidth;
     int     mTrState;
     float   m_iOscSpat1stSrcId;
     int     m_iOscSpatPort;

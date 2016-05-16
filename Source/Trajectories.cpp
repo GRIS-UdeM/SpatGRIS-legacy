@@ -369,24 +369,28 @@ private:
 class EllipseTrajectory : public Trajectory
 {
 public:
-	EllipseTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
+	EllipseTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns, float p_fWidth)
 	: Trajectory(filter, p_pMover, duration, beats, times)
     , mCCW(ccw)
     , m_fTurns(p_fTurns)
+    , m_fWidth(p_fWidth)
     {}
 	
 protected:
 	void spProcess(float duration, float seconds)
 	{
+        
+        //for Antoine, a = angle and r = ray
+        
         float integralPart;
         float da = m_fTurns * mDone / mDurationSingleTraj;
         da = modf(da/m_fTurns, & integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
 
         if (!mCCW) da = -da;
-        // http://www.edmath.org/MATtours/ellipses/ellipses1.07.3.html
+        // http://www.edmath.org/MATtours/ellipses/ellipses1.07.3.html, first part at the top
         FPoint p = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
         float a = 1;
-        float b = 0.5;
+        float b = m_fWidth;//.5;
         float cosDa = cos(da);
         float a2 = a*a;
         float b2 = b*b;
@@ -399,6 +403,7 @@ protected:
 private:
 	bool mCCW;
     float m_fTurns;
+    float m_fWidth;
 };
 
 // ==============================================================================
@@ -699,7 +704,7 @@ String Trajectory::GetTrajectoryName(int i)
 }
 
 Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats,
-                                             AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, const std::pair<float, float> &endPair)
+                                             AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, float p_fWidth, const std::pair<float, float> &endPair)
 {
     
     bool ccw, in;
@@ -752,7 +757,7 @@ Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *f
     switch(type)
     {
         case Circle:                     return new CircleTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns);
-        case EllipseTr:                  return new EllipseTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns);
+        case EllipseTr:                  return new EllipseTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns, p_fWidth);
 //        case Spiral:                     return new SpiralTrajectory(filter, p_pMover, duration, beats, times, ccw, in, bReturn, p_fTurns, endPair);
         case Spiral:                     return new SpiralTrajectory(filter, p_pMover, duration, beats, times, ccw, true, bReturn, p_fTurns, endPair);
         case Pendulum:                   return new PendulumTrajectory(filter, p_pMover, duration, beats, times, in, ccw, bReturn, p_fDampening, p_fDeviation, endPair);
