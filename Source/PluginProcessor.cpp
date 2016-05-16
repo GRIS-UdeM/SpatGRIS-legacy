@@ -309,7 +309,7 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
 void SpatGrisAudioProcessor::updateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
-        JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
+        JUCE_COMPILER_WARNING("performance: there is most probably a better way than begining and ending here. Also unclear at what point and why I changed the if condition above")
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
@@ -453,15 +453,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
 	mParameters.set(index, newValue);
-    
-//    if      (index == getParamForSourceX(0) || index == getParamForSourceY(0)) { setSourceLocationChanged(0);}
-//    else if (index == getParamForSourceX(1) || index == getParamForSourceY(1)) { setSourceLocationChanged(1);}
-//    else if (index == getParamForSourceX(2) || index == getParamForSourceY(2)) { setSourceLocationChanged(2);}
-//    else if (index == getParamForSourceX(3) || index == getParamForSourceY(3)) { setSourceLocationChanged(3);}
-//    else if (index == getParamForSourceX(4) || index == getParamForSourceY(4)) { setSourceLocationChanged(4);}
-//    else if (index == getParamForSourceX(5) || index == getParamForSourceY(5)) { setSourceLocationChanged(5);}
-//    else if (index == getParamForSourceX(6) || index == getParamForSourceY(6)) { setSourceLocationChanged(6);}
-//    else if (index == getParamForSourceX(7) || index == getParamForSourceY(7)) { setSourceLocationChanged(7);}
     sendParamChangeMessageToListeners(index, newValue);
 }
 

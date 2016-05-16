@@ -227,7 +227,7 @@ void SourceMover::setEqualRadius(){
         if (curSrcRT.y < 0) curSrcRT.y += kThetaMax;
         if (curSrcRT.y > kThetaMax) curSrcRT.y -= kThetaMax;
         mFilter->setPreventSourceLocationUpdate(true);
-        mFilter->setSourceRT(iCurSrc, curSrcRT, false);  //this call needs to NOT triger a call to processor::setSourceLocationChanged
+        mFilter->setSourceRT(iCurSrc, curSrcRT, false);
         mFilter->setOldSrcLocRT(iCurSrc, curSrcRT);
         mFilter->setPreventSourceLocationUpdate(false);
     }
