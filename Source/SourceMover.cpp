@@ -46,16 +46,18 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->setIsRecordingAutomation(true);
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        
+        //if we are not in independent mode and have more than 1 source
+        if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
+            int iNbrSrc = mFilter->getNumberOfSources();
+            for (int j = 0; j < iNbrSrc; j++) {
+                mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
+                mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
+            }
+        }
     }
     
-    //if we are not in independent mode and have more than 1 source
-	if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
-        int iNbrSrc = mFilter->getNumberOfSources();
-		for (int j = 0; j < iNbrSrc; j++) {
-			mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
-			mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
-		}
-    }
+
 }
 
 //in kSourceThread, FPoint p is the current location of the selected source, as read on the automation
@@ -78,6 +80,7 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
     
     if (mFilter->getNumberOfSources() > 1) {
         //calculate delta for selected source
+        JUCE_COMPILER_WARNING("in an ideal world, mSourcesDownRT and mFilter->getOldSrcLocRT(mSelectedSrc) would be the same thing")
         FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
         FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
