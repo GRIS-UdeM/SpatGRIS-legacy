@@ -948,18 +948,24 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		return;
 	}
     
+    //check whether we're currently playing
     AudioPlayHead::CurrentPositionInfo cpi;
     getPlayHead()->getCurrentPosition(cpi);
     m_bIsPlaying = cpi.isPlaying;
     
 	unsigned int oriFramesToProcess = buffer.getNumSamples();
 	
+    //if we're in any of the internal read modes
 	if (mRoutingMode > kInternalWrite) {
 		buffer.clear();
-		
+        JUCE_COMPILER_WARNING("maximum number of output channels here is 2, not sure why? this basically means that input/output modes with more than 2 speakers only transmit information from the first 2 speakers? To test")
 		int outChannels = (mNumberOfSpeakers > 2) ? 2 : mNumberOfSpeakers;
+        //here, e.g., internalRead12 = 2, so offset = 0, internalRead34 = 3, so offset = 2; internalRead45 = 4 so offset = 4
 		int offset = (mRoutingMode - 2) * 2;
+        //for every output channel
 		for (int c = 0; c < outChannels; c++) {
+            JUCE_COMPILER_WARNING("this could probably be redone with move semantics")
+            //copy oriFramesToProcess samples from the router's channel (offset+c) into buffer channel c, starting at sample 0
 			buffer.copyFrom(c, 0, Router::instance().outputBuffers(oriFramesToProcess)[offset + c], oriFramesToProcess);
 			Router::instance().clear(offset + c);
 		}
