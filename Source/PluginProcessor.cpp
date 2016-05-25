@@ -1287,13 +1287,13 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
 		float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
 	
-        //for each 
-		for (unsigned int f = 0; f < frames; ++f) {
-			float s = input[f];     //current sample
-			float x = input_x[f];   //x position of current sample
-			float y = input_y[f];   //y position of current sample
+        //for each sample
+		for (unsigned int iSampleId = 0; iSampleId < frames; ++iSampleId) {
+			float s = input[iSampleId];     //current sample
+			float x = input_x[iSampleId];   //x position of current sample
+			float y = input_y[iSampleId];   //y position of current sample
 			
-			// could use the Accelerate framework on mac for these
+			//convert xy position of sample to rt
 			float r = hypotf(x, y);
             if (r > kRadiusMax) {
                 r = kRadiusMax;
@@ -1303,6 +1303,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
                 it += kThetaMax;
             }
 			
+            //apply filter if needed
 			if (mApplyFilter) {
 				float distance;
                 if (r >= 1) {
@@ -1313,7 +1314,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 				s = mFilters[i].process(s, distance);
 			}
 			
-			// adjust input volume
+			// adjust input volume based on volume options from 'volume and filters' tab
 			float dbSource;
             if (r >= 1) {
                 dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
@@ -1322,18 +1323,18 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
             }
             s *= dbToLinear(dbSource);
 			
-			
+			//if r is bigger than kThetaLockRadius (which is the case if we're not right in the center), we don't ramp the position
 			float t;
 			if (r >= kThetaLockRadius){
 				t = it;
 				mLockedThetas.setUnchecked(i, it);
 			} else {
+                //we're at the center of the circle and we need to deal with it. THIS IS PROBABLY RELATED TO AUDIO CLICK ISSUE
 				float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
 				float lt = mLockedThetas.getUnchecked(i);
 				float dt = lt - it;
 				if (dt < 0) dt = -dt;
-				if (dt > kQuarterCircle)
-				{
+				if (dt > kQuarterCircle) {
 					// assume flipped side
 					if (lt > it) lt -= kHalfCircle;
 					else lt += kHalfCircle;
@@ -1358,14 +1359,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
-					addToOutput(s * vLeft, outputs, left, f);
-					addToOutput(s * vRight, outputs, right, f);
+					addToOutput(s * vLeft, outputs, left, iSampleId);
+					addToOutput(s * vRight, outputs, right, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (left >= 0) ? left : right;
 					jassert(o >= 0);
 					
-					addToOutput(s, outputs, o, f);
+					addToOutput(s, outputs, o, iSampleId);
 				}
 			} else {
 				// find front left, right
@@ -1390,14 +1391,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 					float vLeft = 1 - dFrontLeft / dTotal;
 					float vRight = 1 - dFrontRight / dTotal;
 					
-					addToOutput(s * vLeft * front, outputs, frontLeft, f);
-					addToOutput(s * vRight * front, outputs, frontRight, f);
+					addToOutput(s * vLeft * front, outputs, frontLeft, iSampleId);
+					addToOutput(s * vRight * front, outputs, frontRight, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (frontLeft >= 0) ? frontLeft : frontRight;
 					jassert(o >= 0);
 					
-					addToOutput(s * front, outputs, o, f);
+					addToOutput(s * front, outputs, o, iSampleId);
 				}
 				
 				// add to back output
@@ -1406,14 +1407,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 					float vLeft = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
-					addToOutput(s * vLeft * back, outputs, backLeft, f);
-					addToOutput(s * vRight * back, outputs, backRight, f);
+					addToOutput(s * vLeft * back, outputs, backLeft, iSampleId);
+					addToOutput(s * vRight * back, outputs, backRight, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (backLeft >= 0) ? backLeft : backRight;
 					jassert(o >= 0);
 					
-					addToOutput(s * back, outputs, o, f);
+					addToOutput(s * back, outputs, o, iSampleId);
 				}
 			}
 		}
