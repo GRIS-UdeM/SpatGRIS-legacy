@@ -953,10 +953,13 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     getPlayHead()->getCurrentPosition(cpi);
     m_bIsPlaying = cpi.isPlaying;
     
-	unsigned int oriFramesToProcess = buffer.getNumSamples();
+    //various variables
+    double sampleRate = getSampleRate();
+	unsigned int oriFramesToProcess = buffer.getNumSamples();   //ori stands for output routing input
+    unsigned int inFramesToProcess = oriFramesToProcess;        //we need a copy of this because inFramesToProcess will be modified below
 	
-    //if we're in any of the internal read modes
-	if (mRoutingMode > kInternalWrite) {
+    //if we're in any of the internal read modes, copy stuff from Router into output buffer and return
+	if (mProcessMode != kOscSpatMode && mRoutingMode > kInternalWrite) {
 		buffer.clear();
         JUCE_COMPILER_WARNING("maximum number of output channels here is 2, not sure why? this basically means that input/output modes with more than 2 speakers only transmit information from the first 2 speakers? To test")
 		int outChannels = (mNumberOfSpeakers > 2) ? 2 : mNumberOfSpeakers;
@@ -972,9 +975,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		return;
 	}
 	
-	double sampleRate = getSampleRate();
-	unsigned int inFramesToProcess = oriFramesToProcess;
-	
+	// process trajectory if there is one going on
 	Trajectory::Ptr trajectory = mTrajectory;
 	if (trajectory) {
         if (m_bIsPlaying) {
@@ -990,14 +991,16 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		}
 	}
     
+    //if we're in osc spat mode, return and don't process any audio
     if (mProcessMode == kOscSpatMode) {
         return;
     }
 	
 	// cache values
 	float params[kNumberOfParameters];
-	for (int i = 0; i < kNumberOfParameters; i++)
+    for (int i = 0; i < kNumberOfParameters; i++){
 		params[i] = mParameters[i];
+    }
 		
 	if (mProcessMode != kFreeVolumeMode) {
 		params[kVolumeNear] = denormalize(kVolumeNearMin, kVolumeNearMax, params[kVolumeNear]);
