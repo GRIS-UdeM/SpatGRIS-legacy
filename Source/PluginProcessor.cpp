@@ -924,7 +924,6 @@ void SpatGrisAudioProcessor::reset() {
         mFilters[i].reset();
     }
     
-    
     Router::instance().reset();
 }
 
@@ -953,12 +952,12 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     getPlayHead()->getCurrentPosition(cpi);
     m_bIsPlaying = cpi.isPlaying;
     
-    //various variables
+    //set various variables
     double sampleRate = getSampleRate();
 	unsigned int oriFramesToProcess = buffer.getNumSamples();   //ori stands for output routing input
     unsigned int inFramesToProcess = oriFramesToProcess;        //we need a copy of this because inFramesToProcess will be modified below
 	
-    //if we're in any of the internal read modes, copy stuff from Router into output buffer and return
+    //if we're in any of the internal read modes, copy stuff from Router into buffer and return
 	if (mProcessMode != kOscSpatMode && mRoutingMode > kInternalWrite) {
 		buffer.clear();
         JUCE_COMPILER_WARNING("maximum number of output channels here is 2, not sure why? this basically means that input/output modes with more than 2 speakers only transmit information from the first 2 speakers? To test")
@@ -996,12 +995,14 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
         return;
     }
 	
-	// cache values
+	// cache parameter values, probably in case they change while we're doing stuff
+    JUCE_COMPILER_WARNING("why not use memcopy here?")
 	float params[kNumberOfParameters];
     for (int i = 0; i < kNumberOfParameters; i++){
 		params[i] = mParameters[i];
     }
 		
+    //depending on what mode we are, denormalize parameters we will need
 	if (mProcessMode != kFreeVolumeMode) {
 		params[kVolumeNear] = denormalize(kVolumeNearMin, kVolumeNearMax, params[kVolumeNear]);
 		params[kVolumeMid]  = denormalize(kVolumeMidMin,  kVolumeMidMax,  params[kVolumeMid]);
@@ -1015,57 +1016,52 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	}
 	if (mRoutingMode == kInternalWrite) {
 		params[kRoutingVolume] = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, params[kRoutingVolume]);
+        jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
+        jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
 	
-	//float *inputs[iActualNumberOfSources];
+    //for each source, get pointer (**inputs) to content of buffer, and denormalize x and y.
+    //Interestingly, because we only have one buffer going in and out of this function, we initially always have the same number of inputs and outputs.
 	float **inputs = new float* [mNumberOfSources];
-	for (int i = 0; i < mNumberOfSources; i++) {
-		inputs[i] = buffer.getWritePointer(i);
-
+    for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
+        //get the inputs
+		inputs[iCurSource] = buffer.getWritePointer(iCurSource);
+        //denormalize current position
         if (mProcessMode == kFreeVolumeMode){
-            float fValue = denormalize(kSourceMinDistance, kSourceMaxDistance, params[getParamForSourceD(i)]);
-            params[getParamForSourceD(i)] = fValue;
+            float fValue = denormalize(kSourceMinDistance, kSourceMaxDistance, params[getParamForSourceD(iCurSource)]);
+            params[getParamForSourceD(iCurSource)] = fValue;
         }
-		params[getParamForSourceX(i)] = params[getParamForSourceX(i)] * (2*kRadiusMax) - kRadiusMax;
-		params[getParamForSourceY(i)] = params[getParamForSourceY(i)] * (2*kRadiusMax) - kRadiusMax;
+		params[getParamForSourceX(iCurSource)] = params[getParamForSourceX(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
+		params[getParamForSourceY(iCurSource)] = params[getParamForSourceY(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
 	}
 	
-	if (mRoutingMode == kInternalWrite) {
-		jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
-		jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
-	}
-	
-	//float *outputs[iActualNumberOfSpeakers];
+    //get output pointer (**outputs) from same buffer that we got the inputs from
 	float **outputs = new float*[mNumberOfSpeakers];
-	for (int o = 0; o < mNumberOfSpeakers; o++)
-	{
-
-		outputs[o] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(o) : buffer.getWritePointer(o);
+	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
+        //if we're in internal write, get write buffer from mRoutingTempAudioBuffer, otherwise get it from the main buffer function argument
+		outputs[iCurOutput] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(iCurOutput) : buffer.getWritePointer(iCurOutput);
         
-		if (mProcessMode == kFreeVolumeMode)
-		{
-			params[getParamForSpeakerX(o)] = params[getParamForSpeakerX(o)] * (2*kRadiusMax) - kRadiusMax;
-			params[getParamForSpeakerY(o)] = params[getParamForSpeakerY(o)] * (2*kRadiusMax) - kRadiusMax;
-		}
-		else
-		{
-			float x = params[getParamForSpeakerX(o)] * (2*kRadiusMax) - kRadiusMax;
-			float y = params[getParamForSpeakerY(o)] * (2*kRadiusMax) - kRadiusMax;
+		if (mProcessMode == kFreeVolumeMode) {
+            //in free volume, speakers can be anywhere, so we have an x and a y
+			params[getParamForSpeakerX(iCurOutput)] = params[getParamForSpeakerX(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
+			params[getParamForSpeakerY(iCurOutput)] = params[getParamForSpeakerY(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
+		} else {
+            //in non-free volume, speakers are bounded to the unit circle, so we only need their angle on that circle, which we store in params[getParamForSpeakerX(iCurOutput)]
+			float x = params[getParamForSpeakerX(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
+			float y = params[getParamForSpeakerY(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
 			float t = atan2f(y, x);
 			if (t < 0) t += kThetaMax;
-			params[getParamForSpeakerX(o)] = t;
+			params[getParamForSpeakerX(iCurOutput)] = t;
 		}
 	}
 	
-	// make sure the smoothed parameters table is inited
-	if (!mSmoothedParametersInited)
-	{
-		for (int i = 0; i < kNumberOfParameters; i++)
+	// initialize mSmoothedParameters if it isn't
+	if (!mSmoothedParametersInited) {
+        for (int i = 0; i < kNumberOfParameters; i++){
 			mSmoothedParameters.setUnchecked(i, params[i]);
+        }
 		mSmoothedParametersInited = true;
 	}
-	
-	bool processesInPlaceIsIgnored = (mRoutingMode != kInternalWrite);
 	
 	// process data
     unsigned int numFramesToDo;
@@ -1073,18 +1069,17 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
         //we process either kChunkSize frames or whatever is left in inFramesToProcess
 		numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
 		
-		if (processesInPlaceIsIgnored) {
+        //if we're in internal write, we don't need to make a copy of the input samples
+		if (mRoutingMode == kInternalWrite) {
+            ProcessData(inputs, outputs, params, sampleRate, numFramesToDo);
+        } else {
 			float **inputsCopy = new float* [mNumberOfSources];
-            JUCE_COMPILER_WARNING("why are we copying the inputs instead of using original?")
 			for (int i = 0; i < mNumberOfSources; i++) {
 				memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
 				inputsCopy[i] = mInputsCopy.getReference(i).b;
 			}
-			
 			ProcessData(inputsCopy, outputs, params, sampleRate, numFramesToDo);
 			delete[] inputsCopy;
-        } else {
-			ProcessData(inputs, outputs, params, sampleRate, numFramesToDo);
         }
 		
 		inFramesToProcess -= numFramesToDo;
@@ -1108,14 +1103,12 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 		const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
 		const float sm_n = 1 - sm_o;
-		for (unsigned int f = 0; f < oriFramesToProcess; f++)
-		{
+		for (unsigned int f = 0; f < oriFramesToProcess; f++) {
 			currentParam = currentParam * sm_o + targetParam * sm_n;
 			ramp[f] = dbToLinear(currentParam);
 		}
 		mSmoothedParameters.setUnchecked(i, currentParam);
-		for (int o = 0; o < mNumberOfSpeakers; o++)
-		{
+		for (int o = 0; o < mNumberOfSpeakers; o++) {
 			float *output = mRoutingTempAudioBuffer.getWritePointer(o);
 			for (unsigned int f = 0; f < oriFramesToProcess; f++)
 				output[f] *= ramp[f];
@@ -1150,14 +1143,15 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	
 	delete[] inputs;
 	delete[] outputs;
+    JUCE_COMPILER_WARNING("everything related to mProcessCounter should be in #if USE_DB_METERS")
 	mProcessCounter++;
 }
 
 void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
 	switch(mProcessMode) {
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
-		case kPanVolumeMode:	ProcessDataPanVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
-		case kPanSpanMode:		ProcessDataPanSpanMode(inputs, outputs, params, sampleRate, frames);	break;
+		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params, sampleRate, frames);	break;
+		case kPanSpanMode:		ProcessDataPanSpanMode   (inputs, outputs, params, sampleRate, frames);	break;
 	}
 }
 
@@ -1258,7 +1252,7 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
 	
 	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
-    const int sourceParameters = JucePlugin_MaxNumInputChannels * kParamsPerSource;
+    const int sourceParameters = JucePlugin_MaxNumInputChannels   * kParamsPerSource;
 	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
     for (int i = 0; i < (kNumberOfParameters - kConstantParameters); ++i) {
 		bool isSpeakerXY = (i >= sourceParameters && i < (sourceParameters + speakerParameters) && ((i - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
