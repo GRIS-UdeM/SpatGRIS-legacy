@@ -240,7 +240,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mProcessCounter = 0;
 	//mLastTimeInSamples = -1;
 	mProcessMode = kPanVolumeMode;
-	mRoutingMode = 0;
+	mRoutingMode = kNormalRouting;
     //version 9
     updateInputOutputMode();
     mSrcPlacementMode = 1;
@@ -749,7 +749,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
         
         mNumberOfSpeakers = p_iNewNumberOfSpeakers;
         
-        if (mRoutingMode == 1) {
+        if (mRoutingMode == kInternalWrite) {
             updateRoutingTempAudioBuffer();
         }
 #if USE_DB_METERS
@@ -943,7 +943,7 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioSampleBuffer& buffer, Mi
 void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	// sanity check for auval
-	if (buffer.getNumChannels() < ((mRoutingMode == 1) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
+	if (buffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
 		printf("unexpected channel count %d vs %dx%d rmode: %d\n", buffer.getNumChannels(), mNumberOfSources, mNumberOfSpeakers, mRoutingMode);
 		return;
 	}
@@ -954,7 +954,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     
 	unsigned int oriFramesToProcess = buffer.getNumSamples();
 	
-	if (mRoutingMode > 1) {
+	if (mRoutingMode > kInternalWrite) {
 		buffer.clear();
 		
 		int outChannels = (mNumberOfSpeakers > 2) ? 2 : mNumberOfSpeakers;
@@ -1004,7 +1004,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	if (mProcessMode == kPanSpanMode) {
 		params[kMaxSpanVolume] = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, params[kMaxSpanVolume]);
 	}
-	if (mRoutingMode == 1) {
+	if (mRoutingMode == kInternalWrite) {
 		params[kRoutingVolume] = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, params[kRoutingVolume]);
 	}
 	
@@ -1021,7 +1021,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		params[getParamForSourceY(i)] = params[getParamForSourceY(i)] * (2*kRadiusMax) - kRadiusMax;
 	}
 	
-	if (mRoutingMode == 1) {
+	if (mRoutingMode == kInternalWrite) {
 		jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
 		jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
@@ -1031,7 +1031,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	for (int o = 0; o < mNumberOfSpeakers; o++)
 	{
 
-		outputs[o] = (mRoutingMode == 1) ? mRoutingTempAudioBuffer.getWritePointer(o) : buffer.getWritePointer(o);
+		outputs[o] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(o) : buffer.getWritePointer(o);
         
 		if (mProcessMode == kFreeVolumeMode)
 		{
@@ -1056,7 +1056,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		mSmoothedParametersInited = true;
 	}
 	
-	bool processesInPlaceIsIgnored = (mRoutingMode != 1);
+	bool processesInPlaceIsIgnored = (mRoutingMode != kInternalWrite);
 	
 	// process data
     unsigned int numFramesToDo;
@@ -1090,8 +1090,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
         }
 	}
 	
-    JUCE_COMPILER_WARNING("1 = internal write")
-	if (mRoutingMode == 1){
+	if (mRoutingMode == kInternalWrite){
 		// apply routing volume
 		int i = kRoutingVolume;
 		float currentParam = mSmoothedParameters[i];
@@ -1134,7 +1133,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	}
 #endif
     
-	if (mRoutingMode == 1) {
+	if (mRoutingMode == kInternalWrite) {
 		// accumulate in internal buffer
 		Router::instance().accumulate(mNumberOfSpeakers, oriFramesToProcess, mRoutingTempAudioBuffer);
 		buffer.clear();
@@ -2067,7 +2066,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mLeapEnabled        = xmlState->getIntAttribute ("mLeapEnabled", 0);
             mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
             mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
-            setRoutingMode(xmlState->getIntAttribute ("mRoutingMode", 0));
+            setRoutingMode(xmlState->getIntAttribute ("mRoutingMode", kNormalRouting));
             mParameters.set(kSmooth,        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
             mParameters.set(kVolumeNear,    static_cast<float>(xmlState->getDoubleAttribute("kVolumeNear", normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault))));
             mParameters.set(kVolumeMid,     static_cast<float>(xmlState->getDoubleAttribute("kVolumeMid", normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault))));

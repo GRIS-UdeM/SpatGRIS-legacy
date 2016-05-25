@@ -133,6 +133,20 @@ enum InputOutputModes {
 
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
 
+enum RoutingModes{
+    kNormalRouting = 0
+    ,kInternalWrite
+    ,kInternalRead12
+    ,kInternalRead34
+    ,kInternalRead56
+    ,kInternalRead78
+    ,kInternalRead910
+    ,kInternalRead1112
+    ,kInternalRead1213
+    ,kInternalRead1314
+    ,kInternalRead1516
+};
+
 //==============================================================================
 // these must be normalized/denormalized for processing
 static const float kSourceMinDistance = 2.5 * 0.5;
@@ -323,7 +337,7 @@ public:
 	int getRoutingMode() const { return mRoutingMode; }
 	void setRoutingMode(int s) {
         mRoutingMode = s;
-        if (mRoutingMode == 1){
+        if (mRoutingMode == kInternalWrite){
             updateRoutingTempAudioBuffer();
         }
     }
