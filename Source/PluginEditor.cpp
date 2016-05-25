@@ -1662,13 +1662,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         }
         updateEndLocationTextEditors();
     }
-    else if (button == mApplySrcPlacementButton) {
-        
-        if (mFilter->getNumberOfSources() == 1){
-            mFilter->setSourceRT(0, FPoint(0, 0));
-            return;
-        }
-    }
     else if (mFilter->getIsAllowInputOutputModeSelection() && button == mApplyInputOutputModeButton) {
         //update mode in processor, which will update its number of sources and speakers
         int iSelectedMode = mInputOutputModeCombo->getSelectedId();
