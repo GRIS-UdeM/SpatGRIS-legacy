@@ -1252,16 +1252,17 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
 	
 	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
-    const int sourceParameters = JucePlugin_MaxNumInputChannels   * kParamsPerSource;
+    const int sourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
 	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    for (int i = 0; i < (kNumberOfParameters - kConstantParameters); ++i) {
-		bool isSpeakerXY = (i >= sourceParameters && i < (sourceParameters + speakerParameters) && ((i - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
+    for (int iCurParam = 0; iCurParam < (kNumberOfParameters - kConstantParameters); ++iCurParam) {
+        //skip parameters related to speaker position
+		bool isSpeakerXY = (iCurParam >= sourceParameters && iCurParam < (sourceParameters + speakerParameters) && ((iCurParam - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
         if (isSpeakerXY) {
             continue;
         }
-		float currentParam = mSmoothedParameters[i];
-		float targetParam = params[i];
-		float *ramp = mSmoothedParametersRamps.getReference(i).b;
+		float currentParam = mSmoothedParameters[iCurParam];
+		float targetParam = params[iCurParam];
+		float *ramp = mSmoothedParametersRamps.getReference(iCurParam).b;
 	
 		for (unsigned int f = 0; f < frames; ++f) {
             //this is apparently more optimal than having variables declared outside the loop, http://stackoverflow.com/questions/7959573/declaring-variables-inside-loops-good-practice-or-bad-practice-2-parter#
@@ -1271,22 +1272,22 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 			currentParam = currentParam * sm_o + targetParam * sm_n;
 			ramp[f] = currentParam;
 		}
-		
-		mSmoothedParameters.setUnchecked(i, currentParam);
+		mSmoothedParameters.setUnchecked(iCurParam, currentParam);
 	}
-	
+    
 	// clear outputs[]
 	for (int o = 0; o < mNumberOfSpeakers; ++o) {
 		float *output = outputs[o];
 		memset(output, 0, frames * sizeof(float));
 	}
-
-	// Compute output[] for each source
+    
+	// core of the algorithm -- compute output[] for each source
 	for (int i = 0; i < mNumberOfSources; ++i) {
 		float *input = inputs[i];
 		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
 		float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
 	
+        //for each 
 		for (unsigned int f = 0; f < frames; ++f) {
 			float s = input[f];     //current sample
 			float x = input_x[f];   //x position of current sample
@@ -1297,25 +1298,30 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
             if (r > kRadiusMax) {
                 r = kRadiusMax;
             }
-			float it = atan2f(y, x);
+			float it = atan2f(y, x);    //atan2f is the arctangent with 2 variables
             if (it < 0){
                 it += kThetaMax;
             }
 			
 			if (mApplyFilter) {
 				float distance;
-				if (r >= 1) distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
-				else distance = denormalize(params[kFilterNear], params[kFilterMid], r);
+                if (r >= 1) {
+                    distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
+                } else {
+                    distance = denormalize(params[kFilterNear], params[kFilterMid], r);
+                }
 				s = mFilters[i].process(s, distance);
 			}
 			
 			// adjust input volume
-			{
-				float dbSource;
-				if (r >= 1) dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
-				else dbSource = denormalize(params[kVolumeNear], params[kVolumeMid], r);
-				s *= dbToLinear(dbSource);
-			}
+			float dbSource;
+            if (r >= 1) {
+                dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
+            } else {
+                dbSource = denormalize(params[kVolumeNear], params[kVolumeMid], r);
+            }
+            s *= dbToLinear(dbSource);
+			
 			
 			float t;
 			if (r >= kThetaLockRadius){
@@ -1641,12 +1647,14 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             }
             
             // adjust input volume
-            {
-                float dbSource;
-                if (r >= 1) dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
-                else dbSource = denormalize(params[kVolumeNear], params[kVolumeMid], r);
-                s *= dbToLinear(dbSource);
+            float dbSource;
+            if (r >= 1) {
+                dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
+            } else {
+                dbSource = denormalize(params[kVolumeNear], params[kVolumeMid], r);
             }
+            s *= dbToLinear(dbSource);
+            
             
             float t;
             if (r >= kThetaLockRadius)
