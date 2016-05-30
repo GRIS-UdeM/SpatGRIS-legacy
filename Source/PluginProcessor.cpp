@@ -1312,7 +1312,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 fCurSampleT += kThetaMax;
             }
 			
-            //apply filter if needed
+            //apply filter to fCurSampleValue if needed
 			if (mApplyFilter) {
 				float distance;
                 if (fCurSampleR >= 1) {
@@ -1323,7 +1323,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
 			}
 			
-			// adjust input volume based on volume options from 'volume and filters' tab
+			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
 			float dbSource;
             if (fCurSampleR >= 1) {
                 dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
@@ -1332,30 +1332,28 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             }
             fCurSampleValue *= dbToLinear(dbSource);
 			
-			//if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), we don't ramp the position
+			//if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
 			float t;
 			if (fCurSampleR >= kThetaLockRadius){
 				t = fCurSampleT;
 				mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
 			}
-            //we're at the center of the circle and we need to deal with it. THIS IS PROBABLY RELATED TO AUDIO CLICK ISSUE
+            
+            //we're right in the center of the circle
             else {
                 float c = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
-
-				float lt = mLockedThetas.getUnchecked(iCurSource);
-				float dt = lt - fCurSampleT;
-                if (dt < 0){
-                    dt = -dt;
-                }
-				if (dt > kQuarterCircle) {
+                //calculate difference between previous and current theta
+				float fPrevTheta = mLockedThetas.getUnchecked(iCurSource);
+				float fDeltaTheta = abs(fPrevTheta - fCurSampleT);
+				if (fDeltaTheta > kQuarterCircle) {
 					// assume flipped side
-                    if (lt > fCurSampleT) {
-                        lt -= kHalfCircle;
+                    if (fPrevTheta > fCurSampleT) {
+                        fPrevTheta -= kHalfCircle;
                     } else {
-                        lt += kHalfCircle;
+                        fPrevTheta += kHalfCircle;
                     }
                 }
-				t = c * fCurSampleT + (1 - c) * lt;
+				t = c * fCurSampleT + (1 - c) * fPrevTheta;
 				
                 if (t < 0) {
                     t += kThetaMax;
@@ -1537,8 +1535,7 @@ static void Integrate(float x1, float x2, const vector<Area> &areas, int areaCou
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
-{
+void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
     const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
     const float sm_n = 1 - sm_o;
