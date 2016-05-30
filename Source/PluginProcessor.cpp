@@ -1317,8 +1317,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             fCurSampleValue *= dbToLinear(dbSource);
             
             
-            
-            
+        
             //WE BASICALLY HAVE 2 SITUATIONS HERE, BUT WE NEED 3
 			float fNewTheta;
 
@@ -1355,7 +1354,8 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
             }
 
-            //SITUATION 3: WE ARE FAR FROM THE CIRCLE, BUT WE JUST CROSSED IT, SO WE SHOULD RAMP
+            //SITUATION 3: WE ARE FAR FROM THE CIRCLE, BUT WE JUST CROSSED IT, SO WE SHOULD RAMP BETWEEN THE PREVIOUS AND CURRENT POSITION, NOT THE RANDOM NORMALIZED RAMP FROM SITUATION 1
+            //the whole logic needs to be revised. for example we need to save locked theta every time.
             
             
             
