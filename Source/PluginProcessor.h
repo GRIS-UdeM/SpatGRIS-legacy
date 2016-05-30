@@ -83,22 +83,23 @@ enum speakerParameters{
     kParamsPerSpeakers
 };
 
-#define kConstantOffset (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
+//the JucePlugin values are from the introjucer:   8           * 5                + 16                              * 5 = 120
+#define kNonConstantParameters (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
 
 enum constantParameters{
-	kSmooth =				0 + kConstantOffset,
-	kVolumeNear =			1 + kConstantOffset,
-	kVolumeMid =			2 + kConstantOffset,
-	kVolumeFar =			3 + kConstantOffset,
-	kFilterNear =			4 + kConstantOffset,
-	kFilterMid =			5 + kConstantOffset,
-	kFilterFar =			6 + kConstantOffset,
-	kMaxSpanVolume =		7 + kConstantOffset,
-	kRoutingVolume =		8 + kConstantOffset,
+	kSmooth =				0 + kNonConstantParameters,
+	kVolumeNear =			1 + kNonConstantParameters,
+	kVolumeMid =			2 + kNonConstantParameters,
+	kVolumeFar =			3 + kNonConstantParameters,
+	kFilterNear =			4 + kNonConstantParameters,
+	kFilterMid =			5 + kNonConstantParameters,
+	kFilterFar =			6 + kNonConstantParameters,
+	kMaxSpanVolume =		7 + kNonConstantParameters,
+	kRoutingVolume =		8 + kNonConstantParameters,
 	kConstantParameters =	9
 };
 
-#define kNumberOfParameters (kConstantParameters + kConstantOffset)
+#define kNumberOfParameters (kConstantParameters + kNonConstantParameters)
 
 //==============================================================================
 static const float kSourceRadius = 10;

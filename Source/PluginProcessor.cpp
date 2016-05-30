@@ -1254,25 +1254,31 @@ JUCE_COMPILER_WARNING("could redo everything with vectors; they are just as effi
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
 	
 	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
-    const int sourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
-	const int speakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    for (int iCurParam = 0; iCurParam < (kNumberOfParameters - kConstantParameters); ++iCurParam) {
-        //skip parameters related to speaker position
-		bool isSpeakerXY = (iCurParam >= sourceParameters && iCurParam < (sourceParameters + speakerParameters) && ((iCurParam - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
+    const int kiTotalSourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
+	const int kiTotalSpeakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+    //for each kNonConstantParameters parameter, ie, IDs 0 to 120
+    for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
+        //skip x and y parameters for each of 16 speakers, ie, params 40,41,45,46,50,51,55,56,60,61,65,66,70,71,75,76,80,81,85,86,90,91,95,96,100,101,105,106,110,111,115,116
+		bool isSpeakerXY = (iCurParam >= kiTotalSourceParameters && iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) && ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
         if (isSpeakerXY) {
             continue;
         }
+        
+        //the actual parameters we will ramp are, for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker (kSpeakerUnused1,kSpeakerM,kSpeakerUnused2
+        JUCE_COMPILER_WARNING("we should also skip (and not ramp) kSpeakerUnused1 and kSpeakerUnused2")
+        //get current and target values, as well as a reference to the current ramp position
 		float currentParam = mSmoothedParameters[iCurParam];
 		float targetParam = p_pfParams[iCurParam];
-		float *ramp = mSmoothedParametersRamps.getReference(iCurParam).b;
-	
-		for (unsigned int f = 0; f < p_iTotalSamples; ++f) {
-            //this is apparently more optimal than having variables declared outside the loop, http://stackoverflow.com/questions/7959573/declaring-variables-inside-loops-good-practice-or-bad-practice-2-parter#
-            const float smooth = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]); // milliseconds
+		float *pSmoothedParametersRamps = mSmoothedParametersRamps.getReference(iCurParam).b;
+        //for each sample
+		for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
+            const float smooth = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]); // milliseconds. Declaring variables here is more optimal than outside the loop, http://stackoverflow.com/questions/7959573/declaring-variables-inside-loops-good-practice-or-bad-practice-2-parter#
             const float sm_o = powf(0.01f, 1000.f / (smooth * p_fSampleRate));
             const float sm_n = 1 - sm_o;
+            //interpolate param value between the current (previous) and target value
 			currentParam = currentParam * sm_o + targetParam * sm_n;
-			ramp[f] = currentParam;
+            //update ramp positions
+			pSmoothedParametersRamps[iCurSampleId] = currentParam;
 		}
 		mSmoothedParameters.setUnchecked(iCurParam, currentParam);
 	}
@@ -1286,14 +1292,15 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 	// core of the algorithm -- compute output[] for each source
 	for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
 		float *allSamplesCurSource = p_ppfInputs[iCurSource];
+        //for each source, we have 256 (kChunkSize) values for x and y. mSmoothedParametersRamps was updated a few lines above using pSmoothedParametersRamps
 		float *xCurSource = mSmoothedParametersRamps.getReference(getParamForSourceX(iCurSource)).b;
 		float *yCurSource = mSmoothedParametersRamps.getReference(getParamForSourceY(iCurSource)).b;
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
-			float s = allSamplesCurSource[iSampleId];     //current sample
-			float x = xCurSource[iSampleId];   //x position of current sample
-			float y = yCurSource[iSampleId];   //y position of current sample
+			float fCurSampleValue = allSamplesCurSource[iSampleId];   //current sample
+			float x = xCurSource[iSampleId];            //x position of current sample
+			float y = yCurSource[iSampleId];            //y position of current sample
 			
 			//convert xy position of sample to rt
 			float r = hypotf(x, y);
@@ -1313,7 +1320,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 } else {
                     distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], r);
                 }
-				s = mFilters[iCurSource].process(s, distance);
+				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
 			}
 			
 			// adjust input volume based on volume options from 'volume and filters' tab
@@ -1323,7 +1330,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             } else {
                 dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], r);
             }
-            s *= dbToLinear(dbSource);
+            fCurSampleValue *= dbToLinear(dbSource);
 			
 			//if r is bigger than kThetaLockRadius (which is the case if we're not right in the center), we don't ramp the position
 			float t;
@@ -1369,14 +1376,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
-					addToOutput(s * vLeft, p_ppfOutputs, left, iSampleId);
-					addToOutput(s * vRight, p_ppfOutputs, right, iSampleId);
+					addToOutput(fCurSampleValue * vLeft, p_ppfOutputs, left, iSampleId);
+					addToOutput(fCurSampleValue * vRight, p_ppfOutputs, right, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (left >= 0) ? left : right;
 					jassert(o >= 0);
 					
-					addToOutput(s, p_ppfOutputs, o, iSampleId);
+					addToOutput(fCurSampleValue, p_ppfOutputs, o, iSampleId);
 				}
 			} else {
 				// find front left, right
@@ -1401,14 +1408,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft = 1 - dFrontLeft / dTotal;
 					float vRight = 1 - dFrontRight / dTotal;
 					
-					addToOutput(s * vLeft * front, p_ppfOutputs, frontLeft, iSampleId);
-					addToOutput(s * vRight * front, p_ppfOutputs, frontRight, iSampleId);
+					addToOutput(fCurSampleValue * vLeft * front, p_ppfOutputs, frontLeft, iSampleId);
+					addToOutput(fCurSampleValue * vRight * front, p_ppfOutputs, frontRight, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (frontLeft >= 0) ? frontLeft : frontRight;
 					jassert(o >= 0);
 					
-					addToOutput(s * front, p_ppfOutputs, o, iSampleId);
+					addToOutput(fCurSampleValue * front, p_ppfOutputs, o, iSampleId);
 				}
 				
 				// add to back output
@@ -1417,14 +1424,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
-					addToOutput(s * vLeft * back, p_ppfOutputs, backLeft, iSampleId);
-					addToOutput(s * vRight * back, p_ppfOutputs, backRight, iSampleId);
+					addToOutput(fCurSampleValue * vLeft * back, p_ppfOutputs, backLeft, iSampleId);
+					addToOutput(fCurSampleValue * vRight * back, p_ppfOutputs, backRight, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (backLeft >= 0) ? backLeft : backRight;
 					jassert(o >= 0);
 					
-					addToOutput(s * back, p_ppfOutputs, o, iSampleId);
+					addToOutput(fCurSampleValue * back, p_ppfOutputs, o, iSampleId);
 				}
 			}
 		}
