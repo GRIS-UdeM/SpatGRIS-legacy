@@ -1299,63 +1299,63 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
 			float fCurSampleValue = allSamplesCurSource[iSampleId];   //current sample
-			float x = xCurSource[iSampleId];            //x position of current sample
-			float y = yCurSource[iSampleId];            //y position of current sample
+			float fCurSampleX = xCurSource[iSampleId];            //x position of current sample
+			float fCurSampleY = yCurSource[iSampleId];            //y position of current sample
 			
 			//convert xy position of sample to rt
-			float r = hypotf(x, y);
-            if (r > kRadiusMax) {
-                r = kRadiusMax;
+			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
+            if (fCurSampleR > kRadiusMax) {
+                fCurSampleR = kRadiusMax;
             }
-			float it = atan2f(y, x);    //atan2f is the arctangent with 2 variables
-            if (it < 0){
-                it += kThetaMax;
+			float fCurSampleT = atan2f(fCurSampleY, fCurSampleX);    //atan2f is the arctangent with 2 variables
+            if (fCurSampleT < 0){
+                fCurSampleT += kThetaMax;
             }
 			
             //apply filter if needed
 			if (mApplyFilter) {
 				float distance;
-                if (r >= 1) {
-                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (r - 1));
+                if (fCurSampleR >= 1) {
+                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (fCurSampleR - 1));
                 } else {
-                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], r);
+                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], fCurSampleR);
                 }
 				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
 			}
 			
 			// adjust input volume based on volume options from 'volume and filters' tab
 			float dbSource;
-            if (r >= 1) {
-                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (r - 1));
+            if (fCurSampleR >= 1) {
+                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
             } else {
-                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], r);
+                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
             }
             fCurSampleValue *= dbToLinear(dbSource);
 			
-			//if r is bigger than kThetaLockRadius (which is the case if we're not right in the center), we don't ramp the position
+			//if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), we don't ramp the position
 			float t;
-			if (r >= kThetaLockRadius){
-				t = it;
-				mLockedThetas.setUnchecked(iCurSource, it);
+			if (fCurSampleR >= kThetaLockRadius){
+				t = fCurSampleT;
+				mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
 			}
             //we're at the center of the circle and we need to deal with it. THIS IS PROBABLY RELATED TO AUDIO CLICK ISSUE
             else {
-                float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
+                float c = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
 
 				float lt = mLockedThetas.getUnchecked(iCurSource);
-				float dt = lt - it;
+				float dt = lt - fCurSampleT;
                 if (dt < 0){
                     dt = -dt;
                 }
 				if (dt > kQuarterCircle) {
 					// assume flipped side
-                    if (lt > it) {
+                    if (lt > fCurSampleT) {
                         lt -= kHalfCircle;
                     } else {
                         lt += kHalfCircle;
                     }
                 }
-				t = c * it + (1 - c) * lt;
+				t = c * fCurSampleT + (1 - c) * lt;
 				
                 if (t < 0) {
                     t += kThetaMax;
@@ -1364,7 +1364,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 }
 			}
 			
-			if (r >= 1) {
+			if (fCurSampleR >= 1) {
 				// find left and right speakers
 				int left, right;
 				float dLeft, dRight;
@@ -1399,7 +1399,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 				float dBackLeft, dBackRight;
                 findLeftAndRightSpeakers(bt, p_pfParams, backLeft, backRight, dBackLeft, dBackRight);
 			
-				float front = r * 0.5f + 0.5f;
+				float front = fCurSampleR * 0.5f + 0.5f;
 				float back = 1 - front;
 				
 				// add to front output
