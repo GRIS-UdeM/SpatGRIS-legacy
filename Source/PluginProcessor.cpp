@@ -1249,7 +1249,9 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 	output[f] += s * output_adj;
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+//sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
+JUCE_COMPILER_WARNING("could redo everything with vectors; they are just as efficient as native arrays")
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
 	
 	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
     const int sourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
@@ -1261,13 +1263,13 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
             continue;
         }
 		float currentParam = mSmoothedParameters[iCurParam];
-		float targetParam = params[iCurParam];
+		float targetParam = p_pfParams[iCurParam];
 		float *ramp = mSmoothedParametersRamps.getReference(iCurParam).b;
 	
-		for (unsigned int f = 0; f < frames; ++f) {
+		for (unsigned int f = 0; f < p_iTotalSamples; ++f) {
             //this is apparently more optimal than having variables declared outside the loop, http://stackoverflow.com/questions/7959573/declaring-variables-inside-loops-good-practice-or-bad-practice-2-parter#
-            const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
-            const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
+            const float smooth = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]); // milliseconds
+            const float sm_o = powf(0.01f, 1000.f / (smooth * p_fSampleRate));
             const float sm_n = 1 - sm_o;
 			currentParam = currentParam * sm_o + targetParam * sm_n;
 			ramp[f] = currentParam;
@@ -1276,22 +1278,22 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 	}
     
 	// clear outputs[]
-	for (int o = 0; o < mNumberOfSpeakers; ++o) {
-		float *output = outputs[o];
-		memset(output, 0, frames * sizeof(float));
+	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
+		float *output = p_ppfOutputs[iCurOutput];
+		memset(output, 0, p_iTotalSamples * sizeof(float));
 	}
     
 	// core of the algorithm -- compute output[] for each source
-	for (int i = 0; i < mNumberOfSources; ++i) {
-		float *input = inputs[i];
-		float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
-		float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
+	for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
+		float *allSamplesCurSource = p_ppfInputs[iCurSource];
+		float *xCurSource = mSmoothedParametersRamps.getReference(getParamForSourceX(iCurSource)).b;
+		float *yCurSource = mSmoothedParametersRamps.getReference(getParamForSourceY(iCurSource)).b;
 	
         //for each sample
-		for (unsigned int iSampleId = 0; iSampleId < frames; ++iSampleId) {
-			float s = input[iSampleId];     //current sample
-			float x = input_x[iSampleId];   //x position of current sample
-			float y = input_y[iSampleId];   //y position of current sample
+		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
+			float s = allSamplesCurSource[iSampleId];     //current sample
+			float x = xCurSource[iSampleId];   //x position of current sample
+			float y = yCurSource[iSampleId];   //y position of current sample
 			
 			//convert xy position of sample to rt
 			float r = hypotf(x, y);
@@ -1307,19 +1309,19 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 			if (mApplyFilter) {
 				float distance;
                 if (r >= 1) {
-                    distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
+                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (r - 1));
                 } else {
-                    distance = denormalize(params[kFilterNear], params[kFilterMid], r);
+                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], r);
                 }
-				s = mFilters[i].process(s, distance);
+				s = mFilters[iCurSource].process(s, distance);
 			}
 			
 			// adjust input volume based on volume options from 'volume and filters' tab
 			float dbSource;
             if (r >= 1) {
-                dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
+                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (r - 1));
             } else {
-                dbSource = denormalize(params[kVolumeNear], params[kVolumeMid], r);
+                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], r);
             }
             s *= dbToLinear(dbSource);
 			
@@ -1327,31 +1329,39 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 			float t;
 			if (r >= kThetaLockRadius){
 				t = it;
-				mLockedThetas.setUnchecked(i, it);
-			} else {
-                //we're at the center of the circle and we need to deal with it. THIS IS PROBABLY RELATED TO AUDIO CLICK ISSUE
-				float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
-				float lt = mLockedThetas.getUnchecked(i);
+				mLockedThetas.setUnchecked(iCurSource, it);
+			}
+            //we're at the center of the circle and we need to deal with it. THIS IS PROBABLY RELATED TO AUDIO CLICK ISSUE
+            else {
+                float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
+
+				float lt = mLockedThetas.getUnchecked(iCurSource);
 				float dt = lt - it;
-				if (dt < 0) dt = -dt;
+                if (dt < 0){
+                    dt = -dt;
+                }
 				if (dt > kQuarterCircle) {
 					// assume flipped side
-					if (lt > it) lt -= kHalfCircle;
-					else lt += kHalfCircle;
-				}
+                    if (lt > it) {
+                        lt -= kHalfCircle;
+                    } else {
+                        lt += kHalfCircle;
+                    }
+                }
 				t = c * it + (1 - c) * lt;
 				
-				if (t < 0) t += kThetaMax;
-				else if (t >= kThetaMax) t -= kThetaMax;
-				
-				//if (f == 0) printf("it: %f lt: %f lt2: %f t: %f c: %f\n", it, mLockedThetas.getUnchecked(i), lt, t, c);
+                if (t < 0) {
+                    t += kThetaMax;
+                } else if (t >= kThetaMax) {
+                    t -= kThetaMax;
+                }
 			}
 			
 			if (r >= 1) {
 				// find left and right speakers
 				int left, right;
 				float dLeft, dRight;
-                findLeftAndRightSpeakers(t, params, left, right, dLeft, dRight);
+                findLeftAndRightSpeakers(t, p_pfParams, left, right, dLeft, dRight);
                 
 				// add to output
 				if (left >= 0 && right >= 0) {
@@ -1359,20 +1369,20 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
-					addToOutput(s * vLeft, outputs, left, iSampleId);
-					addToOutput(s * vRight, outputs, right, iSampleId);
+					addToOutput(s * vLeft, p_ppfOutputs, left, iSampleId);
+					addToOutput(s * vRight, p_ppfOutputs, right, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (left >= 0) ? left : right;
 					jassert(o >= 0);
 					
-					addToOutput(s, outputs, o, iSampleId);
+					addToOutput(s, p_ppfOutputs, o, iSampleId);
 				}
 			} else {
 				// find front left, right
 				int frontLeft, frontRight;
 				float dFrontLeft, dFrontRight;
-                findLeftAndRightSpeakers(t, params, frontLeft, frontRight, dFrontLeft, dFrontRight);
+                findLeftAndRightSpeakers(t, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
                 
 				float bt = t + kHalfCircle;
 				if (bt > kThetaMax) bt -= kThetaMax;
@@ -1380,7 +1390,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 				// find back left, right
 				int backLeft, backRight;
 				float dBackLeft, dBackRight;
-                findLeftAndRightSpeakers(bt, params, backLeft, backRight, dBackLeft, dBackRight);                
+                findLeftAndRightSpeakers(bt, p_pfParams, backLeft, backRight, dBackLeft, dBackRight);
 			
 				float front = r * 0.5f + 0.5f;
 				float back = 1 - front;
@@ -1391,14 +1401,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 					float vLeft = 1 - dFrontLeft / dTotal;
 					float vRight = 1 - dFrontRight / dTotal;
 					
-					addToOutput(s * vLeft * front, outputs, frontLeft, iSampleId);
-					addToOutput(s * vRight * front, outputs, frontRight, iSampleId);
+					addToOutput(s * vLeft * front, p_ppfOutputs, frontLeft, iSampleId);
+					addToOutput(s * vRight * front, p_ppfOutputs, frontRight, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (frontLeft >= 0) ? frontLeft : frontRight;
 					jassert(o >= 0);
 					
-					addToOutput(s * front, outputs, o, iSampleId);
+					addToOutput(s * front, p_ppfOutputs, o, iSampleId);
 				}
 				
 				// add to back output
@@ -1407,14 +1417,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **inputs, float **ou
 					float vLeft = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
-					addToOutput(s * vLeft * back, outputs, backLeft, iSampleId);
-					addToOutput(s * vRight * back, outputs, backRight, iSampleId);
+					addToOutput(s * vLeft * back, p_ppfOutputs, backLeft, iSampleId);
+					addToOutput(s * vRight * back, p_ppfOutputs, backRight, iSampleId);
 				} else {
 					// one side is empty!
 					int o = (backLeft >= 0) ? backLeft : backRight;
 					jassert(o >= 0);
 					
-					addToOutput(s * back, outputs, o, iSampleId);
+					addToOutput(s * back, p_ppfOutputs, o, iSampleId);
 				}
 			}
 		}

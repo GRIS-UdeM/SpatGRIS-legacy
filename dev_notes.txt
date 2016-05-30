@@ -184,3 +184,8 @@ looking at older versions
 * v2.1.3. before joystick, internal routing, source unique
     * clicks everywhere, but recording pendulum at .3s no clicks (.1 sec yes)
 * there's clicks in every single version. This is a problem rooted deep in the algorithm
+------------------- 2016-05-30 ---------------------
+Looking into spatialization algorithm
+The thing with goddamn arrays is that you don't know their sizes. 
+* parameters **inputs and **outputs are inputs[numInputChannels][p_iTotalSamples].
+* 
