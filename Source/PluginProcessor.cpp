@@ -1189,10 +1189,8 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
         }
         
         //if curSpeaker is on left of target speaker
-//        if (fCurSpeakerAngle < p_fTargetSpeakerAngle){
         if (fCurSpeakerAngle >= p_fTargetAngle){
             //check if curAngle is smaller than previous smallest left angle
-            //fCurDeltaAngle = p_fTargetSpeakerAngle - fCurSpeakerAngle;
             fCurDeltaAngle = fCurSpeakerAngle - p_fTargetAngle;
             if (fCurDeltaAngle < p_pfDeltaAngleToLeftSpeaker){
                 p_pfDeltaAngleToLeftSpeaker = fCurDeltaAngle;
@@ -1202,7 +1200,6 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
         }
         //if curSpeaker is on right of target speaker
         else {
-//            fCurDeltaAngle = fCurSpeakerAngle - p_fTargetSpeakerAngle;
             fCurDeltaAngle = p_fTargetAngle - fCurSpeakerAngle;
             if (fCurDeltaAngle < p_pfDeltaAngleToRightSpeaker){
                 p_pfDeltaAngleToRightSpeaker = fCurDeltaAngle;
@@ -1222,18 +1219,6 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
         p_piLeftSpeaker = iFirstSpeaker;
         p_pfDeltaAngleToLeftSpeaker = fMinAngle + (kThetaMax - fMaxAngle);
     }
-    
-//    //if we haven't found the right speaker and the target is the first speaker, the left speaker is the first one
-//    if (p_iTargetSpeaker == iFirstSpeaker && p_piLeftSpeaker == -1){
-//        p_piLeftSpeaker = iLastSpeaker;
-//        p_pfDeltaAngleToLeftSpeaker = fMinAngle + (kThetaMax - fMaxAngle);
-//    }
-//    
-//    //if we haven't found the left speaker and the target is the last speaker, the left speaker is the first one
-//    else if (p_iTargetSpeaker == iLastSpeaker && p_piRightSpeaker == -1){
-//        p_piRightSpeaker = iFirstSpeaker;
-//        p_pfDeltaAngleToRightSpeaker = fMinAngle + (kThetaMax - fMaxAngle);
-//    }
 }
 
 
@@ -1250,9 +1235,8 @@ void SpatGrisAudioProcessor::addToOutput(float s, float **outputs, int o, int f)
 }
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-JUCE_COMPILER_WARNING("could redo everything with vectors; they are just as efficient as native arrays")
+JUCE_COMPILER_WARNING("could redo everything with vectors; they are just as efficient as native arrays. could be clearer?")
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
-	
 	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
     const int kiTotalSourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
 	const int kiTotalSpeakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
@@ -1298,9 +1282,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
-			float fCurSampleValue = allSamplesCurSource[iSampleId];   //current sample
-			float fCurSampleX = xCurSource[iSampleId];            //x position of current sample
-			float fCurSampleY = yCurSource[iSampleId];            //y position of current sample
+			float fCurSampleValue = allSamplesCurSource[iSampleId]; //current sample
+			float fCurSampleX = xCurSource[iSampleId];              //x position of current sample
+			float fCurSampleY = yCurSource[iSampleId];              //y position of current sample
 			
 			//convert xy position of sample to rt
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
@@ -1331,17 +1315,18 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
             }
             fCurSampleValue *= dbToLinear(dbSource);
-			
-			//if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
-			float t;
-			if (fCurSampleR >= kThetaLockRadius){
-				t = fCurSampleT;
-				mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
-			}
             
-            //we're right in the center of the circle
-            else {
-                float c = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
+            
+            
+            
+            //WE BASICALLY HAVE 2 SITUATIONS HERE, BUT WE NEED 3
+			float fNewTheta;
+
+            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE, WE RAMP BETWEEN PREVIOUS AND CURRENT VALUE
+            if (fCurSampleR < kThetaLockRadius) {
+                //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0
+                //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
+                float fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
                 //calculate difference between previous and current theta
 				float fPrevTheta = mLockedThetas.getUnchecked(iCurSource);
 				float fDeltaTheta = abs(fPrevTheta - fCurSampleT);
@@ -1353,20 +1338,37 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                         fPrevTheta += kHalfCircle;
                     }
                 }
-				t = c * fCurSampleT + (1 - c) * fPrevTheta;
+                //t is a ramp between previous value (fPrevTheta) and current value (c)
+				fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevTheta;
 				
-                if (t < 0) {
-                    t += kThetaMax;
-                } else if (t >= kThetaMax) {
-                    t -= kThetaMax;
+                if (fNewTheta < 0) {
+                    fNewTheta += kThetaMax;
+                } else if (fNewTheta >= kThetaMax) {
+                    fNewTheta -= kThetaMax;
                 }
 			}
-			
+            //SITUATION 2, WE'RE FAR FROM THE MIDDLE AND WE HAVE NOT JUST CROSSED IT (NOT CHECKING FOR THE LATTER0
+            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
+
+            else {
+                fNewTheta = fCurSampleT;
+                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
+            }
+
+            //SITUATION 3: WE ARE FAR FROM THE CIRCLE, BUT WE JUST CROSSED IT, SO WE SHOULD RAMP
+            
+            
+            
+            
+            
+            
+            
+			//if we're outside the main, first circle, only 2 speakers will play
 			if (fCurSampleR >= 1) {
 				// find left and right speakers
 				int left, right;
 				float dLeft, dRight;
-                findLeftAndRightSpeakers(t, p_pfParams, left, right, dLeft, dRight);
+                findLeftAndRightSpeakers(fNewTheta, p_pfParams, left, right, dLeft, dRight);
                 
 				// add to output
 				if (left >= 0 && right >= 0) {
@@ -1383,13 +1385,15 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					addToOutput(fCurSampleValue, p_ppfOutputs, o, iSampleId);
 				}
-			} else {
+			}
+            //if we're inside the main circle, 4 speakers will play
+            else {
 				// find front left, right
 				int frontLeft, frontRight;
 				float dFrontLeft, dFrontRight;
-                findLeftAndRightSpeakers(t, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
+                findLeftAndRightSpeakers(fNewTheta, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
                 
-				float bt = t + kHalfCircle;
+				float bt = fNewTheta + kHalfCircle;
 				if (bt > kThetaMax) bt -= kThetaMax;
 				
 				// find back left, right
