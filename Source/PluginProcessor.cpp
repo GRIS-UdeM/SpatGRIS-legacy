@@ -1317,45 +1317,83 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             fCurSampleValue *= dbToLinear(dbSource);
             
             
-        
+            
+//            //BACKUP CODE
+//            float fNewTheta;
+//            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE, WE RAMP BETWEEN PREVIOUS AND CURRENT VALUE
+//            if (fCurSampleR < kThetaLockRadius) {
+//                //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0
+//                //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
+//                float fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
+//                //calculate difference between previous and current theta
+//                float fPrevTheta = mLockedThetas.getUnchecked(iCurSource);
+//                float fDeltaTheta = abs(fPrevTheta - fCurSampleT);
+//                if (fDeltaTheta > kQuarterCircle) {
+//                    // assume flipped side
+//                    if (fPrevTheta > fCurSampleT) {
+//                        fPrevTheta -= kHalfCircle;
+//                    } else {
+//                        fPrevTheta += kHalfCircle;
+//                    }
+//                }
+//                //t is a ramp between previous value (fPrevTheta) and current value (c)
+//                fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevTheta;
+//                
+//                if (fNewTheta < 0) {
+//                    fNewTheta += kThetaMax;
+//                } else if (fNewTheta >= kThetaMax) {
+//                    fNewTheta -= kThetaMax;
+//                }
+//            }
+//            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
+//            else {
+//                fNewTheta = fCurSampleT;
+//                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
+//            }
+            
+            
+            
+            
+            
             //WE BASICALLY HAVE 2 SITUATIONS HERE, BUT WE NEED 3
 			float fNewTheta;
-
+            //calculate difference between previous and current theta
+            float fPrevTheta = mLockedThetas.getUnchecked(iCurSource);
+            float fDeltaTheta = abs(fPrevTheta - fCurSampleT);
+            bool bJustCrossedCenter = false;
+            if (fDeltaTheta > kQuarterCircle) {
+                bJustCrossedCenter = true;
+                // assume flipped side
+                if (fPrevTheta > fCurSampleT) {
+                    fPrevTheta -= kHalfCircle;
+                } else {
+                    fPrevTheta += kHalfCircle;
+                }
+            }
+            
             //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE, WE RAMP BETWEEN PREVIOUS AND CURRENT VALUE
-            if (fCurSampleR < kThetaLockRadius) {
+            if (bJustCrossedCenter) {
                 //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0
                 //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
                 float fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
                 //calculate difference between previous and current theta
-				float fPrevTheta = mLockedThetas.getUnchecked(iCurSource);
-				float fDeltaTheta = abs(fPrevTheta - fCurSampleT);
-				if (fDeltaTheta > kQuarterCircle) {
-					// assume flipped side
-                    if (fPrevTheta > fCurSampleT) {
-                        fPrevTheta -= kHalfCircle;
-                    } else {
-                        fPrevTheta += kHalfCircle;
-                    }
-                }
                 //t is a ramp between previous value (fPrevTheta) and current value (c)
 				fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevTheta;
-				
                 if (fNewTheta < 0) {
                     fNewTheta += kThetaMax;
                 } else if (fNewTheta >= kThetaMax) {
                     fNewTheta -= kThetaMax;
                 }
-			}
-            //SITUATION 2, WE'RE FAR FROM THE MIDDLE AND WE HAVE NOT JUST CROSSED IT (NOT CHECKING FOR THE LATTER0
-            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
-
-            else {
+			} else {
+                //SITUATION 2, WE'RE FAR FROM THE MIDDLE AND WE HAVE NOT JUST CROSSED IT (NOT CHECKING FOR THE LATTER)
                 fNewTheta = fCurSampleT;
+            }
+            
+            if (fCurSampleR >= kThetaLockRadius){
                 mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
             }
 
-            //SITUATION 3: WE ARE FAR FROM THE CIRCLE, BUT WE JUST CROSSED IT, SO WE SHOULD RAMP BETWEEN THE PREVIOUS AND CURRENT POSITION, NOT THE RANDOM NORMALIZED RAMP FROM SITUATION 1
-            //the whole logic needs to be revised. for example we need to save locked theta every time.
+            
             
             
             
