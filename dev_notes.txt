@@ -189,3 +189,10 @@ Looking into spatialization algorithm
 The thing with goddamn arrays is that you don't know their sizes. 
 * parameters **inputs and **outputs are inputs[numInputChannels][p_iTotalSamples].
 * 
+
+------------------- 2016-06-02 ---------------------
+looking into #56, the 0.0.0.0 issue. I'm now questioning what is going on here. Reason is that xcode also shows that touch osc messages are sent to 0.0.0.0, but when I put a wrong adress, ie not the ipad adress, then messages don't get to the ipad. Meaning that perhaps we are not sending on 0.0.0.0. 
+
+However, now it seems that osc spat is just not working at all. Zirkonium is not responding to messages, and my OF oscreceiver is not displaying osc messages (it does display touch osc messages).
+
+So. I need to make sure osc spat messages are sent. Turns out I had changed the ip adress. now seeing stuff.
