@@ -455,8 +455,7 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
     sendParamChangeMessageToListeners(index, newValue);
 }
 
-const String SpatGrisAudioProcessor::getParameterName (int index)
-{
+const String SpatGrisAudioProcessor::getParameterName (int index) {
    
 	if (index == kSmooth)		return "Smooth Param";
     if (index == kVolumeNear)	return "Volume Near";
@@ -468,12 +467,10 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
 	if (index == kMaxSpanVolume)return "Max span volume";
 	if (index == kRoutingVolume)return "Routing volume";
 	
-    if (index < mNumberOfSources * kParamsPerSource)
-	{
+    if (index < mNumberOfSources * kParamsPerSource) {
 		String s("Source ");
 		s << (index / kParamsPerSource + 1);
-		switch(index % kParamsPerSource)
-		{
+		switch(index % kParamsPerSource) {
 			case kSourceX:          s << " - X"; break;
 			case kSourceY:          s << " - Y"; break;
 			case kSourceD:          s << " - S"; break;
@@ -485,12 +482,10 @@ const String SpatGrisAudioProcessor::getParameterName (int index)
 	}
 	index -= mNumberOfSources * kParamsPerSource;
 	
-    if (index < mNumberOfSpeakers * kParamsPerSpeakers)
-	{
+    if (index < mNumberOfSpeakers * kParamsPerSpeakers) {
 		String s("Speaker ");
 		s << (index / kParamsPerSpeakers + 1);
-		switch(index % kParamsPerSpeakers)
-		{
+		switch(index % kParamsPerSpeakers) {
             default: return String::empty;
 		}
 		return s;
