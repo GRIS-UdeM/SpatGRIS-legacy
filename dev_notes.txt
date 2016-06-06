@@ -196,3 +196,13 @@ looking into #56, the 0.0.0.0 issue. I'm now questioning what is going on here. 
 However, now it seems that osc spat is just not working at all. Zirkonium is not responding to messages, and my OF oscreceiver is not displaying osc messages (it does display touch osc messages).
 
 So. I need to make sure osc spat messages are sent. Turns out I had changed the ip adress. now seeing stuff.
+-------------------- 2016-06-06 ------------------
+#47. 
+
+So. Here's how the algorithm should go:
+    * is delta theta more than a quarter circle
+        * yes:
+            * need to ramp between prev and next theta, using locked thetas
+        * no: 
+    
+    we need to not store mLockedThetas when r < kThetaLockRadius

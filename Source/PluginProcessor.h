@@ -771,8 +771,10 @@ private:
 	
 	bool mSmoothedParametersInited;
 	Array<float> mSmoothedParameters;
-	
+	JUCE_COMPILER_WARNING("these really should be vectors")
 	Array<float> mLockedThetas;
+    Array<float> mPrevRs;
+    Array<float> mPrevTs;
 	
 	#define kChunkSize (256)
 	struct IOBuf { float b[kChunkSize]; };
