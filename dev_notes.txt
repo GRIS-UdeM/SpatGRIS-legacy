@@ -206,3 +206,7 @@ So. Here's how the algorithm should go:
         * no: 
     
     we need to not store mLockedThetas when r < kThetaLockRadius
+
+continuing this on 2016-06-13. I created a reaper file with a crazy sharp automation on x position. I get clicks when the source oscillates over the center, but not when it oscillates over a non-center mid point. 
+
+so I did a bunch of excel plots, and my algorithm doesn't work at all! Need to find a way to make it smoother when transitioning. 

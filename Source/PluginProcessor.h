@@ -775,6 +775,9 @@ private:
 	Array<float> mLockedThetas;
     Array<float> mPrevRs;
     Array<float> mPrevTs;
+    
+    vector<float> allThetas;
+    bool bThetasPrinted = false;
 	
 	#define kChunkSize (256)
 	struct IOBuf { float b[kChunkSize]; };
