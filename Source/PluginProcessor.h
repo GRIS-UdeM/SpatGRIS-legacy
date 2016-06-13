@@ -535,12 +535,15 @@ public:
         
         //calculate xy distance from origin, and clamp it to 2 (ie ignore outside of circle)
         float hypo = hypotf(pXY.x, pXY.y);
-        if (hypo > 2){
-            hypo = 2;
+        if (hypo > kRadiusMax){
+            hypo = kRadiusMax;
         }
-        float fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
-        fElev /= (M_PI/2);                        //making range [0,1]
-        fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
+        
+//        float fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
+//        fElev /= (M_PI/2);                      //making range [0,1]
+//        fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
+        
+        float fElev = (kRadiusMax-hypo)/4;
 
         return FPoint(fAzim, fElev);
     }
