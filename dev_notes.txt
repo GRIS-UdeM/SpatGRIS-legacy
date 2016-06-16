@@ -210,3 +210,15 @@ So. Here's how the algorithm should go:
 continuing this on 2016-06-13. I created a reaper file with a crazy sharp automation on x position. I get clicks when the source oscillates over the center, but not when it oscillates over a non-center mid point. 
 
 so I did a bunch of excel plots, and my algorithm doesn't work at all! Need to find a way to make it smoother when transitioning. 
+----------------- 2016-06-15 -------------------
+Looking into future general directions. 
+Robert sent a new version of the zirkonium, alpha 12. Il n'est pas compatible avec jack, mais il est compatible avec soundflower. J'ai cloné le code de soundflower, et ça compile sur nicolai. J'ai aussi le code PD de vbap.
+
+GENERAL TO DO HERE:
+* understand vbap algorithm (read paper(s))
+	* wait for David
+* understand vbap PD code (zirkonium version or original)
+	* wait for David
+* understand what is required to have software being seen as audio cards, essentially what soundflower and jack do. 
+* understand how to deal with audio outputs, ie what zirkonium does. 
+
