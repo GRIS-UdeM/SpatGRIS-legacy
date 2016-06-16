@@ -390,10 +390,10 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(elevspan_osc);
         message.addFloat32(gain_osc);
 JUCE_COMPILER_WARNING("NOT SENDING MESSAGES BECAUSE SENDING ON 0.0.0.0")
-        if (!mOscSpatSender.send(message)) {
-            DBG("Error: could not send OSC message.");
-            return;
-        }
+//        if (!mOscSpatSender.send(message)) {
+//            DBG("Error: could not send OSC message.");
+//            return;
+//        }
     }
 }
 
@@ -1426,28 +1426,18 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 //
 //            
 //            
+//
+            
+            
+            
+            
+            //BYPASSING ALL THIS
+//            float fNewTheta = fCurSampleT;
+            
+            
+            
 //            
-//            
-//            // PRINTING THINGS
-//            if (iCurSource == 0){
-//                allThetas.push_back(fNewTheta);
-//                float sampleRate = 1 * getSampleRate();
-//                if (allThetas.size() >= sampleRate && !bThetasPrinted ){
-//                    
-//                    cout << "\n\n\n\n";
-//                    float prev = -1.f;
-//                    for (int i=0; i<allThetas.size(); ++i) {
-//                        float cur = allThetas[i];
-//                        if (cur != prev){
-//                            cout << i << ": " << cur << newLine;
-//                            prev = cur;
-//                        }
-//                        
-//                    }
-//                    bThetasPrinted = true;
-//                }
-//                
-//            }
+
             
             
             
@@ -1525,6 +1515,35 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					addToOutput(fCurSampleValue * back, p_ppfOutputs, o, iSampleId);
 				}
+                
+                
+                
+                // PRINTING THINGS
+//                if (iCurSource == 0){
+//                    allThetas.push_back(fNewTheta);
+//                    float fTotalSamples = 2
+//                    * getSampleRate(); //10000;
+//                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
+//                        
+//                        cout << "\n\n\n\n";
+//                        float prev = -1.f;
+//                        for (int i=0; i<allThetas.size(); ++i) {
+//                            float cur = allThetas[i];
+//                            if (cur != prev){
+//                                cout << i << ": " << cur << "\t" << frontLeft << "\t" << frontRight << "\t" << backLeft << "\t" << backRight << newLine;
+////                                cout << i << ": " << cur << "\t" << dFrontLeft << "\t" << dFrontRight << "\t" << dBackLeft << "\t" << dBackRight << newLine;
+//                                prev = cur;
+//                            }
+//                            
+//                        }
+//                        bThetasPrinted = true;
+//                    }
+//                    
+//                }
+                
+                
+                
+                
 			}
 		}
 	}
