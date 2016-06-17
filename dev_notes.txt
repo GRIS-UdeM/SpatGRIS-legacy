@@ -214,6 +214,7 @@ so I did a bunch of excel plots, and my algorithm doesn't work at all! Need to f
 06-16. I added Antoine's algo to my excel plot and it is weird! Je pense que son algo n'est peut-[etre pas tant pour gerer les clicks que pour empecher les delta thetas trop grands au centre du cercle. Right. Si je bypass le truc au complet, j'ai une belle progression sinusoidale. Il y a peut-etre quelque chose d'autre qui se passe directement au centre... genre avec le code qui suit?
 ------ NOW HERE ------
 J<Ai ajouté du code qui print les speakers qui jouent du son, et c'est toujours les mêmes. Les speakers et les delta speakers sont toujours les memes, donc il y a quelque chose que je ne comprends pas ici. 
+I can't debug this at home because it says I only have 2 speakers... unless I use jack? nope, doesn't work. 
 
 ----------------- 2016-06-15 -------------------
 Looking into future general directions. 
