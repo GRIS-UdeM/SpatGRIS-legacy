@@ -780,6 +780,12 @@ private:
     Array<float> mPrevTs;
     
     vector<float> allThetas;
+    vector<float> allRs;
+    vector<float> allFRs;
+    vector<float> allFLs;
+    vector<float> allBRs;
+    vector<float> allBLs;
+    
     bool bThetasPrinted = false;
 	
 	#define kChunkSize (256)

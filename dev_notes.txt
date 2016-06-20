@@ -212,9 +212,16 @@ continuing this on 2016-06-13. I created a reaper file with a crazy sharp automa
 so I did a bunch of excel plots, and my algorithm doesn't work at all! Need to find a way to make it smoother when transitioning. .
 
 06-16. I added Antoine's algo to my excel plot and it is weird! Je pense que son algo n'est peut-[etre pas tant pour gerer les clicks que pour empecher les delta thetas trop grands au centre du cercle. Right. Si je bypass le truc au complet, j'ai une belle progression sinusoidale. Il y a peut-etre quelque chose d'autre qui se passe directement au centre... genre avec le code qui suit?
------- NOW HERE ------
 J<Ai ajouté du code qui print les speakers qui jouent du son, et c'est toujours les mêmes. Les speakers et les delta speakers sont toujours les memes, donc il y a quelque chose que je ne comprends pas ici. 
 I can't debug this at home because it says I only have 2 speakers... unless I use jack? nope, doesn't work. 
+
+06-20. après avoir observé plusieurs graphes, j'en vient aux conclusions suivantes:
+* mon hypothèse était qu'une transition instantanée de l'automation allait produire une transition instantanée de theta, et donc une transition instantanée entre 4 sets de haut-parleurs différents. C'est faux
+    * Une automation instantané produit une sinusoide de theta
+    * plein de changements produisent des transitions instantanées de HP, je ne pense pas que ça soit directement le problème
+* je ne comprends pas bien ce qu'Antoine essayait de faire. Il semble y avoir une coupure pas rapport dans la transition d'Angle. 
+* je pense que le problème est peut-être qu'on a plusieurs transition rapides entre des paires de haut-parleurs quand on passe d'un coté à l'autre. Ce que je pourrais faire est de complètement bloquer theta quand on arrive au centre, et de repartir directement avec le nouveau theta quand r > threshold. 
+Idid this, and still the fucking clicks. I cannot figure out where the clicks come from! One clue is that there's no clicks if slightly off center...
 
 ----------------- 2016-06-15 -------------------
 Looking into future general directions. 

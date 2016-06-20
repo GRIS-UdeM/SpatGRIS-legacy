@@ -1351,84 +1351,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             }
 
             
-
-            
-            
-
-//			float fNewTheta;
-//            
-//            //calculate fDeltaTheta between last mLockedThetas saved and fCurSampleT
-//            float fPrevTheta = mLockedThetas.getUnchecked(iCurSource);
-//            float fDeltaTheta = abs(fPrevTheta - fCurSampleT);
-//            bool bJustCrossedCenter = false;
-//            if (fDeltaTheta > kQuarterCircle) {
-//                bJustCrossedCenter = true;
-//                // assume flipped side
-//                if (fPrevTheta > fCurSampleT) {
-//                    fPrevTheta -= kHalfCircle;
-//                } else {
-//                    fPrevTheta += kHalfCircle;
-//                }
-//            }
-//            
-//            //if we just crossed the center
-//            if (bJustCrossedCenter) {
-//                //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0
-//                //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
-//                float fProportionOfCurrentTheta;
-//                if (fCurSampleR < kThetaLockRadius){
-//                    //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE, WE RAMP BETWEEN kThetaLockRadius AND CURRENT VALUE
-//                    fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
-//                } else {
-//                    fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (mPrevRs.getUnchecked(iCurSource) - kThetaLockRampRadius)) : 0;
-//                }
-//                //calculate difference between previous and current theta
-//                //t is a ramp between previous value (fPrevTheta) and current value (c)
-//				fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevTheta;
-//                if (fNewTheta < 0) {
-//                    fNewTheta += kThetaMax;
-//                } else if (fNewTheta >= kThetaMax) {
-//                    fNewTheta -= kThetaMax;
-//                }
-//			} else {
-//                //SITUATION 2, WE'RE FAR FROM THE MIDDLE AND WE HAVE NOT JUST CROSSED IT (NOT CHECKING FOR THE LATTER)
-//                fNewTheta = fCurSampleT;
-//            }
-//            
-//            if (fCurSampleR >= kThetaLockRadius){
-//                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
-//                mPrevRs.setUnchecked(iCurSource, fCurSampleR);
-//            }
-
-    
-            
-            
-            
-            
-            
-            
-//            
-//            //MY NEW ALGORITHM
-//            float fNewTheta = fCurSampleT;
-//            float fPrevTheta = mPrevTs.getUnchecked(iCurSource);
-//            float fDeltaTheta =  fNewTheta - fPrevTheta;
-//            if (abs(fDeltaTheta) > 3*M_PI_2){
-//                const float kfMaxDeltaTheta = M_PI / 1 ;
-//                fNewTheta = (fDeltaTheta > 0) ? fPrevTheta + kfMaxDeltaTheta : fPrevTheta - kfMaxDeltaTheta;
-//                if (fNewTheta < 0) {
-//                    fNewTheta += kThetaMax;
-//                } else if (fNewTheta >= kThetaMax) {
-//                    fNewTheta -= kThetaMax;
-//                }
-//            }
-//
-//            mPrevTs.setUnchecked(iCurSource, fNewTheta);
-//
-//            
-//            
-//
-            
-            
             
             
             //BYPASSING ALL THIS
@@ -1436,7 +1358,19 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             
             
             
-//            
+//
+            
+            //FROM LOCKED TO NEW VALUE
+//            float fNewTheta;
+//            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
+//            if (fCurSampleR < .1 /*kThetaLockRadius*/) {
+//                fNewTheta = mLockedThetas.getUnchecked(iCurSource);
+//            }
+//            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
+//            else {
+//                fNewTheta = fCurSampleT;
+//                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
+//            }
 
             
             
@@ -1521,8 +1455,12 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 // PRINTING THINGS
 //                if (iCurSource == 0){
 //                    allThetas.push_back(fNewTheta);
-//                    float fTotalSamples = 2
-//                    * getSampleRate(); //10000;
+//                    allRs.push_back(fCurSampleR);
+//                    allFRs.push_back(frontRight);
+//                    allFLs.push_back(frontLeft);
+//                    allBRs.push_back(backRight);
+//                    allBLs.push_back(backLeft);
+//                    float fTotalSamples = .5 * getSampleRate(); //10000;
 //                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
 //                        
 //                        cout << "\n\n\n\n";
@@ -1530,7 +1468,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 //                        for (int i=0; i<allThetas.size(); ++i) {
 //                            float cur = allThetas[i];
 //                            if (cur != prev){
-//                                cout << i << ": " << cur << "\t" << frontLeft << "\t" << frontRight << "\t" << backLeft << "\t" << backRight << newLine;
+//                                cout << i << ": " << cur << "\t" << allFRs[i] << "\t" << allFLs[i] << "\t" << allBRs[i] << "\t" << allBLs[i] <<  "\t" << allRs[i] << newLine;
 ////                                cout << i << ": " << cur << "\t" << dFrontLeft << "\t" << dFrontRight << "\t" << dBackLeft << "\t" << dBackRight << newLine;
 //                                prev = cur;
 //                            }
