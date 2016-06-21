@@ -34,12 +34,14 @@ FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *move
 , m_pMover(mover)
 , m_iCurPathLines(0)
 , m_iMaxPathLines(10)
+, bIsDestructed(false)
 {
     m_pMover->setFieldComponent(this);
 }
 
 FieldComponent::~FieldComponent()
 {
+    bIsDestructed = true;
 }
 
 void FieldComponent::clearTrajectoryPath(){

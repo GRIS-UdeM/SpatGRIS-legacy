@@ -70,7 +70,9 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
     if (mMoverType != kSourceThread){
         mFilter->setSourceXY01(mSelectedSrc, pointXY01);
         mFilter->setOldSrcLocRT(mSelectedSrc, mFilter->convertXy012Rt(pointXY01));
-        mField->updatePositionTrace(pointXY01.x, pointXY01.y);
+        if (!mField->bIsDestructed){ //mField could be null when we're exiting while playing
+            mField->updatePositionTrace(pointXY01.x, pointXY01.y);
+        }
     }
     
     int iMovementMode = mFilter->getMovementMode();
