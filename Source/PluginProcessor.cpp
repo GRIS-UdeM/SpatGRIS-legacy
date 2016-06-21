@@ -248,24 +248,28 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
     mSpPlacementMode = 1;
     mSpSelected = 1;
+    
+    mTrState = kTrReady;
     m_iTrType = 0;
     m_iTrDirection = 0;
-
     m_iTrReturn = 0;
     m_iTrSrcSelect = -1;//0;
     m_fTrDuration = 5.f;
     m_iTrUnits = 1;     //0 = beats, 1 = seconds
     m_fTrRepeats = 1.f;
     m_fTrDampening = 0.f;
-    m_iOscSpat1stSrcId = 1;
-    m_iOscSpatPort = 18032;
-    m_sOscIpAddress = "127.0.0.1";
+    
+    
     m_fTrTurns = 1.f;
     m_fTrDeviation = 0.f;
     m_fTrEllipseWidth = .25f;
     m_fEndLocationXY01 = make_pair(.5, .5);
     m_bIsSettingEndPoint = false;
     m_bJustSelectedEndPoint = false;
+    
+    m_iOscSpat1stSrcId = 1;
+    m_iOscSpatPort = 18032;
+    m_sOscIpAddress = "127.0.0.1";
     
 	mOscLeapSource = 0;
 	mOscReceiveEnabled = 0;
@@ -296,6 +300,7 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     Trajectory::Ptr t = getTrajectory();
     if (t){
         t->stop();
+        setTrajectory(NULL);
     }
 }
 
@@ -416,7 +421,6 @@ float SpatGrisAudioProcessor::getParameter (int index) {
 }
 
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
-    
     float fOldValue = mParameters.getUnchecked(index);
     if (!areSame(fOldValue, newValue)){
         if (newValue == 0){
@@ -451,7 +455,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
 
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
-	mParameters.set(index, newValue);
+    mParameters.set(index, newValue);
     sendParamChangeMessageToListeners(index, newValue);
 }
 
@@ -1453,31 +1457,31 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 
                 
                 // PRINTING THINGS
-                if (iCurSource == 0){
-                    allThetas.push_back(fNewTheta);
-                    allRs.push_back(fCurSampleR);
-                    allFRs.push_back(frontRight);
-                    allFLs.push_back(frontLeft);
-                    allBRs.push_back(backRight);
-                    allBLs.push_back(backLeft);
-                    float fTotalSamples = .5 * getSampleRate(); //10000;
-                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
-                        
-                        cout << "\n\n\n\n";
-                        float prev = -1.f;
-                        for (int i=0; i<allThetas.size(); ++i) {
-                            float cur = allThetas[i];
-                            if (cur != prev){
-                                cout << i << ": " << cur << "\t" << allFRs[i] << "\t" << allFLs[i] << "\t" << allBRs[i] << "\t" << allBLs[i] <<  "\t" << allRs[i] << newLine;
-//                                cout << i << ": " << cur << "\t" << dFrontLeft << "\t" << dFrontRight << "\t" << dBackLeft << "\t" << dBackRight << newLine;
-                                prev = cur;
-                            }
-                            
-                        }
-                        bThetasPrinted = true;
-                    }
-                    
-                }
+//                if (iCurSource == 0){
+//                    allThetas.push_back(fNewTheta);
+//                    allRs.push_back(fCurSampleR);
+//                    allFRs.push_back(frontRight);
+//                    allFLs.push_back(frontLeft);
+//                    allBRs.push_back(backRight);
+//                    allBLs.push_back(backLeft);
+//                    float fTotalSamples = .5 * getSampleRate(); //10000;
+//                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
+//                        
+//                        cout << "\n\n\n\n";
+//                        float prev = -1.f;
+//                        for (int i=0; i<allThetas.size(); ++i) {
+//                            float cur = allThetas[i];
+//                            if (cur != prev){
+//                                cout << i << ": " << cur << "\t" << allFRs[i] << "\t" << allFLs[i] << "\t" << allBRs[i] << "\t" << allBLs[i] <<  "\t" << allRs[i] << newLine;
+////                                cout << i << ": " << cur << "\t" << dFrontLeft << "\t" << dFrontRight << "\t" << dBackLeft << "\t" << dBackRight << newLine;
+//                                prev = cur;
+//                            }
+//                            
+//                        }
+//                        bThetasPrinted = true;
+//                    }
+//                    
+//                }
                 
                 
                 
@@ -1835,7 +1839,6 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 		float output_adj[kChunkSize];
 		{
 			float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-            //asdf
 			//float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
 			
 			for (unsigned int f = 0; f < frames; f++){
@@ -1851,7 +1854,6 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 			float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
 			float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
 			float *input_d = mSmoothedParametersRamps.getReference(getParamForSourceD(i)).b;
-			//DBG("input_d = " << *input_d);
 			
 			if (i == 0)
 				for (unsigned int f = 0; f < frames; f++)
@@ -2037,7 +2039,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mSpPlacementMode", mSpPlacementMode);
     xml.setAttribute ("mSrcSelected", mSrcSelected);
     xml.setAttribute ("mSpSelected", mSpSelected);
-    xml.setAttribute ("mTrState", mTrState);
+//    xml.setAttribute ("mTrState", mTrState);
     xml.setAttribute ("m_iTrDirection", m_iTrDirection);
     xml.setAttribute ("m_iTrReturn", m_iTrReturn);
     xml.setAttribute ("m_iTrType", m_iTrType);
@@ -2067,9 +2069,11 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i) {
 		String srcX = "src" + to_string(i) + "x";
-        xml.setAttribute (srcX, mParameters[getParamForSourceX(i)]);
+        float x = mParameters[getParamForSourceX(i)];
+        xml.setAttribute (srcX, x);
         String srcY = "src" + to_string(i) + "y";
-        xml.setAttribute (srcY, mParameters[getParamForSourceY(i)]);
+        float y = mParameters[getParamForSourceY(i)];
+        xml.setAttribute (srcY, y);
         String srcD = "src" + to_string(i) + "d";
         xml.setAttribute (srcD, mParameters[getParamForSourceD(i)]);
         String srcAS = "src" + to_string(i) + "AS";
@@ -2125,7 +2129,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mSpPlacementMode    = xmlState->getIntAttribute ("mSpPlacementMode", 1);
             mSrcSelected        = xmlState->getIntAttribute ("mSrcSelected", 0);
             mSpSelected         = xmlState->getIntAttribute ("mSpSelected", 1);
-            mTrState            = xmlState->getIntAttribute ("mTrState", 0);
+//            mTrState            = xmlState->getIntAttribute ("mTrState", 0);
             m_iTrDirection      = xmlState->getIntAttribute ("m_iTrDirection", 0);
             m_iTrReturn         = xmlState->getIntAttribute ("m_iTrReturn", 0);
             m_iTrType           = xmlState->getIntAttribute ("m_iTrType", 0);
