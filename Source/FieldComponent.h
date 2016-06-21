@@ -58,7 +58,9 @@ public:
     void clearTrajectoryPath();
     void updatePositionTrace(float p_fX, float p_fY);
     
-    bool bIsDestructed;
+    bool isDestructed(){
+        return bIsDestructed;
+    }
 private:
 	SpatGrisAudioProcessor *mFilter;
 	SourceMover *m_pMover;
@@ -86,7 +88,7 @@ private:
     int m_iCurPathLines;
     int m_iMaxPathLines;
     std::deque<FPoint> m_dqAllPathPoints;
-    
+    bool bIsDestructed;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };
