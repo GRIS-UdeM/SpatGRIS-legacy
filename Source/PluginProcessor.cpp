@@ -2091,8 +2091,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     copyXmlToBinary (xml, destData);
 }
 
-void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
-{
+void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr) {
