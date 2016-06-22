@@ -30,65 +30,66 @@
 
 // ==============================================================================
 void Trajectory::start() {
+    //tell mover to start the automation, etc
     m_pMover->begin(mFilter->getSrcSelected(), kTrajectory);
+    //store initial position of sources
     for (int i = 0; i < mFilter->getNumberOfSources(); i++){
         mSourcesInitialPositionRT.add(mFilter->getSourceRT(i));
     }
-    spInit();
-	mStarted = true;
+    childInit();
+	m_bStarted = true;
 }
 
 bool Trajectory::process(float seconds, float beats) {
-	if (mStopped) return true;
-    if (!mStarted) {
-            start();
+	if (m_bStopped) return true;
+    if (!m_bStarted) {
+        start();
     }
-	if (mDone == mTotalDuration) {
-		spProcess(0, 0);
+	if (m_fTimeDone == m_fTotalDuration) {
+		childProcess(0, 0);
         stop();
-        
 		return true;
 	}
 
-	float duration = mBeats ? beats : seconds;
-	spProcess(duration, seconds);
+	float duration = m_bUseBeats ? beats : seconds;
+	childProcess(duration, seconds);
 	
-	mDone += duration;
-	if (mDone > mTotalDuration)
-		mDone = mTotalDuration;
+	m_fTimeDone += duration;
+	if (m_fTimeDone > m_fTotalDuration)
+		m_fTimeDone = m_fTotalDuration;
 	
 	return false;
 }
 
 float Trajectory::progress()
 {
-	return mDone / mTotalDuration;
+	return m_fTimeDone / m_fTotalDuration;
 }
 
 //the returned value here will change integers when we're done with one trajectory cycle. E.g., .1,.2,.3,.4,.5,.6,.7,.8,.9, 1.0 (new cycle), 1.1, 1.2 ... 2.0 (new cycle), etc
 float Trajectory::progressCycle(){
-    return mDone / mDurationSingleTraj;
+    return m_fTimeDone / m_fDurationSingleTraj;
 }
 
 void Trajectory::stop()
 {
-	if (!mStarted || mStopped) return;
+	if (!m_bStarted || m_bStopped) return;
     m_pMover->end(kTrajectory);
-	mStopped = true;
+	m_bStopped = true;
 }
 
 Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
     :mFilter(filter)
     ,m_pMover(p_pMover)
-	,mStarted(false)
-	,mStopped(false)
-	,mDone(0)
-	,mDurationSingleTraj(duration)
-	,mBeats(beats)
+	,m_bStarted(false)
+	,m_bStopped(false)
+	,m_fTimeDone(0)
+	,m_fDurationSingleTraj(duration)
+	,m_bUseBeats(beats)
 {
-	if (mDurationSingleTraj < 0.0001) mDurationSingleTraj = 0.0001;
+	if (m_fDurationSingleTraj < 0.0001) m_fDurationSingleTraj = 0.0001;
 	if (times < 0.0001) times = 0.0001;
-	mTotalDuration = mDurationSingleTraj * times;
+	m_fTotalDuration = m_fDurationSingleTraj * times;
 }
 
 //using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
@@ -200,9 +201,9 @@ public:
     {}
     
 protected:
-    void spProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds) {
         float integralPart;
-        float da = m_fTurns * mDone / mDurationSingleTraj;
+        float da = m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
         da = modf(da/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
         if (!mCCW) da = -da;
     
@@ -228,7 +229,7 @@ public:
     { }
 
 protected:
-    void spInit() {
+    void childInit() {
         FPoint startPoint = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
         //if start ray is bigger than end ray, we are going in. Otherwise we're not
         m_fEndPointRt = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
@@ -238,14 +239,14 @@ protected:
             mIn = false;
         }
     }
-    void spProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds) {
         float da, integralPart;
-        float fTranslationFactor = modf(mDone / mDurationSingleTraj, &integralPart);
+        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);
         
-        if (mDone < mTotalDuration){
+        if (m_fTimeDone < m_fTotalDuration){
             //in return spiral, delta angle goes twice as fast
             int iMultiple = (mRT ? 2 : 1);
-            da = iMultiple * fmodf(mDone / mDurationSingleTraj * M_PI, M_PI);
+            da = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
             if (mRT && da >= M_PI){
                 //reverse direction when we reach halfway in return spiral
                 fTranslationFactor = 1-fTranslationFactor;
@@ -300,7 +301,7 @@ public:
     }
 
 protected:
-    void spInit() {
+    void childInit() {
         int src = mFilter->getSrcSelected();
         FPoint pointXY = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         m_fStartPair.first  = pointXY.x;
@@ -317,14 +318,14 @@ protected:
         }
         m_fInitialLength = m_fEndPair.first - m_fStartPair.first;
     }
-    void spProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds) {
 
         int iReturn = m_bRT ? 2:1;
 
         //pendulum part
         float newX01, newY01, temp;
-        float fCurrentProgress = modf((mDone / mDurationSingleTraj), &temp);    //currentProgress goes 0->1 for every cycle
-        float fCurDampening = m_fTotalDampening * mDone / mTotalDuration;       //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
+        float fCurrentProgress = modf((m_fTimeDone / m_fDurationSingleTraj), &temp);    //currentProgress goes 0->1 for every cycle
+        float fCurDampening = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;       //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
 
         if (m_bYisDependent){
             float fCurStartX01  = m_fStartPair.first + fCurDampening * m_fInitialLength /2;
@@ -343,7 +344,7 @@ protected:
 
         //circle/deviation part
         float deviationAngle, integralPart;
-        deviationAngle = mDone / mTotalDuration;
+        deviationAngle = m_fTimeDone / m_fTotalDuration;
         deviationAngle = modf(deviationAngle, &integralPart);
         if (!mCCW) {
             deviationAngle = - deviationAngle;
@@ -377,13 +378,13 @@ public:
     {}
 	
 protected:
-	void spProcess(float duration, float seconds)
+	void childProcess(float duration, float seconds)
 	{
         
         //for Antoine, a = angle and r = ray
         
         float integralPart;
-        float da = m_fTurns * mDone / mDurationSingleTraj;
+        float da = m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
         da = modf(da/m_fTurns, & integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
 
         if (!mCCW) da = -da;
@@ -467,10 +468,10 @@ public:
     {}
 	
 protected:
-    void spProcess(float duration, float seconds){
+    void childProcess(float duration, float seconds){
         if (mFilter->getIndependentMode()){
             for (int iCurSrc = 0; iCurSrc < mFilter->getNumberOfSources(); ++iCurSrc){
-                if (fmodf(mDone, mDurationSingleTraj) < 0.01){
+                if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                     mFilter->restoreCurrentLocations(iCurSrc);
                 }
                 mClock += seconds;
@@ -493,7 +494,7 @@ protected:
                 } 
             }
         } else {
-            if (fmodf(mDone, mDurationSingleTraj) < 0.01){
+            if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                 mFilter->restoreCurrentLocations(mFilter->getSrcSelected());
             }
             mClock += seconds;
@@ -537,11 +538,11 @@ protected:
 	virtual FPoint destinationForSource(int s, FPoint o) = 0;
     virtual void resetIfRandomTarget(){};
 
-	void spProcess(float duration, float seconds) {
+	void childProcess(float duration, float seconds) {
 
         bool bWriteAutomationForAllSources = mFilter->getIndependentMode();
         
-        float p = mDone / mDurationSingleTraj;
+        float p = m_fTimeDone / m_fDurationSingleTraj;
         int iSelectedSrc = mFilter->getSrcSelected();
 		int cycle = (int)p;
     
@@ -582,7 +583,7 @@ protected:
             }
         }
         //this should only be done the last time this function is called for a given trajectory
-        if (abs(mDone - mTotalDuration) < 0.01){
+        if (abs(m_fTimeDone - m_fTotalDuration) < 0.01){
             mFilter->restoreCurrentLocations();
         }
 

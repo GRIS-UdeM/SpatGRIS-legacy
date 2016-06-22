@@ -69,8 +69,8 @@ public:
 	void stop();
 	
 protected:
-	virtual void spProcess(float duration, float seconds) = 0;
-    virtual void spInit() {}
+	virtual void childProcess(float duration, float seconds) = 0;
+    virtual void childInit() {}
     Array<Point<float>> mSourcesInitialPositionRT;
 	
 private:
@@ -80,11 +80,11 @@ protected:
 	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);
 	SpatGrisAudioProcessor *mFilter;
     SourceMover *m_pMover;
-	bool mStarted, mStopped;
-	float mDone;
-	float mDurationSingleTraj;
-	float mTotalDuration;
-	bool mBeats;
+	bool m_bStarted, m_bStopped;
+	float m_fTimeDone;
+	float m_fDurationSingleTraj;
+	float m_fTotalDuration;
+	bool m_bUseBeats;
 };
 
 #endif  // TRAJECTORIES_H_INCLUDED

@@ -2039,7 +2039,6 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mSpPlacementMode", mSpPlacementMode);
     xml.setAttribute ("mSrcSelected", mSrcSelected);
     xml.setAttribute ("mSpSelected", mSpSelected);
-//    xml.setAttribute ("mTrState", mTrState);
     xml.setAttribute ("m_iTrDirection", m_iTrDirection);
     xml.setAttribute ("m_iTrReturn", m_iTrReturn);
     xml.setAttribute ("m_iTrType", m_iTrType);
@@ -2129,7 +2128,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mSpPlacementMode    = xmlState->getIntAttribute ("mSpPlacementMode", 1);
             mSrcSelected        = xmlState->getIntAttribute ("mSrcSelected", 0);
             mSpSelected         = xmlState->getIntAttribute ("mSpSelected", 1);
-//            mTrState            = xmlState->getIntAttribute ("mTrState", 0);
             m_iTrDirection      = xmlState->getIntAttribute ("m_iTrDirection", 0);
             m_iTrReturn         = xmlState->getIntAttribute ("m_iTrReturn", 0);
             m_iTrType           = xmlState->getIntAttribute ("m_iTrType", 0);
