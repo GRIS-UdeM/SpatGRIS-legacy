@@ -46,7 +46,7 @@ bool Trajectory::process(float seconds, float beats) {
         start();
     }
 	if (m_fTimeDone == m_fTotalDuration) {
-		childProcess(0, 0);
+//		childProcess(0, 0);
         stop();
 		return true;
 	}
