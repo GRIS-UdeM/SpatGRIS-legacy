@@ -257,8 +257,18 @@ protected:
         
         //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle or the outside of the circle
         float fCurT = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
-        float fDeltaR = (cos(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI)
         float fStartR = mStartPointRt.x;
+        
+        
+        //COSINE DELTA R
+        float fDeltaR = (cos(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI)
+        
+        //LINEAR DELTA R, doesn't seem to make much of a difference
+//        float fDeltaR = (M_PI - fDeltaTheta) / M_PI;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI)
+
+        
+        
+        
         float fCurR;
         if (m_bGoingIn) {
             //fCurR simply goes [fStartR, 0] following a cosine curve
@@ -267,9 +277,14 @@ protected:
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
         }
+        
+        
+        
+        
+        
         FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
         
-        //do linear translation to end point
+        //do linear XY translation to end point
         if (m_bGoingIn){
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
