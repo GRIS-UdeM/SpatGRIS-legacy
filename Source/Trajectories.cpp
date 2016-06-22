@@ -236,7 +236,7 @@ protected:
         m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
     }
     void childProcess(float duration, float seconds) {
-        //figure out delta theta
+        //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         float fDeltaTheta, integralPart;
         float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
         if (m_fTimeDone < m_fTotalDuration){
@@ -248,20 +248,28 @@ protected:
                 fTranslationFactor = 1-fTranslationFactor;
             }
         } else {
-            JUCE_COMPILER_WARNING("what??")
+            JUCE_COMPILER_WARNING("what?? this is assuming that @ end point, theta = startTheta + 2*pi, which is not necessarily true")
             fDeltaTheta = M_PI; //only done at the very end of the trajectory
         }
         if (!m_bCCW){
             fDeltaTheta = -fDeltaTheta;
         }
         
-        //
-        float l = (cos(fDeltaTheta)+1) * 0.5;
-        float r = m_bGoingIn ? (mStartPointRt.x * l) : (mStartPointRt.x + (2 - mStartPointRt.x) * (1 - l)); 
-        float t = mStartPointRt.y + m_fTurns * 2 * fDeltaTheta;
+        //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle or the outside of the circle
+        float fCurT = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
+        float fDeltaR = (cos(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI)
+        float fStartR = mStartPointRt.x;
+        float fCurR;
+        if (m_bGoingIn) {
+            //fCurR simply goes [fStartR, 0] following a cosine curve
+            fCurR = fStartR * fDeltaR;
+        } else {
+            //fCurR goes from fStartR to kRadiusMax following a cosine curve
+            fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
+        }
+        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
         
-        //convert rt to xy and do translation
-        FPoint curPointXY01 = mFilter->convertRt2Xy01(r, t);
+        //do linear translation to end point
         if (m_bGoingIn){
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
