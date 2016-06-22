@@ -239,17 +239,12 @@ protected:
         //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         float fDeltaTheta, integralPart;
         float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
-        if (m_fTimeDone < m_fTotalDuration){
-            //in return spiral, delta angle goes twice as fast
-            int iMultiple = (m_bReturn ? 2 : 1);
-            fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
-            if (m_bReturn && fDeltaTheta >= M_PI){
-                //reverse direction when we reach halfway in return spiral
-                fTranslationFactor = 1-fTranslationFactor;
-            }
-        } else {
-            JUCE_COMPILER_WARNING("what?? this is assuming that @ end point, theta = startTheta + 2*pi, which is not necessarily true")
-            fDeltaTheta = M_PI; //only done at the very end of the trajectory
+        //in return spiral, delta angle goes twice as fast
+        int iMultiple = (m_bReturn ? 2 : 1);
+        fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
+        if (m_bReturn && fDeltaTheta >= M_PI){
+            //reverse direction when we reach halfway in return spiral
+            fTranslationFactor = 1-fTranslationFactor;
         }
         if (!m_bCCW){
             fDeltaTheta = -fDeltaTheta;
