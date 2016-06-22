@@ -222,8 +222,8 @@ class SpiralTrajectory : public Trajectory {
 public:
     SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
     : Trajectory(filter, p_pMover, duration, beats, times)
-    , mCCW(ccw)
-    , mRT(rt)
+    , m_bCCW(ccw)
+    , m_bReturn(rt)
     , m_fTurns(p_fTurns)
     , m_fEndPairXY01(endPair)
     { }
@@ -231,41 +231,38 @@ public:
 protected:
     void childInit() {
         mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
-        //if start ray is bigger than end ray, we are going in. Otherwise we're not
-        mEndPointRt = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
-        if (mStartPointRt.x > mEndPointRt.x){
-            mIn = true;
-        } else {
-            mIn = false;
-        }
+        mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
+        //if start ray is bigger than end ray, we are going in
+        m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
     }
     void childProcess(float duration, float seconds) {
-        float da, integralPart;
-        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);
-        
+        //figure out delta theta
+        float fDeltaTheta, integralPart;
+        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
         if (m_fTimeDone < m_fTotalDuration){
             //in return spiral, delta angle goes twice as fast
-            int iMultiple = (mRT ? 2 : 1);
-            da = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
-            if (mRT && da >= M_PI){
+            int iMultiple = (m_bReturn ? 2 : 1);
+            fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
+            if (m_bReturn && fDeltaTheta >= M_PI){
                 //reverse direction when we reach halfway in return spiral
                 fTranslationFactor = 1-fTranslationFactor;
             }
         } else {
-            da = M_PI; //only done at the very end of the trajectory
+            JUCE_COMPILER_WARNING("what??")
+            fDeltaTheta = M_PI; //only done at the very end of the trajectory
+        }
+        if (!m_bCCW){
+            fDeltaTheta = -fDeltaTheta;
         }
         
-        if (!mCCW){
-            da = -da;
-        }
-        
-        float l = (cos(da)+1) * 0.5;
-        float r = mIn ? (mStartPointRt.x * l) : (mStartPointRt.x + (2 - mStartPointRt.x) * (1 - l)); //(initialPoint.x * (1-l));
-        float t = mStartPointRt.y + m_fTurns * 2 * da;
+        //
+        float l = (cos(fDeltaTheta)+1) * 0.5;
+        float r = m_bGoingIn ? (mStartPointRt.x * l) : (mStartPointRt.x + (2 - mStartPointRt.x) * (1 - l)); 
+        float t = mStartPointRt.y + m_fTurns * 2 * fDeltaTheta;
         
         //convert rt to xy and do translation
         FPoint curPointXY01 = mFilter->convertRt2Xy01(r, t);
-        if (mIn){
+        if (m_bGoingIn){
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
         } else {
@@ -277,7 +274,7 @@ protected:
     }
     
 private:
-    bool mCCW, mIn, mRT;
+    bool m_bCCW, m_bGoingIn, m_bReturn;
     float m_fTurns;
     std::pair<float, float> m_fEndPairXY01;
     FPoint mStartPointRt, mEndPointRt;
