@@ -220,6 +220,7 @@ private:
 // ==============================================================================
 class SpiralTrajectory : public Trajectory {
 public:
+    JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
     SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
     : Trajectory(filter, p_pMover, duration, beats, times)
     , m_bCCW(ccw)
@@ -245,9 +246,9 @@ protected:
         }
         
         //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle or the outside of the circle
-        float fCurT = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
+        float fCurT   = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
         float fStartR = mStartPointRt.x;
-        float fDeltaR = (cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
+        float fDeltaR = (M_PI - fDeltaTheta) / M_PI;//(cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
         float fCurR;
         if (m_bGoingIn) {
             //fCurR simply goes [fStartR, 0] following a cosine curve
@@ -256,9 +257,10 @@ protected:
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
         }
-        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
-        cout << fCurR << "\t" << fCurT << newLine;
         
+        
+        //CARTESIAN TRANSLATION
+        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
         //do linear XY translation to end point
         float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
         if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
@@ -266,13 +268,31 @@ protected:
             fTranslationFactor = 1-fTranslationFactor;
         }
         if (m_bGoingIn){
-            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
+            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first -.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
         } else {
-            FPoint untranslatedEndOutPointXY = mFilter->convertRt2Xy01(2, mStartPointRt.y);
-            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first - untranslatedEndOutPointXY.x);
-            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second- untranslatedEndOutPointXY.y);
+            //here, fTranslationFactor grows linearly, the rest is constants
+            FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(kRadiusMax, mStartPointRt.y);
+            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first  - untranslatedEndOutPointXY01.x);
+            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second - untranslatedEndOutPointXY01.y);
         }
+
+        
+        //POLAR TRANSLATION
+//        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
+//        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
+//            //reverse direction when we reach halfway in return spiral
+//            fTranslationFactor = 1-fTranslationFactor;
+//        }
+//        
+//        FPoint untranslatedEndPointRt = FPoint(kRadiusMax, mStartPointRt.y);
+//        FPoint actualEndPointRt       = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second), false);
+//        fCurR += fTranslationFactor * (untranslatedEndPointRt.x - actualEndPointRt.x);
+//        fCurT += fTranslationFactor * (untranslatedEndPointRt.y - actualEndPointRt.y);
+//        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
+
+        
+        
         m_pMover->move(curPointXY01, kTrajectory);
     }
     
