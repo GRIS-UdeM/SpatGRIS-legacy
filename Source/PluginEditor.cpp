@@ -1146,7 +1146,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
         mTrSeparateAutomationMode->setVisible(false);
     }
     
-    unique_ptr<vector<String>> allDirections = Trajectory::getTrajectoryPossibleDirections(iSelectedTrajectory);
+    unique_ptr<vector<String>> allDirections = Trajectory::getAllPossibleDirections(iSelectedTrajectory);
     if (allDirections != nullptr){
         mTrDirectionComboBox->clear();
         for(auto it = allDirections->begin(); it != allDirections->end(); ++it){
@@ -1166,7 +1166,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
         mTrDirectionComboBox->setVisible(false);
     }
     
-    unique_ptr<vector<String>> allReturns = Trajectory::getTrajectoryPossibleReturns(iSelectedTrajectory);
+    unique_ptr<vector<String>> allReturns = Trajectory::getAllPossibleReturns(iSelectedTrajectory);
     if (allReturns != nullptr){
         mTrReturnComboBox->clear();
         for(auto it = allReturns->begin(); it != allReturns->end(); ++it){
@@ -1618,7 +1618,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             float   p_fDeviation    = mTrDeviationTextEditor->getText().getFloatValue()/360;
             float   p_fHalfWidth    = mTrEllipseWidthTextEditor->getText().getFloatValue();
             float   p_fTurns        = mTrTurnsTextEditor->getText().getFloatValue();
-            unique_ptr<AllTrajectoryDirections> direction = Trajectory::getTrajectoryDirection(type, mTrDirectionComboBox->getSelectedId());
+            unique_ptr<AllTrajectoryDirections> direction = Trajectory::getCurDirection(type, mTrDirectionComboBox->getSelectedId());
 
             mFilter->setIsRecordingAutomation(true);
             mFilter->storeCurrentLocations();

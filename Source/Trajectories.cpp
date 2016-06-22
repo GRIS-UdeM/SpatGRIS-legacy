@@ -40,13 +40,13 @@ void Trajectory::start() {
 	m_bStarted = true;
 }
 
+//return true if the trajectory is finished, false otherwise
 bool Trajectory::process(float seconds, float beats) {
 	if (m_bStopped) return true;
     if (!m_bStarted) {
         start();
     }
 	if (m_fTimeDone == m_fTotalDuration) {
-//		childProcess(0, 0);
         stop();
 		return true;
 	}
@@ -55,14 +55,13 @@ bool Trajectory::process(float seconds, float beats) {
 	childProcess(duration, seconds);
 	
 	m_fTimeDone += duration;
-	if (m_fTimeDone > m_fTotalDuration)
+    if (m_fTimeDone > m_fTotalDuration){
 		m_fTimeDone = m_fTotalDuration;
-	
+    }
 	return false;
 }
 
-float Trajectory::progress()
-{
+float Trajectory::progress() {
 	return m_fTimeDone / m_fTotalDuration;
 }
 
@@ -71,8 +70,7 @@ float Trajectory::progressCycle(){
     return m_fTimeDone / m_fDurationSingleTraj;
 }
 
-void Trajectory::stop()
-{
+void Trajectory::stop() {
 	if (!m_bStarted || m_bStopped) return;
     m_pMover->end(kTrajectory);
 	m_bStopped = true;
@@ -93,7 +91,7 @@ Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, fl
 }
 
 //using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
-std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleDirections(int p_iTrajectory){
+std::unique_ptr<vector<String>> Trajectory::getAllPossibleDirections(int p_iTrajectory){
     unique_ptr<vector<String>> vDirections (new vector<String>);
     
     switch(p_iTrajectory) {
@@ -128,7 +126,7 @@ std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleDirections(int 
     return vDirections;
 }
 
-unique_ptr<AllTrajectoryDirections> Trajectory::getTrajectoryDirection(int p_iSelectedTrajectory, int p_iSelectedDirection){
+unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedTrajectory, int p_iSelectedDirection){
     
     unique_ptr<AllTrajectoryDirections> pDirection (new AllTrajectoryDirections);
     
@@ -160,7 +158,7 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getTrajectoryDirection(int p_iSe
     return pDirection;
 }
 
-std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleReturns(int p_iTrajectory){
+std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTrajectory){
     
     unique_ptr<vector<String>> vReturns (new vector<String>);
     
@@ -191,8 +189,7 @@ std::unique_ptr<vector<String>> Trajectory::getTrajectoryPossibleReturns(int p_i
 
 
 // ==============================================================================
-class CircleTrajectory : public Trajectory
-{
+class CircleTrajectory : public Trajectory {
 public:
     CircleTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
     : Trajectory(filter, p_pMover, duration, beats, times)
@@ -202,13 +199,17 @@ public:
     
 protected:
     void childProcess(float duration, float seconds) {
+        //figure delta theta
         float integralPart;
-        float da = m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
-        da = modf(da/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
-        if (!mCCW) da = -da;
+        float fDeltaTheta = m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
+        fDeltaTheta = modf(fDeltaTheta/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
+        if (!mCCW) fDeltaTheta = -fDeltaTheta;
+        fDeltaTheta = fDeltaTheta * 2 * M_PI;
     
-        FPoint p = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
-        m_pMover->move(mFilter->convertRt2Xy01(p.x, p.y+da*2*M_PI), kTrajectory);
+        //move to initial position + delta theta
+        FPoint startPointRT  = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+        FPoint newPointXY01  = mFilter->convertRt2Xy01(startPointRT.x, startPointRT.y+fDeltaTheta);
+        m_pMover->move(newPointXY01, kTrajectory);
     }
 	
 private:
@@ -217,8 +218,7 @@ private:
 };
 
 // ==============================================================================
-class SpiralTrajectory : public Trajectory
-{
+class SpiralTrajectory : public Trajectory {
 public:
     SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
     : Trajectory(filter, p_pMover, duration, beats, times)
@@ -230,10 +230,10 @@ public:
 
 protected:
     void childInit() {
-        FPoint startPoint = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
         //if start ray is bigger than end ray, we are going in. Otherwise we're not
-        m_fEndPointRt = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
-        if (startPoint.x > m_fEndPointRt.x){
+        mEndPointRt = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
+        if (mStartPointRt.x > mEndPointRt.x){
             mIn = true;
         } else {
             mIn = false;
@@ -259,12 +259,9 @@ protected:
             da = -da;
         }
         
-        FPoint initialPointRT = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
         float l = (cos(da)+1) * 0.5;
-        
-        float r = mIn ? (initialPointRT.x * l) : (initialPointRT.x + (2 - initialPointRT.x) * (1 - l)); //(initialPoint.x * (1-l));
-        
-        float t = initialPointRT.y + m_fTurns * 2 * da;
+        float r = mIn ? (mStartPointRt.x * l) : (mStartPointRt.x + (2 - mStartPointRt.x) * (1 - l)); //(initialPoint.x * (1-l));
+        float t = mStartPointRt.y + m_fTurns * 2 * da;
         
         //convert rt to xy and do translation
         FPoint curPointXY01 = mFilter->convertRt2Xy01(r, t);
@@ -272,7 +269,7 @@ protected:
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
         } else {
-            FPoint untranslatedEndOutPointXY = mFilter->convertRt2Xy01(2, initialPointRT.y);
+            FPoint untranslatedEndOutPointXY = mFilter->convertRt2Xy01(2, mStartPointRt.y);
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first - untranslatedEndOutPointXY.x);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second- untranslatedEndOutPointXY.y);
         }
@@ -283,7 +280,7 @@ private:
     bool mCCW, mIn, mRT;
     float m_fTurns;
     std::pair<float, float> m_fEndPairXY01;
-    FPoint m_fEndPointRt;
+    FPoint mStartPointRt, mEndPointRt;
 };
 
 // ================================================================================================
