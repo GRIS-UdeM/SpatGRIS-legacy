@@ -1537,7 +1537,6 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
     }
-
     else if (&textEditor == mOscSpat1stSrcIdTextEditor){
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
         if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
@@ -1554,7 +1553,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
     }
-    if (&textEditor == m_pTrEndRayTextEditor || &textEditor == m_pTrEndAngleTextEditor){
+    else if (&textEditor == m_pTrEndRayTextEditor || &textEditor == m_pTrEndAngleTextEditor){
         if (mTrEndPointButton->getToggleState()){
             return;
         }

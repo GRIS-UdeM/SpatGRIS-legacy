@@ -238,14 +238,8 @@ protected:
     void childProcess(float duration, float seconds) {
         //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         float fDeltaTheta, integralPart;
-        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
-        //in return spiral, delta angle goes twice as fast
-        int iMultiple = (m_bReturn ? 2 : 1);
+        int iMultiple = (m_bReturn ? 2 : 1);    //in return spiral, delta angle goes twice as fast
         fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
-        if (m_bReturn && fDeltaTheta >= M_PI){
-            //reverse direction when we reach halfway in return spiral
-            fTranslationFactor = 1-fTranslationFactor;
-        }
         if (!m_bCCW){
             fDeltaTheta = -fDeltaTheta;
         }
@@ -253,17 +247,7 @@ protected:
         //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle or the outside of the circle
         float fCurT = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
         float fStartR = mStartPointRt.x;
-        
-        
-        //COSINE DELTA R
-        float fDeltaR = (cos(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI)
-        
-        //LINEAR DELTA R, doesn't seem to make much of a difference
-//        float fDeltaR = (M_PI - fDeltaTheta) / M_PI;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI)
-
-        
-        
-        
+        float fDeltaR = (cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
         float fCurR;
         if (m_bGoingIn) {
             //fCurR simply goes [fStartR, 0] following a cosine curve
@@ -272,14 +256,15 @@ protected:
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
         }
-        
-        
-        
-        
-        
         FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
+        cout << fCurR << "\t" << fCurT << newLine;
         
         //do linear XY translation to end point
+        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
+        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
+            //reverse direction when we reach halfway in return spiral
+            fTranslationFactor = 1-fTranslationFactor;
+        }
         if (m_bGoingIn){
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first-.5);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
