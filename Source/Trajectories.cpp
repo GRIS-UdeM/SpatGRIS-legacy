@@ -304,34 +304,34 @@ private:
 class PendulumTrajectory : public Trajectory
 {
 public:
-    PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const std::pair<float, float> &endPoint)
+    PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const std::pair<float, float> &endPair)
     :Trajectory(filter, p_pMover, duration, beats, times)
     , mCCW(ccw)
     , m_bRT(rt)
     , m_fDeviation(fDeviation)
     , m_fTotalDampening(p_fDampening)
     {
-        m_fEndPair = make_pair(endPoint.first, 1-endPoint.second);
+        m_fEndPointXy01 = FPoint(endPair.first, 1-endPair.second);
     }
 
 protected:
     void childInit() {
         //get start point
         int src = mFilter->getSrcSelected();
-        FPoint pointXY = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
-        m_fStartPair.first  = pointXY.x;
-        m_fStartPair.second = pointXY.y;
+        m_fStartPointXy01 = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         //calculate slope and offset
-        if (!areSame(m_fEndPair.first, m_fStartPair.first)){
+        if (!areSame(m_fEndPointXy01.x, m_fStartPointXy01.x)){
             m_bYisDependent = true;
-            m_fM = (m_fEndPair.second - m_fStartPair.second) / (m_fEndPair.first - m_fStartPair.first);
-            m_fB = m_fStartPair.second - m_fM * m_fStartPair.first;
+            m_fM = (m_fEndPointXy01.y - m_fStartPointXy01.y) / (m_fEndPointXy01.x - m_fStartPointXy01.x);
+            m_fB = m_fStartPointXy01.y - m_fM * m_fStartPointXy01.x;
+            m_fInitialLength = m_fEndPointXy01.x - m_fStartPointXy01.x;
         } else {
             m_bYisDependent = false;
             m_fM = 0;
-            m_fB = m_fStartPair.first;
+            m_fB = m_fStartPointXy01.x;
+            m_fInitialLength = m_fEndPointXy01.y - m_fStartPointXy01.y;
         }
-        m_fInitialLength = m_fEndPair.first - m_fStartPair.first;
+        
     }
     void childProcess(float duration, float seconds) {
 
@@ -343,16 +343,16 @@ protected:
         float fCurDampening = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;       //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
 
         if (m_bYisDependent){
-            float fCurStartX01  = m_fStartPair.first + fCurDampening * m_fInitialLength /2;
+            float fCurStartX01  = m_fStartPointXy01.x + fCurDampening * m_fInitialLength /2;
             float fCurLength    = m_fInitialLength - fCurDampening * m_fInitialLength;
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             newX01 = fCurStartX01 + fCurrentProgress;
             newY01 = m_fM * newX01 + m_fB;
 
         } else {
-            fCurrentProgress = (m_fEndPair.second - m_fStartPair.second) * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
-            newX01 = m_fStartPair.first;
-            newY01 = m_fStartPair.second + fCurrentProgress;
+            fCurrentProgress = (m_fEndPointXy01.y - m_fStartPointXy01.y) * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
+            newX01 = m_fStartPointXy01.x;
+            newY01 = m_fStartPointXy01.y + fCurrentProgress;
         }
         
         FPoint pointRT = mFilter->convertXy012Rt(FPoint(newX01, newY01), false);
@@ -372,8 +372,8 @@ protected:
     }
 private:
     bool mCCW, m_bRT, m_bYisDependent;
-    std::pair<float, float> m_fStartPair;
-    std::pair<float, float> m_fEndPair;
+    FPoint m_fStartPointXy01;
+    FPoint m_fEndPointXy01;
     float m_fM;
     float m_fB;
     float m_fDeviation;
