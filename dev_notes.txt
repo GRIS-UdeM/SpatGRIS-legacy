@@ -235,3 +235,20 @@ GENERAL TO DO HERE:
 * understand what is required to have software being seen as audio cards, essentially what soundflower and jack do. 
 * understand how to deal with audio outputs, ie what zirkonium does. 
 
+----------------- 2016-06-24 ------------------
+Trajectories. So I cleaned the trajectories that represent shapes, which are: 
+* circle
+* ellipse
+* spiral
+* pendulum
+and not those
+* random
+* random target
+* sym X and sym Y target
+* closest speaker target
+
+But in fact, the only two that don't make sense to accelerate are the randoms:
+* random
+* random target
+
+

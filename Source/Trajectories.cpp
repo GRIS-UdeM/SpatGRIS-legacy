@@ -498,6 +498,7 @@ protected:
                 } 
             }
         } else {
+            //reset position at every new cycle
             if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                 mFilter->restoreCurrentLocations(mFilter->getSrcSelected());
             }
@@ -586,11 +587,6 @@ protected:
                 }
             }
         }
-        //this should only be done the last time this function is called for a given trajectory
-        if (abs(m_fTimeDone - m_fTotalDuration) < 0.01){
-            mFilter->restoreCurrentLocations();
-        }
-
 	}
 private:
 	Array<FPoint> mSourcesOrigins;
