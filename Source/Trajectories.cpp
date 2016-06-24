@@ -319,7 +319,7 @@ protected:
         //get start point
         int src = mFilter->getSrcSelected();
         m_fStartPointXy01 = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
-        //calculate slope and offset
+        //calculate slope, offset and initial length, which represents only the length over the dependent variable
         if (!areSame(m_fEndPointXy01.x, m_fStartPointXy01.x)){
             m_bYisDependent = true;
             m_fM = (m_fEndPointXy01.y - m_fStartPointXy01.y) / (m_fEndPointXy01.x - m_fStartPointXy01.x);
@@ -331,43 +331,40 @@ protected:
             m_fB = m_fStartPointXy01.x;
             m_fInitialLength = m_fEndPointXy01.y - m_fStartPointXy01.y;
         }
-        
     }
     void childProcess(float duration, float seconds) {
-
+        float fCurX01, fCurY01, integralPart;
         int iReturn = m_bRT ? 2:1;
-
-        //pendulum part
-        float newX01, newY01, temp;
-        float fCurrentProgress = modf((m_fTimeDone / m_fDurationSingleTraj), &temp);    //currentProgress goes 0->1 for every cycle
-        float fCurDampening = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;       //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
-
+        //calculate current progress and dampening
+        float fCurrentProgress  = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
+        float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
+        //if y is dependent, use slope equation, otherwise just go vertically. All calculations in cartesian coordinates.
         if (m_bYisDependent){
+            //as we dampen, we move the start point and shorten the length
             float fCurStartX01  = m_fStartPointXy01.x + fCurDampening * m_fInitialLength /2;
-            float fCurLength    = m_fInitialLength - fCurDampening * m_fInitialLength;
+            float fCurLength    = m_fInitialLength    - fCurDampening * m_fInitialLength;
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
-            newX01 = fCurStartX01 + fCurrentProgress;
-            newY01 = m_fM * newX01 + m_fB;
-
+            //use new start point and lenght to calculate current coordinates
+            fCurX01 = fCurStartX01 + fCurrentProgress;
+            fCurY01 = m_fM * fCurX01 + m_fB;
         } else {
-            fCurrentProgress = (m_fEndPointXy01.y - m_fStartPointXy01.y) * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
-            newX01 = m_fStartPointXy01.x;
-            newY01 = m_fStartPointXy01.y + fCurrentProgress;
+            //as we dampen, we move the start point and shorten the length
+            float fCurStartY01  = m_fStartPointXy01.y + fCurDampening * m_fInitialLength /2;
+            float fCurLength    = m_fInitialLength    - fCurDampening * m_fInitialLength;
+            fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
+            //use new start point and lenght to calculate current coordinates
+            fCurX01 = m_fStartPointXy01.x;
+            fCurY01 = fCurStartY01 + fCurrentProgress;
         }
         
-        FPoint pointRT = mFilter->convertXy012Rt(FPoint(newX01, newY01), false);
-
-        //circle/deviation part
-        float deviationAngle, integralPart;
-        deviationAngle = m_fTimeDone / m_fTotalDuration;
-        deviationAngle = modf(deviationAngle, &integralPart);
+        //convert to RT to implement angular deviation
+        FPoint pointRT = mFilter->convertXy012Rt(FPoint(fCurX01, fCurY01), false);
+        float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
         if (!mCCW) {
             deviationAngle = - deviationAngle;
         }
-        deviationAngle *= 2 * M_PI * m_fDeviation;
-        
+        //convert back to XY01 and move
         FPoint pointXY01 = mFilter->convertRt2Xy01(pointRT.x, pointRT.y + deviationAngle);
-        
         m_pMover->move(pointXY01, kTrajectory);
     }
 private:
