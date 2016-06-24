@@ -159,9 +159,7 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedT
 }
 
 std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTrajectory){
-    
     unique_ptr<vector<String>> vReturns (new vector<String>);
-    
     switch(p_iTrajectory) {
         case Spiral:
         case Pendulum:
@@ -311,25 +309,25 @@ public:
     , m_fDeviation(fDeviation)
     , m_fTotalDampening(p_fDampening)
     {
-        m_fEndPointXy01 = FPoint(endPair.first, 1-endPair.second);
+        mEndPointXy01 = FPoint(endPair.first, 1-endPair.second);
     }
 
 protected:
     void childInit() {
-        //get start point
+        //get XY01 start point
         int src = mFilter->getSrcSelected();
-        m_fStartPointXy01 = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
+        mStartPointXy01 = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         //calculate slope, offset and initial length, which represents only the length over the dependent variable
-        if (!areSame(m_fEndPointXy01.x, m_fStartPointXy01.x)){
+        if (!areSame(mEndPointXy01.x, mStartPointXy01.x)){
             m_bYisDependent = true;
-            m_fM = (m_fEndPointXy01.y - m_fStartPointXy01.y) / (m_fEndPointXy01.x - m_fStartPointXy01.x);
-            m_fB = m_fStartPointXy01.y - m_fM * m_fStartPointXy01.x;
-            m_fInitialLength = m_fEndPointXy01.x - m_fStartPointXy01.x;
+            m_fM = (mEndPointXy01.y - mStartPointXy01.y) / (mEndPointXy01.x - mStartPointXy01.x);
+            m_fB = mStartPointXy01.y - m_fM * mStartPointXy01.x;
+            m_fInitialLength = mEndPointXy01.x - mStartPointXy01.x;
         } else {
             m_bYisDependent = false;
             m_fM = 0;
-            m_fB = m_fStartPointXy01.x;
-            m_fInitialLength = m_fEndPointXy01.y - m_fStartPointXy01.y;
+            m_fB = mStartPointXy01.x;
+            m_fInitialLength = mEndPointXy01.y - mStartPointXy01.y;
         }
     }
     void childProcess(float duration, float seconds) {
@@ -341,7 +339,7 @@ protected:
         //if y is dependent, use slope equation, otherwise just go vertically. All calculations in cartesian coordinates.
         if (m_bYisDependent){
             //as we dampen, we move the start point and shorten the length
-            float fCurStartX01  = m_fStartPointXy01.x + fCurDampening * m_fInitialLength /2;
+            float fCurStartX01  = mStartPointXy01.x + fCurDampening * m_fInitialLength /2;
             float fCurLength    = m_fInitialLength    - fCurDampening * m_fInitialLength;
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             //use new start point and lenght to calculate current coordinates
@@ -349,14 +347,13 @@ protected:
             fCurY01 = m_fM * fCurX01 + m_fB;
         } else {
             //as we dampen, we move the start point and shorten the length
-            float fCurStartY01  = m_fStartPointXy01.y + fCurDampening * m_fInitialLength /2;
+            float fCurStartY01  = mStartPointXy01.y + fCurDampening * m_fInitialLength /2;
             float fCurLength    = m_fInitialLength    - fCurDampening * m_fInitialLength;
             fCurrentProgress    = fCurLength * (1-cos(fCurrentProgress * iReturn * M_PI)) / 2;
             //use new start point and lenght to calculate current coordinates
-            fCurX01 = m_fStartPointXy01.x;
+            fCurX01 = mStartPointXy01.x;
             fCurY01 = fCurStartY01 + fCurrentProgress;
         }
-        
         //convert to RT to implement angular deviation
         FPoint pointRT = mFilter->convertXy012Rt(FPoint(fCurX01, fCurY01), false);
         float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
@@ -369,8 +366,7 @@ protected:
     }
 private:
     bool mCCW, m_bRT, m_bYisDependent;
-    FPoint m_fStartPointXy01;
-    FPoint m_fEndPointXy01;
+    FPoint mStartPointXy01, mEndPointXy01;
     float m_fM;
     float m_fB;
     float m_fDeviation;
@@ -387,36 +383,37 @@ public:
     , mCCW(ccw)
     , m_fTurns(p_fTurns)
     , m_fWidth(p_fWidth)
-    {}
+    { }
 	
 protected:
-	void childProcess(float duration, float seconds)
-	{
-        
-        //for Antoine, a = angle and r = ray
-        
+    void childInit(){
+        mStartPointRT = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+    }
+    
+	void childProcess(float duration, float seconds) {
         float integralPart;
-        float da = m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
-        da = modf(da/m_fTurns, & integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
-
-        if (!mCCW) da = -da;
-        // http://www.edmath.org/MATtours/ellipses/ellipses1.07.3.html, first part at the top
-        FPoint p = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
-        float a = 1;
-        float b = m_fWidth;//.5;
-        float cosDa = cos(da);
-        float a2 = a*a;
+        //calculate delta theta
+        float fDeltaTheta = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
+        if (!mCCW){
+            fDeltaTheta = -fDeltaTheta;
+        }
+        // calculate fCurR and fCurT , using http://www.edmath.org/MATtours/ellipses/ellipses1.07.3.html first part at the top, with a = 1
+        float b = m_fWidth;
+        float cosDa = cos(fDeltaTheta);
         float b2 = b*b;
-        float cosDa2 = cosDa*cosDa;
-        float r2 = (a2*b2)/((b2-a2)*cosDa2+a2);
-        float r = sqrt(r2);
-        m_pMover->move(mFilter->convertRt2Xy01(p.x * r, p.y + da), kTrajectory);
+        float r2 = b2 / ((b2-1) * cosDa * cosDa + 1);
+        float fCurR = mStartPointRT.x * sqrt(r2);
+        float fCurT = mStartPointRT.y + fDeltaTheta;
+        //move using XY01
+        FPoint curPointXy01 = mFilter->convertRt2Xy01(fCurR, fCurT);
+        m_pMover->move(curPointXy01, kTrajectory);
     }
 	
 private:
 	bool mCCW;
     float m_fTurns;
     float m_fWidth;
+    FPoint mStartPointRT;
 };
 
 // ==============================================================================
@@ -424,12 +421,10 @@ private:
 class MTRand_int32
 {
 public:
-	MTRand_int32()
-	{
+	MTRand_int32() {
 		seed(rand());
 	}
-	uint32_t rand_uint32()
-	{
+	uint32_t rand_uint32() {
 		if (p == n) gen_state();
 		unsigned long x = state[p++];
 		x ^= (x >> 11);
@@ -437,8 +432,7 @@ public:
 		x ^= (x << 15) & 0xEFC60000;
 		return x ^ (x >> 18);
 	}
-	void seed(uint32_t s)
-	{
+	void seed(uint32_t s) {
 		state[0] = s;
 		for (int i = 1; i < n; ++i)
 			state[i] = 1812433253 * (state[i - 1] ^ (state[i - 1] >> 30)) + i;
@@ -450,12 +444,10 @@ private:
 	static const int n = 624, m = 397;
 	int p;
 	unsigned long state[n];
-	unsigned long twiddle(uint32_t u, uint32_t v)
-	{
+	unsigned long twiddle(uint32_t u, uint32_t v) {
 		return (((u & 0x80000000) | (v & 0x7FFFFFFF)) >> 1) ^ ((v & 1) * 0x9908B0DF);
 	}
-	void gen_state()
-	{
+	void gen_state() {
 		for (int i = 0; i < (n - m); ++i)
 			state[i] = state[i + m] ^ twiddle(state[i], state[i + 1]);
 		for (int i = n - m; i < (n - 1); ++i)
@@ -771,7 +763,6 @@ Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *f
     {
         case Circle:                     return new CircleTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns);
         case EllipseTr:                  return new EllipseTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns, p_fWidth);
-//        case Spiral:                     return new SpiralTrajectory(filter, p_pMover, duration, beats, times, ccw, in, bReturn, p_fTurns, endPair);
         case Spiral:                     return new SpiralTrajectory(filter, p_pMover, duration, beats, times, ccw, true, bReturn, p_fTurns, endPair);
         case Pendulum:                   return new PendulumTrajectory(filter, p_pMover, duration, beats, times, in, ccw, bReturn, p_fDampening, p_fDeviation, endPair);
         case RandomTrajectory:           return new RandomTrajectoryClass(filter, p_pMover, duration, beats, times, speed);
