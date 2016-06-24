@@ -245,7 +245,7 @@ protected:
             fDeltaTheta = -fDeltaTheta;
         }
         
-        //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle or the outside of the circle
+        //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
         float fCurT   = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
         float fStartR = mStartPointRt.x;
         float fDeltaR = (M_PI - fDeltaTheta) / M_PI;//(cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
@@ -257,6 +257,7 @@ protected:
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
         }
+        
         
         
         //CARTESIAN TRANSLATION
@@ -276,7 +277,6 @@ protected:
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first  - untranslatedEndOutPointXY01.x);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second - untranslatedEndOutPointXY01.y);
         }
-
         
         //POLAR TRANSLATION
 //        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
@@ -309,10 +309,10 @@ class PendulumTrajectory : public Trajectory
 public:
     PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const std::pair<float, float> &endPoint)
     :Trajectory(filter, p_pMover, duration, beats, times)
-    ,mCCW(ccw)
-    ,m_bRT(rt)
-    ,m_fDeviation(fDeviation)
-    ,m_fTotalDampening(p_fDampening)
+    , mCCW(ccw)
+    , m_bRT(rt)
+    , m_fDeviation(fDeviation)
+    , m_fTotalDampening(p_fDampening)
     {
         m_fEndPair = make_pair(endPoint.first, 1-endPoint.second);
     }
