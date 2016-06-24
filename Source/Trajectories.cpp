@@ -237,6 +237,7 @@ protected:
         m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
     }
     void childProcess(float duration, float seconds) {
+        
         //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         float fDeltaTheta, integralPart;
         int iMultiple = (m_bReturn ? 2 : 1);    //in return spiral, delta angle goes twice as fast
@@ -245,7 +246,7 @@ protected:
             fDeltaTheta = -fDeltaTheta;
         }
         
-        //figure curPointXY01. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
+        //figure fCurR and fCurT. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
         float fCurT   = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
         float fStartR = mStartPointRt.x;
         float fDeltaR = (M_PI - fDeltaTheta) / M_PI;//(cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
@@ -257,8 +258,6 @@ protected:
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
         }
-        
-        
         
         //CARTESIAN TRANSLATION
         FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
@@ -291,8 +290,6 @@ protected:
 //        fCurT += fTranslationFactor * (untranslatedEndPointRt.y - actualEndPointRt.y);
 //        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
 
-        
-        
         m_pMover->move(curPointXY01, kTrajectory);
     }
     
@@ -319,11 +316,12 @@ public:
 
 protected:
     void childInit() {
+        //get start point
         int src = mFilter->getSrcSelected();
         FPoint pointXY = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         m_fStartPair.first  = pointXY.x;
         m_fStartPair.second = pointXY.y;
-
+        //calculate slope and offset
         if (!areSame(m_fEndPair.first, m_fStartPair.first)){
             m_bYisDependent = true;
             m_fM = (m_fEndPair.second - m_fStartPair.second) / (m_fEndPair.first - m_fStartPair.first);
