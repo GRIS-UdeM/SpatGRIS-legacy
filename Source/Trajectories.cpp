@@ -549,8 +549,8 @@ protected:
         
         float p = m_fTimeDone / m_fDurationSingleTraj;
         int iSelectedSrc = mFilter->getSrcSelected();
+        JUCE_COMPILER_WARNING("couldn't we simply do that for a lot of other trajectories when we need to know the cycle count?")
 		int cycle = (int)p;
-    
 
         //reset stuff when we start a new cycle
 		if (mCycle != cycle) {
