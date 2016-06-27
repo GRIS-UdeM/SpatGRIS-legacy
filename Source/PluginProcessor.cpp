@@ -1362,8 +1362,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             
             
             
-//
-            
+        
             //FROM LOCKED TO NEW VALUE
 //            float fNewTheta;
 //            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
@@ -1457,31 +1456,29 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 
                 
                 // PRINTING THINGS
-//                if (iCurSource == 0){
-//                    allThetas.push_back(fNewTheta);
-//                    allRs.push_back(fCurSampleR);
-//                    allFRs.push_back(frontRight);
-//                    allFLs.push_back(frontLeft);
-//                    allBRs.push_back(backRight);
-//                    allBLs.push_back(backLeft);
-//                    float fTotalSamples = .5 * getSampleRate(); //10000;
-//                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
-//                        
-//                        cout << "\n\n\n\n";
-//                        float prev = -1.f;
-//                        for (int i=0; i<allThetas.size(); ++i) {
-//                            float cur = allThetas[i];
+                if (iCurSource == 0){
+                    allThetas.push_back(fNewTheta);
+                    allRs.push_back(fCurSampleR);
+                    allFRs.push_back(frontRight);
+                    allFLs.push_back(frontLeft);
+                    allBRs.push_back(backRight);
+                    allBLs.push_back(backLeft);
+                    float fTotalSamples = 5 * getSampleRate(); //10000;
+                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
+                        cout << "i \t cur \t front right \t front left \t back right \tback left \t all rays\n";
+                        float prev = -1.f;
+                        for (int i=0; i<allThetas.size(); ++i) {
+                            float cur = allThetas[i];
 //                            if (cur != prev){
-//                                cout << i << ": " << cur << "\t" << allFRs[i] << "\t" << allFLs[i] << "\t" << allBRs[i] << "\t" << allBLs[i] <<  "\t" << allRs[i] << newLine;
-////                                cout << i << ": " << cur << "\t" << dFrontLeft << "\t" << dFrontRight << "\t" << dBackLeft << "\t" << dBackRight << newLine;
-//                                prev = cur;
-//                            }
-//                            
-//                        }
-//                        bThetasPrinted = true;
-//                    }
-//                    
-//                }
+                            if (abs(cur - prev) > .005){
+                                cout << i << "\t" << cur << "\t" << allFRs[i] << "\t" << allFLs[i] << "\t" << allBRs[i] << "\t" << allBLs[i] <<  "\t" << allRs[i] << newLine;
+                                prev = cur;
+                            }
+                        }
+                        bThetasPrinted = true;
+                    }
+                    
+                }
                 
                 
                 

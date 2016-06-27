@@ -222,6 +222,12 @@ I can't debug this at home because it says I only have 2 speakers... unless I us
 * je ne comprends pas bien ce qu'Antoine essayait de faire. Il semble y avoir une coupure pas rapport dans la transition d'Angle. 
 * je pense que le problème est peut-être qu'on a plusieurs transition rapides entre des paires de haut-parleurs quand on passe d'un coté à l'autre. Ce que je pourrais faire est de complètement bloquer theta quand on arrive au centre, et de repartir directement avec le nouveau theta quand r > threshold. 
 Idid this, and still the fucking clicks. I cannot figure out where the clicks come from! One clue is that there's no clicks if slightly off center...
+--- 2016-06-27. new graphs to really compare clicks vs non clicks
+* antoine center: changement entre 248 et 308 = 60 samples
+* antoine off-center: changement entre 138 et 467 = 329 samples
+It is simply the lenght of the transition that is causing a click? Probably. Could force staying with 1 speaker for at least, e.g., 50 samples. 
+
+i made a new excel sheet, cause the first one crashed. J'ai refais les automations dans reaper pour avoir une transition entre 2 pointes collèes, une transition entre 2 pointes opposées sans passer par le center et genre 6 transitions en passant par le centre. Que je prenne l'algo d'antoine ou lockedNew, j'ai des clicks sur tous les passages par le centre. Comme les graphiques sont pas mal pareil, pas certain que ça vaille la peine de les comparer, il faut plus essayer de comprendre pkoi seulement les passages par le centre cliquent.  
 
 ----------------- 2016-06-15 -------------------
 Looking into future general directions. 
