@@ -833,6 +833,14 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    //these are all for issue #47
+    const int m_kiTotalSamplesToGo = 200;
+    long long m_llSamplesToGo;
+    JUCE_COMPILER_WARNING("AFAIK, the speaker position is completely defined with only one of these 2 or 4 variables. should edit findLeftAndRightSpeakers to reflect that")
+    int m_iPrevLeft, m_iPrevRight, m_iPrevFLeft, m_iPrevFRight, m_iPrevBLeft, m_iPrevBRight;
+    float m_fPrevDLeft, m_fPrevDRight, m_fPrevDFLeft, m_fPrevDFRight, m_fPrevDBLeft, m_fPrevDBRight;
+    bool m_bWasInMiddle;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

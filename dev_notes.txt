@@ -228,7 +228,15 @@ Idid this, and still the fucking clicks. I cannot figure out where the clicks co
 It is simply the lenght of the transition that is causing a click? Probably. Could force staying with 1 speaker for at least, e.g., 50 samples. 
 
 i made a new excel sheet, cause the first one crashed. J'ai refais les automations dans reaper pour avoir une transition entre 2 pointes collèes, une transition entre 2 pointes opposées sans passer par le center et genre 6 transitions en passant par le centre. Que je prenne l'algo d'antoine ou lockedNew, j'ai des clicks sur tous les passages par le centre. Comme les graphiques sont pas mal pareil, pas certain que ça vaille la peine de les comparer, il faut plus essayer de comprendre pkoi seulement les passages par le centre cliquent.  
+====
+2016-06-29
+algorithme pour ne pas changer de speakers trop vite. 
+On veut empêcher le changement de speaker si
+    * on a un changement de speaker depuis moins que total_samples
+    
+ugh. je capote. mon nouvel algorithme marche quand je regarde dans excel, mais en écoutant dans reaper, on a plus de clicks qu'avant, genre on a des clicks même off-center. 
 
+En plus je viens de faire des nouveau projets de tests reaper avec octogris, et là c'Est l'inverse! Clicks seulement off center, pas quand on est centered. WWTTFFFFFF
 ----------------- 2016-06-15 -------------------
 Looking into future general directions. 
 Robert sent a new version of the zirkonium, alpha 12. Il n'est pas compatible avec jack, mais il est compatible avec soundflower. J'ai cloné le code de soundflower, et ça compile sur nicolai. J'ai aussi le code PD de vbap.

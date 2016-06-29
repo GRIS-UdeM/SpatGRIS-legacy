@@ -282,6 +282,13 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mJoystickEnabled = 0;
     m_bOscSpatSenderIsConnected = false;
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
+    
+    m_iPrevLeft = -1;
+    m_iPrevRight = -1;
+    m_iPrevFLeft = -1;
+    m_iPrevFRight = -1;
+    m_iPrevBLeft = -1;
+    m_iPrevBRight = -1;
 	
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
@@ -1385,6 +1392,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 				// find left and right speakers
 				int left, right;
 				float dLeft, dRight;
+                
                 findLeftAndRightSpeakers(fNewTheta, p_pfParams, left, right, dLeft, dRight);
                 
 				// add to output
@@ -1402,21 +1410,50 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					addToOutput(fCurSampleValue, p_ppfOutputs, o, iSampleId);
 				}
+                m_bWasInMiddle = false;
 			}
             //if we're inside the main circle, 4 speakers will play
             else {
 				// find front left, right
 				int frontLeft, frontRight;
 				float dFrontLeft, dFrontRight;
+
                 findLeftAndRightSpeakers(fNewTheta, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
-                
-				float bt = fNewTheta + kHalfCircle;
+
+                float bt = fNewTheta + kHalfCircle;
 				if (bt > kThetaMax) bt -= kThetaMax;
 				
 				// find back left, right
 				int backLeft, backRight;
 				float dBackLeft, dBackRight;
                 findLeftAndRightSpeakers(bt, p_pfParams, backLeft, backRight, dBackLeft, dBackRight);
+                
+                
+                //overwrite results from findLeftAndRightSpeakers if we haven't been using the same speakers for m_kiTotalSamplesToGo
+//                if (m_iPrevFLeft != -1 && m_bWasInMiddle && frontLeft != m_iPrevFLeft && --m_llSamplesToGo >= 0){
+//                    frontLeft   = m_iPrevFLeft;
+//                    frontRight  = m_iPrevFRight;
+//                    dFrontLeft  = m_fPrevDFLeft;
+//                    dFrontRight = m_fPrevDFRight;
+//                    
+//                    backLeft   = m_iPrevBLeft;
+//                    backRight  = m_iPrevBRight;
+//                    dBackLeft  = m_fPrevDBLeft;
+//                    dBackRight = m_fPrevDBRight;
+//
+//                } else {
+//                    m_llSamplesToGo = m_kiTotalSamplesToGo;
+//                    m_iPrevFLeft    = frontLeft;
+//                    m_iPrevFRight   = frontRight;
+//                    m_fPrevDFLeft   = dFrontLeft;
+//                    m_fPrevDFRight  = dFrontRight;
+//                    
+//                    m_iPrevBLeft    = backLeft;
+//                    m_iPrevBRight   = backRight;
+//                    m_fPrevDBLeft   = dBackLeft;
+//                    m_fPrevDBRight  = dBackRight;
+//                }
+                
 			
 				float front = fCurSampleR * 0.5f + 0.5f;
 				float back = 1 - front;
@@ -1456,33 +1493,32 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 
                 
                 // PRINTING THINGS
-                if (iCurSource == 0){
-                    allThetas.push_back(fNewTheta);
-                    allRs.push_back(fCurSampleR);
-                    allFRs.push_back(frontRight);
-                    allFLs.push_back(frontLeft);
-                    allBRs.push_back(backRight);
-                    allBLs.push_back(backLeft);
-                    float fTotalSamples = 5 * getSampleRate(); //10000;
-                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
-                        cout << "i \t cur \t front right \t front left \t back right \tback left \t all rays\n";
-                        float prev = -1.f;
-                        for (int i=0; i<allThetas.size(); ++i) {
-                            float cur = allThetas[i];
-//                            if (cur != prev){
-                            if (abs(cur - prev) > .005){
-                                cout << i << "\t" << cur << "\t" << allFRs[i] << "\t" << allFLs[i] << "\t" << allBRs[i] << "\t" << allBLs[i] <<  "\t" << allRs[i] << newLine;
-                                prev = cur;
-                            }
-                        }
-                        bThetasPrinted = true;
-                    }
-                    
-                }
+//                if (iCurSource == 0){
+//                    allThetas.push_back(fNewTheta);
+//                    allRs.push_back(fCurSampleR);
+//                    allFRs.push_back(frontRight);
+//                    allFLs.push_back(frontLeft);
+//                    allBRs.push_back(backRight);
+//                    allBLs.push_back(backLeft);
+//                    float fTotalSamples = 1.8 * getSampleRate(); //10000;
+//                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
+//                        cout << "i \ttheta\tray\tfront right\n";
+//                        float prev = -1.f;
+//                        for (int i=0; i<allThetas.size(); ++i) {
+//                            float curTheta = allThetas[i];
+////                            if (abs(curTheta - prev) > .005){
+//                                cout << i << "\t" << curTheta << "\t" << allRs[i] <<  "\t" << allFRs[i] << newLine;
+//                                prev = curTheta;
+////                            }
+//                        }
+//                        bThetasPrinted = true;
+//                    }
+//                    
+//                }
                 
                 
                 
-                
+                m_bWasInMiddle = true;
 			}
 		}
 	}
