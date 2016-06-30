@@ -233,9 +233,7 @@ AudioProcessorEditor (ownerFilter)
     m_VersionLabel->setJustificationType(Justification(Justification::right));
     m_VersionLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
     m_VersionLabel->setLookAndFeel(&mGrisFeel);
-    
     addAndMakeVisible(m_VersionLabel);
-
     mComponents.add(m_VersionLabel);
 
     // param box
@@ -675,7 +673,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 5;
         }
         
-        mApplyFilter = addCheckbox("Apply Filter", mFilter->getApplyFilter(),
+        mApplyFilterButton = addCheckbox("Apply Filter", mFilter->getApplyFilter(),
                                    x, y, w, dh, box);
         y += dh + 5;
         
@@ -1705,7 +1703,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mElevSpanLinkButton) {
         mFilter->setLinkElevSpan(button->getToggleState());
     }
-    else if (button == mApplyFilter) {
+    else if (button == mApplyFilterButton) {
         mFilter->setApplyFilter(button->getToggleState());
     }
     
@@ -2096,7 +2094,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(), dontSendNotification);
         mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(), dontSendNotification);
         mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(), dontSendNotification);
-        mApplyFilter->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
+        mApplyFilterButton->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
     }
     
 #if TIME_THINGS
