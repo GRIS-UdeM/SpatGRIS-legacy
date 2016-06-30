@@ -986,7 +986,7 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpk
     
     mInputOutputModeCombo->setSelectedId(mode);
     
-
+    JUCE_COMPILER_WARNING("well, in fact these 2 calls are just never made because this function is never called with a true argument")
     //these don't work because of various things not being constructed when this method is called in the constructor. Need to extract
     //the relevant parts of buttonClicked(mApplyInputOutputModeButton) in a method, and call that new method from here
     if (p_bResetSrcAndSpkPositions){
