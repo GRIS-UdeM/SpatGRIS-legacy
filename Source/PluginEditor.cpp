@@ -232,6 +232,8 @@ AudioProcessorEditor (ownerFilter)
     m_VersionLabel->setText("SpatGRIS" + version,  dontSendNotification);
     m_VersionLabel->setJustificationType(Justification(Justification::right));
     m_VersionLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
+    m_VersionLabel->setLookAndFeel(&mGrisFeel);
+    
     addAndMakeVisible(m_VersionLabel);
 
     mComponents.add(m_VersionLabel);
