@@ -1249,6 +1249,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
     const int kiTotalSourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
 	const int kiTotalSpeakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+    const float smooth = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]);
+    const float sm_o = powf(0.01f, 1000.f / (smooth * p_fSampleRate));
+    const float sm_n = 1 - sm_o;
+
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
         //skip x and y parameters for each of 16 speakers, ie, params 40,41,45,46,50,51,55,56,60,61,65,66,70,71,75,76,80,81,85,86,90,91,95,96,100,101,105,106,110,111,115,116
@@ -1263,11 +1267,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 		float currentParam = mSmoothedParameters[iCurParam];
 		float targetParam = p_pfParams[iCurParam];
 		float *pSmoothedParametersRamps = mSmoothedParametersRamps.getReference(iCurParam).b;
+        
         //for each sample
 		for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
-            const float smooth = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]); // milliseconds. Declaring variables here is more optimal than outside the loop, http://stackoverflow.com/questions/7959573/declaring-variables-inside-loops-good-practice-or-bad-practice-2-parter#
-            const float sm_o = powf(0.01f, 1000.f / (smooth * p_fSampleRate));
-            const float sm_n = 1 - sm_o;
             //interpolate param value between the current (previous) and target value
 			currentParam = currentParam * sm_o + targetParam * sm_n;
             //update ramp positions
@@ -1497,10 +1499,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 //                    allThetas.push_back(fNewTheta);
 //                    allRs.push_back(fCurSampleR);
 //                    allFRs.push_back(frontRight);
-//                    allFLs.push_back(frontLeft);
-//                    allBRs.push_back(backRight);
-//                    allBLs.push_back(backLeft);
-//                    float fTotalSamples = 1.8 * getSampleRate(); //10000;
+//                    float fTotalSamples = 1 * getSampleRate(); //10000;
 //                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
 //                        cout << "i \ttheta\tray\tfront right\n";
 //                        float prev = -1.f;
