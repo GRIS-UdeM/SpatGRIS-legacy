@@ -402,10 +402,10 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(elevspan_osc);
         message.addFloat32(gain_osc);
 JUCE_COMPILER_WARNING("NOT SENDING MESSAGES BECAUSE SENDING ON 0.0.0.0")
-//        if (!mOscSpatSender.send(message)) {
-//            DBG("Error: could not send OSC message.");
-//            return;
-//        }
+        if (!mOscSpatSender.send(message)) {
+            DBG("Error: could not send OSC message.");
+            return;
+        }
     }
 }
 
@@ -1331,37 +1331,37 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             
             
             //figure out tetha, ramping if we pass the center
-            float fNewTheta;
-            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
-            if (fCurSampleR < kThetaLockRadius) {
-                //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0, so we use 100% of fPrevTheta
-                //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
-                float fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
-                //calculate difference between previous and current theta
-                float fPrevLockedTheta = mLockedThetas.getUnchecked(iCurSource);
-                float fDeltaTheta = abs(fPrevLockedTheta - fCurSampleT);
-                if (fDeltaTheta > kQuarterCircle) {
-                    // assume flipped side
-                    if (fPrevLockedTheta > fCurSampleT) {
-                        fPrevLockedTheta -= kHalfCircle;
-                    } else {
-                        fPrevLockedTheta += kHalfCircle;
-                    }
-                }
-                //fNewTheta is a ramp between previous value (fPrevLockedTheta) and current value (fCurSampleT)
-                fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevLockedTheta;
-                
-                if (fNewTheta < 0) {
-                    fNewTheta += kThetaMax;
-                } else if (fNewTheta >= kThetaMax) {
-                    fNewTheta -= kThetaMax;
-                }
-            }
-            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
-            else {
-                fNewTheta = fCurSampleT;
-                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
-            }
+//            float fNewTheta;
+//            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
+//            if (fCurSampleR < kThetaLockRadius) {
+//                //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0, so we use 100% of fPrevTheta
+//                //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
+//                float fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
+//                //calculate difference between previous and current theta
+//                float fPrevLockedTheta = mLockedThetas.getUnchecked(iCurSource);
+//                float fDeltaTheta = abs(fPrevLockedTheta - fCurSampleT);
+//                if (fDeltaTheta > kQuarterCircle) {
+//                    // assume flipped side
+//                    if (fPrevLockedTheta > fCurSampleT) {
+//                        fPrevLockedTheta -= kHalfCircle;
+//                    } else {
+//                        fPrevLockedTheta += kHalfCircle;
+//                    }
+//                }
+//                //fNewTheta is a ramp between previous value (fPrevLockedTheta) and current value (fCurSampleT)
+//                fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevLockedTheta;
+//                
+//                if (fNewTheta < 0) {
+//                    fNewTheta += kThetaMax;
+//                } else if (fNewTheta >= kThetaMax) {
+//                    fNewTheta -= kThetaMax;
+//                }
+//            }
+//            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
+//            else {
+//                fNewTheta = fCurSampleT;
+//                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
+//            }
 
             
             
@@ -1373,16 +1373,16 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             
         
             //FROM LOCKED TO NEW VALUE
-//            float fNewTheta;
-//            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
-//            if (fCurSampleR < .1 /*kThetaLockRadius*/) {
-//                fNewTheta = mLockedThetas.getUnchecked(iCurSource);
-//            }
-//            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
-//            else {
-//                fNewTheta = fCurSampleT;
-//                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
-//            }
+            float fNewTheta;
+            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
+            if (fCurSampleR < .1 /*kThetaLockRadius*/) {
+                fNewTheta = mLockedThetas.getUnchecked(iCurSource);
+            }
+            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
+            else {
+                fNewTheta = fCurSampleT;
+                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
+            }
 
             
             
@@ -1479,7 +1479,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 				// add to back output
 				if (backLeft >= 0 && backRight >= 0) {
 					float dTotal = dBackLeft + dBackRight;
-					float vLeft = 1 - dBackLeft / dTotal;
+					float vLeft  = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
 					addToOutput(fCurSampleValue * vLeft * back, p_ppfOutputs, backLeft, iSampleId);
@@ -1499,14 +1499,16 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 //                    allThetas.push_back(fNewTheta);
 //                    allRs.push_back(fCurSampleR);
 //                    allFRs.push_back(frontRight);
-//                    float fTotalSamples = 1 * getSampleRate(); //10000;
+//                    allSampleValues.push_back(fCurSampleValue);
+//                    
+//                    float fTotalSamples = 1.5 * getSampleRate(); //10000;
 //                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
-//                        cout << "i \ttheta\tray\tfront right\n";
+//                        cout << "i \ttheta\tray\tfront right\tsample value\n";
 //                        float prev = -1.f;
 //                        for (int i=0; i<allThetas.size(); ++i) {
 //                            float curTheta = allThetas[i];
 ////                            if (abs(curTheta - prev) > .005){
-//                                cout << i << "\t" << curTheta << "\t" << allRs[i] <<  "\t" << allFRs[i] << newLine;
+//                                cout << i << "\t" << curTheta << "\t" << allRs[i] <<  "\t" << allFRs[i] <<  "\t" <<   allSampleValues[i] << newLine;
 //                                prev = curTheta;
 ////                            }
 //                        }

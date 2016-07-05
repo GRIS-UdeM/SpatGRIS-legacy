@@ -946,6 +946,7 @@ AudioProcessorEditor (ownerFilter)
     startTimer(kTimerDelay);
 }
 
+JUCE_COMPILER_WARNING("unclear why there is a function here, since only called once in constructor")
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpkPositions){
     mInputOutputModeCombo->clear();
     //insert all modes available, based on iMaxSources and iMaxSpeakers

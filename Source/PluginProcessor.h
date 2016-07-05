@@ -782,6 +782,7 @@ private:
     vector<float> allThetas;
     vector<float> allRs;
     vector<float> allFRs;
+    vector<float> allSampleValues;
     
     bool bThetasPrinted = false;
 	
@@ -832,7 +833,7 @@ private:
     bool m_bIsPlaying;
     
     //these are all for issue #47
-    const int m_kiTotalSamplesToGo = 4800;
+    const int m_kiTotalSamplesToGo = 100;
     long long m_llSamplesToGo;
     int m_iPrevLeft, m_iPrevRight, m_iPrevFLeft, m_iPrevFRight, m_iPrevBLeft, m_iPrevBRight;
     float m_fPrevDLeft, m_fPrevDRight, m_fPrevDFLeft, m_fPrevDFRight, m_fPrevDBLeft, m_fPrevDBRight;
