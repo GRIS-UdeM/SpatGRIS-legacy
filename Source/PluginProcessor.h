@@ -774,8 +774,9 @@ private:
 	
 	bool mSmoothedParametersInited;
 	Array<float> mSmoothedParameters;
-	JUCE_COMPILER_WARNING("these really should be vectors")
+    
 	Array<float> mLockedThetas;
+    Array<Array<float> > mOutVolumes;
     Array<float> mPrevRs;
     Array<float> mPrevTs;
     
@@ -806,7 +807,10 @@ private:
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
-	inline void addToOutput(float s, float **outputs, int o, int f);
+//	inline void addToOutput(float s, float **outputs, int o, int f);
+    inline void setOutputVolume(int source, float volume, float sm_o, float sm_n, int o, vector<bool> &setCalled);
+    void addToOutputs(int source, float sample, float **outputs, int f);
+    
 	void ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
