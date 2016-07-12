@@ -77,8 +77,8 @@ enum sourceParameters{
 enum speakerParameters{
     kSpeakerX = 0,
     kSpeakerY,
-    kSpeakerUnused1,
     kSpeakerM,
+    kSpeakerUnused1,
     kSpeakerUnused2,
     kParamsPerSpeakers
 };

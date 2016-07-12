@@ -1279,17 +1279,17 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
-        //skip x and y parameters for each of 16 speakers, ie, params 40,41,45,46,50,51,55,56,60,61,65,66,70,71,75,76,80,81,85,86,90,91,95,96,100,101,105,106,110,111,115,116
-        
+        //do not ramp parameters kSpeakerX, kSpeakerY, kSpeakerUnused1 and kSpeakerUnused2 for each of 16 speakers
         if (iCurParam >= kiTotalSourceParameters &&
-            iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) &&
-            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) <= kSpeakerY){
-            cout << iCurParam << newLine;
+            iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
+            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
+            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
+            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused1 ||
+            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
             continue;
         }
-        
-        //the actual parameters we will ramp are, for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker (kSpeakerUnused1,kSpeakerM,kSpeakerUnused2
-        JUCE_COMPILER_WARNING("we should also skip (and not ramp) kSpeakerUnused1 and kSpeakerUnused2")
+
+        //the actual parameters we will ramp are, for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
         //get current and target values, as well as a reference to the current ramp position
 		float currentParam = mSmoothedParameters[iCurParam];
 		float targetParam = p_pfParams[iCurParam];
@@ -1323,6 +1323,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
+            //
             setCalled.assign(mNumberOfSpeakers,false);
             
 			float fCurSampleValue = allSamplesCurSource[iSampleId]; //current sample
