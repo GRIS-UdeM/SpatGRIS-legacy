@@ -1267,7 +1267,6 @@ void SpatGrisAudioProcessor::setOutputVolume(int source, float volume, float sm_
 }
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-JUCE_COMPILER_WARNING("could redo everything with vectors; they are just as efficient as native arrays. could be clearer?")
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
 
     // ramp all parameters using param smoothing parameter, except constant ones and speaker positions
@@ -1304,6 +1303,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 		}
 		mSmoothedParameters.setUnchecked(iCurParam, currentParam);
 	}
+    
+    
+    
     
 	// clear outputs[]
 	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
@@ -1549,6 +1551,9 @@ static void Integrate(float x1, float x2, const vector<Area> &areas, int areaCou
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+    
+    
+    
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
     const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
     const float sm_n = 1 - sm_o;
@@ -1561,26 +1566,20 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
         bool isSpeakerXY = (iCurParamId >= sourceParameters && iCurParamId < (sourceParameters + speakerParameters) && ((iCurParamId - sourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
         if (isSpeakerXY) continue;
         
-        bool isSourceXY = (iCurParamId < sourceParameters && (iCurParamId % kParamsPerSource) <= kSourceY);
-        
         float currentParam = mSmoothedParameters[iCurParamId];
         float targetParam = params[iCurParamId];
         float *ramp = mSmoothedParametersRamps.getReference(iCurParamId).b;
         
-
-        if (isSourceXY) {
-            currentParam = targetParam;
-            for (unsigned int f = 0; f < frames; ++f){
-                ramp[f] = targetParam;
-            }
-        } else {
-            for (unsigned int f = 0; f < frames; ++f) {
-                currentParam = currentParam * sm_o + targetParam * sm_n;
-                ramp[f] = currentParam;
-            }
+        for (unsigned int f = 0; f < frames; ++f) {
+            currentParam = currentParam * sm_o + targetParam * sm_n;
+            ramp[f] = currentParam;
         }
+
         mSmoothedParameters.setUnchecked(iCurParamId, currentParam);
     }
+    
+    
+    
     
     // clear outputs
     for (int o = 0; o < mNumberOfSpeakers; o++)
