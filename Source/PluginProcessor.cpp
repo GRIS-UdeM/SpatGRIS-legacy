@@ -1269,18 +1269,22 @@ void SpatGrisAudioProcessor::setOutputVolume(int source, float volume, float sm_
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 JUCE_COMPILER_WARNING("could redo everything with vectors; they are just as efficient as native arrays. could be clearer?")
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
-	// ramp all parameters using param smoothing parameter, except constant ones and speaker thetas
+
+    // ramp all parameters using param smoothing parameter, except constant ones and speaker positions
     const int kiTotalSourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
 	const int kiTotalSpeakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    const float smooth = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]);
-    const float sm_o = powf(0.01f, 1000.f / (smooth * p_fSampleRate));
-    const float sm_n = 1 - sm_o;
+    const float fCurSmoothing = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]);
+    const float fOldValuesPortion = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
+    const float fNewValuePortion = 1 - fOldValuesPortion;
 
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
         //skip x and y parameters for each of 16 speakers, ie, params 40,41,45,46,50,51,55,56,60,61,65,66,70,71,75,76,80,81,85,86,90,91,95,96,100,101,105,106,110,111,115,116
-		bool isSpeakerXY = (iCurParam >= kiTotalSourceParameters && iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) && ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) <= kSpeakerY);
-        if (isSpeakerXY) {
+        
+        if (iCurParam >= kiTotalSourceParameters &&
+            iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) &&
+            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) <= kSpeakerY){
+            cout << iCurParam << newLine;
             continue;
         }
         
@@ -1294,7 +1298,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
         //for each sample
 		for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
             //interpolate param value between the current (previous) and target value
-			currentParam = currentParam * sm_o + targetParam * sm_n;
+			currentParam = currentParam * fOldValuesPortion + targetParam * fNewValuePortion;
             //update ramp positions
 			pSmoothedParametersRamps[iCurSampleId] = currentParam;
 		}
@@ -1356,63 +1360,13 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
             fCurSampleValue *= dbToLinear(dbSource);
             
             
-            
-            
-//            figure out tetha, ramping if we pass the center
-//            float fNewTheta;
-//            //SITUATION 1 WE'RE RIGHT IN THE MIDDLE OF THE CIRCLE. If fCurSampleR < .025, we use fPrevLockedTheta, but if fCurSampleR is [.025,.05], we use a ramp between fPrevLockedTheta and fCurSampleT
-//            if (fCurSampleR < kThetaLockRadius) {
-//                //if fCurSampleR is smaller than .025 (kThetaLockRampRadius), fProportionOfCurrentTheta is 0, so we use 100% of fPrevTheta
-//                //if fCurSampleR is within [.025, .05], fProportionOfCurrentTheta is == fCurSampleR normalized to [0,1]
-//                float fProportionOfCurrentTheta = (fCurSampleR >= kThetaLockRampRadius) ? ((fCurSampleR - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
-//                //calculate difference between previous and current theta
-//                float fPrevLockedTheta = mLockedThetas.getUnchecked(iCurSource);
-//                float fDeltaTheta = abs(fPrevLockedTheta - fCurSampleT);
-//                if (fDeltaTheta > kQuarterCircle) {
-//                    // assume flipped side
-//                    if (fPrevLockedTheta > fCurSampleT) {
-//                        fPrevLockedTheta -= kHalfCircle;
-//                    } else {
-//                        fPrevLockedTheta += kHalfCircle;
-//                    }
-//                }
-//                //fNewTheta is a ramp between previous value (fPrevLockedTheta) and current value (fCurSampleT)
-//                fNewTheta = fProportionOfCurrentTheta * fCurSampleT + (1 - fProportionOfCurrentTheta) * fPrevLockedTheta;
-//                
-//                if (fNewTheta < 0) {
-//                    fNewTheta += kThetaMax;
-//                } else if (fNewTheta >= kThetaMax) {
-//                    fNewTheta -= kThetaMax;
-//                }
-//            }
-//            //if fCurSampleR is bigger than kThetaLockRadius (which is the case if we're not right in the center), store theta of current source
-//            else {
-//                fNewTheta = fCurSampleT;
-//                mLockedThetas.setUnchecked(iCurSource, fCurSampleT);
-//            }
-
-            
-            
-            
-            //BYPASSING ALL THIS
-            float fNewTheta = fCurSampleT;
-            
-            
-            
-        
-
-            
-            
-            
-            
-            
 			//if we're outside the main, first circle, only 2 speakers will play
 			if (fCurSampleR >= 1) {
 				// find left and right speakers
 				int left, right;
 				float dLeft, dRight;
                 
-                findLeftAndRightSpeakers(fNewTheta, p_pfParams, left, right, dLeft, dRight);
+                findLeftAndRightSpeakers(fCurSampleT, p_pfParams, left, right, dLeft, dRight);
                 
 				// add to output
 				if (left >= 0 && right >= 0) {
@@ -1420,14 +1374,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
-                    setOutputVolume(iCurSource, vLeft, sm_o, sm_n, left, setCalled);
-                    setOutputVolume(iCurSource, vRight, sm_o, sm_n, right, setCalled);
+                    setOutputVolume(iCurSource, vLeft, fOldValuesPortion, fNewValuePortion, left, setCalled);
+                    setOutputVolume(iCurSource, vRight, fOldValuesPortion, fNewValuePortion, right, setCalled);
 				} else {
 					// one side is empty!
 					int o = (left >= 0) ? left : right;
 					jassert(o >= 0);
 					
-					setOutputVolume(iCurSource, 1, sm_o, sm_n, o, setCalled);
+					setOutputVolume(iCurSource, 1, fOldValuesPortion, fNewValuePortion, o, setCalled);
 				}
                 m_bWasInMiddle = false;
 			}
@@ -1437,42 +1391,15 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 				int frontLeft, frontRight;
 				float dFrontLeft, dFrontRight;
 
-                findLeftAndRightSpeakers(fNewTheta, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
+                findLeftAndRightSpeakers(fCurSampleT, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
 
-                float bt = fNewTheta + kHalfCircle;
+                float bt = fCurSampleT + kHalfCircle;
 				if (bt > kThetaMax) bt -= kThetaMax;
 				
 				// find back left, right
 				int backLeft, backRight;
 				float dBackLeft, dBackRight;
                 findLeftAndRightSpeakers(bt, p_pfParams, backLeft, backRight, dBackLeft, dBackRight);
-                
-                
-                //overwrite results from findLeftAndRightSpeakers if we haven't been using the same speakers for m_kiTotalSamplesToGo
-//                if (m_iPrevFLeft != -1 && m_bWasInMiddle && frontLeft != m_iPrevFLeft && --m_llSamplesToGo >= 0){
-//                    frontLeft   = m_iPrevFLeft;
-//                    frontRight  = m_iPrevFRight;
-//                    dFrontLeft  = m_fPrevDFLeft;
-//                    dFrontRight = m_fPrevDFRight;
-//                    
-//                    backLeft   = m_iPrevBLeft;
-//                    backRight  = m_iPrevBRight;
-//                    dBackLeft  = m_fPrevDBLeft;
-//                    dBackRight = m_fPrevDBRight;
-//
-//                } else {
-//                    m_llSamplesToGo = m_kiTotalSamplesToGo;
-//                    m_iPrevFLeft    = frontLeft;
-//                    m_iPrevFRight   = frontRight;
-//                    m_fPrevDFLeft   = dFrontLeft;
-//                    m_fPrevDFRight  = dFrontRight;
-//                    
-//                    m_iPrevBLeft    = backLeft;
-//                    m_iPrevBRight   = backRight;
-//                    m_fPrevDBLeft   = dBackLeft;
-//                    m_fPrevDBRight  = dBackRight;
-//                }
-                
 			
 				float front = fCurSampleR * 0.5f + 0.5f;
 				float back = 1 - front;
@@ -1483,14 +1410,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft = 1 - dFrontLeft / dTotal;
 					float vRight = 1 - dFrontRight / dTotal;
 					
-                    setOutputVolume(iCurSource, vLeft * front, sm_o, sm_n, frontLeft, setCalled);
-                    setOutputVolume(iCurSource, vRight * front, sm_o, sm_n, frontRight, setCalled);
+                    setOutputVolume(iCurSource, vLeft * front, fOldValuesPortion, fNewValuePortion, frontLeft, setCalled);
+                    setOutputVolume(iCurSource, vRight * front, fOldValuesPortion, fNewValuePortion, frontRight, setCalled);
 				} else {
 					// one side is empty!
 					int o = (frontLeft >= 0) ? frontLeft : frontRight;
 					jassert(o >= 0);
 					
-					setOutputVolume(iCurSource, front, sm_o, sm_n, o, setCalled);
+					setOutputVolume(iCurSource, front, fOldValuesPortion, fNewValuePortion, o, setCalled);
 				}
 				
 				// add to back output
@@ -1499,47 +1426,21 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft  = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
-                    setOutputVolume(iCurSource, vLeft * back, sm_o, sm_n, backLeft, setCalled);
-                    setOutputVolume(iCurSource, vRight * back, sm_o, sm_n, backRight, setCalled);
+                    setOutputVolume(iCurSource, vLeft * back, fOldValuesPortion, fNewValuePortion, backLeft, setCalled);
+                    setOutputVolume(iCurSource, vRight * back, fOldValuesPortion, fNewValuePortion, backRight, setCalled);
 				} else {
 					// one side is empty!
 					int o = (backLeft >= 0) ? backLeft : backRight;
 					jassert(o >= 0);
 					
-					setOutputVolume(iCurSource, back, sm_o, sm_n, o, setCalled);
+					setOutputVolume(iCurSource, back, fOldValuesPortion, fNewValuePortion, o, setCalled);
 				}
-                
-                // PRINTING THINGS
-//                if (iCurSource == 0){
-//                    allThetas.push_back(fNewTheta);
-//                    allRs.push_back(fCurSampleR);
-//                    allFRs.push_back(frontRight);
-//                    allSampleValues.push_back(fCurSampleValue);
-//                    
-//                    float fTotalSamples = 1.5 * getSampleRate(); //10000;
-//                    if (allThetas.size() >= fTotalSamples && !bThetasPrinted ){
-//                        cout << "i \ttheta\tray\tfront right\tsample value\n";
-//                        float prev = -1.f;
-//                        for (int i=0; i<allThetas.size(); ++i) {
-//                            float curTheta = allThetas[i];
-////                            if (abs(curTheta - prev) > .005){
-//                                cout << i << "\t" << curTheta << "\t" << allRs[i] <<  "\t" << allFRs[i] <<  "\t" <<   allSampleValues[i] << newLine;
-//                                prev = curTheta;
-////                            }
-//                        }
-//                        bThetasPrinted = true;
-//                    }
-//                    
-//                }
-                
-                
-                
                 m_bWasInMiddle = true;
 			}
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!setCalled[o]){
                     vector<bool> empty;
-                    setOutputVolume(iCurSource, 0, sm_o, sm_n, o, empty);
+                    setOutputVolume(iCurSource, 0, fOldValuesPortion, fNewValuePortion, o, empty);
                 }
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
