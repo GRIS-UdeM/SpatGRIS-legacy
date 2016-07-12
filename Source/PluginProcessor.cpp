@@ -1645,52 +1645,30 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 				output_adj[f] = a * m;
 			}
 		}
-		for (int i = 0; i < mNumberOfSources; i++) {
-			float *input = inputs[i];
-			float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
-			float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
-			float *input_d = mSmoothedParametersRamps.getReference(getParamForSourceD(i)).b;
-			
-            if (i == 0){
-				for (unsigned int f = 0; f < frames; f++){
-					float dx = input_x[f] - output_x[f];
-					float dy = input_y[f] - output_y[f];
-					float d = sqrtf(dx*dx + dy*dy);
-					float da = d * adj_factor * input_d[f];
-					//if (da > 1) da = 0; else da = 1 - da;
-					//da *= output_adj[f];
-					//change distance scale for new calculations
-					//"1" means far now instead of "0"
-					if (da > 1) da = 1;
-					//New distance vs amplitude calculations:
-					//if da < 0.1 the log value will skyrocket:
-					if (da < 0.1) da = 0.1;
-					da = -log10f(da);
-					da *= output_adj[f];
-					
-					output[f] = da * input[f];
-				}
-            } else {
-				for (unsigned int f = 0; f < frames; f++){
-					float dx = input_x[f] - output_x[f];
-					float dy = input_y[f] - output_y[f];
-					float d = sqrtf(dx*dx + dy*dy);
-					float da = d * adj_factor * input_d[f];
-					//if (da > 1) da = 0; else da = 1 - da;
-					//change distance scale for new calculations
-					//"1" means far now instead of "0"
-					if (da > 1) da = 1;
-					//New distance vs amplitude calculations:
-					//if da < 0.1 the log value will skyrocket:
-					if (da < 0.1) da = 0.1;
-					da = -log10f(da);
-					da *= output_adj[f];
-					
-					output[f] += da * input[f];
-				}
+        for (int i = 0; i < mNumberOfSources; i++) {
+            float *input = inputs[i];
+            float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
+            float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
+            float *input_d = mSmoothedParametersRamps.getReference(getParamForSourceD(i)).b;
+            
+            for (unsigned int f = 0; f < frames; f++){
+                float dx = input_x[f] - output_x[f];
+                float dy = input_y[f] - output_y[f];
+                float d = sqrtf(dx*dx + dy*dy);
+                float da = d * adj_factor * input_d[f];
+                if (da > 1) da = 1;
+                if (da < 0.1) da = 0.1;
+                da = -log10f(da);
+                da *= output_adj[f];
+                if (i == 0){
+                    output[f] = da * input[f];
+                } else {
+                    output[f] += da * input[f];
+                }
             }
-		}
-	}
+            
+        }
+    }
 }
 
 
