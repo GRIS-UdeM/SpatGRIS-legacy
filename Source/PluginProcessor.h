@@ -808,13 +808,14 @@ private:
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
 //	inline void addToOutput(float s, float **outputs, int o, int f);
-    inline void setOutputVolume(int source, float volume, float sm_o, float sm_n, int o, vector<bool> &setCalled);
+    inline void setOutputVolume(int source, float volume, float sm_o, float sm_n, int o, vector<bool> &p_pvSpeakersCurrentlyInUse);
     void addToOutputs(int source, float sample, float **outputs, int f);
     
 	void ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
+    
     int mNumberOfSources;
     int mNumberOfSpeakers;
     std::vector<FirFilter> mFilters;
