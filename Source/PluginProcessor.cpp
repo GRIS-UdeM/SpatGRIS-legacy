@@ -1332,7 +1332,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
-            //
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
 			float fCurSampleValue = allSamplesCurSource[iSampleId]; //current sample
@@ -1368,7 +1367,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
                 dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
             }
             fCurSampleValue *= dbToLinear(dbSource);
-            
             
 			//if we're outside the main, first circle, only 2 speakers will play
 			if (fCurSampleR >= 1) {
@@ -1475,10 +1473,8 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
 
     int areaCount = 0;
     
-    if (mNumberOfSpeakers > 2)
-    {
-        for (int iCurSpeaker = 0; iCurSpeaker < mNumberOfSpeakers; iCurSpeaker++)
-        {
+    if (mNumberOfSpeakers > 2) {
+        for (int iCurSpeaker = 0; iCurSpeaker < mNumberOfSpeakers; iCurSpeaker++) {
             float fCurAngle = params[getParamForSpeakerX(iCurSpeaker)];
             int left, right;
             float dLeft, dRight;
@@ -1490,9 +1486,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             AddArea(iCurSpeaker, fCurAngle - dLeft, 0, fCurAngle, 1, areas, areaCount, mNumberOfSpeakers);
             AddArea(iCurSpeaker, fCurAngle, 1, fCurAngle + dRight, 0, areas, areaCount, mNumberOfSpeakers);
         }
-    }
-    else if (mNumberOfSpeakers == 2)
-    {
+    } else if (mNumberOfSpeakers == 2) {
         int s1 = (params[getParamForSpeakerX(0)] < params[getParamForSpeakerX(1)]) ? 0 : 1;
         int s2 = 1 - s1;
         float t1 = params[getParamForSpeakerX(s1)];
@@ -1503,28 +1497,21 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
         
         AddArea(s2, t1, 0, t2, 1, areas, areaCount, mNumberOfSpeakers);
         AddArea(s2, t2, 1, t1 + kThetaMax, 0, areas, areaCount, mNumberOfSpeakers);
-    }
-    else
-    {
+    } else {
         AddArea(0, 0, 1, kThetaMax, 1, areas, areaCount, mNumberOfSpeakers);
     }
-   
-    
     
     jassert(areaCount > 0);
     
-    
     // compute
     // in this context: source T, R are actually source X, Y
-    for (int i = 0; i < mNumberOfSources; i++)
-    {
+    for (int i = 0; i < mNumberOfSources; i++) {
         float *input = inputs[i];
         float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
         float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
         float *input_d = mSmoothedParametersRamps.getReference(getParamForSourceD(i)).b;
         
-        for (unsigned int f = 0; f < frames; f++)
-        {
+        for (unsigned int f = 0; f < frames; f++) {
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
             
             float s = input[f];
@@ -1549,8 +1536,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             if (d < 1e-6) d = 1e-6;
             float angle = d * M_PI;
             
-            if (mApplyFilter)
-            {
+            if (mApplyFilter) {
                 float distance;
                 if (r >= 1) distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
                 else distance = denormalize(params[kFilterNear], params[kFilterMid], r);
@@ -1568,19 +1554,15 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             
             
             float t;
-            if (r >= kThetaLockRadius)
-            {
+            if (r >= kThetaLockRadius) {
                 t = it;
                 mLockedThetas.setUnchecked(i, it);
-            }
-            else
-            {
+            } else {
                 float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
                 float lt = mLockedThetas.getUnchecked(i);
                 float dt = lt - it;
                 if (dt < 0) dt = -dt;
-                if (dt > kQuarterCircle)
-                {
+                if (dt > kQuarterCircle) {
                     // assume flipped side
                     if (lt > it) lt -= kHalfCircle;
                     else lt += kHalfCircle;
@@ -1589,7 +1571,6 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
                 
                 if (t < 0) t += kThetaMax;
                 else if (t >= kThetaMax) t -= kThetaMax;
-                
             }
             
             jassert(t >= 0 && t <= kThetaMax);
@@ -1601,27 +1582,20 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             
             float factor = (r < 1) ? (r * 0.5f + 0.5f) : 1;
             
-            for (int side = 0; side < 2; side++)
-            {
+            for (int side = 0; side < 2; side++) {
                 float tl = t - angle, tr = t + angle;
                 
-                if (tl < 0)
-                {
+                if (tl < 0) {
                     Integrate(tl + kThetaMax, kThetaMax, areas, areaCount, outFactors, factor);
                     Integrate(0, tr, areas, areaCount, outFactors, factor);
-                }
-                else if (tr > kThetaMax)
-                {
+                } else if (tr > kThetaMax) {
                     Integrate(tl, kThetaMax, areas, areaCount, outFactors, factor);
                     Integrate(0, tr - kThetaMax, areas, areaCount, outFactors, factor);
-                }
-                else
-                {
+                } else {
                     Integrate(tl, tr, areas, areaCount, outFactors, factor);
                 }
                 
-                if (r < 1)
-                {
+                if (r < 1) {
                     factor = 1 - factor;
                     t = (t < kHalfCircle) ? (t + kHalfCircle) : (t - kHalfCircle);
                 }
@@ -1642,63 +1616,43 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames)
-{
-	const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds	
-	const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
-	const float sm_n = 1 - sm_o;
-	
-	// ramp all the parameters, except constant ones
-	for (int i = 0; i < (kNumberOfParameters - kConstantParameters); i++)
-	{
+void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+	// ramp all non constant parameters
+    const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
+	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * sampleRate));
+	const float sm_n = 1 - fOldValuesPortion;
+	for (int i = 0; i < kNonConstantParameters; i++) {
 		float currentParam = mSmoothedParameters[i];
 		float targetParam = params[i];
 		float *ramp = mSmoothedParametersRamps.getReference(i).b;
-	
-		//float ori = currentParam;
-		
-		for (unsigned int f = 0; f < frames; f++)
-		{
-			currentParam = currentParam * sm_o + targetParam * sm_n;
+		for (unsigned int f = 0; f < frames; f++) {
+			currentParam = currentParam * fOldValuesPortion + targetParam * sm_n;
 			ramp[f] = currentParam;
 		}
-		
-		//if (i == 0 && ori != currentParam) printf("param %i -> %f -> %f\n", i, ori, currentParam);
-		
 		mSmoothedParameters.setUnchecked(i, currentParam);
 	}
-	
 	// in this context: T, R are actually X, Y
-	
-	// compute
 	const float adj_factor = 1 / sqrtf(2);
-	for (int o = 0; o < mNumberOfSpeakers; o++)
-	{
+	for (int o = 0; o < mNumberOfSpeakers; o++) {
 		float *output = outputs[o];
 		float *output_x = mSmoothedParametersRamps.getReference(getParamForSpeakerX(o)).b;
 		float *output_y = mSmoothedParametersRamps.getReference(getParamForSpeakerY(o)).b;
-		float output_adj[kChunkSize];
-		{
+		float output_adj[kChunkSize]; {
 			float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-			//float *output_a = mSmoothedParametersRamps.getReference(getParamForSpeakerA(o)).b;
-			
 			for (unsigned int f = 0; f < frames; f++){
 				float a = dbToLinear(kSpeakerDefaultAttenuation);
 				float m = 1 - output_m[f];
 				output_adj[f] = a * m;
 			}
 		}
-		
-		for (int i = 0; i < mNumberOfSources; i++)
-		{
+		for (int i = 0; i < mNumberOfSources; i++) {
 			float *input = inputs[i];
 			float *input_x = mSmoothedParametersRamps.getReference(getParamForSourceX(i)).b;
 			float *input_y = mSmoothedParametersRamps.getReference(getParamForSourceY(i)).b;
 			float *input_d = mSmoothedParametersRamps.getReference(getParamForSourceD(i)).b;
 			
-			if (i == 0)
-				for (unsigned int f = 0; f < frames; f++)
-				{
+            if (i == 0){
+				for (unsigned int f = 0; f < frames; f++){
 					float dx = input_x[f] - output_x[f];
 					float dy = input_y[f] - output_y[f];
 					float d = sqrtf(dx*dx + dy*dy);
@@ -1716,9 +1670,8 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 					
 					output[f] = da * input[f];
 				}
-			else
-				for (unsigned int f = 0; f < frames; f++)
-				{
+            } else {
+				for (unsigned int f = 0; f < frames; f++){
 					float dx = input_x[f] - output_x[f];
 					float dy = input_y[f] - output_y[f];
 					float d = sqrtf(dx*dx + dy*dy);
@@ -1735,6 +1688,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 					
 					output[f] += da * input[f];
 				}
+            }
 		}
 	}
 }
