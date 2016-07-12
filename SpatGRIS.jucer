@@ -56,6 +56,7 @@
       <FILE id="ebGlDe" name="IOHIDLib_.h" compile="0" resource="1" file="HIDManager/IOHIDLib_.h"/>
     </GROUP>
     <GROUP id="{89B00B3D-3E60-2792-C7A4-D570AF057C40}" name="Source">
+      <FILE id="CeUFNu" name="Areas.h" compile="0" resource="0" file="Source/Areas.h"/>
       <FILE id="wR0X34" name="ParamSliderGris.h" compile="0" resource="0"
             file="Source/ParamSliderGris.h"/>
       <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>

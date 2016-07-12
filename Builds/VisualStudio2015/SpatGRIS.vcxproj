@@ -1886,6 +1886,7 @@
     <ClInclude Include="..\..\HIDManager\IOHIDDevice_.h"/>
     <ClInclude Include="..\..\HIDManager\IOHIDElement_.h"/>
     <ClInclude Include="..\..\HIDManager\IOHIDLib_.h"/>
+    <ClInclude Include="..\..\Source\Areas.h"/>
     <ClInclude Include="..\..\Source\ParamSliderGris.h"/>
     <ClInclude Include="..\..\Source\HIDDelegate.h"/>
     <ClInclude Include="..\..\Source\_firs.h"/>
