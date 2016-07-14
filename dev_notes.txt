@@ -265,4 +265,30 @@ But in fact, the only two that don't make sense to accelerate are the randoms:
 * random
 * random target
 
+------------------ 2016-07-14 --------------------
+#56, investigating juce source.
+    * the deepest I got is in juce_socket.cpp, line 705 ::sendto, which apparently I cannot debut into
+    * in this DatagramSocket object, member lastServerHost is correctly 127.0.0.1
 
+    this ::sendto business is a call to the core osc libraries. i think it sends the adress as
+    info->ai_addr. for some reason I cannot read this, because it's in hexa decimal or some shit.
+    well actually the osc library says it's in binary
+
+now trying to see how liblo does it. Tried with Zirkosc, and apparently i am getting the 0.0.0.0
+thing from liblo. So I am questioning where I got the results I posted on the juce forum, showing
+that liblo sends to 127.0.0.1 and juceosc to 0.0.0.0. Probably with Octogris. Last release using
+liblo is octogris 2.2.8
+
+apparently, on school mac pro, octogris 228 sends to 0.0.0.0, just like juce osc. so i need to learn
+how to use a packet sniffer. ok. 
+
+ludo me disait de prendre tcpdump. Wireshark est une autre option plus high-level.
+
+sudo tcpdump dst 192.168.1.100 
+    * gives me messages when sending touch osc to that address, with spatgris, so with juce osc
+sudo tcpdump port 9000
+    * gives me same thing wit touch osc. 
+
+i think the problem is just xcode on crack. using tcpdump, i see that touch osc messages are sent on
+en2 to 192.x.x.x, which is correct, and spatosc messages are sent on lo0, port 18032, and nothing is
+sent on the network. 

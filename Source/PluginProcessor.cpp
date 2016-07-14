@@ -271,7 +271,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_iOscSpat1stSrcId = 1;
     m_iOscSpatPort = 18032;
     m_sOscIpAddress = "127.0.0.1";
-    
+
 	mOscLeapSource = 0;
 	mOscReceiveEnabled = 0;
 	mOscReceivePort = 8000;
