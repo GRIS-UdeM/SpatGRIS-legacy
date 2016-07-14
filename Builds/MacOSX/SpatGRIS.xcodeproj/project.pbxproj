@@ -94,10 +94,10 @@
 		F6931F081D356697007A103A /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35936CCA2ECAA78CF2CE397F /* IOKit.framework */; };
 		F6931F091D356697007A103A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5DD1591E1C47A84136CC5D6 /* QuartzCore.framework */; };
 		F6931F0A1D356697007A103A /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC7120C397418DE1A7798C95 /* WebKit.framework */; };
-		F6931F101D3566BF007A103A /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		F6931F121D3566CC007A103A /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		F6931F141D3566D3007A103A /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F69AF11ADE7161CDF02E803F /* HID_Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AF464D04B65762BF08B0227C /* HID_Utilities.cpp */; };
+		F6DC25B91D381AD1008A3288 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F6DC25BA1D381AE0008A3288 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F6DC25BB1D381AE9008A3288 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F78409593DB775450C268216 /* RecentFilesMenuTemplate.nib in Resources */ = {isa = PBXBuildFile; fileRef = 281829C2382995B67A43416C /* RecentFilesMenuTemplate.nib */; };
 /* End PBXBuildFile section */
 
@@ -139,7 +139,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F6931F101D3566BF007A103A /* libLeap.dylib in CopyFiles */,
+				F6DC25B91D381AD1008A3288 /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,7 +149,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F6931F121D3566CC007A103A /* libLeap.dylib in CopyFiles */,
+				F6DC25BB1D381AE9008A3288 /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,9 +157,9 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 7;
+			dstSubfolderSpec = 6;
 			files = (
-				F6931F141D3566D3007A103A /* libLeap.dylib in CopyFiles */,
+				F6DC25BA1D381AE0008A3288 /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
