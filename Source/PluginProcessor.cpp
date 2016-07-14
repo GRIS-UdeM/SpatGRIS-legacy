@@ -1666,7 +1666,6 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
                     output[f] += da * input[f];
                 }
             }
-            
         }
     }
 }

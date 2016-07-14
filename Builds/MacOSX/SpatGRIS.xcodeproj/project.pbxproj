@@ -157,7 +157,7 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 7;
+			dstSubfolderSpec = 6;
 			files = (
 				F6931F141D3566D3007A103A /* libLeap.dylib in CopyFiles */,
 			);
