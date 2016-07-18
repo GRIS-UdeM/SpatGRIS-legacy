@@ -776,7 +776,7 @@ private:
 	Array<float> mSmoothedParameters;
     
 	Array<float> mLockedThetas;
-    Array<Array<float> > mOutVolumes;
+    Array<Array<float> > mSpeakerVolumes;
     Array<float> mPrevRs;
     Array<float> mPrevTs;
     
@@ -807,7 +807,7 @@ private:
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
-    inline void setOutputVolume(int source, float volume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse);
+    inline void setSpeakerVolume(int source, float volume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse);
     void addToOutputs(int source, float sample, float **outputs, int f);
 
     float rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples);
