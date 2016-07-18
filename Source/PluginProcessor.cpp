@@ -402,7 +402,6 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(azimspan_osc);
         message.addFloat32(elevspan_osc);
         message.addFloat32(gain_osc);
-JUCE_COMPILER_WARNING("NOT SENDING MESSAGES BECAUSE SENDING ON 0.0.0.0")
         if (!mOscSpatSender.send(message)) {
             DBG("Error: could not send OSC message.");
             return;

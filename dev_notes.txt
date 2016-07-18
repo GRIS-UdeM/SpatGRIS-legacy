@@ -296,4 +296,31 @@ sent on the network.
 -------------------- 2016-07-18 --------------------
 Moving on.
 
-Octogris clics audio
+l'idée de prendre spatgris est qu'on aurait quelque chose qui se connecte directement au server.
+Quelque chose exactement comme spatium. Mais mieux. C'est exactement ce qu'on a avec soundflower par
+contre. Donc je vais devoir avoir une conversation avec Robert sur ça. 
+
+Je dois trouver une mauditte façon de faire la spirale, ça pas de bon sens! J,ai 2h. 
+
+algorithmes possibles
+* pendule avec r, cercle avec t: Ne marche pas, parce que t doit tourner autour du point d'arrivée, 
+et non du point de départ. par le passé, implémenter cet algoritme me donnait un tire-bouchon.
+* spirale cartésienne avec translation cartésienne
+
+currently
+* calculate deltatheta, which will go [0, turns*2*pi]
+* curTheta = startTheta + deltaTheta
+* if going in
+    * curR = startR * cos (deltaTheta), so curR will do startR -> 0 during whole trajectory
+* else
+    * curR will do startR -> maxR during trajectory
+*progressive cartesian translation to endpoint
+
+so what are the problems here?
+* outgoing goes too big before reaching final point because it is aiming at max R. 
+* final delta theta should probably depend on diff between initial and final theta. Meh, i don't think 
+this is necessarily a problem.  reaper sometime makes a jump at the start, but not DP, so i think this is a reaper problem. 
+
+
+
+

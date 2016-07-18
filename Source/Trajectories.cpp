@@ -216,6 +216,89 @@ private:
 };
 
 // ==============================================================================
+//class SpiralTrajectory : public Trajectory {
+//public:
+//    JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
+//    JUCE_COMPILER_WARNING("make a struct containing all trajectory parameters")
+//    SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
+//    : Trajectory(filter, p_pMover, duration, beats, times)
+//    , m_bCCW(ccw)
+//    , m_bReturn(rt)
+//    , m_fTurns(p_fTurns)
+//    , m_fEndPairXY01(endPair)
+//    { }
+//
+//protected:
+//    void childInit() {
+//        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+//        mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
+//        //if start ray is bigger than end ray, we are going in
+//        m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
+//    }
+//    void childProcess(float duration, float seconds) {
+//        
+//        //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
+//        float fDeltaTheta, integralPart;
+//        int iMultiple = (m_bReturn ? 2 : 1);    //in return spiral, delta angle goes twice as fast
+//        fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
+//        if (m_bCCW){
+//            fDeltaTheta = -fDeltaTheta;
+//        }
+//        
+//        //figure fCurR and fCurT. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
+//        float fCurT   = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
+//        float fStartR = mStartPointRt.x;
+//        float fDeltaR = (cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
+//        float fCurR;
+//        if (m_bGoingIn) {
+//            //fCurR simply goes [fStartR, 0] following a cosine curve
+//            fCurR = fStartR * fDeltaR;
+//        } else {
+//            //fCurR goes from fStartR to kRadiusMax following a cosine curve
+//            fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
+//        }
+//        
+//        //CARTESIAN TRANSLATION
+//        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
+//        //do linear XY translation to end point
+//        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
+//        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
+//            //reverse direction when we reach halfway in return spiral
+//            fTranslationFactor = 1-fTranslationFactor;
+//        }
+//        if (m_bGoingIn){
+//            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first -.5);
+//            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
+//        } else {
+//            //here, fTranslationFactor grows linearly, the rest is constants
+//            FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(kRadiusMax, mStartPointRt.y);
+//            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first  - untranslatedEndOutPointXY01.x);
+//            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second - untranslatedEndOutPointXY01.y);
+//        }
+//        
+//        //POLAR TRANSLATION
+////        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &intYegralPart);    //fTranslationFactor goes [0,1] for every cycle
+////        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
+////            //reverse direction when we reach halfway in return spiral
+////            fTranslationFactor = 1-fTranslationFactor;
+////        }
+////        
+////        FPoint untranslatedEndPointRt = FPoint(kRadiusMax, mStartPointRt.y);
+////        FPoint actualEndPointRt       = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second), false);
+////        fCurR += fTranslationFactor * (untranslatedEndPointRt.x - actualEndPointRt.x);
+////        fCurT += fTranslationFactor * (untranslatedEndPointRt.y - actualEndPointRt.y);
+////        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
+//
+//        m_pMover->move(curPointXY01, kTrajectory);
+//    }
+//    
+//private:
+//    bool m_bCCW, m_bGoingIn, m_bReturn;
+//    float m_fTurns;
+//    std::pair<float, float> m_fEndPairXY01;
+//    FPoint mStartPointRt, mEndPointRt;
+//};
+
 class SpiralTrajectory : public Trajectory {
 public:
     JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
@@ -227,7 +310,7 @@ public:
     , m_fTurns(p_fTurns)
     , m_fEndPairXY01(endPair)
     { }
-
+    
 protected:
     void childInit() {
         mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
@@ -255,7 +338,8 @@ protected:
             fCurR = fStartR * fDeltaR;
         } else {
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
-            fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
+            //            fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
+            fCurR = fStartR + (1 - fDeltaR) * (mEndPointRt.x - fStartR);
         }
         
         //CARTESIAN TRANSLATION
@@ -271,24 +355,11 @@ protected:
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
         } else {
             //here, fTranslationFactor grows linearly, the rest is constants
-            FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(kRadiusMax, mStartPointRt.y);
+//            FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(kRadiusMax, mStartPointRt.y);
+                        FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(mEndPointRt.x, mStartPointRt.y);
             curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first  - untranslatedEndOutPointXY01.x);
             curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second - untranslatedEndOutPointXY01.y);
         }
-        
-        //POLAR TRANSLATION
-//        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
-//        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
-//            //reverse direction when we reach halfway in return spiral
-//            fTranslationFactor = 1-fTranslationFactor;
-//        }
-//        
-//        FPoint untranslatedEndPointRt = FPoint(kRadiusMax, mStartPointRt.y);
-//        FPoint actualEndPointRt       = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second), false);
-//        fCurR += fTranslationFactor * (untranslatedEndPointRt.x - actualEndPointRt.x);
-//        fCurT += fTranslationFactor * (untranslatedEndPointRt.y - actualEndPointRt.y);
-//        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
-
         m_pMover->move(curPointXY01, kTrajectory);
     }
     
@@ -298,7 +369,6 @@ private:
     std::pair<float, float> m_fEndPairXY01;
     FPoint mStartPointRt, mEndPointRt;
 };
-
 // ================================================================================================
 class PendulumTrajectory : public Trajectory
 {
