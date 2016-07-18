@@ -1241,21 +1241,6 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
     }
 }
 
-
-void SpatGrisAudioProcessor::addToOutputs(int source, float sample, float **outputs, int f) {
-    const Array<float> &volumes = mOutVolumes[source];
-    for (int o = 0; o < mNumberOfSpeakers; ++o) {
-        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-        float a = dbToLinear(kSpeakerDefaultAttenuation);
-        float m = 1 - output_m[f];
-        float output_adj = a * m;
-        float *output = outputs[o];
-        output[f] += sample * volumes[o] * output_adj;
-    }
-}
-
-
-
 void SpatGrisAudioProcessor::setOutputVolume(int source, float volume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse) {
     float oldVolume = mOutVolumes[source][o];
     float targetVolume = volume;
@@ -1268,6 +1253,17 @@ void SpatGrisAudioProcessor::setOutputVolume(int source, float volume, float sm_
     }
 }
 
+void SpatGrisAudioProcessor::addToOutputs(int source, float sample, float **outputs, int f) {
+    const Array<float> &volumes = mOutVolumes[source];
+    for (int o = 0; o < mNumberOfSpeakers; ++o) {
+        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
+        float a = dbToLinear(kSpeakerDefaultAttenuation);
+        float m = 1 - output_m[f];
+        float output_adj = a * m;
+        float *output = outputs[o];
+        output[f] += sample * volumes[o] * output_adj;
+    }
+}
 
 float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples){
     // ramp all parameters using param smoothing parameter, except constant ones and speaker positions

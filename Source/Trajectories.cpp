@@ -241,9 +241,8 @@ protected:
         float fDeltaTheta, integralPart;
         int iMultiple = (m_bReturn ? 2 : 1);    //in return spiral, delta angle goes twice as fast
         fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
-        if (!m_bCCW){
+        if (m_bCCW){
             fDeltaTheta = -fDeltaTheta;
-            cout << m_bCCW << newLine;
         }
         
         //figure fCurR and fCurT. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
@@ -257,7 +256,6 @@ protected:
         } else {
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
-            cout << "out" << newLine;
         }
         
         //CARTESIAN TRANSLATION
