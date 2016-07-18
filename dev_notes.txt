@@ -292,3 +292,8 @@ sudo tcpdump port 9000
 i think the problem is just xcode on crack. using tcpdump, i see that touch osc messages are sent on
 en2 to 192.x.x.x, which is correct, and spatosc messages are sent on lo0, port 18032, and nothing is
 sent on the network. 
+
+-------------------- 2016-07-18 --------------------
+Moving on.
+
+Octogris clics audio

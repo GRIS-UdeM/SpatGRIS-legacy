@@ -219,6 +219,7 @@ private:
 class SpiralTrajectory : public Trajectory {
 public:
     JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
+    JUCE_COMPILER_WARNING("make a struct containing all trajectory parameters")
     SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
     : Trajectory(filter, p_pMover, duration, beats, times)
     , m_bCCW(ccw)
@@ -242,12 +243,13 @@ protected:
         fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
         if (!m_bCCW){
             fDeltaTheta = -fDeltaTheta;
+            cout << m_bCCW << newLine;
         }
         
         //figure fCurR and fCurT. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
         float fCurT   = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
         float fStartR = mStartPointRt.x;
-        float fDeltaR = (M_PI - fDeltaTheta) / M_PI;//(cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
+        float fDeltaR = (cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
         float fCurR;
         if (m_bGoingIn) {
             //fCurR simply goes [fStartR, 0] following a cosine curve
@@ -255,6 +257,7 @@ protected:
         } else {
             //fCurR goes from fStartR to kRadiusMax following a cosine curve
             fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
+            cout << "out" << newLine;
         }
         
         //CARTESIAN TRANSLATION
