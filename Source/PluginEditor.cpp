@@ -1596,7 +1596,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         Trajectory::Ptr t = mFilter->getTrajectory();
         //a trajectory exists, so we want to cancel it
         if (t) {
-            mFilter->setTrajectory(NULL);
+            mFilter->setTrajectory(nullptr);
             mFilter->setIsRecordingAutomation(false);
             mFilter->restoreCurrentLocations();
             mTrWriteButton->setButtonText("Ready");

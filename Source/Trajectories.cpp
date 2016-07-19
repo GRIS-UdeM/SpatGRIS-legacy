@@ -839,5 +839,5 @@ Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *f
         case ClosestSpeakerTarget:       return new ClosestSpeakerTargetTrajectory(filter, p_pMover, duration, beats, times);
     }
     jassert(0);
-    return NULL;
+    return nullptr;
 }

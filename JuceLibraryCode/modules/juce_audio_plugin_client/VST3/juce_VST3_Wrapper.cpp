@@ -27,7 +27,15 @@
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
 
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
+ #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+ #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
+#endif
+
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
+
+#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
@@ -54,8 +62,6 @@
   #pragma warning (pop)
  #endif
 #endif
-
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_VST3);
 
 namespace juce
 {
@@ -102,6 +108,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 
+class JuceVST3Component;
+
 //==============================================================================
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
@@ -109,6 +117,9 @@ class JuceVST3EditController : public Vst::EditController,
 {
 public:
     JuceVST3EditController (Vst::IHostApplication* host)
+       #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        : usingManagedParameter (false)
+       #endif
     {
         if (host != nullptr)
             host->queryInterface (FUnknown::iid, (void**) &hostContext);
@@ -180,11 +191,18 @@ public:
     }
 
     //==============================================================================
+    enum InternalParameters
+    {
+        paramPreset               = 0x70727374, // 'prst'
+        paramBypass               = 0x62797073, // 'byps'
+        paramMidiControllerOffset = 0x6d636d00  // 'mdm*'
+    };
+
     struct Param  : public Vst::Parameter
     {
-        Param (AudioProcessor& p, int index)  : owner (p), paramIndex (index)
+        Param (AudioProcessor& p, int index, Vst::ParamID paramID)  : owner (p), paramIndex (index)
         {
-            info.id = (Vst::ParamID) index;
+            info.id = paramID;
             toString128 (info.title, p.getParameterName (index));
             toString128 (info.shortTitle, p.getParameterName (index, 8));
             toString128 (info.units, p.getParameterLabel (index));
@@ -251,9 +269,9 @@ public:
     //==============================================================================
     struct BypassParam  : public Vst::Parameter
     {
-        BypassParam (AudioProcessor& p, int index)  : owner (p), paramIndex (index)
+        BypassParam (AudioProcessor& p, Vst::ParamID vstParamID)  : owner (p)
         {
-            info.id = (Vst::ParamID) index;
+            info.id = vstParamID;
             toString128 (info.title, "Bypass");
             toString128 (info.shortTitle, "Bypass");
             toString128 (info.units, "");
@@ -329,9 +347,81 @@ public:
 
     private:
         AudioProcessor& owner;
-        int paramIndex;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BypassParam)
+    };
+
+    //==============================================================================
+    struct ProgramChangeParameter  : public Vst::Parameter
+    {
+        ProgramChangeParameter (AudioProcessor& p)  : owner (p)
+        {
+            jassert (owner.getNumPrograms() > 1);
+
+            info.id = paramPreset;
+            toString128 (info.title, "Program");
+            toString128 (info.shortTitle, "Program");
+            toString128 (info.units, "");
+            info.stepCount = owner.getNumPrograms() - 1;
+            info.defaultNormalizedValue = static_cast<Vst::ParamValue> (owner.getCurrentProgram()) / static_cast<Vst::ParamValue> (info.stepCount);
+            info.unitId = Vst::kRootUnitId;
+            info.flags = Vst::ParameterInfo::kIsProgramChange | Vst::ParameterInfo::kCanAutomate;
+        }
+
+        virtual ~ProgramChangeParameter() {}
+
+        bool setNormalized (Vst::ParamValue v) override
+        {
+            Vst::ParamValue program = v * info.stepCount;
+
+            if (! isPositiveAndBelow ((int) program, owner.getNumPrograms()))
+                return false;
+
+            if (valueNormalized != v)
+            {
+                valueNormalized = v;
+                changed();
+                return true;
+            }
+
+            return false;
+        }
+
+        void toString (Vst::ParamValue value, Vst::String128 result) const override
+        {
+            Vst::ParamValue program = value * info.stepCount;
+            toString128 (result, owner.getProgramName ((int) program));
+        }
+
+        bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
+        {
+            const String paramValueString (getStringFromVstTChars (text));
+
+            const int n = owner.getNumPrograms();
+            for (int i = 0; i < n; ++i)
+            {
+                if (paramValueString == owner.getProgramName (i))
+                {
+                    outValueNormalized = static_cast<Vst::ParamValue> (i) / info.stepCount;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        static String getStringFromVstTChars (const Vst::TChar* text)
+        {
+            return juce::String (juce::CharPointer_UTF16 (reinterpret_cast<const juce::CharPointer_UTF16::CharType*> (text)));
+        }
+
+        Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v * info.stepCount; }
+        Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v / info.stepCount; }
+
+    private:
+        AudioProcessor& owner;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgramChangeParameter)
     };
 
     //==============================================================================
@@ -343,9 +433,13 @@ public:
             const int numParameters = pluginInstance->getNumParameters();
 
             for (int i = 0; i < numParameters; ++i)
-                setParamNormalized ((Vst::ParamID) i, (double) pluginInstance->getParameter (i));
+                setParamNormalized (getVSTParamIDForIndex (i), (double) pluginInstance->getParameter (i));
 
-            setParamNormalized ((Vst::ParamID) numParameters, audioProcessor->isBypassed ? 1.0f : 0.0f);
+            setParamNormalized (bypassParamID, audioProcessor->isBypassed ? 1.0f : 0.0f);
+
+            const int numPrograms = pluginInstance->getNumPrograms();
+            if (numPrograms > 1)
+                setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram()) / static_cast<Vst::ParamValue> (numPrograms - 1));
         }
 
         return Vst::EditController::setComponentState (stream);
@@ -382,15 +476,15 @@ public:
     tresult PLUGIN_API getMidiControllerAssignment (Steinberg::int32 /*busIndex*/, Steinberg::int16 channel,
                                                     Vst::CtrlNumber midiControllerNumber, Vst::ParamID& resultID) override
     {
-        resultID = (Vst::ParamID) midiControllerToParameter[channel][midiControllerNumber];
+        resultID = midiControllerToParameter[channel][midiControllerNumber];
 
         return kResultTrue; // Returning false makes some hosts stop asking for further MIDI Controller Assignments
     }
 
     // Converts an incoming parameter index to a MIDI controller:
-    bool getMidiControllerForParameter (int index, int& channel, int& ctrlNumber)
+    bool getMidiControllerForParameter (Vst::ParamID index, int& channel, int& ctrlNumber)
     {
-        const int mappedIndex = index - parameterToMidiControllerOffset;
+        const int mappedIndex = static_cast<int> (index - parameterToMidiControllerOffset);
 
         if (isPositiveAndBelow (mappedIndex, numElementsInArray (parameterToMidiController)))
         {
@@ -405,6 +499,13 @@ public:
         }
 
         return false;
+    }
+
+    inline bool isMidiControllerParamID (Vst::ParamID paramID) const noexcept
+    {
+        return (paramID >= parameterToMidiControllerOffset
+                    && isPositiveAndBelow (paramID - parameterToMidiControllerOffset,
+                                           static_cast<Vst::ParamID> (numElementsInArray (parameterToMidiController))));
     }
 
     //==============================================================================
@@ -423,19 +524,26 @@ public:
     }
 
     //==============================================================================
-    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit ((Vst::ParamID) index); }
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit (getVSTParamIDForIndex (index)); }
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
         // NB: Cubase has problems if performEdit is called without setParamNormalized
-        EditController::setParamNormalized ((Vst::ParamID) index, (double) newValue);
-        performEdit ((Vst::ParamID) index, (double) newValue);
+        EditController::setParamNormalized (getVSTParamIDForIndex (index), (double) newValue);
+        performEdit (getVSTParamIDForIndex (index), (double) newValue);
     }
 
-    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit ((Vst::ParamID) index); }
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit (getVSTParamIDForIndex (index)); }
 
     void audioProcessorChanged (AudioProcessor*) override
     {
+        if (AudioProcessor* pluginInstance = getPluginInstance())
+        {
+            if (pluginInstance->getNumPrograms() > 1)
+                EditController::setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                                               / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+        }
+
         if (componentHandler != nullptr)
             componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged);
     }
@@ -450,6 +558,9 @@ public:
     }
 
 private:
+
+    friend class JuceVST3Component;
+
     //==============================================================================
     ComSmartPtr<JuceAudioProcessor> audioProcessor;
     ScopedJuceInitialiser_GUI libraryInitialiser;
@@ -462,9 +573,17 @@ private:
     };
 
     enum { numMIDIChannels = 16 };
-    int parameterToMidiControllerOffset;
+    Vst::ParamID parameterToMidiControllerOffset;
     MidiController parameterToMidiController[numMIDIChannels * Vst::kCountCtrlNumber];
-    int midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
+    Vst::ParamID midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
+
+    //==============================================================================
+   #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    bool usingManagedParameter;
+    Array<Vst::ParamID> vstParamIDs;
+   #endif
+    Vst::ParamID bypassParamID;
+
 
     //==============================================================================
     void setupParameters()
@@ -473,40 +592,61 @@ private:
         {
             pluginInstance->addListener (this);
 
+           #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+            const bool usingManagedParameter = false;
+           #endif
+
             if (parameters.getParameterCount() <= 0)
             {
                 const int numParameters = pluginInstance->getNumParameters();
 
-                for (int i = 0; i < numParameters; ++i)
-                    parameters.addParameter (new Param (*pluginInstance, i));
+              #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+                usingManagedParameter = (pluginInstance->getParameters().size() == numParameters);
+              #endif
 
-                parameters.addParameter (new BypassParam (*pluginInstance, numParameters));
+                for (int i = 0; i < numParameters; ++i)
+                {
+                   #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+                    const Vst::ParamID vstParamID = static_cast<Vst::ParamID> (i);
+                   #else
+                    const Vst::ParamID vstParamID = generateVSTParamIDForIndex (pluginInstance, i);
+                    vstParamIDs.add (vstParamID);
+                   #endif
+
+                    parameters.addParameter (new Param (*pluginInstance, i, vstParamID));
+                }
+
+                bypassParamID = static_cast<Vst::ParamID> (usingManagedParameter ? paramBypass : numParameters);
+                parameters.addParameter (new BypassParam (*pluginInstance, bypassParamID));
+
+                if (pluginInstance->getNumPrograms() > 1)
+                    parameters.addParameter (new ProgramChangeParameter (*pluginInstance));
             }
 
            #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-            // (NB: the +1 is to account for the bypass parameter)
-            initialiseMidiControllerMappings (pluginInstance->getNumParameters() + 1);
+            parameterToMidiControllerOffset = static_cast<Vst::ParamID> (usingManagedParameter ? paramMidiControllerOffset
+                                                                                               : parameters.getParameterCount());
+
+            initialiseMidiControllerMappings ();
            #endif
 
             audioProcessorChanged (pluginInstance);
         }
     }
 
-    void initialiseMidiControllerMappings (const int numVstParameters)
+    void initialiseMidiControllerMappings ()
     {
-        parameterToMidiControllerOffset = numVstParameters;
-
         for (int c = 0, p = 0; c < numMIDIChannels; ++c)
         {
             for (int i = 0; i < Vst::kCountCtrlNumber; ++i, ++p)
             {
-                midiControllerToParameter[c][i] = p + parameterToMidiControllerOffset;
+                midiControllerToParameter[c][i] = static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset;
                 parameterToMidiController[p].channel = c;
                 parameterToMidiController[p].ctrlNumber = i;
 
                 parameters.addParameter (new Vst::Parameter (toString ("MIDI CC " + String (c) + "|" + String (i)),
-                                         (Vst::ParamID) (p + parameterToMidiControllerOffset), 0, 0, 0,
-                                         Vst::ParameterInfo::kCanAutomate, Vst::kRootUnitId));
+                                          static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, 0, 0, 0,
+                                          Vst::ParameterInfo::kCanAutomate, Vst::kRootUnitId));
             }
         }
     }
@@ -523,6 +663,34 @@ private:
             sendMessage (message);
         }
     }
+
+    //==============================================================================
+   #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    inline Vst::ParamID getVSTParamIDForIndex (int paramIndex) const noexcept   { return static_cast<Vst::ParamID> (paramIndex); }
+   #else
+    static Vst::ParamID generateVSTParamIDForIndex (AudioProcessor* const pluginFilter, int paramIndex)
+    {
+        jassert (pluginFilter != nullptr);
+
+        const int n = pluginFilter->getNumParameters();
+        const bool managedParameter = (pluginFilter->getParameters().size() == n);
+
+        if (isPositiveAndBelow (paramIndex, n))
+        {
+            const String& juceParamID = pluginFilter->getParameterID (paramIndex);
+            return managedParameter ? static_cast<Vst::ParamID> (juceParamID.hashCode())
+                                    : static_cast<Vst::ParamID> (juceParamID.getIntValue());
+        }
+
+        return static_cast<Vst::ParamID> (-1);
+    }
+
+    inline Vst::ParamID getVSTParamIDForIndex (int paramIndex) const noexcept
+    {
+        return usingManagedParameter ? vstParamIDs.getReference (paramIndex)
+                                     : static_cast<Vst::ParamID> (paramIndex);
+    }
+   #endif
 
     //==============================================================================
     class JuceVST3Editor : public Vst::EditorView
@@ -627,14 +795,30 @@ private:
             return kResultFalse;
         }
 
-        tresult PLUGIN_API canResize() override         { return kResultTrue; }
+        tresult PLUGIN_API canResize() override
+        {
+            if (component != nullptr)
+                if (AudioProcessorEditor* editor = component->pluginEditor)
+                    return editor->isResizable() ? kResultTrue : kResultFalse;
+
+            return kResultFalse;
+        }
 
         tresult PLUGIN_API checkSizeConstraint (ViewRect* rectToCheck) override
         {
             if (rectToCheck != nullptr && component != nullptr)
             {
-                rectToCheck->right  = rectToCheck->left + component->getWidth();
-                rectToCheck->bottom = rectToCheck->top  + component->getHeight();
+                // checkSizeConstraint
+                Rectangle<int> juceRect = Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                              rectToCheck->right, rectToCheck->bottom);
+                if (AudioProcessorEditor* editor = component->pluginEditor)
+                    if (ComponentBoundsConstrainer* constrainer = editor->getConstrainer())
+                        juceRect.setSize (jlimit (constrainer->getMinimumWidth(),  constrainer->getMaximumWidth(),  juceRect.getWidth()),
+                                          jlimit (constrainer->getMinimumHeight(), constrainer->getMaximumHeight(), juceRect.getHeight()));
+
+                rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
+                rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
+
                 return kResultTrue;
             }
 
@@ -648,8 +832,8 @@ private:
         {
         public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-               : owner (editor),
-                 pluginEditor (plugin.createEditorIfNeeded())
+               : pluginEditor (plugin.createEditorIfNeeded()),
+                 owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
@@ -720,9 +904,10 @@ private:
                 }
             }
 
+            ScopedPointer<AudioProcessorEditor> pluginEditor;
+
         private:
             JuceVST3Editor& owner;
-            ScopedPointer<AudioProcessorEditor> pluginEditor;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -803,7 +988,11 @@ public:
         processSetup.sampleRate = 44100.0;
         processSetup.symbolicSampleSize = Vst::kSample32;
 
-        vstBypassParameterId = pluginInstance->getNumParameters();
+       #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        vstBypassParameterId = static_cast<Vst::ParamID> (pluginInstance->getNumParameters());
+       #else
+        cacheParameterIDs();
+       #endif
 
         pluginInstance->setPlayHead (this);
     }
@@ -1256,7 +1445,7 @@ public:
     {
         if (listIndex == 0)
         {
-            info.id = paramPreset;
+            info.id = JuceVST3EditController::paramPreset;
             info.programCount = (Steinberg::int32) getPluginInstance().getNumPrograms();
 
             toString128 (info.name, TRANS("Factory Presets"));
@@ -1271,7 +1460,7 @@ public:
 
     tresult PLUGIN_API getProgramName (Vst::ProgramListID listId, Steinberg::int32 programIndex, Vst::String128 name) override
     {
-        if (listId == paramPreset
+        if (listId == JuceVST3EditController::paramPreset
             && isPositiveAndBelow ((int) programIndex, getPluginInstance().getNumPrograms()))
         {
             toString128 (name, getPluginInstance().getProgramName ((int) programIndex));
@@ -1399,7 +1588,7 @@ public:
             info.flags = Vst::BusInfo::kDefaultActive;
 
            #if JucePlugin_WantsMidiInput
-            if (dir == Vst::kInput)
+            if (dir == Vst::kInput && index == 0)
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
@@ -1411,7 +1600,7 @@ public:
            #endif
 
            #if JucePlugin_ProducesMidiOutput
-            if (dir == Vst::kOutput)
+            if (dir == Vst::kOutput && index == 0)
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
@@ -1613,22 +1802,35 @@ public:
 
                 if (paramQueue->getPoint (numPoints - 1,  offsetSamples, value) == kResultTrue)
                 {
-                    const int id = (int) paramQueue->getParameterId();
+                    const Vst::ParamID vstParamID = paramQueue->getParameterId();
 
-                    if (isPositiveAndBelow (id, pluginInstance->getNumParameters()))
-                        pluginInstance->setParameter (id, static_cast<float> (value));
-                    else if (id == vstBypassParameterId)
+                    if (vstParamID == vstBypassParameterId)
                         setBypassed (static_cast<float> (value) != 0.0f);
                    #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-                    else
-                        addParameterChangeToMidiBuffer (offsetSamples, id, value);
+                    else if (juceVST3EditController->isMidiControllerParamID (vstParamID))
+                        addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
                    #endif
+                    else if (vstParamID == JuceVST3EditController::paramPreset)
+                    {
+                        const int numPrograms  = pluginInstance->getNumPrograms();
+                        const int programValue = roundToInt (value * numPrograms);
+
+                        if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
+                                            && programValue != pluginInstance->getCurrentProgram())
+                            pluginInstance->setCurrentProgram (programValue);
+                    }
+                    else
+                    {
+                        const int index = getJuceIndexForVSTParamID (vstParamID);
+                        if (isPositiveAndBelow (index, pluginInstance->getNumParameters()))
+                            pluginInstance->setParameter (index, static_cast<float> (value));
+                    }
                 }
             }
         }
     }
 
-    void addParameterChangeToMidiBuffer (const Steinberg::int32 offsetSamples, const int id, const double value)
+    void addParameterChangeToMidiBuffer (const Steinberg::int32 offsetSamples, const Vst::ParamID id, const double value)
     {
         // If the parameter is mapped to a MIDI CC message then insert it into the midiBuffer.
         int channel, ctrlNumber;
@@ -1717,7 +1919,12 @@ private:
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
-    int vstBypassParameterId;
+   #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    bool usingManagedParameter;
+    Array<Vst::ParamID> vstParamIDs;
+    HashMap<int32, int> paramMap;
+   #endif
+    Vst::ParamID vstBypassParameterId;
 
     static const char* kJucePrivateDataIdentifier;
 
@@ -1862,12 +2069,6 @@ private:
         return AudioBusPointerHelper<FloatType>::impl (data);
     }
 
-    //==============================================================================
-    enum InternalParameters
-    {
-        paramPreset = 'prst'
-    };
-
     void preparePlugin (double sampleRate, int bufferSize)
     {
         AudioProcessor& p = getPluginInstance();
@@ -1875,6 +2076,40 @@ private:
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
         p.prepareToPlay (sampleRate, bufferSize);
     }
+
+    //==============================================================================
+   #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    inline Vst::ParamID getVSTParamIDForIndex (int paramIndex) const noexcept   { return static_cast<Vst::ParamID> (paramIndex); }
+    inline int getJuceIndexForVSTParamID (Vst::ParamID paramID) const noexcept  { return static_cast<int> (paramID); }
+   #else
+    void cacheParameterIDs()
+    {
+        const int numParameters = pluginInstance->getNumParameters();
+        usingManagedParameter = (pluginInstance->getParameters().size() == numParameters);
+
+        vstBypassParameterId = static_cast<Vst::ParamID> (usingManagedParameter ? JuceVST3EditController::paramBypass : numParameters);
+
+        for (int i = 0; i < numParameters; ++i)
+        {
+            const Vst::ParamID paramID = JuceVST3EditController::generateVSTParamIDForIndex (pluginInstance, i);
+
+            vstParamIDs.add (paramID);
+            paramMap.set (static_cast<int32> (paramID), i);
+        }
+    }
+
+    inline Vst::ParamID getVSTParamIDForIndex (int paramIndex) const noexcept
+    {
+        return usingManagedParameter ? vstParamIDs.getReference (paramIndex)
+                                     : static_cast<Vst::ParamID> (paramIndex);
+    }
+
+    inline int getJuceIndexForVSTParamID (Vst::ParamID paramID) const noexcept
+    {
+        return usingManagedParameter ? paramMap[static_cast<int32> (paramID)]
+                                     : static_cast<int> (paramID);
+    }
+   #endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
@@ -2264,7 +2499,7 @@ private:
 // The VST3 plugin entry point.
 JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 {
-    JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST3);
+    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST3;
 
    #if JUCE_WINDOWS
     // Cunning trick to force this function to be exported. Life's too short to
