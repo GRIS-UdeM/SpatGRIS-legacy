@@ -233,10 +233,10 @@
  #define JucePlugin_ManufacturerEmail      ""
 #endif
 #ifndef  JucePlugin_ManufacturerCode
- #define JucePlugin_ManufacturerCode       'UdeM'
+ #define JucePlugin_ManufacturerCode       0x5564654d // 'UdeM'
 #endif
 #ifndef  JucePlugin_PluginCode
- #define JucePlugin_PluginCode             'Spat'
+ #define JucePlugin_PluginCode             0x53706174 // 'Spat'
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
@@ -254,13 +254,13 @@
  #define JucePlugin_EditorRequiresKeyboardFocus  0
 #endif
 #ifndef  JucePlugin_Version
- #define JucePlugin_Version                0.1.1
+ #define JucePlugin_Version                0.1.2
 #endif
 #ifndef  JucePlugin_VersionCode
- #define JucePlugin_VersionCode            0x101
+ #define JucePlugin_VersionCode            0x102
 #endif
 #ifndef  JucePlugin_VersionString
- #define JucePlugin_VersionString          "0.1.1"
+ #define JucePlugin_VersionString          "0.1.2"
 #endif
 #ifndef  JucePlugin_VSTUniqueID
  #define JucePlugin_VSTUniqueID            JucePlugin_PluginCode

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.1.1"
+<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.1.2"
               bundleIdentifier="com.UdeM.SpatGRIS" includeBinaryInAppConfig="1"
               buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="SpatGris" pluginDesc="SpatGris" pluginManufacturer="UdeM"
@@ -8,7 +8,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="SpatGrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris"
-              pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.2.1"
+              pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.2.3"
               pluginIsMidiEffectPlugin="0" companyName="UdeM" buildAUv3="0">
   <MAINGROUP id="rRl79u" name="SpatGRIS">
     <GROUP id="{48A026D6-2EE7-E714-8C68-003BA85B16C8}" name="GrisCommonFiles">
