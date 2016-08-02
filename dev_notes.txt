@@ -322,5 +322,17 @@ so what are the problems here?
 this is necessarily a problem.  reaper sometime makes a jump at the start, but not DP, so i think this is a reaper problem. 
 
 
+---------------------- 2016-08-02 --------------------
+ok. spatgris is using 4.2.3
+octogris is using 4.1.0, DO NOT MESS WITH THE JUCE VERSION. creates lots of problems.
+* o12
+    so 3 problems:
+        * new reaper project cannot do multiphonics. Old project can...!
+        * DP thinks the o12 modes are in fact o2 modes. This seems like a real problem.
+        * in DP, for spatgris, speaker 4 is outputing in speaker 5, the LFE (or whatever) is reversed
 
+TODO TODAY
+
+* new spatgris version
+* new octogris version
 
