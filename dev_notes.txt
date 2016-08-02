@@ -329,7 +329,7 @@ octogris is using 4.1.0, DO NOT MESS WITH THE JUCE VERSION. creates lots of prob
     so 3 problems:
         * new reaper project cannot do multiphonics. Old project can...!
         * DP thinks the o12 modes are in fact o2 modes. This seems like a real problem.
-        * in DP, for spatgris, speaker 4 is outputing in speaker 5, the LFE (or whatever) is reversed
+        * in DP, for spatgris, speaker 4 is outputing in speaker 5, the LFE (or whatever) is reversed. 
 
 TODO TODAY
 
