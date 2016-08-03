@@ -25,12 +25,11 @@
 #ifndef JUCE_VST3PLUGINFORMAT_H_INCLUDED
 #define JUCE_VST3PLUGINFORMAT_H_INCLUDED
 
-#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)) || DOXYGEN
-
+#if JUCE_PLUGINHOST_VST3
 /**
     Implements a plugin format for VST3s.
 */
-class JUCE_API VST3PluginFormat   : public AudioPluginFormat
+class JUCE_API VST3PluginFormat : public AudioPluginFormat
 {
 public:
     /** Constructor */
@@ -40,27 +39,32 @@ public:
     ~VST3PluginFormat();
 
     //==============================================================================
-    String getName() const override             { return "VST3"; }
-    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
+    /** @internal */
+    String getName() const override { return "VST3"; }
+    /** @internal */
+    void findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier) override;
+    /** @internal */
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& description, double, int) override;
+    /** @internal */
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
+    /** @internal */
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
-    bool pluginNeedsRescanning (const PluginDescription&) override;
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
-    bool doesPluginStillExist (const PluginDescription&) override;
+    /** @internal */
+    bool pluginNeedsRescanning (const PluginDescription& description) override;
+    /** @internal */
+    StringArray searchPathsForPlugins (const FileSearchPath& searchPath, bool recursive) override;
+    /** @internal */
+    bool doesPluginStillExist (const PluginDescription& description) override;
+    /** @internal */
     FileSearchPath getDefaultLocationsToSearch() override;
-    bool canScanForPlugins() const override     { return true; }
-
-private:
-    void createPluginInstance (const PluginDescription&, double initialSampleRate,
-                               int initialBufferSize, void* userData,
-                               void (*callback) (void*, AudioPluginInstance*, const String&)) override;
-
-    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
+    /** @internal */
+    bool canScanForPlugins() const override { return true; }
 
 private:
     //==============================================================================
     void recursiveFileSearch (StringArray&, const File&, bool recursive);
 
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginFormat)
 };
 

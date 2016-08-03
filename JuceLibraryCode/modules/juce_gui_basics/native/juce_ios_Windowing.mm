@@ -39,7 +39,6 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 {
 }
 
-@property (strong, nonatomic) UIWindow *window;
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;
@@ -118,33 +117,27 @@ int juce_iOSMain (int argc, const char* argv[])
 //==============================================================================
 void LookAndFeel::playAlertSound()
 {
-    // TODO
+    //xxx
+    //AudioServicesPlaySystemSound ();
 }
 
 //==============================================================================
 class iOSMessageBox;
 
-#if defined (__IPHONE_8_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
- #define JUCE_USE_NEW_IOS_ALERTWINDOW 1
-#endif
+} // (juce namespace)
 
-#if ! JUCE_USE_NEW_IOS_ALERTWINDOW
-    } // (juce namespace)
+@interface JuceAlertBoxDelegate  : NSObject <UIAlertViewDelegate>
+{
+@public
+    iOSMessageBox* owner;
+}
 
-    @interface JuceAlertBoxDelegate  : NSObject <UIAlertViewDelegate>
-    {
-    @public
-        iOSMessageBox* owner;
-    }
+- (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex;
 
-    - (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex;
+@end
 
-    @end
-
-    namespace juce
-    {
-#endif
-
+namespace juce
+{
 
 class iOSMessageBox
 {
@@ -152,30 +145,9 @@ public:
     iOSMessageBox (const String& title, const String& message,
                    NSString* button1, NSString* button2, NSString* button3,
                    ModalComponentManager::Callback* cb, const bool async)
-        : result (0), resultReceived (false), callback (cb), isAsync (async)
+        : result (0), resultReceived (false), delegate (nil), alert (nil),
+          callback (cb), isYesNo (button3 != nil), isAsync (async)
     {
-       #if JUCE_USE_NEW_IOS_ALERTWINDOW
-        if (currentlyFocusedPeer != nullptr)
-        {
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle: juceStringToNS (title)
-                                                                           message: juceStringToNS (message)
-                                                                    preferredStyle: UIAlertControllerStyleAlert];
-            addButton (alert, button1, 0);
-            addButton (alert, button2, 1);
-            addButton (alert, button3, 2);
-
-            [currentlyFocusedPeer->controller presentViewController: alert
-                                                           animated: YES
-                                                         completion: nil];
-        }
-        else
-        {
-            // Since iOS8, alert windows need to be associated with a window, so you need to
-            // have at least one window on screen when you use this
-            jassertfalse;
-        }
-
-       #else
         delegate = [[JuceAlertBoxDelegate alloc] init];
         delegate->owner = this;
 
@@ -186,15 +158,12 @@ public:
                                  otherButtonTitles: button2, button3, nil];
         [alert retain];
         [alert show];
-       #endif
     }
 
     ~iOSMessageBox()
     {
-       #if ! JUCE_USE_NEW_IOS_ALERTWINDOW
         [alert release];
         [delegate release];
-       #endif
     }
 
     int getResult()
@@ -203,11 +172,7 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-           #if JUCE_USE_NEW_IOS_ALERTWINDOW
-            while (! resultReceived)
-           #else
             while (! (alert.hidden || resultReceived))
-           #endif
                 [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
 
@@ -229,43 +194,28 @@ public:
 private:
     int result;
     bool resultReceived;
-    ScopedPointer<ModalComponentManager::Callback> callback;
-    const bool isAsync;
-
-   #if JUCE_USE_NEW_IOS_ALERTWINDOW
-    void addButton (UIAlertController* alert, NSString* text, int index)
-    {
-        if (text != nil)
-            [alert addAction: [UIAlertAction actionWithTitle: text
-                                                       style: UIAlertActionStyleDefault
-                                                     handler: ^(UIAlertAction*) { this->buttonClicked (index); }]];
-    }
-   #else
-    UIAlertView* alert;
     JuceAlertBoxDelegate* delegate;
-   #endif
+    UIAlertView* alert;
+    ScopedPointer<ModalComponentManager::Callback> callback;
+    const bool isYesNo, isAsync;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)
 };
 
+} // (juce namespace)
 
-#if ! JUCE_USE_NEW_IOS_ALERTWINDOW
-    } // (juce namespace)
+@implementation JuceAlertBoxDelegate
 
-    @implementation JuceAlertBoxDelegate
+- (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex
+{
+    owner->buttonClicked ((int) buttonIndex);
+    alertView.hidden = true;
+}
 
-    - (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex
-    {
-        owner->buttonClicked ((int) buttonIndex);
-        alertView.hidden = true;
-    }
+@end
 
-    @end
-
-    namespace juce
-    {
-#endif
-
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_MODAL_LOOPS_PERMITTED
@@ -334,15 +284,11 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String&)
 //==============================================================================
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
-    if (! SystemStats::isRunningInAppExtensionSandbox())
-        [[UIApplication sharedApplication] setIdleTimerDisabled: ! isEnabled];
+    [[UIApplication sharedApplication] setIdleTimerDisabled: ! isEnabled];
 }
 
 bool Desktop::isScreenSaverEnabled()
 {
-    if (SystemStats::isRunningInAppExtensionSandbox())
-        return true;
-
     return ! [[UIApplication sharedApplication] isIdleTimerDisabled];
 }
 
@@ -355,7 +301,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 //==============================================================================
 Image juce_createIconForFile (const File&)
 {
-    return Image();
+    return Image::null;
 }
 
 //==============================================================================
@@ -367,7 +313,10 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 String SystemClipboard::getTextFromClipboard()
 {
-    return nsStringToJuce ([[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"]);
+    if (NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"])
+        return nsStringToJuce (text);
+
+    return String();
 }
 
 //==============================================================================
@@ -398,10 +347,7 @@ double Desktop::getDefaultMasterScale()
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
-    UIInterfaceOrientation orientation = SystemStats::isRunningInAppExtensionSandbox() ? UIInterfaceOrientationPortrait
-                                                                                       : [[UIApplication sharedApplication] statusBarOrientation];
-
-    return Orientations::convertToJuce (orientation);
+    return Orientations::convertToJuce ([[UIApplication sharedApplication] statusBarOrientation]);
 }
 
 void Desktop::Displays::findDisplays (float masterScale)
@@ -411,7 +357,8 @@ void Desktop::Displays::findDisplays (float masterScale)
         UIScreen* s = [UIScreen mainScreen];
 
         Display d;
-        d.userArea = d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds])) / masterScale;
+        d.userArea  = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s applicationFrame])) / masterScale;
+        d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds])) / masterScale;
         d.isMain = true;
         d.scale = masterScale;
 

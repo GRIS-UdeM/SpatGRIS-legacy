@@ -223,7 +223,7 @@ public:
     }
 
     /** Returns true if the array is empty, false otherwise. */
-    inline bool isEmpty() const noexcept
+    inline bool empty() const noexcept
     {
         return size() == 0;
     }
@@ -540,17 +540,13 @@ public:
         will be done.
 
         @param newElement   the new object to add to the array
-        @return             true if the element was added to the array; false otherwise.
     */
-    bool addIfNotAlreadyThere (ParameterType newElement)
+    void addIfNotAlreadyThere (ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
 
-        if (contains (newElement))
-            return false;
-
-        add (newElement);
-        return true;
+        if (! contains (newElement))
+            add (newElement);
     }
 
     /** Replaces an element with a new value.
@@ -766,8 +762,8 @@ public:
     template <typename ElementComparator, typename TargetValueType>
     int indexOfSorted (ElementComparator& comparator, TargetValueType elementToLookFor) const
     {
-        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
-                                   // avoids getting warning messages about the parameter being unused
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
 
@@ -1120,8 +1116,8 @@ public:
                const bool retainOrderOfEquivalentItems = false)
     {
         const ScopedLockType lock (getLock());
-        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
-                                   // avoids getting warning messages about the parameter being unused
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
         sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 

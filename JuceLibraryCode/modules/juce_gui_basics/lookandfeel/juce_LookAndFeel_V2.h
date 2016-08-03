@@ -173,8 +173,6 @@ public:
                           bool isMouseOverItem, bool isMenuOpen, bool isMouseOverBar,
                           MenuBarComponent&) override;
 
-    Component* getParentComponentForMenuOptions (const PopupMenu::Options& options) override;
-
     //==============================================================================
     void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
                        int buttonX, int buttonY, int buttonW, int buttonH,

@@ -70,45 +70,8 @@ File& File::operator= (File&& other) noexcept
 
 const File File::nonexistent;
 
+
 //==============================================================================
-static String removeEllipsis (const String& path)
-{
-    // This will quickly find both /../ and /./ at the expense of a minor
-    // false-positive performance hit when path elements end in a dot.
-   #if JUCE_WINDOWS
-    if (path.contains (".\\"))
-   #else
-    if (path.contains ("./"))
-   #endif
-    {
-        StringArray toks;
-        toks.addTokens (path, File::separatorString, StringRef());
-        bool anythingChanged = false;
-
-        for (int i = 1; i < toks.size(); ++i)
-        {
-            const String& t = toks[i];
-
-            if (t == ".." && toks[i - 1] != "..")
-            {
-                anythingChanged = true;
-                toks.removeRange (i - 1, 2);
-                i = jmax (0, i - 2);
-            }
-            else if (t == ".")
-            {
-                anythingChanged = true;
-                toks.remove (i--);
-            }
-        }
-
-        if (anythingChanged)
-            return toks.joinIntoString (File::separatorString);
-    }
-
-    return path;
-}
-
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
@@ -116,7 +79,7 @@ String File::parseAbsolutePath (const String& p)
 
 #if JUCE_WINDOWS
     // Windows..
-    String path (removeEllipsis (p.replaceCharacter ('/', '\\')));
+    String path (p.replaceCharacter ('/', '\\'));
 
     if (path.startsWithChar (separator))
     {
@@ -155,7 +118,7 @@ String File::parseAbsolutePath (const String& p)
     // If that's why you've ended up here, use File::getChildFile() to build your paths instead.
     jassert ((! p.containsChar ('\\')) || (p.indexOfChar ('/') >= 0 && p.indexOfChar ('/') < p.indexOfChar ('\\')));
 
-    String path (removeEllipsis (p));
+    String path (p);
 
     if (path.startsWithChar ('~'))
     {
@@ -384,69 +347,62 @@ int64 File::hashCode64() const  { return fullPath.hashCode64(); }
 //==============================================================================
 bool File::isAbsolutePath (StringRef path)
 {
-    const juce_wchar firstChar = *(path.text);
-
-    return firstChar == separator
+    return path.text[0] == separator
            #if JUCE_WINDOWS
-            || (firstChar != 0 && path.text[1] == ':');
+            || (path.isNotEmpty() && path.text[1] == ':');
            #else
-            || firstChar == '~';
+            || path.text[0] == '~';
            #endif
 }
 
 File File::getChildFile (StringRef relativePath) const
 {
-    String::CharPointerType r = relativePath.text;
+    if (isAbsolutePath (relativePath))
+        return File (String (relativePath.text));
 
-    if (isAbsolutePath (r))
-        return File (String (r));
-
-   #if JUCE_WINDOWS
-    if (r.indexOf ((juce_wchar) '/') >= 0)
-        return getChildFile (String (r).replaceCharacter ('/', '\\'));
-   #endif
+    if (relativePath[0] != '.')
+        return File (addTrailingSeparator (fullPath) + relativePath);
 
     String path (fullPath);
 
-    while (*r == '.')
+    // It's relative, so remove any ../ or ./ bits at the start..
+   #if JUCE_WINDOWS
+    if (relativePath.text.indexOf ((juce_wchar) '/') >= 0)
+        return getChildFile (String (relativePath.text).replaceCharacter ('/', '\\'));
+   #endif
+
+    while (relativePath[0] == '.')
     {
-        String::CharPointerType lastPos = r;
-        const juce_wchar secondChar = *++r;
+        const juce_wchar secondChar = relativePath[1];
 
-        if (secondChar == '.') // remove "../"
+        if (secondChar == '.')
         {
-            const juce_wchar thirdChar = *++r;
+            const juce_wchar thirdChar = relativePath[2];
 
-            if (thirdChar == separator || thirdChar == 0)
+            if (thirdChar == 0 || thirdChar == separator)
             {
                 const int lastSlash = path.lastIndexOfChar (separator);
                 if (lastSlash >= 0)
                     path = path.substring (0, lastSlash);
 
-                while (*r == separator) // ignore duplicate slashes
-                    ++r;
+                relativePath = relativePath.text + (thirdChar == 0 ? 2 : 3);
             }
             else
             {
-                r = lastPos;
                 break;
             }
         }
-        else if (secondChar == separator || secondChar == 0)  // remove "./"
+        else if (secondChar == separator)
         {
-            while (*r == separator) // ignore duplicate slashes
-                ++r;
+            relativePath = relativePath.text + 2;
         }
         else
         {
-            r = lastPos;
             break;
         }
     }
 
-    path = addTrailingSeparator (path);
-    path.appendCharPointer (r);
-    return File (path);
+    return File (addTrailingSeparator (path) + relativePath);
 }
 
 File File::getSiblingFile (StringRef fileName) const
@@ -1063,19 +1019,6 @@ public:
         expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
         expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
         expect (tempFile.hasWriteAccess());
-
-        expect (home.getChildFile (".") == home);
-        expect (home.getChildFile ("..") == home.getParentDirectory());
-        expect (home.getChildFile (".xyz").getFileName() == ".xyz");
-        expect (home.getChildFile ("..xyz").getFileName() == "..xyz");
-        expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
-        expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
-        expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
-        expect (home.getChildFile ("../xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile (".././xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile (".././xyz/./abc") == home.getParentDirectory().getChildFile ("xyz/abc"));
-        expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
 
         {
             FileOutputStream fo (tempFile);

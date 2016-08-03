@@ -137,7 +137,8 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int index)
 AudioCDReader::AudioCDReader (const File& volume)
    : AudioFormatReader (0, "CD Audio"),
      volumeDir (volume),
-     currentReaderTrack (-1)
+     currentReaderTrack (-1),
+     reader (0)
 {
      sampleRate = 44100.0;
      bitsPerSample = 16;
@@ -168,7 +169,7 @@ void AudioCDReader::refreshTrackLengths()
     {
         XmlDocument doc (toc);
         const char* error = CDReaderHelpers::getTrackOffsets (doc, trackStartSamples);
-        ignoreUnused (error); // could be logged..
+        (void) error; // could be logged..
 
         lengthInSamples = trackStartSamples.getLast() - trackStartSamples.getFirst();
     }

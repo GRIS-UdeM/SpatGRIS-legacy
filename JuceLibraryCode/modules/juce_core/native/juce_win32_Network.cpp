@@ -53,7 +53,7 @@ public:
             if (! isError())
             {
                 DWORD bufferSizeBytes = 4096;
-                StringPairArray dataHeaders;
+                StringPairArray dataHeaders (false);
 
                 for (;;)
                 {

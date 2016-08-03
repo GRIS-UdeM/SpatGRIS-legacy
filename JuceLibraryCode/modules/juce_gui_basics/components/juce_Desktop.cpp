@@ -386,14 +386,10 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
 //==============================================================================
 void Desktop::setOrientationsEnabled (const int newOrientations)
 {
-    if (allowedOrientations != newOrientations)
-    {
-        // Dodgy set of flags being passed here! Make sure you specify at least one permitted orientation.
-        jassert (newOrientations != 0 && (newOrientations & ~allOrientations) == 0);
+    // Dodgy set of flags being passed here! Make sure you specify at least one permitted orientation.
+    jassert (newOrientations != 0 && (newOrientations & ~allOrientations) == 0);
 
-        allowedOrientations = newOrientations;
-        allowedOrientationsChanged();
-    }
+    allowedOrientations = newOrientations;
 }
 
 bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const noexcept

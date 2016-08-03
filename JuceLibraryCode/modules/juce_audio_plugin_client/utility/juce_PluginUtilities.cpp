@@ -26,14 +26,12 @@
  #include <windows.h>
 #endif
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+// Your project must contain an AppConfig.h file with your project-specific settings in it,
+// and your header search path must make it accessible to the module's files.
+#include "AppConfig.h"
+
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
-
-namespace juce
-{
-    AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
-}
 
 #if _MSC_VER || JUCE_MINGW
 
@@ -56,7 +54,7 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
     }
    #endif
 
-    ignoreUnused (reserved);
+    (void) reserved;
     return TRUE;
 }
 
@@ -68,7 +66,7 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
-AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
+AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
 {
     AudioProcessor::setTypeOfNextNewPlugin (type);
     AudioProcessor* const pluginInstance = createPluginFilter();

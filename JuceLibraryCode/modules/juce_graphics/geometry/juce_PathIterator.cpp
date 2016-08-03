@@ -26,6 +26,8 @@
  #pragma optimize ("t", on)
 #endif
 
+const float PathFlatteningIterator::defaultTolerance = 0.6f;
+
 //==============================================================================
 PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
                                                 const AffineTransform& transform_,

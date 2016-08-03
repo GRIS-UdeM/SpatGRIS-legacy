@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,10 +22,11 @@
   ==============================================================================
 */
 
+
 #if JUCE_COMPILER_SUPPORTS_LAMBDAS
 
 //==============================================================================
-struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameterWithID,
+struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameter,
                                                    private ValueTree::Listener
 {
     Parameter (AudioProcessorValueTreeState& s,
@@ -33,8 +34,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                NormalisableRange<float> r, float defaultVal,
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue)
-        : AudioProcessorParameterWithID (parameterID, paramName),
-          owner (s), label (labelText),
+        : owner (s), paramID (parameterID), name (paramName), label (labelText),
           valueToTextFunction (valueToText),
           textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
@@ -52,6 +52,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     float getValue() const override                             { return range.convertTo0to1 (value); }
     float getDefaultValue() const override                      { return range.convertTo0to1 (defaultValue); }
+    String getName (int maximumStringLength) const override     { return name.substring (0, maximumStringLength); }
     String getLabel() const override                            { return label; }
 
     float getValueForText (const String& text) const override
@@ -141,7 +142,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     AudioProcessorValueTreeState& owner;
     ValueTree state;
-    String label;
+    String paramID, name, label;
     ListenerList<AudioProcessorValueTreeState::Listener> listeners;
     std::function<String (float)> valueToTextFunction;
     std::function<float (const String&)> textToValueFunction;
@@ -257,21 +258,21 @@ void AudioProcessorValueTreeState::updateParameterConnectionsToChildTrees()
     }
 }
 
-void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
+void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree&, const Identifier& property)
 {
-    if (property == idPropertyID && tree.hasType (valueType) && tree.getParent() == state)
+    if (property == idPropertyID)
         updateParameterConnectionsToChildTrees();
 }
 
-void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, ValueTree& tree)
+void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, ValueTree&)
 {
-    if (parent == state && tree.hasType (valueType))
+    if (parent == state)
         updateParameterConnectionsToChildTrees();
 }
 
-void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree& tree, int)
+void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree&, int)
 {
-    if (parent == state && tree.hasType (valueType))
+    if (parent == state)
         updateParameterConnectionsToChildTrees();
 }
 

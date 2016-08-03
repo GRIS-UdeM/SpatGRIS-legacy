@@ -157,7 +157,6 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title, const File& file, const String& filters,
                                       bool isDirectory, bool /* selectsFiles */,
                                       bool isSave, bool /* warnAboutOverwritingExistingFiles */,
-                                      bool /*treatFilePackagesAsDirs*/,
                                       bool selectMultipleFiles, FilePreviewComponent*)
 {
     const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
@@ -170,6 +169,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         addKDialogArgs (args, separator, title, file, filters, isDirectory, isSave, selectMultipleFiles);
     else
         addZenityArgs (args, separator, title, file, filters, isDirectory, isSave, selectMultipleFiles);
+
+    args.add ("2>/dev/null"); // (to avoid logging info ending up in the results)
 
     ChildProcess child;
 

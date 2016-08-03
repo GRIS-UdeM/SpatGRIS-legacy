@@ -125,7 +125,7 @@ public:
         if (lastHue != h)
         {
             lastHue = h;
-            colours = Image();
+            colours = Image::null;
             repaint();
         }
 
@@ -134,7 +134,7 @@ public:
 
     void resized() override
     {
-        colours = Image();
+        colours = Image::null;
         updateMarker();
     }
 

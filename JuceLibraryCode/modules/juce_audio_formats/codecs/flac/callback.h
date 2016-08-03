@@ -34,10 +34,7 @@
 #define FLAC__CALLBACK_H
 
 #include "ordinals.h"
-
-// JUCE: removed as JUCE already includes this and including stdlib
-// in FlacNamespace will cause problems
-//#include <stdlib.h>
+#include <stdlib.h> /* for size_t */
 
 /** \file include/FLAC/callback.h
  *

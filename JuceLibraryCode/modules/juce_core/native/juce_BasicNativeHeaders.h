@@ -29,6 +29,7 @@
 #ifndef JUCE_BASICNATIVEHEADERS_H_INCLUDED
 #define JUCE_BASICNATIVEHEADERS_H_INCLUDED
 
+#include "../system/juce_TargetPlatform.h"
 #undef T
 
 //==============================================================================
@@ -41,8 +42,12 @@
   #import <MobileCoreServices/MobileCoreServices.h>
   #include <sys/fcntl.h>
  #else
+  #define Point CarbonDummyPointName
+  #define Component CarbonDummyCompName
   #import <Cocoa/Cocoa.h>
   #import <CoreAudio/HostTime.h>
+  #undef Point
+  #undef Component
   #include <sys/dir.h>
  #endif
 
@@ -109,9 +114,7 @@
  #if JUCE_MINGW
   #include <basetyps.h>
   #include <sys/time.h>
-  #ifndef alloca
-   #define alloca __builtin_alloca
-  #endif
+  #define alloca __builtin_alloca
  #else
   #include <crtdbg.h>
   #include <comutil.h>

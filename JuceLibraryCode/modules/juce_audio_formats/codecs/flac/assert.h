@@ -35,10 +35,7 @@
 
 /* we need this since some compilers (like MSVC) leave assert()s on release code (and we don't want to use their ASSERT) */
 #ifdef DEBUG
-// JUCE: removed as JUCE already includes standard headers and including
-// these in FlacNamespace will cause problems
-
-//#include <assert.h>
+#include <assert.h>
 #define FLAC__ASSERT(x) assert(x)
 #define FLAC__ASSERT_DECLARATION(x) x
 #else

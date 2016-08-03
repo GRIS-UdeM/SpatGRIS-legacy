@@ -54,8 +54,7 @@ Viewport::Viewport (const String& name)
 
 Viewport::~Viewport()
 {
-    setScrollOnDragEnabled (false);
-    deleteOrRemoveContentComp();
+    deleteContentComp();
 }
 
 //==============================================================================
@@ -63,24 +62,20 @@ void Viewport::visibleAreaChanged (const Rectangle<int>&) {}
 void Viewport::viewedComponentChanged (Component*) {}
 
 //==============================================================================
-void Viewport::deleteOrRemoveContentComp()
+void Viewport::deleteContentComp()
 {
     if (contentComp != nullptr)
-    {
         contentComp->removeComponentListener (this);
 
-        if (deleteContent)
-        {
-            // This sets the content comp to a null pointer before deleting the old one, in case
-            // anything tries to use the old one while it's in mid-deletion..
-            ScopedPointer<Component> oldCompDeleter (contentComp);
-            contentComp = nullptr;
-        }
-        else
-        {
-            contentHolder.removeChildComponent (contentComp);
-            contentComp = nullptr;
-        }
+    if (deleteContent)
+    {
+        // This sets the content comp to a null pointer before deleting the old one, in case
+        // anything tries to use the old one while it's in mid-deletion..
+        ScopedPointer<Component> oldCompDeleter (contentComp);
+    }
+    else
+    {
+        contentComp = nullptr;
     }
 }
 
@@ -88,7 +83,7 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
 {
     if (contentComp.get() != newViewedComponent)
     {
-        deleteOrRemoveContentComp();
+        deleteContentComp();
         contentComp = newViewedComponent;
         deleteContent = deleteComponentWhenNoLongerNeeded;
 
@@ -181,111 +176,10 @@ void Viewport::componentMovedOrResized (Component&, bool, bool)
     updateVisibleArea();
 }
 
-//==============================================================================
-typedef AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum> ViewportDragPosition;
-
-struct Viewport::DragToScrollListener   : private MouseListener,
-                                          private ViewportDragPosition::Listener
-{
-    DragToScrollListener (Viewport& v)
-        : viewport (v), numTouches (0), isDragging (false)
-    {
-        viewport.contentHolder.addMouseListener (this, true);
-        offsetX.addListener (this);
-        offsetY.addListener (this);
-    }
-
-    ~DragToScrollListener()
-    {
-        viewport.contentHolder.removeMouseListener (this);
-    }
-
-    void positionChanged (ViewportDragPosition&, double) override
-    {
-        viewport.setViewPosition (originalViewPos - Point<int> ((int) offsetX.getPosition(),
-                                                                (int) offsetY.getPosition()));
-    }
-
-    void mouseDown (const MouseEvent&) override
-    {
-        ++numTouches;
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (numTouches == 1)
-        {
-            Point<float> totalOffset = e.getOffsetFromDragStart().toFloat();
-
-            if (! isDragging && totalOffset.getDistanceFromOrigin() > 8.0f)
-            {
-                isDragging = true;
-
-                originalViewPos = viewport.getViewPosition();
-                offsetX.setPosition (0.0);
-                offsetX.beginDrag();
-                offsetY.setPosition (0.0);
-                offsetY.beginDrag();
-            }
-
-            if (isDragging)
-            {
-                offsetX.drag (totalOffset.x);
-                offsetY.drag (totalOffset.y);
-            }
-        }
-    }
-
-    void mouseUp (const MouseEvent&) override
-    {
-        if (--numTouches == 0)
-        {
-            offsetX.endDrag();
-            offsetY.endDrag();
-            isDragging = false;
-        }
-
-        jassert (numTouches >= 0);
-    }
-
-    Viewport& viewport;
-    ViewportDragPosition offsetX, offsetY;
-    Point<int> originalViewPos;
-    int numTouches;
-    bool isDragging;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragToScrollListener)
-};
-
-void Viewport::setScrollOnDragEnabled (bool shouldScrollOnDrag)
-{
-    if (isScrollOnDragEnabled() != shouldScrollOnDrag)
-    {
-        if (shouldScrollOnDrag)
-            dragToScrollListener = new DragToScrollListener (*this);
-        else
-            dragToScrollListener = nullptr;
-    }
-}
-
-bool Viewport::isScrollOnDragEnabled() const noexcept
-{
-    return dragToScrollListener != nullptr;
-}
-
-bool Viewport::isCurrentlyScrollingOnDrag() const noexcept
-{
-    return dragToScrollListener != nullptr && dragToScrollListener->isDragging;
-}
-
-//==============================================================================
 void Viewport::lookAndFeelChanged()
 {
     if (! customScrollBarThickness)
-    {
         scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
-        resized();
-    }
 }
 
 void Viewport::resized()

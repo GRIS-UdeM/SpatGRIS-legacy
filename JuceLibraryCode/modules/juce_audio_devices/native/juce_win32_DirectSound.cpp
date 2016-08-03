@@ -182,9 +182,11 @@ namespace DSoundLogging
         }
     }
 
+    #define CATCH JUCE_CATCH_EXCEPTION
     #define JUCE_DS_LOG(a)        DSoundLogging::logMessage(a);
     #define JUCE_DS_LOG_ERROR(a)  DSoundLogging::logError(a, __LINE__);
    #else
+    #define CATCH JUCE_CATCH_ALL
     #define JUCE_DS_LOG(a)
     #define JUCE_DS_LOG_ERROR(a)
    #endif
@@ -249,7 +251,7 @@ public:
         {
             JUCE_DS_LOG ("closing output: " + name);
             HRESULT hr = pOutputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr); ignoreUnused (hr);
+            JUCE_DS_LOG_ERROR (hr); (void) hr;
 
             pOutputBuffer->Release();
             pOutputBuffer = nullptr;
@@ -352,7 +354,7 @@ public:
                                         hr = pOutputBuffer->Play (0, 0, 1 /* DSBPLAY_LOOPING */);
 
                                         if (SUCCEEDED (hr))
-                                            return String();
+                                            return String::empty;
                                     }
                                 }
                             }
@@ -532,7 +534,7 @@ public:
         {
             JUCE_DS_LOG ("closing input: " + name);
             HRESULT hr = pInputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr); ignoreUnused (hr);
+            JUCE_DS_LOG_ERROR (hr); (void) hr;
 
             pInputBuffer->Release();
             pInputBuffer = nullptr;
@@ -595,7 +597,7 @@ public:
                 hr = pInputBuffer->Start (1 /* DSCBSTART_LOOPING */);
 
                 if (SUCCEEDED (hr))
-                    return String();
+                    return String::empty;
             }
         }
 

@@ -73,19 +73,19 @@ public:
         The button will keep its own internal copies of these drawables.
 
         @param normalImage      the thing to draw for the button's 'normal' state. An internal copy
-                                will be made of the object passed-in if it is non-null.
+                                will be made of the object passed-in if it is non-zero.
         @param overImage        the thing to draw for the button's 'over' state - if this is
-                                null, the button's normal image will be used when the mouse is
+                                zero, the button's normal image will be used when the mouse is
                                 over it. An internal copy will be made of the object passed-in
-                                if it is non-null.
+                                if it is non-zero.
         @param downImage        the thing to draw for the button's 'down' state - if this is
-                                null, the 'over' image will be used instead (or the normal image
+                                zero, the 'over' image will be used instead (or the normal image
                                 as a last resort). An internal copy will be made of the object
-                                passed-in if it is non-null.
-        @param disabledImage    an image to draw when the button is disabled. If this is null,
+                                passed-in if it is non-zero.
+        @param disabledImage    an image to draw when the button is disabled. If this is zero,
                                 the normal image will be drawn with a reduced opacity instead.
                                 An internal copy will be made of the object passed-in if it is
-                                non-null.
+                                non-zero.
         @param normalImageOn    same as the normalImage, but this is used when the button's toggle
                                 state is 'on'. If this is nullptr, the normal image is used instead
         @param overImageOn      same as the overImage, but this is used when the button's toggle

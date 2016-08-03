@@ -524,9 +524,7 @@ bool File::isOnHardDisk() const
     if (fullPath.toLowerCase()[0] <= 'b' && fullPath[1] == ':')
         return n != DRIVE_REMOVABLE;
 
-    return n != DRIVE_CDROM
-        && n != DRIVE_REMOTE
-        && n != DRIVE_NO_ROOT_DIR;
+    return n != DRIVE_CDROM && n != DRIVE_REMOTE;
 }
 
 bool File::isOnRemovableDrive() const
@@ -800,8 +798,14 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 //==============================================================================
 bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
 {
-    HINSTANCE hInstance = ShellExecute (0, 0, fileName.toWideCharPointer(),
-                                        parameters.toWideCharPointer(), 0, SW_SHOWDEFAULT);
+    HINSTANCE hInstance = 0;
+
+    JUCE_TRY
+    {
+        hInstance = ShellExecute (0, 0, fileName.toWideCharPointer(),
+                                  parameters.toWideCharPointer(), 0, SW_SHOWDEFAULT);
+    }
+    JUCE_CATCH_ALL
 
     return hInstance > (HINSTANCE) 32;
 }

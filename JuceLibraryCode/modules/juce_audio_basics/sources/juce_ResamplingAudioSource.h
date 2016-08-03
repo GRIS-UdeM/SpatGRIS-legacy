@@ -30,7 +30,7 @@
 /**
     A type of AudioSource that takes an input source and changes its sample rate.
 
-    @see AudioSource, LagrangeInterpolator, CatmullRomInterpolator
+    @see AudioSource
 */
 class JUCE_API  ResamplingAudioSource  : public AudioSource
 {

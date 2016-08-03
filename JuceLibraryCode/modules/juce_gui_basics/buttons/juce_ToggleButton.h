@@ -69,9 +69,7 @@ public:
     */
     enum ColourIds
     {
-        textColourId            = 0x1006501,  /**< The colour to use for the button's text. */
-        tickColourId            = 0x1006502,  /**< The colour to use for the tick mark. */
-        tickDisabledColourId    = 0x1006503   /**< The colour to use for the disabled tick mark. */
+        textColourId                    = 0x1006501   /**< The colour to use for the button's text. */
     };
 
 protected:

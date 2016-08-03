@@ -53,14 +53,8 @@ public:
 
         When first created, the thread is not running. Use the startThread()
         method to start it.
-
-        @param threadName       The name of the thread which typically appears in
-                                debug logs and profiles.
-        @param threadStackSize  The size of the stack of the thread. If this value
-                                is zero then the default stack size of the OS will
-                                be used.
     */
-    explicit Thread (const String& threadName, size_t threadStackSize = 0);
+    explicit Thread (const String& threadName);
 
     /** Destructor.
 
@@ -148,17 +142,9 @@ public:
         Threads need to check this regularly, and if it returns true, they should
         return from their run() method at the first possible opportunity.
 
-        @see signalThreadShouldExit, currentThreadShouldExit
+        @see signalThreadShouldExit
     */
-    bool threadShouldExit() const                { return shouldExit; }
-
-    /** Checks whether the current thread has been told to stop running.
-        On the message thread, this will always return false, otherwise
-        it will return threadShouldExit() called on the current thread.
-
-        @see threadShouldExit
-    */
-    static bool currentThreadShouldExit();
+    inline bool threadShouldExit() const                { return shouldExit; }
 
     /** Waits for the thread to stop.
 
@@ -284,7 +270,6 @@ private:
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
     int threadPriority;
-    size_t threadStackSize;
     uint32 affinityMask;
     bool volatile shouldExit;
 

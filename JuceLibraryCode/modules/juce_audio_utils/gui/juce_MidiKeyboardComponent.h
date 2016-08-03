@@ -165,16 +165,10 @@ public:
     */
     int getLowestVisibleKey() const noexcept                        { return (int) firstKey; }
 
-    /** Sets the length of the black notes as a proportion of the white note length. */
-    void setBlackNoteLengthProportion (float ratio) noexcept;
-
-    /** Returns the length of the black notes as a proportion of the white note length. */
-    float getBlackNoteLengthProportion() const noexcept             { return blackNoteLengthRatio; }
-
-    /** Returns the absolute length of the black notes.
+    /** Returns the length of the black notes.
         This will be their vertical or horizontal length, depending on the keyboard's orientation.
     */
-    int getBlackNoteLength() const noexcept;
+    int getBlackNoteLength() const noexcept                         { return blackNoteLength; }
 
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
@@ -208,9 +202,6 @@ public:
         distance, in either direction.
     */
     int getKeyStartPosition (int midiNoteNumber) const;
-
-    /** Returns the total width needed to fit all the keys in the available range. */
-    int getTotalKeyboardWidth() const noexcept;
 
     /** Returns the key at a given coordinate. */
     int getNoteAtPosition (Point<int> position);
@@ -362,7 +353,7 @@ protected:
     */
     virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e);
 
-    /** Calculates the position of a given midi-note.
+    /** Calculates the positon of a given midi-note.
 
         This can be overridden to create layouts with custom key-widths.
 
@@ -384,8 +375,7 @@ private:
     friend class MidiKeyboardUpDownButton;
 
     MidiKeyboardState& state;
-    float blackNoteLengthRatio;
-    int xOffset;
+    int xOffset, blackNoteLength;
     float keyWidth;
     Orientation orientation;
 

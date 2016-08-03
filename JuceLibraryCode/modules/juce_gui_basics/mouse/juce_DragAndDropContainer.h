@@ -86,7 +86,7 @@ public:
     */
     void startDragging (const var& sourceDescription,
                         Component* sourceComponent,
-                        Image dragImage = Image(),
+                        Image dragImage = Image::null,
                         bool allowDraggingToOtherJuceWindows = false,
                         const Point<int>* imageOffsetFromMouse = nullptr);
 

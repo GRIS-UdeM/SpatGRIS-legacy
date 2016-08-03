@@ -57,7 +57,7 @@ void ImagePreviewComponent::timerCallback()
 {
     stopTimer();
 
-    currentThumbnail = Image();
+    currentThumbnail = Image::null;
     currentDetails.clear();
     repaint();
 

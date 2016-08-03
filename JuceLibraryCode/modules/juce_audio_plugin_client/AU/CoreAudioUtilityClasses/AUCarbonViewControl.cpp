@@ -82,19 +82,19 @@ void	AUCarbonViewControl::Bind()
 	WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
 
 	if (mType == kTypeContinuous || mType == kTypeText || mType == kTypeDiscrete) {
-		EventTypeSpec controlEvents[] = {
+		EventTypeSpec events[] = {
 			{ kEventClassControl, kEventControlHit },
 			{ kEventClassControl, kEventControlClick },
 		    { kEventClassControl, kEventControlTrack }
 		};
-		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(controlEvents), controlEvents);
+		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
 	}
 
 	if (mType == kTypeText) {
-		EventTypeSpec controlFocusEvents[] = {
+		EventTypeSpec events[] = {
 			{ kEventClassControl, kEventControlSetFocusPart }
 		};
-		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(controlFocusEvents), controlFocusEvents);
+		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
 		ControlKeyFilterUPP proc = mParam.ValuesHaveStrings() ? StdKeyFilterCallback : NumericKeyFilterCallback;
 			// this will fail for a static text field
 		SetControlData(mControl, 0, kControlEditTextKeyFilterTag, sizeof(proc), &proc);
@@ -591,7 +591,7 @@ AUVPresets::AUVPresets (AUCarbonViewBase* 		inParentView,
 #endif
 #ifndef __LP64__
 	if (result != noErr) {	// if the PresentPreset property is not implemented, fall back to the CurrentPreset property
-        result = AudioUnitGetProperty (mView->GetEditAudioUnit(),
+		OSStatus result = AudioUnitGetProperty (mView->GetEditAudioUnit(),
 									kAudioUnitProperty_CurrentPreset,
 									kAudioUnitScope_Global,
 									0,

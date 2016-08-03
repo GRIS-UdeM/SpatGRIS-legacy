@@ -51,9 +51,7 @@ static inline unsigned short __builtin_bswap16(unsigned short a)
 
 #elif defined HAVE_BYTESWAP_H		/* Linux */
 
-// JUCE: removed as JUCE already includes standard headers and including
-// these in FlacNamespace will cause problems
-//#include <byteswap.h>
+#include <byteswap.h>
 
 #define	ENDSWAP_16(x)		(bswap_16 (x))
 #define	ENDSWAP_32(x)		(bswap_32 (x))

@@ -153,7 +153,7 @@ public:
             file = newFile;
             fileSize = newFileSize;
             modTime = newModTime;
-            icon = Image();
+            icon = Image::null;
             isDirectory = fileInfo != nullptr && fileInfo->isDirectory;
 
             repaint();

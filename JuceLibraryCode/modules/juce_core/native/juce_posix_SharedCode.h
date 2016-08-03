@@ -55,7 +55,6 @@ WaitableEvent::WaitableEvent (const bool useManualReset) noexcept
     pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
    #endif
     pthread_mutex_init (&mutex, &atts);
-    pthread_mutexattr_destroy (&atts);
 }
 
 WaitableEvent::~WaitableEvent() noexcept
@@ -149,45 +148,6 @@ void JUCE_CALLTYPE Process::terminate()
     std::_Exit (EXIT_FAILURE);
    #endif
 }
-
-
-#if JUCE_MAC || JUCE_LINUX
-bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
-{
-    rlimit lim;
-    if (getrlimit (RLIMIT_NOFILE, &lim) == 0)
-    {
-        if (newMaxNumber <= 0 && lim.rlim_cur == RLIM_INFINITY && lim.rlim_max == RLIM_INFINITY)
-            return true;
-
-        if (lim.rlim_cur >= (rlim_t) newMaxNumber)
-            return true;
-    }
-
-    lim.rlim_cur = lim.rlim_max = newMaxNumber <= 0 ? RLIM_INFINITY : (rlim_t) newMaxNumber;
-    return setrlimit (RLIMIT_NOFILE, &lim) == 0;
-}
-
-struct MaxNumFileHandlesInitialiser
-{
-    MaxNumFileHandlesInitialiser() noexcept
-    {
-       #ifndef JUCE_PREFERRED_MAX_FILE_HANDLES
-        enum { JUCE_PREFERRED_MAX_FILE_HANDLES = 8192 };
-       #endif
-
-        // Try to give our app a decent number of file handles by default
-        if (! Process::setMaxNumberOfFileHandles (0))
-        {
-            for (int num = JUCE_PREFERRED_MAX_FILE_HANDLES; num > 256; num -= 1024)
-                if (Process::setMaxNumberOfFileHandles (num))
-                    break;
-        }
-    }
-};
-
-static MaxNumFileHandlesInitialiser maxNumFileHandlesInitialiser;
-#endif
 
 //==============================================================================
 const juce_wchar File::separator = '/';
@@ -332,21 +292,11 @@ uint64 File::getFileIdentifier() const
     return juce_stat (fullPath, info) ? (uint64) info.st_ino : 0;
 }
 
-static bool hasEffectiveRootFilePermissions()
-{
-   #if JUCE_LINUX
-    return (geteuid() == 0);
-   #else
-    return false;
-   #endif
-}
-
 //==============================================================================
 bool File::hasWriteAccess() const
 {
     if (exists())
-        return (hasEffectiveRootFilePermissions()
-             || access (fullPath.toUTF8(), W_OK) == 0);
+        return access (fullPath.toUTF8(), W_OK) == 0;
 
     if ((! isDirectory()) && fullPath.containsChar (separator))
         return getParentDirectory().hasWriteAccess();
@@ -415,7 +365,7 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
 bool File::deleteFile() const
 {
-    if (! exists() && ! isSymbolicLink())
+    if (! exists())
         return true;
 
     if (isDirectory())
@@ -445,7 +395,7 @@ Result File::createDirectoryInternal (const String& fileName) const
     return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
 }
 
-//==============================================================================
+//=====================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     if (handle != 0 && lseek (getFD (handle), pos, SEEK_SET) == pos)
@@ -639,14 +589,12 @@ File juce_getExecutableFile()
         static String getFilename()
         {
             Dl_info exeInfo;
-
-            void* localSymbol = (void*) juce_getExecutableFile;
-            dladdr (localSymbol, &exeInfo);
+            dladdr ((void*) juce_getExecutableFile, &exeInfo);
             return CharPointer_UTF8 (exeInfo.dli_fname);
         }
     };
 
-    static String filename = DLAddrReader::getFilename();
+    static String filename (DLAddrReader::getFilename());
     return File::getCurrentWorkingDirectory().getChildFile (filename);
    #endif
 }
@@ -732,7 +680,7 @@ void juce_runSystemCommand (const String&);
 void juce_runSystemCommand (const String& command)
 {
     int result = system (command.toUTF8());
-    ignoreUnused (result);
+    (void) result;
 }
 
 String juce_getOutputFromCommand (const String&);
@@ -911,25 +859,13 @@ void Thread::launchThread()
 {
     threadHandle = 0;
     pthread_t handle = 0;
-    pthread_attr_t attr;
-    pthread_attr_t* attrPtr = nullptr;
 
-    if (pthread_attr_init (&attr) == 0)
-    {
-        attrPtr = &attr;
-
-        pthread_attr_setstacksize (attrPtr, threadStackSize);
-    }
-
-    if (pthread_create (&handle, attrPtr, threadEntryProc, this) == 0)
+    if (pthread_create (&handle, 0, threadEntryProc, this) == 0)
     {
         pthread_detach (handle);
         threadHandle = (void*) handle;
         threadId = (ThreadID) threadHandle;
     }
-
-    if (attrPtr != nullptr)
-        pthread_attr_destroy (attrPtr);
 }
 
 void Thread::closeThreadHandle()
@@ -1067,12 +1003,10 @@ public:
     ActiveProcess (const StringArray& arguments, int streamFlags)
         : childPID (0), pipeHandle (0), readHandle (0)
     {
-        String exe (arguments[0].unquoted());
-
         // Looks like you're trying to launch a non-existent exe or a folder (perhaps on OSX
         // you're trying to launch the .app folder rather than the actual binary inside it?)
-        jassert (File::getCurrentWorkingDirectory().getChildFile (exe).existsAsFile()
-                  || ! exe.containsChar (File::separator));
+        jassert ((! arguments[0].containsChar ('/'))
+                  || File::getCurrentWorkingDirectory().getChildFile (arguments[0]).existsAsFile());
 
         int pipeHandles[2] = { 0 };
 
@@ -1091,25 +1025,25 @@ public:
                 close (pipeHandles[0]);   // close the read handle
 
                 if ((streamFlags & wantStdOut) != 0)
-                    dup2 (pipeHandles[1], STDOUT_FILENO); // turns the pipe into stdout
+                    dup2 (pipeHandles[1], 1); // turns the pipe into stdout
                 else
-                    dup2 (open ("/dev/null", O_WRONLY), STDOUT_FILENO);
+                    close (STDOUT_FILENO);
 
                 if ((streamFlags & wantStdErr) != 0)
-                    dup2 (pipeHandles[1], STDERR_FILENO);
+                    dup2 (pipeHandles[1], 2);
                 else
-                    dup2 (open ("/dev/null", O_WRONLY), STDERR_FILENO);
+                    close (STDERR_FILENO);
 
                 close (pipeHandles[1]);
 
                 Array<char*> argv;
                 for (int i = 0; i < arguments.size(); ++i)
                     if (arguments[i].isNotEmpty())
-                        argv.add (const_cast<char*> (arguments[i].toRawUTF8()));
+                        argv.add (const_cast<char*> (arguments[i].toUTF8().getAddress()));
 
                 argv.add (nullptr);
 
-                execvp (exe.toRawUTF8(), argv.getRawDataPointer());
+                execvp (argv[0], argv.getRawDataPointer());
                 exit (-1);
             }
             else
@@ -1352,7 +1286,7 @@ private:
                                   THREAD_TIME_CONSTRAINT_POLICY_COUNT) == KERN_SUCCESS;
 
        #else
-        ignoreUnused (periodMs);
+        (void) periodMs;
         struct sched_param param;
         param.sched_priority = sched_get_priority_max (SCHED_RR);
         return pthread_setschedparam (thread, SCHED_RR, &param) == 0;

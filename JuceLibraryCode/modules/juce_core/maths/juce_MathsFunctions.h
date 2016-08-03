@@ -93,7 +93,7 @@ typedef unsigned int                uint32;
 #endif
 
 //==============================================================================
-// Some indispensable min/max functions
+// Some indispensible min/max functions
 
 /** Returns the larger of two values. */
 template <typename Type>
@@ -299,7 +299,7 @@ void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexc
 template <typename Type, int N>
 int numElementsInArray (Type (&array)[N])
 {
-    ignoreUnused (array);
+    (void) array; // (required to avoid a spurious warning in MS compilers)
     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
     return N;
 }
@@ -324,9 +324,9 @@ template <>
 inline float juce_hypot (float a, float b) noexcept
 {
    #if JUCE_MSVC
-    return _hypotf (a, b);
+    return (_hypotf (a, b));
    #else
-    return hypotf (a, b);
+    return (hypotf (a, b));
    #endif
 }
 #endif
@@ -356,16 +356,12 @@ const float   float_Pi   = 3.14159265358979323846f;
 
 
 /** Converts an angle in degrees to radians. */
-inline float degreesToRadians (float degrees) noexcept     { return degrees * (float_Pi / 180.0f); }
-
-/** Converts an angle in degrees to radians. */
-inline double degreesToRadians (double degrees) noexcept   { return degrees * (double_Pi / 180.0); }
+template <typename FloatType>
+FloatType degreesToRadians (FloatType degrees) noexcept  { return degrees * static_cast<FloatType> (double_Pi / 180.0); }
 
 /** Converts an angle in radians to degrees. */
-inline float radiansToDegrees (float radians) noexcept     { return radians * (180.0f / float_Pi); }
-
-/** Converts an angle in radians to degrees. */
-inline double radiansToDegrees (double radians) noexcept   { return radians * (180.0 / double_Pi); }
+template <typename FloatType>
+FloatType radiansToDegrees (FloatType radians) noexcept  { return radians * static_cast<FloatType> (180.0 / double_Pi); }
 
 
 //==============================================================================

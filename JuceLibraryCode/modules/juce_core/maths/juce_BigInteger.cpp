@@ -47,7 +47,7 @@ BigInteger::BigInteger (const int32 value)
       negative (value < 0)
 {
     values.calloc (numValues + 1);
-    values[0] = (uint32) std::abs (value);
+    values[0] = (uint32) abs (value);
     highestBit = getHighestBit();
 }
 
@@ -307,7 +307,7 @@ void BigInteger::negate() noexcept
     negative = (! negative) && ! isZero();
 }
 
-#if JUCE_MSVC && ! defined (__INTEL_COMPILER)
+#if JUCE_USE_MSVC_INTRINSICS && ! defined (__INTEL_COMPILER)
  #pragma intrinsic (_BitScanReverse)
 #endif
 
@@ -315,9 +315,9 @@ inline static int highestBitInInt (uint32 n) noexcept
 {
     jassert (n != 0); // (the built-in functions may not work for n = 0)
 
-  #if JUCE_GCC || JUCE_CLANG
+  #if JUCE_GCC
     return 31 - __builtin_clz (n);
-  #elif JUCE_MSVC
+  #elif JUCE_USE_MSVC_INTRINSICS
     unsigned long highest;
     _BitScanReverse (&highest, n);
     return (int) highest;
@@ -385,12 +385,12 @@ BigInteger& BigInteger::operator+= (const BigInteger& other)
             BigInteger temp (*this);
             temp.negate();
             *this = other;
-            *this -= temp;
+            operator-= (temp);
         }
         else
         {
             negate();
-            *this -= other;
+            operator-= (other);
             negate();
         }
     }
@@ -436,7 +436,7 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
         {
             BigInteger temp (other);
             swapWith (temp);
-            *this -= temp;
+            operator-= (temp);
             negate();
             return *this;
         }
@@ -444,7 +444,7 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
     else
     {
         negate();
-        *this += other;
+        operator+= (other);
         negate();
         return *this;
     }
@@ -476,40 +476,24 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
 
 BigInteger& BigInteger::operator*= (const BigInteger& other)
 {
-    int n = getHighestBit();
-    int t = other.getHighestBit();
-
+    BigInteger total;
+    highestBit = getHighestBit();
     const bool wasNegative = isNegative();
     setNegative (false);
 
-    BigInteger total;
-    total.highestBit = n + t + 1;
-
-    n >>= 5;
-    t >>= 5;
-
-    total.ensureSize ((size_t) (n + t + 2));
-
-    BigInteger m (other);
-    m.setNegative (false);
-
-    for (int i = 0; i <= t; ++i)
+    for (int i = 0; i <= highestBit; ++i)
     {
-        uint32 c = 0;
-
-        for (int j = 0; j <= n; ++j)
+        if (operator[](i))
         {
-            uint64 uv = (uint64) total.values[i + j] + (uint64) values[j] * (uint64) m.values[i] + (uint64) c;
-            total.values[i + j] = (uint32) uv;
-            c = uv >> 32;
+            BigInteger n (other);
+            n.setNegative (false);
+            n <<= i;
+            total += n;
         }
-
-        total.values[i + n + 1] = c;
     }
 
     total.setNegative (wasNegative ^ other.isNegative());
     swapWith (total);
-
     return *this;
 }
 
@@ -660,15 +644,15 @@ BigInteger& BigInteger::operator>>= (const int numBits)              { shiftBits
 //==============================================================================
 int BigInteger::compare (const BigInteger& other) const noexcept
 {
-    const bool isNeg = isNegative();
-
-    if (isNeg == other.isNegative())
+    if (isNegative() == other.isNegative())
     {
         const int absComp = compareAbsolute (other);
-        return isNeg ? -absComp : absComp;
+        return isNegative() ? -absComp : absComp;
     }
-
-    return isNeg ? -1 : 1;
+    else
+    {
+        return isNegative() ? -1 : 1;
+    }
 }
 
 int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
@@ -676,8 +660,10 @@ int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
     const int h1 = getHighestBit();
     const int h2 = other.getHighestBit();
 
-    if (h1 > h2) return 1;
-    if (h1 < h2) return -1;
+    if (h1 > h2)
+        return 1;
+    else if (h1 < h2)
+        return -1;
 
     for (int i = (int) bitToIndex (h1) + 1; --i >= 0;)
         if (values[i] != other.values[i])
@@ -688,9 +674,9 @@ int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
 
 bool BigInteger::operator== (const BigInteger& other) const noexcept    { return compare (other) == 0; }
 bool BigInteger::operator!= (const BigInteger& other) const noexcept    { return compare (other) != 0; }
-bool BigInteger::operator<  (const BigInteger& other) const noexcept    { return compare (other) <  0; }
+bool BigInteger::operator<  (const BigInteger& other) const noexcept    { return compare (other) < 0; }
 bool BigInteger::operator<= (const BigInteger& other) const noexcept    { return compare (other) <= 0; }
-bool BigInteger::operator>  (const BigInteger& other) const noexcept    { return compare (other) >  0; }
+bool BigInteger::operator>  (const BigInteger& other) const noexcept    { return compare (other) > 0; }
 bool BigInteger::operator>= (const BigInteger& other) const noexcept    { return compare (other) >= 0; }
 
 //==============================================================================
@@ -699,7 +685,7 @@ void BigInteger::shiftLeft (int bits, const int startBit)
     if (startBit > 0)
     {
         for (int i = highestBit + 1; --i >= startBit;)
-            setBit (i + bits, (*this) [i]);
+            setBit (i + bits, operator[] (i));
 
         while (--bits >= 0)
             clearBit (bits + startBit);
@@ -742,7 +728,7 @@ void BigInteger::shiftRight (int bits, const int startBit)
     if (startBit > 0)
     {
         for (int i = startBit; i <= highestBit; ++i)
-            setBit (i, (*this) [i + bits]);
+            setBit (i, operator[] (i + bits));
 
         highestBit = getHighestBit();
     }
@@ -817,7 +803,7 @@ BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 
     while (! n.isZero())
     {
-        if (std::abs (m.getHighestBit() - n.getHighestBit()) <= 16)
+        if (abs (m.getHighestBit() - n.getHighestBit()) <= 16)
             return simpleGCD (&m, &n);
 
         BigInteger temp2;
@@ -832,128 +818,25 @@ BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 
 void BigInteger::exponentModulo (const BigInteger& exponent, const BigInteger& modulus)
 {
-    *this %= modulus;
     BigInteger exp (exponent);
     exp %= modulus;
 
-    if (modulus.getHighestBit() <= 32 || modulus % 2 == 0)
+    BigInteger value (1);
+    swapWith (value);
+    value %= modulus;
+
+    while (! exp.isZero())
     {
-        BigInteger a (*this);
-
-        const int n = exp.getHighestBit();
-
-        for (int i = n; --i >= 0;)
+        if (exp [0])
         {
-            *this *= *this;
-
-            if (exp[i])
-                *this *= a;
-
-            if (compareAbsolute (modulus) >= 0)
-                *this %= modulus;
+            operator*= (value);
+            operator%= (modulus);
         }
+
+        value *= value;
+        value %= modulus;
+        exp >>= 1;
     }
-    else
-    {
-        const int Rfactor = modulus.getHighestBit() + 1;
-        BigInteger R (1);
-        R.shiftLeft (Rfactor, 0);
-
-        BigInteger R1, m1, g;
-        g.extendedEuclidean (modulus, R, m1, R1);
-
-        if (! g.isOne())
-        {
-            BigInteger a (*this);
-
-            for (int i = exp.getHighestBit(); --i >= 0;)
-            {
-                *this *= *this;
-
-                if (exp[i])
-                    *this *= a;
-
-                if (compareAbsolute (modulus) >= 0)
-                    *this %= modulus;
-            }
-        }
-        else
-        {
-            BigInteger am (((*this) * R) % modulus);
-            BigInteger xm (am);
-            BigInteger um (R % modulus);
-
-            for (int i = exp.getHighestBit(); --i >= 0;)
-            {
-                xm.montgomeryMultiplication (xm, modulus, m1, Rfactor);
-
-                if (exp[i])
-                    xm.montgomeryMultiplication (am, modulus, m1, Rfactor);
-            }
-
-            xm.montgomeryMultiplication (1, modulus, m1, Rfactor);
-            swapWith (xm);
-        }
-    }
-}
-
-void BigInteger::montgomeryMultiplication (const BigInteger& other, const BigInteger& modulus,
-                                           const BigInteger& modulusp, const int k)
-{
-    *this *= other;
-
-    BigInteger t (*this);
-
-    setRange (k, highestBit - k + 1, false);
-    *this *= modulusp;
-
-    setRange (k, highestBit - k + 1, false);
-    *this *= modulus;
-    *this += t;
-    shiftRight (k, 0);
-
-    if (compare (modulus) >= 0)
-        *this -= modulus;
-    else if (isNegative())
-        *this += modulus;
-}
-
-void BigInteger::extendedEuclidean (const BigInteger& a, const BigInteger& b,
-                                    BigInteger& x, BigInteger& y)
-{
-    BigInteger p(a), q(b), gcd(1);
-
-    Array<BigInteger> tempValues;
-
-    while (! q.isZero())
-    {
-        tempValues.add (p / q);
-        gcd = q;
-        q = p % q;
-        p = gcd;
-    }
-
-    x.clear();
-    y = 1;
-
-    for (int i = 1; i < tempValues.size(); ++i)
-    {
-        const BigInteger& v = tempValues.getReference (tempValues.size() - i - 1);
-
-        if ((i & 1) != 0)
-            x += y * v;
-        else
-            y += x * v;
-    }
-
-    if (gcd.compareAbsolute (y * b - x * a) != 0)
-    {
-        x.negate();
-        x.swapWith (y);
-        x.negate();
-    }
-
-    swapWith (gcd);
 }
 
 void BigInteger::inverseModulo (const BigInteger& modulus)
@@ -965,19 +848,22 @@ void BigInteger::inverseModulo (const BigInteger& modulus)
     }
 
     if (isNegative() || compareAbsolute (modulus) >= 0)
-        *this %= modulus;
+        operator%= (modulus);
 
     if (isOne())
         return;
 
-    if (findGreatestCommonDivisor (modulus) != 1)
+    if (! (*this)[0])
     {
-        clear();  // not invertible!
+        // not invertible
+        clear();
         return;
     }
 
-    BigInteger a1 (modulus), a2 (*this);
-    BigInteger b1 (modulus), b2 (1);
+    BigInteger a1 (modulus);
+    BigInteger a2 (*this);
+    BigInteger b1 (modulus);
+    BigInteger b2 (1);
 
     while (! a2.isOne())
     {
@@ -1078,8 +964,8 @@ void BigInteger::parseString (StringRef text, const int base)
 
             if (((uint32) digit) < (uint32) base)
             {
-                *this <<= bits;
-                *this += digit;
+                operator<<= (bits);
+                operator+= (digit);
             }
             else if (c == 0)
             {
@@ -1097,8 +983,8 @@ void BigInteger::parseString (StringRef text, const int base)
 
             if (c >= '0' && c <= '9')
             {
-                *this *= ten;
-                *this += (int) (c - '0');
+                operator*= (ten);
+                operator+= ((int) (c - '0'));
             }
             else if (c == 0)
             {

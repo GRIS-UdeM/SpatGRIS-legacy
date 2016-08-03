@@ -48,18 +48,6 @@ public:
     /** Replaces this sequence with another one. */
     MidiMessageSequence& operator= (const MidiMessageSequence&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    MidiMessageSequence (MidiMessageSequence&& other) noexcept
-        : list (static_cast<OwnedArray<MidiEventHolder>&&> (other.list))
-    {}
-
-    MidiMessageSequence& operator= (MidiMessageSequence&& other) noexcept
-    {
-        list = static_cast<OwnedArray<MidiEventHolder>&&> (other.list);
-        return *this;
-    }
-   #endif
-
     /** Destructor. */
     ~MidiMessageSequence();
 
@@ -172,6 +160,7 @@ public:
     void deleteEvent (int index, bool deleteMatchingNoteUp);
 
     /** Merges another sequence into this one.
+
         Remember to call updateMatchedPairs() after using this method.
 
         @param other                    the sequence to add from
@@ -188,16 +177,6 @@ public:
                       double timeAdjustmentDelta,
                       double firstAllowableDestTime,
                       double endOfAllowableDestTimes);
-
-    /** Merges another sequence into this one.
-        Remember to call updateMatchedPairs() after using this method.
-
-        @param other                    the sequence to add from
-        @param timeAdjustmentDelta      an amount to add to the timestamps of the midi events
-                                        as they are read from the other sequence
-    */
-    void addSequence (const MidiMessageSequence& other,
-                      double timeAdjustmentDelta);
 
     //==============================================================================
     /** Makes sure all the note-on and note-off pairs are up-to-date.

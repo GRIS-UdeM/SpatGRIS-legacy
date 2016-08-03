@@ -35,6 +35,8 @@ public:
         minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
         skewFactor (1.0), velocityModeSensitivity (1.0),
         velocityModeOffset (0.0), velocityModeThreshold (1),
+        rotaryStart (float_Pi * 1.2f),
+        rotaryEnd (float_Pi * 2.8f),
         sliderRegionStart (0), sliderRegionSize (1), sliderBeingDragged (-1),
         pixelsForFullDragExtent (250),
         textBoxPos (textBoxPosition),
@@ -45,6 +47,7 @@ public:
         doubleClickToValue (false),
         isVelocityBased (false),
         userKeyOverridesVelocity (true),
+        rotaryStop (true),
         incDecButtonsSideBySide (false),
         sendChangeOnlyOnRelease (false),
         popupDisplayEnabled (false),
@@ -54,9 +57,6 @@ public:
         snapsToMousePos (true),
         parentForPopupDisplay (nullptr)
     {
-        rotaryParams.startAngleRadians = float_Pi * 1.2f;
-        rotaryParams.endAngleRadians   = float_Pi * 2.8f;
-        rotaryParams.stopAtEnd = true;
     }
 
     ~Pimpl()
@@ -465,6 +465,20 @@ public:
         }
     }
 
+    void setRotaryParameters (const float startAngleRadians,
+                              const float endAngleRadians,
+                              const bool stopAtEnd)
+    {
+        // make sure the values are sensible..
+        jassert (startAngleRadians >= 0 && endAngleRadians >= 0);
+        jassert (startAngleRadians < float_Pi * 4.0f && endAngleRadians < float_Pi * 4.0f);
+        jassert (startAngleRadians < endAngleRadians);
+
+        rotaryStart = startAngleRadians;
+        rotaryEnd = endAngleRadians;
+        rotaryStop = stopAtEnd;
+    }
+
     void setVelocityModeParameters (const double sensitivity, const int threshold,
                                     const double offset, const bool userCanPressKeyToSwapMode)
     {
@@ -693,7 +707,7 @@ public:
             while (angle < 0.0)
                 angle += double_Pi * 2.0;
 
-            if (rotaryParams.stopAtEnd && e.mouseWasDraggedSinceMouseDown())
+            if (rotaryStop && ! e.mouseWasClicked())
             {
                 if (std::abs (angle - lastAngle) > double_Pi)
                 {
@@ -704,26 +718,26 @@ public:
                 }
 
                 if (angle >= lastAngle)
-                    angle = jmin (angle, (double) jmax (rotaryParams.startAngleRadians, rotaryParams.endAngleRadians));
+                    angle = jmin (angle, (double) jmax (rotaryStart, rotaryEnd));
                 else
-                    angle = jmax (angle, (double) jmin (rotaryParams.startAngleRadians, rotaryParams.endAngleRadians));
+                    angle = jmax (angle, (double) jmin (rotaryStart, rotaryEnd));
             }
             else
             {
-                while (angle < rotaryParams.startAngleRadians)
+                while (angle < rotaryStart)
                     angle += double_Pi * 2.0;
 
-                if (angle > rotaryParams.endAngleRadians)
+                if (angle > rotaryEnd)
                 {
-                    if (smallestAngleBetween (angle, rotaryParams.startAngleRadians)
-                         <= smallestAngleBetween (angle, rotaryParams.endAngleRadians))
-                        angle = rotaryParams.startAngleRadians;
+                    if (smallestAngleBetween (angle, rotaryStart)
+                         <= smallestAngleBetween (angle, rotaryEnd))
+                        angle = rotaryStart;
                     else
-                        angle = rotaryParams.endAngleRadians;
+                        angle = rotaryEnd;
                 }
             }
 
-            const double proportion = (angle - rotaryParams.startAngleRadians) / (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians);
+            const double proportion = (angle - rotaryStart) / (rotaryEnd - rotaryStart);
             valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, proportion));
             lastAngle = angle;
         }
@@ -839,9 +853,8 @@ public:
 
                 minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
 
-                lastAngle = rotaryParams.startAngleRadians
-                                + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
-                                     * owner.valueToProportionOfLength (currentValue.getValue());
+                lastAngle = rotaryStart + (rotaryEnd - rotaryStart)
+                                            * owner.valueToProportionOfLength (currentValue.getValue());
 
                 valueWhenLastDragged = (sliderBeingDragged == 2 ? valueMax
                                                                 : (sliderBeingDragged == 1 ? valueMin
@@ -856,7 +869,7 @@ public:
                     if (parentForPopupDisplay != nullptr)
                         parentForPopupDisplay->addChildComponent (popup);
                     else
-                        popup->addToDesktop (ComponentPeer::windowIsTemporary);
+                        popup->addToDesktop (0);
 
                     popup->setVisible (true);
                 }
@@ -883,7 +896,7 @@ public:
             {
                 if (style == IncDecButtons && ! incDecDragged)
                 {
-                    if (e.getDistanceFromDragStart() < 10 || ! e.mouseWasDraggedSinceMouseDown())
+                    if (e.getDistanceFromDragStart() < 10 || e.mouseWasClicked())
                         return;
 
                     incDecDragged = true;
@@ -1095,8 +1108,7 @@ public:
                 lf.drawRotarySlider (g,
                                      sliderRect.getX(), sliderRect.getY(),
                                      sliderRect.getWidth(), sliderRect.getHeight(),
-                                     sliderPos, rotaryParams.startAngleRadians,
-                                     rotaryParams.endAngleRadians, owner);
+                                     sliderPos, rotaryStart, rotaryEnd, owner);
             }
             else
             {
@@ -1183,7 +1195,7 @@ public:
     double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
     double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
     int velocityModeThreshold;
-    RotaryParameters rotaryParams;
+    float rotaryStart, rotaryEnd;
     Point<float> mouseDragStartPos, mousePosWhenLastDragged;
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
@@ -1202,6 +1214,7 @@ public:
     bool doubleClickToValue;
     bool isVelocityBased;
     bool userKeyOverridesVelocity;
+    bool rotaryStop;
     bool incDecButtonsSideBySide;
     bool sendChangeOnlyOnRelease;
     bool popupDisplayEnabled;
@@ -1313,25 +1326,9 @@ void Slider::removeListener (SliderListener* const listener)    { pimpl->listene
 Slider::SliderStyle Slider::getSliderStyle() const noexcept     { return pimpl->style; }
 void Slider::setSliderStyle (const SliderStyle newStyle)        { pimpl->setSliderStyle (newStyle); }
 
-void Slider::setRotaryParameters (RotaryParameters p) noexcept
+void Slider::setRotaryParameters (const float startAngleRadians, const float endAngleRadians, const bool stopAtEnd)
 {
-    // make sure the values are sensible..
-    jassert (p.startAngleRadians >= 0 && p.endAngleRadians >= 0);
-    jassert (p.startAngleRadians < float_Pi * 4.0f && p.endAngleRadians < float_Pi * 4.0f);
-    jassert (p.startAngleRadians < p.endAngleRadians);
-
-    pimpl->rotaryParams = p;
-}
-
-void Slider::setRotaryParameters (float startAngleRadians, float endAngleRadians, bool stopAtEnd) noexcept
-{
-    RotaryParameters p = { startAngleRadians, endAngleRadians, stopAtEnd };
-    setRotaryParameters (p);
-}
-
-Slider::RotaryParameters Slider::getRotaryParameters() const noexcept
-{
-    return pimpl->rotaryParams;
+    pimpl->setRotaryParameters (startAngleRadians, endAngleRadians, stopAtEnd);
 }
 
 void Slider::setVelocityBasedMode (bool vb)                 { pimpl->isVelocityBased = vb; }

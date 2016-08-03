@@ -22,12 +22,19 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
+#if JUCE_PLUGINHOST_VST3
 
 } // namespace juce
 
+#if JucePlugin_Build_VST3
+ #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+ #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
+#endif
+
 #include <map>
 #include "juce_VST3Headers.h"
+
+#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 
 namespace juce
 {
@@ -86,7 +93,7 @@ static int getHashForTUID (const TUID& tuid) noexcept
     return value;
 }
 
-template <typename ObjectType>
+template<typename ObjectType>
 static void fillDescriptionWith (PluginDescription& description, ObjectType& object)
 {
     description.version  = toString (object.version).trim();
@@ -398,17 +405,7 @@ public:
             return kResultFalse;
 
         owner->sendParamChangeMessageToListeners (index, (float) valueNormalized);
-
-        {
-            Steinberg::int32 eventIndex;
-            owner->inputParameterChanges->addParameterData (paramID, eventIndex)->addPoint (0, valueNormalized, eventIndex);
-        }
-
-        // did the plug-in already update the parameter internally
-        if (owner->editController->getParamNormalized (paramID) != (float) valueNormalized)
-            return owner->editController->setParamNormalized (paramID, valueNormalized);
-
-        return kResultTrue;
+        return owner->editController->setParamNormalized (paramID, valueNormalized);
     }
 
     tresult PLUGIN_API endEdit (Vst::ParamID paramID) override
@@ -458,7 +455,7 @@ public:
 
     tresult PLUGIN_API requestOpenEditor (FIDString name) override
     {
-        ignoreUnused (name);
+        (void) name;
         jassertfalse;
         return kResultFalse;
     }
@@ -696,8 +693,8 @@ public:
 
     tresult PLUGIN_API notifyProgramListChange (Vst::ProgramListID, Steinberg::int32) override
     {
-        owner->syncProgramNames();
-        return kResultTrue;
+        jassertfalse;
+        return kResultFalse;
     }
 
     //==============================================================================
@@ -904,7 +901,7 @@ private:
         Atomic<int> refCount;
 
         //==============================================================================
-        template <typename Type>
+        template<typename Type>
         void addMessageToQueue (AttrID id, const Type& value)
         {
             jassert (id != nullptr);
@@ -923,7 +920,7 @@ private:
             owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
         }
 
-        template <typename Type>
+        template<typename Type>
         bool findMessageOnQueueWithID (AttrID id, Type& value)
         {
             jassert (id != nullptr);
@@ -1157,10 +1154,7 @@ struct DLLHandle
             if (GetFactoryProc proc = (GetFactoryProc) getFunction ("GetPluginFactory"))
                 factory = proc();
 
-        // The plugin NEEDS to provide a factory to be able to be called a VST3!
-        // Most likely you are trying to load a 32-bit VST3 from a 64-bit host
-        // or vice versa.
-        jassert (factory != nullptr);
+        jassert (factory != nullptr); // The plugin NEEDS to provide a factory to be able to be called a VST3!
         return factory;
     }
 
@@ -1196,7 +1190,6 @@ private:
         if (library.open (filePath))
         {
             typedef bool (PLUGIN_API *InitModuleProc) ();
-
             if (InitModuleProc proc = (InitModuleProc) getFunction ("InitDll"))
             {
                 if (proc())
@@ -1583,11 +1576,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
 };
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4996) // warning about overriding deprecated methods
-#endif
-
 //==============================================================================
 class VST3PluginInstance : public AudioPluginInstance
 {
@@ -1596,7 +1584,6 @@ public:
       : module (handle),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
-        programParameterID ((Vst::ParamID) -1),
         inputParameterChanges (new ParamValueQueueList()),
         outputParameterChanges (new ParamValueQueueList()),
         midiInputs (new MidiEventList()),
@@ -1666,7 +1653,6 @@ public:
         grabInformationObjects();
         synchroniseStates();
         interconnectComponentAndController();
-        syncProgramNames();
         setupIO();
         return true;
     }
@@ -1679,8 +1665,8 @@ public:
         createPluginDescription (description, module->file,
                                  company, module->name,
                                  *info, info2, infoW,
-                                 getTotalNumInputChannels(),
-                                 getTotalNumOutputChannels());
+                                 getNumInputChannels(),
+                                 getNumOutputChannels());
     }
 
     void* getPlatformSpecificData() override   { return component; }
@@ -1689,7 +1675,7 @@ public:
     //==============================================================================
     const String getName() const override
     {
-        return module != nullptr ? module->name : String();
+        return module != nullptr ? module->name : String::empty;
     }
 
     void repopulateArrangements()
@@ -1768,15 +1754,19 @@ public:
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
-        isActive = false;
+        JUCE_TRY
+        {
+            isActive = false;
 
-        setStateForAllBusses (false);
+            setStateForAllBusses (false);
 
-        if (processor != nullptr)
-            warnOnFailure (processor->setProcessing (false));
+            if (processor != nullptr)
+                warnOnFailure (processor->setProcessing (false));
 
-        if (component != nullptr)
-            warnOnFailure (component->setActive (false));
+            if (component != nullptr)
+                warnOnFailure (component->setActive (false));
+        }
+        JUCE_CATCH_ALL_ASSERT
     }
 
     bool supportsDoublePrecisionProcessing() const override
@@ -1818,7 +1808,7 @@ public:
 
         updateTimingInformation (data, getSampleRate());
 
-        for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
+        for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
         associateTo (data, buffer);
@@ -1847,7 +1837,7 @@ public:
                 return toString (busInfo.name);
         }
 
-        return String();
+        return String::empty;
     }
 
     const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
@@ -1855,29 +1845,41 @@ public:
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
-        return isPositiveAndBelow (channelIndex, getTotalNumInputChannels())
-                 && getBusInfo (true, true).channelCount == 2;
+        if (channelIndex < 0 || channelIndex >= getNumInputChannels())
+            return false;
+
+        return getBusInfo (true, true).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
-        return isPositiveAndBelow (channelIndex, getTotalNumOutputChannels())
-                 && getBusInfo (false, true).channelCount == 2;
+        if (channelIndex < 0 || channelIndex >= getNumOutputChannels())
+            return false;
+
+        return getBusInfo (false, true).channelCount == 2;
     }
 
     bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
     bool producesMidi() const override   { return getBusInfo (false, false).channelCount > 0; }
 
     //==============================================================================
+    bool silenceInProducesSilenceOut() const override
+    {
+        if (processor != nullptr)
+            return processor->getTailSamples() == Vst::kNoTail;
+
+        return true;
+    }
+
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
     double getTailLengthSeconds() const override
     {
         if (processor != nullptr)
         {
-            const double sampleRate = getSampleRate();
+            const double currentSampleRate = getSampleRate();
 
-            if (sampleRate > 0.0)
-                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
+            if (currentSampleRate > 0.0)
+                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / currentSampleRate;
         }
 
         return 0.0;
@@ -1939,7 +1941,7 @@ public:
             return toString (result);
         }
 
-        return String();
+        return String::empty;
     }
 
     void setParameter (int parameterIndex, float newValue) override
@@ -1955,34 +1957,25 @@ public:
     }
 
     //==============================================================================
-    int getNumPrograms() override                        { return programNames.size(); }
-    const String getProgramName (int index) override     { return programNames[index]; }
-    int getCurrentProgram() override                     { return jmax (0, (int) editController->getParamNormalized (programParameterID) * (programNames.size() - 1)); }
+    int getNumPrograms() override                        { return getProgramListInfo (0).programCount; }
+    int getCurrentProgram() override                     { return 0; }
+    void setCurrentProgram (int) override                {}
     void changeProgramName (int, const String&) override {}
 
-    void setCurrentProgram (int program) override
+    const String getProgramName (int index) override
     {
-        if (programNames.size() > 0 && editController != nullptr)
-        {
-            Vst::ParamValue value =
-                static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (programNames.size());
-
-            editController->setParamNormalized (programParameterID, value);
-            Steinberg::int32 index;
-            inputParameterChanges->addParameterData (programParameterID, index)->addPoint (0, value, index);
-        }
+        Vst::String128 result;
+        unitInfo->getProgramName (getProgramListInfo (0).id, index, result);
+        return toString (result);
     }
 
     //==============================================================================
     void reset() override
     {
-        if (component != nullptr && processor != nullptr)
+        if (component != nullptr)
         {
-            processor->setProcessing (false);
             component->setActive (false);
-
             component->setActive (true);
-            processor->setProcessing (true);
         }
     }
 
@@ -2030,7 +2023,8 @@ public:
     /** @note Not applicable to VST3 */
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
-        ignoreUnused (data, sizeInBytes);
+        (void) data;
+        (void) sizeInBytes;
     }
 
     //==============================================================================
@@ -2039,18 +2033,18 @@ public:
     class ParamValueQueueList  : public Vst::IParameterChanges
     {
     public:
-        ParamValueQueueList() : numQueuesUsed (0) {}
+        ParamValueQueueList() {}
         virtual ~ParamValueQueueList() {}
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
-        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return numQueuesUsed; }
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr; }
+        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return (Steinberg::int32) queues.size(); }
+        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return queues[(int) index]; }
 
         Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
         {
-            for (int i = numQueuesUsed; --i >= 0;)
+            for (int i = queues.size(); --i >= 0;)
             {
                 if (queues.getUnchecked (i)->getParameterId() == id)
                 {
@@ -2059,31 +2053,24 @@ public:
                 }
             }
 
-            index = numQueuesUsed++;
-            ParamValueQueue* valueQueue = (index < queues.size() ? queues[index]
-                                                                 : queues.add (new ParamValueQueue));
-
-            valueQueue->clear();
-            valueQueue->setParamID (id);
-
-            return valueQueue;
+            index = getParameterCount();
+            return queues.add (new ParamValueQueue (id));
         }
 
         void clearAllQueues() noexcept
         {
-            numQueuesUsed = 0;
+            for (int i = queues.size(); --i >= 0;)
+                queues.getUnchecked (i)->clear();
         }
 
         struct ParamValueQueue  : public Vst::IParamValueQueue
         {
-            ParamValueQueue () : paramID (static_cast<Vst::ParamID> (-1))
+            ParamValueQueue (Vst::ParamID parameterID) : paramID (parameterID)
             {
                 points.ensureStorageAllocated (1024);
             }
 
             virtual ~ParamValueQueue() {}
-
-            void setParamID (Vst::ParamID pID) noexcept    { paramID = pID; }
 
             JUCE_DECLARE_VST3_COM_REF_METHODS
             JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2136,7 +2123,7 @@ public:
             };
 
             Atomic<int> refCount;
-            Vst::ParamID paramID;
+            const Vst::ParamID paramID;
             Array<ParamPoint> points;
             CriticalSection pointLock;
 
@@ -2145,7 +2132,6 @@ public:
 
         Atomic<int> refCount;
         OwnedArray<ParamValueQueue> queues;
-        int numQueuesUsed;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
     };
@@ -2184,9 +2170,6 @@ private:
     Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements; // Caching to improve performance and to avoid possible non-thread-safe calls to getBusArrangements().
     VST3FloatAndDoubleBusMapComposite inputBusMap, outputBusMap;
     Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
-
-    StringArray programNames;
-    Vst::ParamID programParameterID;
 
     //==============================================================================
     template <typename Type>
@@ -2341,8 +2324,8 @@ private:
 
         if (componentConnection != nullptr && editControllerConnection != nullptr)
         {
-            warnOnFailure (componentConnection->connect (editControllerConnection));
             warnOnFailure (editControllerConnection->connect (componentConnection));
+            warnOnFailure (componentConnection->connect (editControllerConnection));
         }
     }
 
@@ -2408,7 +2391,6 @@ private:
         Vst::BusInfo busInfo;
         busInfo.mediaType = forAudio ? Vst::kAudio : Vst::kEvent;
         busInfo.direction = forInput ? Vst::kInput : Vst::kOutput;
-        busInfo.channelCount = 0;
 
         component->getBusInfo (busInfo.mediaType, busInfo.direction,
                                (Steinberg::int32) index, busInfo);
@@ -2475,83 +2457,8 @@ private:
         return paramInfo;
     }
 
-    void syncProgramNames ()
-    {
-        programNames.clear();
-
-        if (processor == nullptr || editController == nullptr)
-            return;
-
-        Vst::UnitID programUnitID;
-        Vst::ParameterInfo paramInfo = { 0 };
-
-        {
-            int idx, num = editController->getParameterCount();
-            for (idx = 0; idx < num; ++idx)
-                if (editController->getParameterInfo (idx, paramInfo) == kResultOk
-                     && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
-                    break;
-
-            if (idx >= num) return;
-
-            programParameterID = paramInfo.id;
-            programUnitID = paramInfo.unitId;
-        }
-
-        if (unitInfo != nullptr)
-        {
-            Vst::UnitInfo uInfo = { 0 };
-            const int unitCount = unitInfo->getUnitCount();
-
-            for (int idx = 0; idx < unitCount; ++idx)
-            {
-                if (unitInfo->getUnitInfo(idx, uInfo) == kResultOk
-                      && uInfo.id == programUnitID)
-                {
-                    const int programListCount = unitInfo->getProgramListCount();
-
-                    for (int j = 0; j < programListCount; ++j)
-                    {
-                        Vst::ProgramListInfo programListInfo = { 0 };
-
-                        if (unitInfo->getProgramListInfo (j, programListInfo) == kResultOk
-                              && programListInfo.id == uInfo.programListId)
-                        {
-                            Vst::String128 name;
-
-                            for (int k = 0; k < programListInfo.programCount; ++k)
-                                if (unitInfo->getProgramName (programListInfo.id, k, name) == kResultOk)
-                                    programNames.add (toString (name));
-
-                            return;
-                        }
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        if (editController != nullptr
-               && paramInfo.stepCount > 0)
-        {
-            const int numPrograms = paramInfo.stepCount + 1;
-            for (int i = 0; i < numPrograms; ++i)
-            {
-                Vst::String128 programName;
-                Vst::ParamValue valueNormalized = static_cast<Vst::ParamValue> (i) / static_cast<Vst::ParamValue> (paramInfo.stepCount);
-                if (editController->getParamStringByValue (paramInfo.id, valueNormalized, programName) == kResultOk)
-                    programNames.add (toString (programName));
-            }
-        }
-    }
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)
 };
-
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
 
 };
 
@@ -2567,14 +2474,9 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
     VST3Classes::VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
 }
 
-void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
-                                             double,
-                                             int,
-                                             void* userData,
-                                             void (*callback) (void*, AudioPluginInstance*, const String&))
+AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const PluginDescription& description, double, int)
 {
     ScopedPointer<VST3Classes::VST3PluginInstance> result;
-
 
     if (fileMightContainThisPluginType (description.fileOrIdentifier))
     {
@@ -2594,17 +2496,7 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    String errorMsg;
-
-    if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-3");
-
-    callback (userData, result.release(), errorMsg);
-}
-
-bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
-{
-    return false;
+    return result.release();
 }
 
 bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -2634,7 +2526,7 @@ bool VST3PluginFormat::doesPluginStillExist (const PluginDescription& descriptio
     return File (description.fileOrIdentifier).exists();
 }
 
-StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
+StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
 {
     StringArray results;
 

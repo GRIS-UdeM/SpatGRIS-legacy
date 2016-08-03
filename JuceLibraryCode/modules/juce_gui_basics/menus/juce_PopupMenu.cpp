@@ -22,143 +22,47 @@
   ==============================================================================
 */
 
+//==============================================================================
 namespace PopupMenuSettings
 {
     const int scrollZone = 24;
     const int borderSize = 2;
+    const int timerInterval = 50;
     const int dismissCommandId = 0x6287345f;
+    const int sectionHeaderID  = 0x4734a34f;
 
     static bool menuWasHiddenBecauseOfAppChange = false;
 }
 
-//==============================================================================
-struct PopupMenu::HelperClasses
+class PopupMenu::Item
 {
+public:
+    Item()  : itemID (0), isActive (true), isSeparator (true), isTicked (false),
+              usesColour (false), commandManager (nullptr)
+    {}
 
-class MouseSourceState;
-class MenuWindow;
+    Item (const int itemId,
+          const String& name,
+          const bool active,
+          const bool ticked,
+          Drawable* drawable,
+          const Colour colour,
+          const bool useColour,
+          CustomComponent* const custom,
+          const PopupMenu* const sub,
+          ApplicationCommandManager* const manager)
 
-static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
-static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
-static const Colour* getColour (const PopupMenu::Item& item) noexcept    { return item.colour != Colour (0x00000000) ? &item.colour : nullptr; }
-static bool hasSubMenu (const PopupMenu::Item& item) noexcept            { return item.subMenu != nullptr && (item.itemID == 0 || item.subMenu->getNumItems() > 0); }
-
-//==============================================================================
-struct HeaderItemComponent  : public PopupMenu::CustomComponent
-{
-    HeaderItemComponent (const String& name)  : PopupMenu::CustomComponent (false)
+      : itemID (itemId), text (name), textColour (colour),
+        isActive (active), isSeparator (false), isTicked (ticked),
+        usesColour (useColour), iconDrawable (drawable),
+        customComp (custom), subMenu (createCopyIfNotNull (sub)), commandManager (manager)
     {
-        setName (name);
-    }
-
-    void paint (Graphics& g) override
-    {
-        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
-    }
-
-    void getIdealSize (int& idealWidth, int& idealHeight) override
-    {
-        getLookAndFeel().getIdealPopupMenuItemSize (getName(), false, -1, idealWidth, idealHeight);
-        idealHeight += idealHeight / 2;
-        idealWidth += idealWidth / 4;
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeaderItemComponent)
-};
-
-//==============================================================================
-struct ItemComponent  : public Component
-{
-    ItemComponent (const PopupMenu::Item& i, int standardItemHeight, MenuWindow& parent)
-      : item (i),
-        customComp (i.customComponent),
-        isHighlighted (false)
-    {
-        if (item.isSectionHeader)
-            customComp = new HeaderItemComponent (item.text);
-
-        addAndMakeVisible (customComp);
-
-        parent.addAndMakeVisible (this);
-
-        updateShortcutKeyDescription();
-
-        int itemW = 80;
-        int itemH = 16;
-        getIdealSize (itemW, itemH, standardItemHeight);
-        setSize (itemW, jlimit (2, 600, itemH));
-
-        addMouseListener (&parent, false);
-    }
-
-    ~ItemComponent()
-    {
-        removeChildComponent (customComp);
-    }
-
-    void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
-    {
-        if (customComp != nullptr)
-            customComp->getIdealSize (idealWidth, idealHeight);
-        else
-            getLookAndFeel().getIdealPopupMenuItemSize (getTextForMeasurement(),
-                                                        item.isSeparator,
-                                                        standardItemHeight,
-                                                        idealWidth, idealHeight);
-    }
-
-    void paint (Graphics& g) override
-    {
-        if (customComp == nullptr)
-            getLookAndFeel().drawPopupMenuItem (g, getLocalBounds(),
-                                                item.isSeparator,
-                                                item.isEnabled,
-                                                isHighlighted,
-                                                item.isTicked,
-                                                hasSubMenu (item),
-                                                item.text,
-                                                item.shortcutKeyDescription,
-                                                item.image,
-                                                getColour (item));
-    }
-
-    void resized() override
-    {
-        if (Component* const child = getChildComponent (0))
-            child->setBounds (getLocalBounds().reduced (2, 0));
-    }
-
-    void setHighlighted (bool shouldBeHighlighted)
-    {
-        shouldBeHighlighted = shouldBeHighlighted && item.isEnabled;
-
-        if (isHighlighted != shouldBeHighlighted)
-        {
-            isHighlighted = shouldBeHighlighted;
-
-            if (customComp != nullptr)
-                customComp->setHighlighted (shouldBeHighlighted);
-
-            repaint();
-        }
-    }
-
-    PopupMenu::Item item;
-
-private:
-    // NB: we use a copy of the one from the item info in case we're using our own section comp
-    ReferenceCountedObjectPtr<CustomComponent> customComp;
-    bool isHighlighted;
-
-    void updateShortcutKeyDescription()
-    {
-        if (item.commandManager != nullptr
-             && item.itemID != 0
-             && item.shortcutKeyDescription.isEmpty())
+        if (commandManager != nullptr && itemID != 0)
         {
             String shortcutKey;
-            const Array<KeyPress> keyPresses (item.commandManager->getKeyMappings()
-                                                 ->getKeyPressesAssignedToCommand (item.itemID));
+
+            const Array <KeyPress> keyPresses (commandManager->getKeyMappings()
+                                                    ->getKeyPressesAssignedToCommand (itemID));
 
             for (int i = 0; i < keyPresses.size(); ++i)
             {
@@ -173,15 +77,141 @@ private:
                     shortcutKey << key;
             }
 
-            item.shortcutKeyDescription = shortcutKey.trim();
+            shortcutKey = shortcutKey.trim();
+
+            if (shortcutKey.isNotEmpty())
+                text << "<end>" << shortcutKey;
         }
     }
 
-    String getTextForMeasurement() const
+    Item (const Item& other)
+        : itemID (other.itemID),
+          text (other.text),
+          textColour (other.textColour),
+          isActive (other.isActive),
+          isSeparator (other.isSeparator),
+          isTicked (other.isTicked),
+          usesColour (other.usesColour),
+          iconDrawable (other.iconDrawable != nullptr ? other.iconDrawable->createCopy() : nullptr),
+          customComp (other.customComp),
+          subMenu (createCopyIfNotNull (other.subMenu.get())),
+          commandManager (other.commandManager)
+    {}
+
+    bool canBeTriggered() const noexcept    { return isActive && itemID != 0 && itemID != PopupMenuSettings::sectionHeaderID; }
+    bool hasActiveSubMenu() const noexcept  { return isActive && subMenu != nullptr && subMenu->items.size() > 0; }
+
+    //==============================================================================
+    const int itemID;
+    String text;
+    const Colour textColour;
+    const bool isActive, isSeparator, isTicked, usesColour;
+    ScopedPointer<Drawable> iconDrawable;
+    ReferenceCountedObjectPtr<CustomComponent> customComp;
+    ScopedPointer<PopupMenu> subMenu;
+    ApplicationCommandManager* const commandManager;
+
+private:
+    Item& operator= (const Item&);
+
+    JUCE_LEAK_DETECTOR (Item)
+};
+
+
+//==============================================================================
+struct PopupMenu::HelperClasses
+{
+
+class MouseSourceState;
+class MenuWindow;
+
+//==============================================================================
+class ItemComponent  : public Component
+{
+public:
+    ItemComponent (const PopupMenu::Item& info, int standardItemHeight, MenuWindow& parent)
+      : itemInfo (info),
+        isHighlighted (false)
     {
-        return item.shortcutKeyDescription.isNotEmpty() ? item.text + "   " + item.shortcutKeyDescription
-                                                        : item.text;
+        addAndMakeVisible (itemInfo.customComp);
+        parent.addAndMakeVisible (this);
+
+        int itemW = 80;
+        int itemH = 16;
+        getIdealSize (itemW, itemH, standardItemHeight);
+        setSize (itemW, jlimit (2, 600, itemH));
+
+        addMouseListener (&parent, false);
     }
+
+    ~ItemComponent()
+    {
+        removeChildComponent (itemInfo.customComp);
+    }
+
+    void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
+    {
+        if (itemInfo.customComp != nullptr)
+            itemInfo.customComp->getIdealSize (idealWidth, idealHeight);
+        else
+            getLookAndFeel().getIdealPopupMenuItemSize (itemInfo.text,
+                                                        itemInfo.isSeparator,
+                                                        standardItemHeight,
+                                                        idealWidth, idealHeight);
+    }
+
+    void paint (Graphics& g) override
+    {
+        if (itemInfo.customComp == nullptr)
+        {
+            String mainText (itemInfo.text);
+            String endText;
+            const int endIndex = mainText.indexOf ("<end>");
+
+            if (endIndex >= 0)
+            {
+                endText = mainText.substring (endIndex + 5).trim();
+                mainText = mainText.substring (0, endIndex);
+            }
+
+            getLookAndFeel()
+                .drawPopupMenuItem (g, getLocalBounds(),
+                                    itemInfo.isSeparator,
+                                    itemInfo.isActive,
+                                    isHighlighted,
+                                    itemInfo.isTicked,
+                                    itemInfo.subMenu != nullptr && (itemInfo.itemID == 0 || itemInfo.subMenu->getNumItems() > 0),
+                                    mainText, endText,
+                                    itemInfo.iconDrawable,
+                                    itemInfo.usesColour ? &(itemInfo.textColour) : nullptr);
+        }
+    }
+
+    void resized() override
+    {
+        if (Component* const child = getChildComponent (0))
+            child->setBounds (getLocalBounds().reduced (2, 0));
+    }
+
+    void setHighlighted (bool shouldBeHighlighted)
+    {
+        shouldBeHighlighted = shouldBeHighlighted && itemInfo.isActive;
+
+        if (isHighlighted != shouldBeHighlighted)
+        {
+            isHighlighted = shouldBeHighlighted;
+
+            if (itemInfo.customComp != nullptr)
+                itemInfo.customComp->setHighlighted (shouldBeHighlighted);
+
+            repaint();
+        }
+    }
+
+    PopupMenu::Item itemInfo;
+
+private:
+    bool isHighlighted;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent)
 };
@@ -200,7 +230,6 @@ public:
          options (opts),
          managerOfChosenCommand (manager),
          componentAttachedTo (options.targetComponent),
-         parentComponent (nullptr),
          hasBeenOver (false),
          needsToScroll (false),
          dismissOnMouseUp (shouldDismissOnMouseUp),
@@ -219,9 +248,7 @@ public:
         setAlwaysOnTop (true);
 
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
-                                          : menu.lookAndFeel.get());
-
-        parentComponent = getLookAndFeel().getParentComponentForMenuOptions (options);
+                                          : menu.lookAndFeel);
 
         setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
@@ -240,30 +267,18 @@ public:
 
         if (options.visibleItemID != 0)
         {
-            const Point<int> targetPosition =
-                (parentComponent != nullptr ? parentComponent->getLocalPoint (nullptr, options.targetArea.getTopLeft())
-                                            : options.targetArea.getTopLeft());
-
-            const int y = targetPosition.getY() - windowPos.getY();
+            const int y = options.targetArea.getY() - windowPos.getY();
             ensureItemIsVisible (options.visibleItemID,
                                  isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
         }
 
         resizeToBestWindowPos();
+        addToDesktop (ComponentPeer::windowIsTemporary
+                       | ComponentPeer::windowIgnoresKeyPresses
+                       | getLookAndFeel().getMenuWindowFlags());
 
-        if (parentComponent != nullptr)
-        {
-            parentComponent->addChildComponent (this);
-        }
-        else
-        {
-            addToDesktop (ComponentPeer::windowIsTemporary
-                          | ComponentPeer::windowIgnoresKeyPresses
-                          | getLookAndFeel().getMenuWindowFlags());
-
-            getActiveWindows().add (this);
-            Desktop::getInstance().addGlobalMouseListener (this);
-        }
+        getActiveWindows().add (this);
+        Desktop::getInstance().addGlobalMouseListener (this);
     }
 
     ~MenuWindow()
@@ -285,13 +300,10 @@ public:
 
     void paintOverChildren (Graphics& g) override
     {
-        LookAndFeel& lf = getLookAndFeel();
-
-        if (parentComponent != nullptr)
-            lf.drawResizableFrame (g, getWidth(), getHeight(), BorderSize<int> (PopupMenuSettings::borderSize));
-
         if (canScroll())
         {
+            LookAndFeel& lf = getLookAndFeel();
+
             if (isTopScrollZoneActive())
                 lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, true);
 
@@ -427,7 +439,7 @@ public:
             {
                 // we want to dismiss the menu, but if we do it synchronously, then
                 // the mouse-click will be allowed to pass through. That's good, except
-                // when the user clicks on the button that originally popped the menu up,
+                // when the user clicks on the button that orginally popped the menu up,
                 // as they'll expect the menu to go away, and in fact it'll just
                 // come back. So only dismiss synchronously if they're not on the original
                 // comp that we're attached to.
@@ -571,43 +583,27 @@ public:
     }
 
     //==============================================================================
-    Rectangle<int> getParentArea (Point<int> targetPoint)
+    void calculateWindowPos (const Rectangle<int>& target, const bool alignToRectangle)
     {
-        Rectangle<int> parentArea (Desktop::getInstance().getDisplays()
-                                   .getDisplayContaining (targetPoint)
-                                  #if JUCE_MAC
-                                   .userArea);
-                                  #else
-                                   .totalArea); // on windows, don't stop the menu overlapping the taskbar
-                                  #endif
+        const Rectangle<int> mon (Desktop::getInstance().getDisplays()
+                                     .getDisplayContaining (target.getCentre())
+                                                           #if JUCE_MAC
+                                                            .userArea);
+                                                           #else
+                                                            .totalArea); // on windows, don't stop the menu overlapping the taskbar
+                                                           #endif
 
-        if (parentComponent == nullptr)
-            return parentArea;
-
-        return parentComponent->getLocalArea (nullptr,
-                                              parentComponent->getScreenBounds()
-                                                    .reduced (PopupMenuSettings::borderSize)
-                                                    .getIntersection (parentArea));
-    }
-
-    void calculateWindowPos (Rectangle<int> target, const bool alignToRectangle)
-    {
-        const Rectangle<int> parentArea = getParentArea (target.getCentre());
-
-        if (parentComponent != nullptr)
-            target = parentComponent->getLocalArea (nullptr, target).getIntersection (parentArea);
-
-        const int maxMenuHeight = parentArea.getHeight() - 24;
+        const int maxMenuHeight = mon.getHeight() - 24;
 
         int x, y, widthToUse, heightToUse;
-        layoutMenuItems (parentArea.getWidth() - 24, maxMenuHeight, widthToUse, heightToUse);
+        layoutMenuItems (mon.getWidth() - 24, maxMenuHeight, widthToUse, heightToUse);
 
         if (alignToRectangle)
         {
             x = target.getX();
 
-            const int spaceUnder = parentArea.getHeight() - (target.getBottom() - parentArea.getY());
-            const int spaceOver = target.getY() - parentArea.getY();
+            const int spaceUnder = mon.getHeight() - (target.getBottom() - mon.getY());
+            const int spaceOver = target.getY() - mon.getY();
 
             if (heightToUse < spaceUnder - 30 || spaceUnder >= spaceOver)
                 y = target.getBottom();
@@ -616,7 +612,7 @@ public:
         }
         else
         {
-            bool tendTowardsRight = target.getCentreX() < parentArea.getCentreX();
+            bool tendTowardsRight = target.getCentreX() < mon.getCentreX();
 
             if (parent != nullptr)
             {
@@ -625,19 +621,19 @@ public:
                     const bool parentGoingRight = (parent->getX() + parent->getWidth() / 2
                                                     > parent->parent->getX() + parent->parent->getWidth() / 2);
 
-                    if (parentGoingRight && target.getRight() + widthToUse < parentArea.getRight() - 4)
+                    if (parentGoingRight && target.getRight() + widthToUse < mon.getRight() - 4)
                         tendTowardsRight = true;
                     else if ((! parentGoingRight) && target.getX() > widthToUse + 4)
                         tendTowardsRight = false;
                 }
-                else if (target.getRight() + widthToUse < parentArea.getRight() - 32)
+                else if (target.getRight() + widthToUse < mon.getRight() - 32)
                 {
                     tendTowardsRight = true;
                 }
             }
 
-            const int biggestSpace = jmax (parentArea.getRight() - target.getRight(),
-                                           target.getX() - parentArea.getX()) - 32;
+            const int biggestSpace = jmax (mon.getRight() - target.getRight(),
+                                           target.getX() - mon.getX()) - 32;
 
             if (biggestSpace < widthToUse)
             {
@@ -646,21 +642,21 @@ public:
                 if (numColumns > 1)
                     layoutMenuItems (biggestSpace - 4, maxMenuHeight, widthToUse, heightToUse);
 
-                tendTowardsRight = (parentArea.getRight() - target.getRight()) >= (target.getX() - parentArea.getX());
+                tendTowardsRight = (mon.getRight() - target.getRight()) >= (target.getX() - mon.getX());
             }
 
             if (tendTowardsRight)
-                x = jmin (parentArea.getRight() - widthToUse - 4, target.getRight());
+                x = jmin (mon.getRight() - widthToUse - 4, target.getRight());
             else
-                x = jmax (parentArea.getX() + 4, target.getX() - widthToUse);
+                x = jmax (mon.getX() + 4, target.getX() - widthToUse);
 
             y = target.getY();
-            if (target.getCentreY() > parentArea.getCentreY())
-                y = jmax (parentArea.getY(), target.getBottom() - heightToUse);
+            if (target.getCentreY() > mon.getCentreY())
+                y = jmax (mon.getY(), target.getBottom() - heightToUse);
         }
 
-        x = jmax (parentArea.getX() + 1, jmin (parentArea.getRight() - (widthToUse + 6), x));
-        y = jmax (parentArea.getY() + 1, jmin (parentArea.getBottom() - (heightToUse + 6), y));
+        x = jmax (mon.getX() + 1, jmin (mon.getRight() - (widthToUse + 6), x));
+        y = jmax (mon.getY() + 1, jmin (mon.getBottom() - (heightToUse + 6), y));
 
         windowPos.setBounds (x, y, widthToUse, heightToUse);
 
@@ -731,12 +727,9 @@ public:
             childNum += numChildren;
         }
 
-        // width must never be larger than the screen
-        const int minWidth = jmin (maxMenuW, options.minWidth);
-
-        if (totalW < minWidth)
+        if (totalW < options.minWidth)
         {
-            totalW = minWidth;
+            totalW = options.minWidth;
 
             for (int col = 0; col < numColumns; ++col)
                 columnWidths.set (0, totalW / numColumns);
@@ -751,42 +744,43 @@ public:
 
         for (int i = items.size(); --i >= 0;)
         {
-            if (ItemComponent* const m = items.getUnchecked(i))
+            ItemComponent* const m = items.getUnchecked(i);
+
+            if (m != nullptr
+                && m->itemInfo.itemID == itemID
+                && windowPos.getHeight() > PopupMenuSettings::scrollZone * 4)
             {
-                if (m->item.itemID == itemID
-                     && windowPos.getHeight() > PopupMenuSettings::scrollZone * 4)
+                const int currentY = m->getY();
+
+                if (wantedY > 0 || currentY < 0 || m->getBottom() > windowPos.getHeight())
                 {
-                    const int currentY = m->getY();
+                    if (wantedY < 0)
+                        wantedY = jlimit (PopupMenuSettings::scrollZone,
+                                          jmax (PopupMenuSettings::scrollZone,
+                                                windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
+                                          currentY);
 
-                    if (wantedY > 0 || currentY < 0 || m->getBottom() > windowPos.getHeight())
-                    {
-                        if (wantedY < 0)
-                            wantedY = jlimit (PopupMenuSettings::scrollZone,
-                                              jmax (PopupMenuSettings::scrollZone,
-                                                    windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
-                                              currentY);
+                    const Rectangle<int> mon (Desktop::getInstance().getDisplays()
+                                                .getDisplayContaining (windowPos.getPosition()).userArea);
 
-                        const Rectangle<int> parantArea = getParentArea (windowPos.getPosition());
+                    int deltaY = wantedY - currentY;
 
-                        int deltaY = wantedY - currentY;
+                    windowPos.setSize (jmin (windowPos.getWidth(), mon.getWidth()),
+                                       jmin (windowPos.getHeight(), mon.getHeight()));
 
-                        windowPos.setSize (jmin (windowPos.getWidth(), parantArea.getWidth()),
-                                           jmin (windowPos.getHeight(), parantArea.getHeight()));
+                    const int newY = jlimit (mon.getY(),
+                                             mon.getBottom() - windowPos.getHeight(),
+                                             windowPos.getY() + deltaY);
 
-                        const int newY = jlimit (parantArea.getY(),
-                                                 parantArea.getBottom() - windowPos.getHeight(),
-                                                 windowPos.getY() + deltaY);
+                    deltaY -= newY - windowPos.getY();
 
-                        deltaY -= newY - windowPos.getY();
+                    childYOffset -= deltaY;
+                    windowPos.setPosition (windowPos.getX(), newY);
 
-                        childYOffset -= deltaY;
-                        windowPos.setPosition (windowPos.getX(), newY);
-
-                        updateYPositions();
-                    }
-
-                    break;
+                    updateYPositions();
                 }
+
+                break;
             }
         }
     }
@@ -883,9 +877,9 @@ public:
         activeSubMenu = nullptr;
 
         if (childComp != nullptr
-             && hasActiveSubMenu (childComp->item))
+             && childComp->itemInfo.hasActiveSubMenu())
         {
-            activeSubMenu = new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
+            activeSubMenu = new HelperClasses::MenuWindow (*(childComp->itemInfo.subMenu), this,
                                                            options.withTargetScreenArea (childComp->getScreenBounds())
                                                                   .withMinimumWidth (0)
                                                                   .withTargetComponent (nullptr),
@@ -903,11 +897,11 @@ public:
     void triggerCurrentlyHighlightedItem()
     {
         if (currentChild != nullptr
-             && canBeTriggered (currentChild->item)
-             && (currentChild->item.customComponent == nullptr
-                  || currentChild->item.customComponent->isTriggeredAutomatically()))
+             && currentChild->itemInfo.canBeTriggered()
+             && (currentChild->itemInfo.customComp == nullptr
+                  || currentChild->itemInfo.customComp->isTriggeredAutomatically()))
         {
-            dismissMenu (&currentChild->item);
+            dismissMenu (&currentChild->itemInfo);
         }
     }
 
@@ -923,7 +917,7 @@ public:
 
             if (ItemComponent* mic = items.getUnchecked ((start + items.size()) % items.size()))
             {
-                if (canBeTriggered (mic->item) || hasActiveSubMenu (mic->item))
+                if (mic->itemInfo.canBeTriggered() || mic->itemInfo.hasActiveSubMenu())
                 {
                     setCurrentlyHighlightedChild (mic);
                     break;
@@ -950,7 +944,6 @@ public:
     OwnedArray<ItemComponent> items;
     ApplicationCommandManager** managerOfChosenCommand;
     WeakReference<Component> componentAttachedTo;
-    Component* parentComponent;
     Rectangle<int> windowPos;
     bool hasBeenOver, needsToScroll;
     bool dismissOnMouseUp, hideOnExit, disableMouseMoves, hasAnyJuceCompHadFocus;
@@ -980,7 +973,7 @@ public:
         if (! window.windowIsStillValid())
             return;
 
-        startTimerHz (20);
+        startTimer (PopupMenuSettings::timerInterval);
         handleMousePosition (e.getScreenPosition());
     }
 
@@ -1182,8 +1175,9 @@ private:
 };
 
 //==============================================================================
-struct NormalComponentWrapper : public PopupMenu::CustomComponent
+class NormalComponentWrapper : public PopupMenu::CustomComponent
 {
+public:
     NormalComponentWrapper (Component* const comp, const int w, const int h,
                             const bool triggerMenuItemAutomaticallyWhenClicked)
         : PopupMenu::CustomComponent (triggerMenuItemAutomaticallyWhenClicked),
@@ -1204,15 +1198,43 @@ struct NormalComponentWrapper : public PopupMenu::CustomComponent
             child->setBounds (getLocalBounds());
     }
 
+private:
     const int width, height;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NormalComponentWrapper)
+};
+
+//==============================================================================
+class HeaderItemComponent  : public PopupMenu::CustomComponent
+{
+public:
+    HeaderItemComponent (const String& name)
+        : PopupMenu::CustomComponent (false)
+    {
+        setName (name);
+    }
+
+    void paint (Graphics& g) override
+    {
+        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
+    }
+
+    void getIdealSize (int& idealWidth, int& idealHeight) override
+    {
+        getLookAndFeel().getIdealPopupMenuItemSize (getName(), false, -1, idealWidth, idealHeight);
+        idealHeight += idealHeight / 2;
+        idealWidth += idealWidth / 4;
+    }
+
+private:
+    JUCE_LEAK_DETECTOR (HeaderItemComponent)
 };
 
 };
 
 //==============================================================================
 PopupMenu::PopupMenu()
+    : lookAndFeel (nullptr)
 {
 }
 
@@ -1261,70 +1283,14 @@ void PopupMenu::clear()
     items.clear();
 }
 
-//==============================================================================
-PopupMenu::Item::Item() noexcept
-  : itemID (0),
-    commandManager (nullptr),
-    colour (0x00000000),
-    isEnabled (true),
-    isTicked (false),
-    isSeparator (false),
-    isSectionHeader (false)
-{
-}
-
-PopupMenu::Item::Item (const Item& other)
-  : text (other.text),
-    itemID (other.itemID),
-    subMenu (createCopyIfNotNull (other.subMenu.get())),
-    image (other.image != nullptr ? other.image->createCopy() : nullptr),
-    customComponent (other.customComponent),
-    commandManager (other.commandManager),
-    shortcutKeyDescription (other.shortcutKeyDescription),
-    colour (other.colour),
-    isEnabled (other.isEnabled),
-    isTicked (other.isTicked),
-    isSeparator (other.isSeparator),
-    isSectionHeader (other.isSectionHeader)
-{
-}
-
-PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
-{
-    text = other.text;
-    itemID = other.itemID;
-    subMenu = createCopyIfNotNull (other.subMenu.get());
-    image = (other.image != nullptr ? other.image->createCopy() : nullptr);
-    customComponent = other.customComponent;
-    commandManager = other.commandManager;
-    shortcutKeyDescription = other.shortcutKeyDescription;
-    colour = other.colour;
-    isEnabled = other.isEnabled;
-    isTicked = other.isTicked;
-    isSeparator = other.isSeparator;
-    isSectionHeader = other.isSectionHeader;
-    return *this;
-}
-
-void PopupMenu::addItem (const Item& newItem)
-{
-    // An ID of 0 is used as a return value to indicate that the user
-    // didn't pick anything, so you shouldn't use it as the ID for an item..
-    jassert (newItem.itemID != 0
-              || newItem.isSeparator || newItem.isSectionHeader
-              || newItem.subMenu != nullptr);
-
-    items.add (new Item (newItem));
-}
-
 void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked)
 {
-    Item i;
-    i.text = itemText;
-    i.itemID = itemResultID;
-    i.isEnabled = isActive;
-    i.isTicked = isTicked;
-    addItem (i);
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, nullptr,
+                         Colours::black, false, nullptr, nullptr, nullptr));
 }
 
 static Drawable* createDrawableFromImage (const Image& im)
@@ -1341,18 +1307,23 @@ static Drawable* createDrawableFromImage (const Image& im)
 
 void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, const Image& iconToUse)
 {
-    addItem (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse));
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse),
+                         Colours::black, false, nullptr, nullptr, nullptr));
 }
 
 void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, Drawable* iconToUse)
 {
-    Item i;
-    i.text = itemText;
-    i.itemID = itemResultID;
-    i.isEnabled = isActive;
-    i.isTicked = isTicked;
-    i.image = iconToUse;
-    addItem (i);
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, iconToUse,
+                         Colours::black, false, nullptr, nullptr, nullptr));
 }
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
@@ -1367,59 +1338,47 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
         ApplicationCommandInfo info (*registeredInfo);
         ApplicationCommandTarget* const target = commandManager->getTargetForCommand (commandID, info);
 
-        Item i;
-        i.text = displayName.isNotEmpty() ? displayName : info.shortName;
-        i.itemID = (int) commandID;
-        i.commandManager = commandManager;
-        i.isEnabled = target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0;
-        i.isTicked = (info.flags & ApplicationCommandInfo::isTicked) != 0;
-        i.image = iconToUse;
-        addItem (i);
+        items.add (new Item (commandID,
+                             displayName.isNotEmpty() ? displayName
+                                                      : info.shortName,
+                             target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0,
+                             (info.flags & ApplicationCommandInfo::isTicked) != 0,
+                             iconToUse,
+                             Colours::black,
+                             false,
+                             nullptr, nullptr,
+                             commandManager));
     }
-}
-
-void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
-                                 bool isActive, bool isTicked, Drawable* iconToUse)
-{
-    Item i;
-    i.text = itemText;
-    i.itemID = itemResultID;
-    i.colour = itemTextColour;
-    i.isEnabled = isActive;
-    i.isTicked = isTicked;
-    i.image = iconToUse;
-    addItem (i);
 }
 
 void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
                                  bool isActive, bool isTicked, const Image& iconToUse)
 {
-    Item i;
-    i.text = itemText;
-    i.itemID = itemResultID;
-    i.colour = itemTextColour;
-    i.isEnabled = isActive;
-    i.isTicked = isTicked;
-    i.image = createDrawableFromImage (iconToUse);
-    addItem (i);
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse),
+                         itemTextColour, true, nullptr, nullptr, nullptr));
 }
 
-void PopupMenu::addCustomItem (int itemResultID, CustomComponent* cc, const PopupMenu* subMenu)
+void PopupMenu::addCustomItem (int itemID, CustomComponent* cc, const PopupMenu* subMenu)
 {
-    Item i;
-    i.itemID = itemResultID;
-    i.customComponent = cc;
-    i.subMenu = createCopyIfNotNull (subMenu);
-    addItem (i);
+    jassert (itemID != 0);    // 0 is used as a return value to indicate that the user
+                              // didn't pick anything, so you shouldn't use it as the id
+                              // for an item..
+
+    items.add (new Item (itemID, String::empty, true, false, nullptr,
+                         Colours::black, false, cc, subMenu, nullptr));
 }
 
 void PopupMenu::addCustomItem (int itemResultID, Component* customComponent, int idealWidth, int idealHeight,
                                bool triggerMenuItemAutomaticallyWhenClicked, const PopupMenu* subMenu)
 {
-    addCustomItem (itemResultID,
-                   new HelperClasses::NormalComponentWrapper (customComponent, idealWidth, idealHeight,
-                                                              triggerMenuItemAutomaticallyWhenClicked),
-                   subMenu);
+    items.add (new Item (itemResultID, String::empty, true, false, nullptr, Colours::black, false,
+                         new HelperClasses::NormalComponentWrapper (customComponent, idealWidth, idealHeight,
+                                                                    triggerMenuItemAutomaticallyWhenClicked),
+                         subMenu, nullptr));
 }
 
 void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive)
@@ -1436,38 +1395,24 @@ void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu,
 void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive,
                             Drawable* iconToUse, bool isTicked, int itemResultID)
 {
-    Item i;
-    i.text = subMenuName;
-    i.itemID = itemResultID;
-    i.subMenu = new PopupMenu (subMenu);
-    i.isEnabled = isActive && (itemResultID != 0 || subMenu.getNumItems() > 0);
-    i.isTicked = isTicked;
-    i.image = iconToUse;
-    addItem (i);
+    items.add (new Item (itemResultID, subMenuName, isActive && (itemResultID != 0 || subMenu.getNumItems() > 0), isTicked,
+                         iconToUse, Colours::black, false, nullptr, &subMenu, nullptr));
 }
 
 void PopupMenu::addSeparator()
 {
     if (items.size() > 0 && ! items.getLast()->isSeparator)
-    {
-        Item i;
-        i.isSeparator = true;
-        addItem (i);
-    }
+        items.add (new Item());
 }
 
 void PopupMenu::addSectionHeader (const String& title)
 {
-    Item i;
-    i.text = title;
-    i.isSectionHeader = true;
-    addItem (i);
+    addCustomItem (PopupMenuSettings::sectionHeaderID, new HelperClasses::HeaderItemComponent (title));
 }
 
 //==============================================================================
 PopupMenu::Options::Options()
     : targetComponent (nullptr),
-      parentComponent (nullptr),
       visibleItemID (0),
       minWidth (0),
       maxColumns (0),
@@ -1522,13 +1467,6 @@ PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemTo
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) const noexcept
-{
-    Options o (*this);
-    o.parentComponent = parent;
-    return o;
-}
-
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
@@ -1543,8 +1481,9 @@ Component* PopupMenu::createWindow (const Options& options,
 
 //==============================================================================
 // This invokes any command manager commands and deletes the menu window when it is dismissed
-struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
+class PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 {
+public:
     PopupMenuCompletionCallback()
         : managerOfChosenCommand (nullptr),
           prevFocused (Component::getCurrentlyFocusedComponent()),
@@ -1553,7 +1492,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
     }
 
-    void modalStateFinished (int result) override
+    void modalStateFinished (int result)
     {
         if (managerOfChosenCommand != nullptr && result != 0)
         {
@@ -1580,6 +1519,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
     ScopedPointer<Component> component;
     WeakReference<Component> prevFocused, prevTopLevel;
 
+private:
     JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback)
 };
 
@@ -1604,7 +1544,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
         if (userCallback == nullptr && canBeModal)
             return window->runModalLoop();
        #else
-        ignoreUnused (canBeModal);
+        (void) canBeModal;
         jassert (! (userCallback == nullptr && canBeModal));
        #endif
     }
@@ -1706,8 +1646,10 @@ bool PopupMenu::containsCommandItem (const int commandID) const
         const Item& mi = *items.getUnchecked (i);
 
         if ((mi.itemID == commandID && mi.commandManager != nullptr)
-              || (mi.subMenu != nullptr && mi.subMenu->containsCommandItem (commandID)))
+             || (mi.subMenu != nullptr && mi.subMenu->containsCommandItem (commandID)))
+        {
             return true;
+        }
     }
 
     return false;
@@ -1724,7 +1666,7 @@ bool PopupMenu::containsAnyActiveItems() const noexcept
             if (mi.subMenu->containsAnyActiveItems())
                 return true;
         }
-        else if (mi.isEnabled)
+        else if (mi.isActive)
         {
             return true;
         }
@@ -1761,7 +1703,7 @@ void PopupMenu::CustomComponent::triggerMenuItem()
     {
         if (HelperClasses::MenuWindow* const pmw = mic->findParentComponentOfClass<HelperClasses::MenuWindow>())
         {
-            pmw->dismissMenu (&mic->item);
+            pmw->dismissMenu (&mic->itemInfo);
         }
         else
         {
@@ -1778,21 +1720,53 @@ void PopupMenu::CustomComponent::triggerMenuItem()
 }
 
 //==============================================================================
-PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& m)  : menu (m), index (0) {}
-PopupMenu::MenuItemIterator::~MenuItemIterator() {}
+PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& m)
+    : subMenu (nullptr),
+      itemId (0),
+      isSeparator (false),
+      isTicked (false),
+      isEnabled (false),
+      isCustomComponent (false),
+      isSectionHeader (false),
+      customColour (nullptr),
+      menu (m),
+      index (0)
+{
+}
+
+PopupMenu::MenuItemIterator::~MenuItemIterator()
+{
+}
 
 bool PopupMenu::MenuItemIterator::next()
 {
     if (index >= menu.items.size())
         return false;
 
-    const Item* const item = menu.items.getUnchecked (index++);
+    const Item* const item = menu.items.getUnchecked (index);
+    ++index;
 
-    return ! (item->isSeparator && index >= menu.items.size()); // (avoid showing a separator at the end)
+    if (item->isSeparator && index >= menu.items.size()) // (avoid showing a separator at the end)
+        return false;
+
+    itemName        = item->customComp != nullptr ? item->customComp->getName() : item->text;
+    subMenu         = item->subMenu;
+    itemId          = item->itemID;
+    isSeparator     = item->isSeparator;
+    isTicked        = item->isTicked;
+    isEnabled       = item->isActive;
+    isSectionHeader = dynamic_cast<HelperClasses::HeaderItemComponent*> (static_cast<CustomComponent*> (item->customComp)) != nullptr;
+    isCustomComponent = (! isSectionHeader) && item->customComp != nullptr;
+    customColour    = item->usesColour ? &(item->textColour) : nullptr;
+    icon            = item->iconDrawable;
+    commandManager  = item->commandManager;
+
+    return true;
 }
 
-const PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const noexcept
+void PopupMenu::MenuItemIterator::addItemTo (PopupMenu& targetMenu)
 {
-    jassert (isPositiveAndBelow (index - 1, menu.items.size()));
-    return *menu.items.getUnchecked (index - 1);
+    targetMenu.items.add (new Item (itemId, itemName, isEnabled, isTicked, icon != nullptr ? icon->createCopy() : nullptr,
+                                    customColour != nullptr ? *customColour : Colours::black,
+                                    customColour != nullptr, nullptr, subMenu, commandManager));
 }

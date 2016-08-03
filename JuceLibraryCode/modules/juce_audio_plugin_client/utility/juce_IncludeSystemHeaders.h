@@ -50,20 +50,16 @@
   #define JUCE_SUPPORT_CARBON 1
  #endif
 
- #ifdef __OBJC__
-  #if JUCE_MAC
-   #include <Cocoa/Cocoa.h>
-  #elif JUCE_IOS
-   #include <UIKit/UIKit.h>
-  #else
-   #error
-  #endif
- #endif
-
- #if JUCE_SUPPORT_CARBON && (! JUCE_IOS)
+ #if JUCE_SUPPORT_CARBON
+  #define Point CarbonDummyPointName
+  #define Component CarbonDummyCompName
+  #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
+  #undef Point
+  #undef Component
+ #else
+  #include <Cocoa/Cocoa.h>
  #endif
-
  #include <objc/runtime.h>
  #include <objc/objc.h>
  #include <objc/message.h>

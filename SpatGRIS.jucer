@@ -8,7 +8,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="SpatGrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris"
-              pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.2.3"
+              pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.1.0"
               pluginIsMidiEffectPlugin="0" companyName="UdeM" buildAUv3="0">
   <MAINGROUP id="rRl79u" name="SpatGRIS">
     <GROUP id="{48A026D6-2EE7-E714-8C68-003BA85B16C8}" name="GrisCommonFiles">
@@ -106,19 +106,19 @@
                        libraryPath="~/Documents/sdks/LeapSDK/lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_events" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_osc" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../sdks/JUCE-4.2.3/modules"/>
+        <MODULEPATH id="juce_core" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_events" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_osc" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../sdks/JUCE-4.1.0/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
@@ -136,19 +136,19 @@
                        libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x64" useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_events" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_core" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_osc" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../sdks/JUCE-4.2.3/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../sdks/JUCE-4.2.3/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_events" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_core" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_osc" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../sdks/JUCE-4.1.0/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../sdks/JUCE-4.1.0/modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>

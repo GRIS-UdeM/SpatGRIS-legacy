@@ -693,9 +693,7 @@ int64 AudioThumbnail::getHashCode() const
 void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer& incoming,
                                int startOffsetInBuffer, int numSamples)
 {
-    jassert (startSample >= 0
-              && startOffsetInBuffer >= 0
-              && startOffsetInBuffer + numSamples <= incoming.getNumSamples());
+    jassert (startSample >= 0);
 
     const int firstThumbIndex = (int) (startSample / samplesPerThumbSample);
     const int lastThumbIndex  = (int) ((startSample + numSamples + (samplesPerThumbSample - 1)) / samplesPerThumbSample);

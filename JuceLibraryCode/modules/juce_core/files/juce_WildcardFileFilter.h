@@ -66,10 +66,10 @@ public:
 
     //==============================================================================
     /** Returns true if the filename matches one of the patterns specified. */
-    bool isFileSuitable (const File& file) const override;
+    bool isFileSuitable (const File& file) const;
 
     /** This always returns true. */
-    bool isDirectorySuitable (const File& file) const override;
+    bool isDirectorySuitable (const File& file) const;
 
 private:
     //==============================================================================

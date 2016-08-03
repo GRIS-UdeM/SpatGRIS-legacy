@@ -135,7 +135,7 @@ namespace JPEGHelpers
 {
     using namespace jpeglibNamespace;
 
-   #if ! (JUCE_WINDOWS && (JUCE_MSVC || JUCE_CLANG))
+   #if ! JUCE_MSVC
     using jpeglibNamespace::boolean;
    #endif
 

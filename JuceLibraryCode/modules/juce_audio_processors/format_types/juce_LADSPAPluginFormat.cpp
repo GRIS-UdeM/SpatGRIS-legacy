@@ -225,8 +225,8 @@ public:
         desc.category = getCategory();
         desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String();
         desc.version = getVersion();
-        desc.numInputChannels  = getTotalNumInputChannels();
-        desc.numOutputChannels = getTotalNumOutputChannels();
+        desc.numInputChannels  = getNumInputChannels();
+        desc.numOutputChannels = getNumOutputChannels();
         desc.isInstrument = false;
     }
 
@@ -252,6 +252,7 @@ public:
     bool acceptsMidi() const                  { return false; }
     bool producesMidi() const                 { return false; }
 
+    bool silenceInProducesSilenceOut() const  { return plugin == nullptr; } // ..any way to get a proper answer for these?
     double getTailLengthSeconds() const       { return 0.0; }
 
     //==============================================================================
@@ -326,16 +327,16 @@ public:
             jassertfalse; // no callback to use?
         }
 
-        for (int i = getTotalNumInputChannels(), e = getTotalNumOutputChannels(); i < e; ++i)
+        for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
             buffer.clear (i, 0, numSamples);
     }
 
-    bool isInputChannelStereoPair (int index) const    { return isPositiveAndBelow (index, getTotalNumInputChannels()); }
-    bool isOutputChannelStereoPair (int index) const   { return isPositiveAndBelow (index, getTotalNumOutputChannels()); }
+    bool isInputChannelStereoPair (int index) const    { return isPositiveAndBelow (index, getNumInputChannels()); }
+    bool isOutputChannelStereoPair (int index) const   { return isPositiveAndBelow (index, getNumInputChannels()); }
 
     const String getInputChannelName (const int index) const
     {
-        if (isPositiveAndBelow (index, getTotalNumInputChannels()))
+        if (isPositiveAndBelow (index, getNumInputChannels()))
             return String (plugin->PortNames [inputs [index]]).trim();
 
         return String();
@@ -343,7 +344,7 @@ public:
 
     const String getOutputChannelName (const int index) const
     {
-        if (isPositiveAndBelow (index, getTotalNumInputChannels()))
+        if (isPositiveAndBelow (index, getNumInputChannels()))
             return String (plugin->PortNames [outputs [index]]).trim();
 
         return String();
@@ -610,13 +611,10 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
     }
 }
 
-void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                               double sampleRate, int blockSize,
-                                               void* userData,
-                                               void (*callback) (void*, AudioPluginInstance*, const String&))
+AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
+                                                                        double sampleRate, int blockSize)
 {
     ScopedPointer<LADSPAPluginInstance> result;
-
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -642,17 +640,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    String errorMsg;
-
-    if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "LADSPA");
-
-    callback (userData, result.release(), errorMsg);
-}
-
-bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
-{
-    return false;
+    return result.release();
 }
 
 bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -676,7 +664,7 @@ bool LADSPAPluginFormat::doesPluginStillExist (const PluginDescription& desc)
     return File::createFileWithoutCheckingPath (desc.fileOrIdentifier).exists();
 }
 
-StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
+StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
 {
     StringArray results;
 

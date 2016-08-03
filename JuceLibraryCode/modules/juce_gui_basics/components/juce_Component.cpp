@@ -401,7 +401,7 @@ struct Component::ComponentHelpers
 
     static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int> clipRect, Point<int> delta)
     {
-        bool wasClipped = false;
+        bool nothingChanged = true;
 
         for (int i = comp.childComponentList.size(); --i >= 0;)
         {
@@ -416,19 +416,19 @@ struct Component::ComponentHelpers
                     if (child.isOpaque() && child.componentTransparency == 0)
                     {
                         g.excludeClipRegion (newClip + delta);
-                        wasClipped = true;
+                        nothingChanged = false;
                     }
                     else
                     {
                         const Point<int> childPos (child.getPosition());
                         if (clipObscuredRegions (child, g, newClip - childPos, childPos + delta))
-                            wasClipped = true;
+                            nothingChanged = false;
                     }
                 }
             }
         }
 
-        return wasClipped;
+        return nothingChanged;
     }
 
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
@@ -437,15 +437,6 @@ struct Component::ComponentHelpers
             return p->getLocalBounds();
 
         return Desktop::getInstance().getDisplays().getMainDisplay().userArea;
-    }
-
-    static void releaseAllCachedImageResources (Component& c)
-    {
-        if (CachedComponentImage* cached = c.getCachedComponentImage())
-            cached->releaseResources();
-
-        for (int i = c.getNumChildComponents(); --i >= 0;)
-            releaseAllCachedImageResources (*c.getChildComponent (i));
     }
 };
 
@@ -537,7 +528,8 @@ void Component::setVisible (bool shouldBeVisible)
 
         if (! shouldBeVisible)
         {
-            ComponentHelpers::releaseAllCachedImageResources (*this);
+            if (cachedImage != nullptr)
+                cachedImage->releaseResources();
 
             if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
             {
@@ -821,7 +813,7 @@ public:
 
     bool invalidateAll() override                            { validArea.clear(); return true; }
     bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
-    void releaseResources() override                         { image = Image(); }
+    void releaseResources() override                         { image = Image::null; }
 
 private:
     Image image;
@@ -1367,7 +1359,7 @@ bool Component::isTransformed() const noexcept
 
 AffineTransform Component::getTransform() const
 {
-    return affineTransform != nullptr ? *affineTransform : AffineTransform();
+    return affineTransform != nullptr ? *affineTransform : AffineTransform::identity;
 }
 
 //==============================================================================
@@ -1555,7 +1547,8 @@ Component* Component::removeChildComponent (const int index, bool sendParentEven
         childComponentList.remove (index);
         child->parentComponent = nullptr;
 
-        ComponentHelpers::releaseAllCachedImageResources (*child);
+        if (child->cachedImage != nullptr)
+            child->cachedImage->releaseResources();
 
         // (NB: there are obscure situations where child->isShowing() = false, but it still has the focus)
         if (currentlyFocusedComponent == child || child->isParentOf (currentlyFocusedComponent))
@@ -1712,7 +1705,7 @@ int Component::runModalLoop()
                                            ->callFunctionOnMessageThread (&ComponentHelpers::runModalLoopCallback, this);
     }
 
-    if (! isCurrentlyModal (false))
+    if (! isCurrentlyModal())
         enterModalState (true);
 
     return ModalComponentManager::getInstance()->runEventLoopForCurrentComponent();
@@ -1728,46 +1721,50 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    if (! isCurrentlyModal (false))
-    {
-        ModalComponentManager& mcm = *ModalComponentManager::getInstance();
-        mcm.startModal (this, deleteWhenDismissed);
-        mcm.attachCallback (this, callback);
+    // Check for an attempt to make a component modal when it already is!
+    // This can cause nasty problems..
+    jassert (! flags.currentlyModalFlag);
 
+    if (! isCurrentlyModal())
+    {
+        ModalComponentManager* const mcm = ModalComponentManager::getInstance();
+        mcm->startModal (this, deleteWhenDismissed);
+        mcm->attachCallback (this, callback);
+
+        flags.currentlyModalFlag = true;
         setVisible (true);
 
         if (shouldTakeKeyboardFocus)
             grabKeyboardFocus();
     }
-    else
-    {
-        // Probably a bad idea to try to make a component modal twice!
-        jassertfalse;
-    }
 }
 
 void Component::exitModalState (const int returnValue)
 {
-    if (isCurrentlyModal (false))
+    if (flags.currentlyModalFlag)
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            ModalComponentManager& mcm = *ModalComponentManager::getInstance();
-            mcm.endModal (this, returnValue);
-            mcm.bringModalComponentsToFront();
+            ModalComponentManager::getInstance()->endModal (this, returnValue);
+            flags.currentlyModalFlag = false;
+
+            ModalComponentManager::getInstance()->bringModalComponentsToFront();
         }
         else
         {
-            struct ExitModalStateMessage   : public CallbackMessage
+            class ExitModalStateMessage   : public CallbackMessage
             {
-                ExitModalStateMessage (Component* c, int res)  : target (c), result (res)  {}
+            public:
+                ExitModalStateMessage (Component* const c, const int res)
+                    : target (c), result (res)   {}
 
                 void messageCallback() override
                 {
-                    if (Component* c = target)
-                        c->exitModalState (result);
+                    if (target.get() != nullptr) // (get() required for VS2003 bug)
+                        target->exitModalState (result);
                 }
 
+            private:
                 WeakReference<Component> target;
                 int result;
             };
@@ -1777,15 +1774,10 @@ void Component::exitModalState (const int returnValue)
     }
 }
 
-bool Component::isCurrentlyModal (bool onlyConsiderForemostModalComponent) const noexcept
+bool Component::isCurrentlyModal() const noexcept
 {
-    const int n = onlyConsiderForemostModalComponent ? 1 : getNumCurrentlyModalComponents();
-
-    for (int i = 0; i < n; ++i)
-        if (getCurrentlyModalComponent (i) == this)
-            return true;
-
-    return false;
+    return flags.currentlyModalFlag
+            && getCurrentlyModalComponent() == this;
 }
 
 bool Component::isCurrentlyBlockedByAnotherModalComponent() const
@@ -1974,7 +1966,7 @@ void Component::paintComponentAndChildren (Graphics& g)
     {
         g.saveState();
 
-        if (! (ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, Point<int>()) && g.isClipEmpty()))
+        if (ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, Point<int>()) || ! g.isClipEmpty())
             paint (g);
 
         g.restoreState();
@@ -2685,7 +2677,7 @@ void Component::internalFocusLoss (const FocusChangeType cause)
 {
     const WeakReference<Component> safePointer (this);
 
-    focusLost (cause);
+    focusLost (focusChangedDirectly);
 
     if (safePointer != nullptr)
         internalChildFocusChange (cause, safePointer);
@@ -2977,18 +2969,14 @@ bool Component::isMouseButtonDown() const
     return false;
 }
 
-bool Component::isMouseOverOrDragging (const bool includeChildren) const
+bool Component::isMouseOverOrDragging() const
 {
     const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
     for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-    {
-        Component* const c = mi->getComponentUnderMouse();
-
-        if ((c == this || (includeChildren && isParentOf (c)))
+        if (mi->getComponentUnderMouse() == this
               && (mi->isMouse() || mi->isDragging()))
             return true;
-    }
 
     return false;
 }

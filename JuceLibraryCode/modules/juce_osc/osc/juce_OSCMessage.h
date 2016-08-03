@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -20,7 +20,7 @@
    available: visit www.juce.com for more information.
 
   ==============================================================================
-*/
+ */
 
 #ifndef JUCE_OSCMESSAGE_H_INCLUDED
 #define JUCE_OSCMESSAGE_H_INCLUDED
@@ -86,10 +86,10 @@ public:
     int size() const noexcept;
 
     /** Returns true if the OSCMessage contains no OSCArgument objects; false otherwise. */
-    bool isEmpty() const noexcept;
+    bool empty() const noexcept;
 
     /** Returns a reference to the OSCArgument at index i in the OSCMessage object.
-        This method does not check the range and results in undefined behaviour
+        This method does not check the range and results in undefined behavour
         in case i < 0 or i >= size().
     */
     OSCArgument& operator[] (const int i) const noexcept;
@@ -159,7 +159,7 @@ private:
 };
 
 
-//==============================================================================
+//==================================================================================
 #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
  template <typename Arg1, typename... Args>
  OSCMessage::OSCMessage (const OSCAddressPattern& ap, Arg1&& arg1, Args&&... args)

@@ -145,20 +145,6 @@ bool MPEZone::truncateToFit (MPEZone other) noexcept
 }
 
 //==============================================================================
-bool MPEZone::operator== (const MPEZone& other) const noexcept
-{
-    return masterChannel         == other.masterChannel
-        && numNoteChannels       == other.numNoteChannels
-        && perNotePitchbendRange == other.perNotePitchbendRange
-        && masterPitchbendRange  == other.masterPitchbendRange;
-}
-
-bool MPEZone::operator!= (const MPEZone& other) const noexcept
-{
-    return ! operator== (other);
-}
-
-//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
@@ -284,7 +270,7 @@ public:
     }
 
 private:
-    //==============================================================================
+    //==========================================================================
     void testOverlapsWith (int masterChannelFirst, int numNoteChannelsFirst,
                            int masterChannelSecond, int numNoteChannelsSecond,
                            bool expectedRetVal)
@@ -296,7 +282,7 @@ private:
         expect (second.overlapsWith (first) == expectedRetVal);
     }
 
-    //==============================================================================
+    //==========================================================================
     void testTruncateToFit (int masterChannelFirst, int numNoteChannelsFirst,
                             int masterChannelSecond, int numNoteChannelsSecond,
                             bool expectedRetVal,

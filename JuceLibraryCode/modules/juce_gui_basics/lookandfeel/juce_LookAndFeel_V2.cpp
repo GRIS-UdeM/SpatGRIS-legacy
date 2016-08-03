@@ -69,8 +69,6 @@ LookAndFeel_V2::LookAndFeel_V2()
         TextButton::textColourOffId,                0xff000000,
 
         ToggleButton::textColourId,                 0xff000000,
-        ToggleButton::tickColourId,                 0xff000000,
-        ToggleButton::tickDisabledColourId,         0xff808080,
 
         TextEditor::backgroundColourId,             0xffffffff,
         TextEditor::textColourId,                   0xff000000,
@@ -267,12 +265,13 @@ void LookAndFeel_V2::drawButtonText (Graphics& g, TextButton& button, bool /*isM
     const int fontHeight = roundToInt (font.getHeight() * 0.6f);
     const int leftIndent  = jmin (fontHeight, 2 + cornerSize / (button.isConnectedOnLeft() ? 4 : 2));
     const int rightIndent = jmin (fontHeight, 2 + cornerSize / (button.isConnectedOnRight() ? 4 : 2));
-    const int textWidth = button.getWidth() - leftIndent - rightIndent;
 
-    if (textWidth > 0)
-        g.drawFittedText (button.getButtonText(),
-                          leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2,
-                          Justification::centred, 2);
+    g.drawFittedText (button.getButtonText(),
+                      leftIndent,
+                      yIndent,
+                      button.getWidth() - leftIndent - rightIndent,
+                      button.getHeight() - yIndent * 2,
+                      Justification::centred, 2);
 }
 
 void LookAndFeel_V2::drawTickBox (Graphics& g, Component& component,
@@ -297,11 +296,10 @@ void LookAndFeel_V2::drawTickBox (Graphics& g, Component& component,
         tick.lineTo (3.0f, 6.0f);
         tick.lineTo (6.0f, 0.0f);
 
-        g.setColour (component.findColour (isEnabled ? ToggleButton::tickColourId
-                                                     : ToggleButton::tickDisabledColourId));
+        g.setColour (isEnabled ? Colours::black : Colours::grey);
 
         const AffineTransform trans (AffineTransform::scale (w / 9.0f, h / 9.0f)
-                                                     .translated (x, y));
+                                         .translated (x, y));
 
         g.strokePath (tick, PathStrokeType (2.5f), trans);
     }
@@ -1073,11 +1071,6 @@ void LookAndFeel_V2::drawMenuBarItem (Graphics& g, int width, int height,
 
     g.setFont (getMenuBarFont (menuBar, itemIndex, itemText));
     g.drawFittedText (itemText, 0, 0, width, height, Justification::centred, 1);
-}
-
-Component* LookAndFeel_V2::getParentComponentForMenuOptions (const PopupMenu::Options& options)
-{
-    return options.getParentComponent();
 }
 
 //==============================================================================

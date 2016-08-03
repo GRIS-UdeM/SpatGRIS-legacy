@@ -27,8 +27,6 @@ KnownPluginList::~KnownPluginList() {}
 
 void KnownPluginList::clear()
 {
-    ScopedLock lock (typesArrayLock);
-
     if (types.size() > 0)
     {
         types.clear();
@@ -38,8 +36,6 @@ void KnownPluginList::clear()
 
 PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
 {
-    ScopedLock lock (typesArrayLock);
-
     for (int i = 0; i < types.size(); ++i)
         if (types.getUnchecked(i)->fileOrIdentifier == fileOrIdentifier)
             return types.getUnchecked(i);
@@ -49,8 +45,6 @@ PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifi
 
 PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
 {
-    ScopedLock lock (typesArrayLock);
-
     for (int i = 0; i < types.size(); ++i)
         if (types.getUnchecked(i)->matchesIdentifierString (identifierString))
             return types.getUnchecked(i);
@@ -60,37 +54,27 @@ PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& id
 
 bool KnownPluginList::addType (const PluginDescription& type)
 {
+    for (int i = types.size(); --i >= 0;)
     {
-        ScopedLock lock (typesArrayLock);
-
-        for (int i = types.size(); --i >= 0;)
+        if (types.getUnchecked(i)->isDuplicateOf (type))
         {
-            if (types.getUnchecked(i)->isDuplicateOf (type))
-            {
-                // strange - found a duplicate plugin with different info..
-                jassert (types.getUnchecked(i)->name == type.name);
-                jassert (types.getUnchecked(i)->isInstrument == type.isInstrument);
+            // strange - found a duplicate plugin with different info..
+            jassert (types.getUnchecked(i)->name == type.name);
+            jassert (types.getUnchecked(i)->isInstrument == type.isInstrument);
 
-                *types.getUnchecked(i) = type;
-                return false;
-            }
+            *types.getUnchecked(i) = type;
+            return false;
         }
-
-        types.insert (0, new PluginDescription (type));
     }
 
+    types.insert (0, new PluginDescription (type));
     sendChangeMessage();
     return true;
 }
 
 void KnownPluginList::removeType (const int index)
 {
-    {
-        ScopedLock lock (typesArrayLock);
-
-        types.remove (index);
-    }
-
+    types.remove (index);
     sendChangeMessage();
 }
 
@@ -99,8 +83,6 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
 {
     if (getTypeForFile (fileOrIdentifier) == nullptr)
         return false;
-
-    ScopedLock lock (typesArrayLock);
 
     for (int i = types.size(); --i >= 0;)
     {
@@ -121,7 +103,7 @@ void KnownPluginList::setCustomScanner (CustomScanner* newScanner)
 
 bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
                                       const bool dontRescanIfAlreadyInList,
-                                      OwnedArray<PluginDescription>& typesFound,
+                                      OwnedArray <PluginDescription>& typesFound,
                                       AudioPluginFormat& format)
 {
     const ScopedLock sl (scanLock);
@@ -130,8 +112,6 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
          && getTypeForFile (fileOrIdentifier) != nullptr)
     {
         bool needsRescanning = false;
-
-        ScopedLock lock (typesArrayLock);
 
         for (int i = types.size(); --i >= 0;)
         {
@@ -153,7 +133,7 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
     if (blacklist.contains (fileOrIdentifier))
         return false;
 
-    OwnedArray<PluginDescription> found;
+    OwnedArray <PluginDescription> found;
 
     {
         const ScopedUnlock sl2 (scanLock);
@@ -183,7 +163,7 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
 
 void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& formatManager,
                                                      const StringArray& files,
-                                                     OwnedArray<PluginDescription>& typesFound)
+                                                     OwnedArray <PluginDescription>& typesFound)
 {
     for (int i = 0; i < files.size(); ++i)
     {
@@ -318,17 +298,12 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
     if (method != defaultOrder)
     {
         Array<PluginDescription*> oldOrder, newOrder;
+        oldOrder.addArray (types);
 
-        {
-            ScopedLock lock (typesArrayLock);
+        PluginSorter sorter (method, forwards);
+        types.sort (sorter, true);
 
-            oldOrder.addArray (types);
-
-            PluginSorter sorter (method, forwards);
-            types.sort (sorter, true);
-
-            newOrder.addArray (types);
-        }
+        newOrder.addArray (types);
 
         if (oldOrder != newOrder)
             sendChangeMessage();
@@ -340,12 +315,8 @@ XmlElement* KnownPluginList::createXml() const
 {
     XmlElement* const e = new XmlElement ("KNOWNPLUGINS");
 
-    {
-        ScopedLock lock (typesArrayLock);
-
-        for (int i = types.size(); --i >= 0;)
-            e->prependChildElement (types.getUnchecked(i)->createXml());
-    }
+    for (int i = types.size(); --i >= 0;)
+        e->prependChildElement (types.getUnchecked(i)->createXml());
 
     for (int i = 0; i < blacklist.size(); ++i)
         e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", blacklist[i]);
@@ -377,7 +348,7 @@ struct PluginTreeUtils
 {
     enum { menuIdBase = 0x324503f4 };
 
-    static void buildTreeByFolder (KnownPluginList::PluginTree& tree, const Array<PluginDescription*>& allPlugins)
+    static void buildTreeByFolder (KnownPluginList::PluginTree& tree, const Array <PluginDescription*>& allPlugins)
     {
         for (int i = 0; i < allPlugins.size(); ++i)
         {
@@ -421,7 +392,7 @@ struct PluginTreeUtils
     }
 
     static void buildTreeByCategory (KnownPluginList::PluginTree& tree,
-                                     const Array<PluginDescription*>& sorted,
+                                     const Array <PluginDescription*>& sorted,
                                      const KnownPluginList::SortMethod sortMethod)
     {
         String lastType;
@@ -504,21 +475,15 @@ struct PluginTreeUtils
         return false;
     }
 
-    static bool addToMenu (const KnownPluginList::PluginTree& tree, PopupMenu& m,
-                           const OwnedArray<PluginDescription>& allPlugins,
-                           const String& currentlyTickedPluginID)
+    static void addToMenu (const KnownPluginList::PluginTree& tree, PopupMenu& m, const OwnedArray <PluginDescription>& allPlugins)
     {
-        bool isTicked = false;
-
         for (int i = 0; i < tree.subFolders.size(); ++i)
         {
             const KnownPluginList::PluginTree& sub = *tree.subFolders.getUnchecked(i);
 
             PopupMenu subMenu;
-            const bool isItemTicked = addToMenu (sub, subMenu, allPlugins, currentlyTickedPluginID);
-            isTicked = isTicked || isItemTicked;
-
-            m.addSubMenu (sub.folder, subMenu, true, nullptr, isItemTicked, 0);
+            addToMenu (sub, subMenu, allPlugins);
+            m.addSubMenu (sub.folder, subMenu);
         }
 
         for (int i = 0; i < tree.plugins.size(); ++i)
@@ -530,22 +495,16 @@ struct PluginTreeUtils
             if (containsDuplicateNames (tree.plugins, name))
                 name << " (" << plugin->pluginFormatName << ')';
 
-            const bool isItemTicked = plugin->matchesIdentifierString (currentlyTickedPluginID);
-            isTicked = isTicked || isItemTicked;
-
-            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, name, true, isItemTicked);
+            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, name, true, false);
         }
-
-        return isTicked;
     }
 };
 
 KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortMethod) const
 {
-    Array<PluginDescription*> sorted;
+    Array <PluginDescription*> sorted;
 
     {
-        ScopedLock lock (typesArrayLock);
         PluginSorter sorter (sortMethod, true);
 
         for (int i = 0; i < types.size(); ++i)
@@ -572,11 +531,10 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
 }
 
 //==============================================================================
-void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod,
-                                 const String& currentlyTickedPluginID) const
+void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod) const
 {
     ScopedPointer<PluginTree> tree (createTree (sortMethod));
-    PluginTreeUtils::addToMenu (*tree, menu, types, currentlyTickedPluginID);
+    PluginTreeUtils::addToMenu (*tree, menu, types);
 }
 
 int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const

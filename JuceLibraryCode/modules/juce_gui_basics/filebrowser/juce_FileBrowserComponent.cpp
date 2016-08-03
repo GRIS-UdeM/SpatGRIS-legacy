@@ -33,7 +33,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
      currentPathBox ("path"),
      fileLabel ("f", TRANS ("file:")),
      thread ("Juce FileBrowser"),
-     wasProcessActive (true)
+     wasProcessActive (false)
 {
     // You need to specify one or other of the open/save flags..
     jassert ((flags & (saveMode | openMode)) != 0);

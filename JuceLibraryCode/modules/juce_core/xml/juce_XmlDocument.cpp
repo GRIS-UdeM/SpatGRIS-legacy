@@ -172,7 +172,7 @@ String XmlDocument::getFileContents (const String& filename) const
             return in->readEntireStreamAsString();
     }
 
-    return String();
+    return String::empty;
 }
 
 juce_wchar XmlDocument::readNextChar() noexcept
@@ -617,17 +617,9 @@ void XmlDocument::readChildElements (XmlElement& parent)
                 }
                 else
                 {
-                    for (;; ++input)
+                    for (;;)
                     {
-                        juce_wchar nextChar = *input;
-
-                        if (nextChar == '\r')
-                        {
-                            nextChar = '\n';
-
-                            if (input[1] == '\n')
-                                continue;
-                        }
+                        const juce_wchar nextChar = *input;
 
                         if (nextChar == '<' || nextChar == '&')
                             break;
@@ -641,6 +633,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
                         textElementContent.appendUTF8Char (nextChar);
                         contentShouldBeUsed = contentShouldBeUsed || ! CharacterFunctions::isWhitespace (nextChar);
+                        ++input;
                     }
                 }
             }

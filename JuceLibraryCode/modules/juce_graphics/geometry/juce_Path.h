@@ -83,14 +83,12 @@ public:
     bool operator== (const Path&) const noexcept;
     bool operator!= (const Path&) const noexcept;
 
-    static const float defaultToleranceForTesting;
-    static const float defaultToleranceForMeasurement;
-
     //==============================================================================
     /** Returns true if the path doesn't contain any lines or curves. */
     bool isEmpty() const noexcept;
 
-    /** Returns the smallest rectangle that contains all points within the path. */
+    /** Returns the smallest rectangle that contains all points within the path.
+    */
     Rectangle<float> getBounds() const noexcept;
 
     /** Returns the smallest rectangle that contains all points within the path
@@ -100,7 +98,7 @@ public:
 
     /** Checks whether a point lies within the path.
 
-        This is only relevant for closed paths (see closeSubPath()), and
+        This is only relevent for closed paths (see closeSubPath()), and
         may produce false results if used on a path which has open sub-paths.
 
         The path's winding rule is taken into account by this method.
@@ -112,11 +110,11 @@ public:
         @see closeSubPath, setUsingNonZeroWinding
     */
     bool contains (float x, float y,
-                   float tolerance = defaultToleranceForTesting) const;
+                   float tolerance = 1.0f) const;
 
     /** Checks whether a point lies within the path.
 
-        This is only relevant for closed paths (see closeSubPath()), and
+        This is only relevent for closed paths (see closeSubPath()), and
         may produce false results if used on a path which has open sub-paths.
 
         The path's winding rule is taken into account by this method.
@@ -128,7 +126,7 @@ public:
         @see closeSubPath, setUsingNonZeroWinding
     */
     bool contains (const Point<float> point,
-                   float tolerance = defaultToleranceForTesting) const;
+                   float tolerance = 1.0f) const;
 
     /** Checks whether a line crosses the path.
 
@@ -140,8 +138,8 @@ public:
         so this method could return a false positive when your point is up to this distance
         outside the path's boundary.
     */
-    bool intersectsLine (Line<float> line,
-                         float tolerance = defaultToleranceForTesting);
+    bool intersectsLine (const Line<float>& line,
+                         float tolerance = 1.0f);
 
     /** Cuts off parts of a line to keep the parts that are either inside or
         outside this path.
@@ -155,13 +153,12 @@ public:
                                         that will be kept; if false its the section inside
                                         the path
     */
-    Line<float> getClippedLine (Line<float> line, bool keepSectionOutsidePath) const;
+    Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
 
     /** Returns the length of the path.
         @see getPointAlongPath
     */
-    float getLength (const AffineTransform& transform = AffineTransform(),
-                     float tolerance = defaultToleranceForMeasurement) const;
+    float getLength (const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Returns a point that is the specified distance along the path.
         If the distance is greater than the total length of the path, this will return the
@@ -169,17 +166,15 @@ public:
         @see getLength
     */
     Point<float> getPointAlongPath (float distanceFromStart,
-                                    const AffineTransform& transform = AffineTransform(),
-                                    float tolerance = defaultToleranceForMeasurement) const;
+                                    const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Finds the point along the path which is nearest to a given position.
         This sets pointOnPath to the nearest point, and returns the distance of this point from the start
         of the path.
     */
-    float getNearestPoint (Point<float> targetPoint,
+    float getNearestPoint (const Point<float> targetPoint,
                            Point<float>& pointOnPath,
-                           const AffineTransform& transform = AffineTransform(),
-                           float tolerance = defaultToleranceForMeasurement) const;
+                           const AffineTransform& transform = AffineTransform::identity) const;
 
     //==============================================================================
     /** Removes all lines and curves, resetting the path completely. */

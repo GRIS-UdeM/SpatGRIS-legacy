@@ -176,16 +176,13 @@ public:
 
     static void keyChosen (int result, ChangeKeyButton* button)
     {
-        if (button != nullptr && button->currentKeyEntryWindow != nullptr)
+        if (result != 0 && button != nullptr && button->currentKeyEntryWindow != nullptr)
         {
-            if (result != 0)
-            {
-                button->currentKeyEntryWindow->setVisible (false);
-                button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
-            }
-
-            button->currentKeyEntryWindow = nullptr;
+            button->currentKeyEntryWindow->setVisible (false);
+            button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
         }
+
+        button->currentKeyEntryWindow = nullptr;
     }
 
     void assignNewKey()

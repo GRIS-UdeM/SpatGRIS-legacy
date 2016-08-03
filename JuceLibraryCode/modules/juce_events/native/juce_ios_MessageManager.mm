@@ -38,9 +38,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    if (! SystemStats::isRunningInAppExtensionSandbox())
-       [[[UIApplication sharedApplication] delegate] applicationWillTerminate: [UIApplication sharedApplication]];
-
+    [[[UIApplication sharedApplication] delegate] applicationWillTerminate: [UIApplication sharedApplication]];
     exit (0); // iOS apps get no mercy..
 }
 

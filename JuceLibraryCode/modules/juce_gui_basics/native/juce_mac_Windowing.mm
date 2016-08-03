@@ -270,7 +270,7 @@ public:
                                                         kIOPMAssertionLevelOn,
                                                         CFSTR ("JUCE Playback"),
                                                         &assertionID);
-            jassert (res == kIOReturnSuccess); ignoreUnused (res);
+            jassert (res == kIOReturnSuccess); (void) res;
         }
 
         ~PMAssertion()
@@ -395,19 +395,6 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-static void selectImageForDrawing (const Image& image)
-{
-    [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: juce_getImageContext (image)
-                                                                                     flipped: false]];
-}
-
-static void releaseImageAfterDrawing()
-{
-    [[NSGraphicsContext currentContext] flushGraphics];
-    [NSGraphicsContext restoreGraphicsState];
-}
-
 Image juce_createIconForFile (const File& file)
 {
     JUCE_AUTORELEASEPOOL
@@ -416,52 +403,18 @@ Image juce_createIconForFile (const File& file)
 
         Image result (Image::ARGB, (int) [image size].width, (int) [image size].height, true);
 
-        selectImageForDrawing (result);
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: juce_getImageContext (result) flipped: false]];
+
         [image drawAtPoint: NSMakePoint (0, 0)
                   fromRect: NSMakeRect (0, 0, [image size].width, [image size].height)
                  operation: NSCompositeSourceOver fraction: 1.0f];
-        releaseImageAfterDrawing();
+
+        [[NSGraphicsContext currentContext] flushGraphics];
+        [NSGraphicsContext restoreGraphicsState];
 
         return result;
     }
-}
-
-static Image createNSWindowSnapshot (NSWindow* nsWindow)
-{
-    JUCE_AUTORELEASEPOOL
-    {
-        CGImageRef screenShot = CGWindowListCreateImage (CGRectNull,
-                                                         kCGWindowListOptionIncludingWindow,
-                                                         (CGWindowID) [nsWindow windowNumber],
-                                                         kCGWindowImageBoundsIgnoreFraming);
-
-        NSBitmapImageRep* bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: screenShot];
-
-        Image result (Image::ARGB, (int) [bitmapRep size].width, (int) [bitmapRep size].height, true);
-
-        selectImageForDrawing (result);
-        [bitmapRep drawAtPoint: NSMakePoint (0, 0)];
-        releaseImageAfterDrawing();
-
-        [bitmapRep release];
-        CGImageRelease (screenShot);
-
-        return result;
-    }
-}
-
-Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
-{
-    if (id windowOrView = (id) nativeWindowHandle)
-    {
-        if ([windowOrView isKindOfClass: [NSWindow class]])
-            return createNSWindowSnapshot ((NSWindow*) windowOrView);
-
-        if ([windowOrView isKindOfClass: [NSView class]])
-            return createNSWindowSnapshot ([(NSView*) windowOrView window]);
-    }
-
-    return Image();
 }
 
 //==============================================================================
@@ -478,7 +431,10 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 String SystemClipboard::getTextFromClipboard()
 {
-    return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSStringPboardType]);
+    NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
+
+    return text == nil ? String()
+                       : nsStringToJuce (text);
 }
 
 void Process::setDockIconVisible (bool isVisible)
@@ -487,13 +443,7 @@ void Process::setDockIconVisible (bool isVisible)
     [NSApp setActivationPolicy: isVisible ? NSApplicationActivationPolicyRegular
                                           : NSApplicationActivationPolicyProhibited];
    #else
-    ignoreUnused (isVisible);
+    (void) isVisible;
     jassertfalse; // sorry, not available in 10.5!
    #endif
-}
-
-bool Desktop::isOSXDarkModeActive()
-{
-    return [[[NSUserDefaults standardUserDefaults] stringForKey: nsStringLiteral ("AppleInterfaceStyle")]
-                isEqualToString: nsStringLiteral ("Dark")];
 }

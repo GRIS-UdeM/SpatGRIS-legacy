@@ -152,13 +152,10 @@ void StringArray::insert (const int index, const String& newString)
     strings.insert (index, newString);
 }
 
-bool StringArray::addIfNotAlreadyThere (const String& newString, const bool ignoreCase)
+void StringArray::addIfNotAlreadyThere (const String& newString, const bool ignoreCase)
 {
-    if (contains (newString, ignoreCase))
-        return false;
-
-    add (newString);
-    return true;
+    if (! contains (newString, ignoreCase))
+        add (newString);
 }
 
 void StringArray::addArray (const StringArray& otherArray, int startIndex, int numElementsToAdd)

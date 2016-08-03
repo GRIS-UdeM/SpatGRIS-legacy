@@ -105,16 +105,6 @@ private:
             }
         }
 
-        void startedDragging() override
-        {
-            owner.beginParameterChangeGesture(index);
-        }
-
-        void stoppedDragging() override
-        {
-            owner.endParameterChangeGesture(index);
-        }
-
         String getTextFromValue (double /*value*/) override
         {
             return owner.getParameterText (index) + " " + owner.getParameterLabel (index).trimEnd();

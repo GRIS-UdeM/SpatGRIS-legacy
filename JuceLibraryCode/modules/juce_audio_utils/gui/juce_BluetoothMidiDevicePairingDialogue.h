@@ -25,6 +25,8 @@
 #ifndef JUCE_BLUETOOTHMIDIDEVICPAIRINGCOMPONENT_H_INCLUDED
 #define JUCE_BLUETOOTHMIDIDEVICPAIRINGCOMPONENT_H_INCLUDED
 
+class BluetoothMidiSelectorOverlay;
+
 //==============================================================================
 /**
     Opens a Bluetooth MIDI pairing dialogue that allows the user to view and

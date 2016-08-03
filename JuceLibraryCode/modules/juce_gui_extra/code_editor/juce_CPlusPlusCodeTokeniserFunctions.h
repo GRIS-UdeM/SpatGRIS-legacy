@@ -553,7 +553,6 @@ struct CppTokeniserFunctions
     {
         int charsOnLine = 0;
         bool lastWasHexEscapeCode = false;
-        bool trigraphDetected = false;
 
         for (int i = 0; i < numBytesToRead || numBytesToRead < 0; ++i)
         {
@@ -562,29 +561,11 @@ struct CppTokeniserFunctions
 
             switch (c)
             {
-
-                case '\t':  out << "\\t";  trigraphDetected = false; lastWasHexEscapeCode = false; charsOnLine += 2; break;
-                case '\r':  out << "\\r";  trigraphDetected = false; lastWasHexEscapeCode = false; charsOnLine += 2; break;
-                case '\n':  out << "\\n";  trigraphDetected = false; lastWasHexEscapeCode = false; charsOnLine += 2; startNewLine = breakAtNewLines; break;
-                case '\\':  out << "\\\\"; trigraphDetected = false; lastWasHexEscapeCode = false; charsOnLine += 2; break;
-                case '\"':  out << "\\\""; trigraphDetected = false; lastWasHexEscapeCode = false; charsOnLine += 2; break;
-
-                case '?':
-                    if (trigraphDetected)
-                    {
-                        out << "\\?";
-                        charsOnLine++;
-                        trigraphDetected = false;
-                    }
-                    else
-                    {
-                        out << "?";
-                        trigraphDetected = true;
-                    }
-
-                    lastWasHexEscapeCode = false;
-                    charsOnLine++;
-                    break;
+                case '\t':  out << "\\t";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\r':  out << "\\r";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\n':  out << "\\n";  lastWasHexEscapeCode = false; charsOnLine += 2; startNewLine = breakAtNewLines; break;
+                case '\\':  out << "\\\\"; lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\"':  out << "\\\""; lastWasHexEscapeCode = false; charsOnLine += 2; break;
 
                 case 0:
                     if (numBytesToRead < 0)
@@ -592,7 +573,6 @@ struct CppTokeniserFunctions
 
                     out << "\\0";
                     lastWasHexEscapeCode = true;
-                    trigraphDetected = false;
                     charsOnLine += 2;
                     break;
 
@@ -601,7 +581,6 @@ struct CppTokeniserFunctions
                     {
                         out << "\\\'";
                         lastWasHexEscapeCode = false;
-                        trigraphDetected = false;
                         charsOnLine += 2;
                         break;
                     }
@@ -614,21 +593,18 @@ struct CppTokeniserFunctions
                     {
                         out << (char) c;
                         lastWasHexEscapeCode = false;
-                        trigraphDetected = false;
                         ++charsOnLine;
                     }
                     else if (allowStringBreaks && lastWasHexEscapeCode && c >= 32 && c < 127)
                     {
                         out << "\"\"" << (char) c;
                         lastWasHexEscapeCode = false;
-                        trigraphDetected = false;
                         charsOnLine += 3;
                     }
                     else
                     {
                         out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) c);
                         lastWasHexEscapeCode = true;
-                        trigraphDetected = false;
                         charsOnLine += 4;
                     }
 

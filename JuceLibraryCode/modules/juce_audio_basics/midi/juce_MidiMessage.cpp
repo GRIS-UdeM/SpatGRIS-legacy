@@ -33,23 +33,11 @@ namespace MidiHelpers
     {
         return (uint8) jlimit (0, 127, v);
     }
-}
 
-//==============================================================================
-uint8 MidiMessage::floatValueToMidiByte (const float v) noexcept
-{
-    return MidiHelpers::validVelocity (roundToInt (v * 127.0f));
-}
-
-uint16 MidiMessage::pitchbendToPitchwheelPos (const float pitchbend,
-                                 const float pitchbendRange) noexcept
-{
-    // can't translate a pitchbend value that is outside of the given range!
-    jassert (std::abs (pitchbend) <= pitchbendRange);
-
-    return static_cast<uint16> (pitchbend > 0.0f
-                                  ? jmap (pitchbend, 0.0f, pitchbendRange, 8192.0f, 16383.0f)
-                                  : jmap (pitchbend, -pitchbendRange, 0.0f, 0.0f, 8192.0f));
+    inline uint8 floatVelocityToByte (const float v) noexcept
+    {
+        return validVelocity (roundToInt (v * 127.0f));
+    }
 }
 
 //==============================================================================
@@ -96,24 +84,25 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) noexcept
 MidiMessage::MidiMessage() noexcept
    : timeStamp (0), size (2)
 {
-    packedData.asBytes[0] = 0xf0;
-    packedData.asBytes[1] = 0xf7;
+    preallocatedData.asBytes[0] = 0xf0;
+    preallocatedData.asBytes[1] = 0xf7;
 }
 
 MidiMessage::MidiMessage (const void* const d, const int dataSize, const double t)
-   : timeStamp (t), size (dataSize)
+   : timeStamp (t),
+     size (dataSize)
 {
     jassert (dataSize > 0);
-    // this checks that the length matches the data..
-    jassert (dataSize > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
-
     memcpy (allocateSpace (dataSize), d, (size_t) dataSize);
+
+    // check that the length matches the data..
+    jassert (size > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
 }
 
 MidiMessage::MidiMessage (const int byte1, const double t) noexcept
    : timeStamp (t), size (1)
 {
-    packedData.asBytes[0] = (uint8) byte1;
+    preallocatedData.asBytes[0] = (uint8) byte1;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 1);
@@ -122,8 +111,8 @@ MidiMessage::MidiMessage (const int byte1, const double t) noexcept
 MidiMessage::MidiMessage (const int byte1, const int byte2, const double t) noexcept
    : timeStamp (t), size (2)
 {
-    packedData.asBytes[0] = (uint8) byte1;
-    packedData.asBytes[1] = (uint8) byte2;
+    preallocatedData.asBytes[0] = (uint8) byte1;
+    preallocatedData.asBytes[1] = (uint8) byte2;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 2);
@@ -132,9 +121,9 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const double t) noex
 MidiMessage::MidiMessage (const int byte1, const int byte2, const int byte3, const double t) noexcept
    : timeStamp (t), size (3)
 {
-    packedData.asBytes[0] = (uint8) byte1;
-    packedData.asBytes[1] = (uint8) byte2;
-    packedData.asBytes[2] = (uint8) byte3;
+    preallocatedData.asBytes[0] = (uint8) byte1;
+    preallocatedData.asBytes[1] = (uint8) byte2;
+    preallocatedData.asBytes[2] = (uint8) byte3;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 3);
@@ -143,19 +132,29 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const int byte3, con
 MidiMessage::MidiMessage (const MidiMessage& other)
    : timeStamp (other.timeStamp), size (other.size)
 {
-    if (isHeapAllocated())
-        memcpy (allocateSpace (size), other.getData(), (size_t) size);
+    if (other.allocatedData != nullptr)
+    {
+        allocatedData.malloc ((size_t) size);
+        memcpy (allocatedData, other.allocatedData, (size_t) size);
+    }
     else
-        packedData.allocatedData = other.packedData.allocatedData;
+    {
+        preallocatedData.asInt32 = other.preallocatedData.asInt32;
+    }
 }
 
 MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
    : timeStamp (newTimeStamp), size (other.size)
 {
-    if (isHeapAllocated())
-        memcpy (allocateSpace (size), other.getData(), (size_t) size);
+    if (other.allocatedData != nullptr)
+    {
+        allocatedData.malloc ((size_t) size);
+        memcpy (allocatedData, other.allocatedData, (size_t) size);
+    }
     else
-        packedData.allocatedData = other.packedData.allocatedData;
+    {
+        preallocatedData.asInt32 = other.preallocatedData.asInt32;
+    }
 }
 
 MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const uint8 lastStatusByte,
@@ -230,15 +229,16 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
         }
         else
         {
+            preallocatedData.asInt32 = 0;
             size = getMessageLengthFromFirstByte ((uint8) byte);
-            packedData.asBytes[0] = (uint8) byte;
+            preallocatedData.asBytes[0] = (uint8) byte;
 
             if (size > 1)
             {
-                packedData.asBytes[1] = src[0];
+                preallocatedData.asBytes[1] = src[0];
 
                 if (size > 2)
-                    packedData.asBytes[2] = src[1];
+                    preallocatedData.asBytes[2] = src[1];
             }
         }
 
@@ -246,7 +246,7 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
     }
     else
     {
-        packedData.allocatedData = nullptr;
+        preallocatedData.asInt32 = 0;
         size = 0;
     }
 }
@@ -255,25 +255,19 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
 {
     if (this != &other)
     {
-        if (other.isHeapAllocated())
-        {
-            if (isHeapAllocated())
-                packedData.allocatedData = static_cast<uint8*> (std::realloc (packedData.allocatedData, (size_t) other.size));
-            else
-                packedData.allocatedData = static_cast<uint8*> (std::malloc ((size_t) other.size));
+        timeStamp = other.timeStamp;
+        size = other.size;
 
-            memcpy (packedData.allocatedData, other.packedData.allocatedData, (size_t) other.size);
+        if (other.allocatedData != nullptr)
+        {
+            allocatedData.malloc ((size_t) size);
+            memcpy (allocatedData, other.allocatedData, (size_t) size);
         }
         else
         {
-            if (isHeapAllocated())
-                std::free (packedData.allocatedData);
-
-            packedData.allocatedData = other.packedData.allocatedData;
+            allocatedData.free();
+            preallocatedData.asInt32 = other.preallocatedData.asInt32;
         }
-
-        timeStamp = other.timeStamp;
-        size = other.size;
     }
 
     return *this;
@@ -283,61 +277,36 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
 MidiMessage::MidiMessage (MidiMessage&& other) noexcept
    : timeStamp (other.timeStamp), size (other.size)
 {
-    packedData.allocatedData = other.packedData.allocatedData;
-    other.size = 0;
+    if (other.allocatedData != nullptr)
+        allocatedData.swapWith (other.allocatedData);
+    else
+        preallocatedData.asInt32 = other.preallocatedData.asInt32;
 }
 
 MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
 {
-    packedData.allocatedData = other.packedData.allocatedData;
+    jassert (this != &other); // shouldn't be possible
+
     timeStamp = other.timeStamp;
     size = other.size;
-    other.size = 0;
+    allocatedData.swapWith (other.allocatedData);
+    preallocatedData.asInt32 = other.preallocatedData.asInt32;
+
     return *this;
 }
 #endif
 
-MidiMessage::~MidiMessage() noexcept
-{
-    if (isHeapAllocated())
-        std::free (packedData.allocatedData);
-}
+MidiMessage::~MidiMessage() {}
 
 uint8* MidiMessage::allocateSpace (int bytes)
 {
-    if (bytes > (int) sizeof (packedData))
+    if (bytes > 4)
     {
-        uint8* d = static_cast<uint8*> (std::malloc ((size_t) bytes));
-        packedData.allocatedData = d;
-        return d;
+        allocatedData.malloc ((size_t) bytes);
+        return allocatedData;
     }
 
-    return packedData.asBytes;
-}
-
-String MidiMessage::getDescription() const
-{
-    if (isNoteOn())           return "Note on "  + MidiMessage::getMidiNoteName (getNoteNumber(), true, true, 3) + " Velocity " + String (getVelocity()) + " Channel " + String (getChannel());
-    if (isNoteOff())          return "Note off " + MidiMessage::getMidiNoteName (getNoteNumber(), true, true, 3) + " Velocity " + String (getVelocity()) + " Channel " + String (getChannel());
-    if (isProgramChange())    return "Program change " + String (getProgramChangeNumber()) + " Channel " + String (getChannel());
-    if (isPitchWheel())       return "Pitch wheel " + String (getPitchWheelValue()) + " Channel " + String (getChannel());
-    if (isAftertouch())       return "Aftertouch " + MidiMessage::getMidiNoteName (getNoteNumber(), true, true, 3) +  ": " + String (getAfterTouchValue()) + " Channel " + String (getChannel());
-    if (isChannelPressure())  return "Channel pressure " + String (getChannelPressureValue()) + " Channel " + String (getChannel());
-    if (isAllNotesOff())      return "All notes off Channel " + String (getChannel());
-    if (isAllSoundOff())      return "All sound off Channel " + String (getChannel());
-    if (isMetaEvent())        return "Meta event";
-
-    if (isController())
-    {
-        String name (MidiMessage::getControllerName (getControllerNumber()));
-
-        if (name.isEmpty())
-            name = String (getControllerNumber());
-
-        return "Controller " + name + ": " + String (getControllerValue()) + " Channel " + String (getChannel());
-    }
-
-    return String::toHexString (getRawData(), getRawDataSize());
+    return preallocatedData.asBytes;
 }
 
 int MidiMessage::getChannel() const noexcept
@@ -402,7 +371,7 @@ int MidiMessage::getNoteNumber() const noexcept
 
 void MidiMessage::setNoteNumber (const int newNoteNumber) noexcept
 {
-    if (isNoteOnOrOff() || isAftertouch())
+    if (isNoteOnOrOff())
         getData()[1] = (uint8) (newNoteNumber & 127);
 }
 
@@ -422,7 +391,7 @@ float MidiMessage::getFloatVelocity() const noexcept
 void MidiMessage::setVelocity (const float newVelocity) noexcept
 {
     if (isNoteOnOrOff())
-        getData()[2] = floatValueToMidiByte (newVelocity);
+        getData()[2] = MidiHelpers::floatVelocityToByte (newVelocity);
 }
 
 void MidiMessage::multiplyVelocity (const float scaleFactor) noexcept
@@ -569,7 +538,7 @@ MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const 
 
 MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const float velocity) noexcept
 {
-    return noteOn (channel, noteNumber, floatValueToMidiByte (velocity));
+    return noteOn (channel, noteNumber, MidiHelpers::floatVelocityToByte (velocity));
 }
 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8 velocity) noexcept
@@ -583,7 +552,7 @@ MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8
 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, float velocity) noexcept
 {
-    return noteOff (channel, noteNumber, floatValueToMidiByte (velocity));
+    return noteOff (channel, noteNumber, MidiHelpers::floatVelocityToByte (velocity));
 }
 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber) noexcept
@@ -728,10 +697,9 @@ MidiMessage MidiMessage::textMetaEvent (int type, StringRef text)
     header[--n] = 0xff;
 
     const size_t headerLen = sizeof (header) - n;
-    const int totalSize = (int) (headerLen + textSize);
 
-    uint8* const dest = result.allocateSpace (totalSize);
-    result.size = totalSize;
+    uint8* const dest = result.allocateSpace ((int) (headerLen + textSize));
+    result.size = (int) (headerLen + textSize);
 
     memcpy (dest, header + n, headerLen);
     memcpy (dest + headerLen, text.text.getAddress(), textSize);
@@ -848,7 +816,7 @@ bool MidiMessage::isKeySignatureMetaEvent() const noexcept
 
 int MidiMessage::getKeySignatureNumberOfSharpsOrFlats() const noexcept
 {
-    return (int) (int8) getMetaEventData()[0];
+    return (int) getMetaEventData()[0];
 }
 
 bool MidiMessage::isKeySignatureMajorKey() const noexcept
@@ -1014,10 +982,10 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
         return s;
     }
 
-    return String();
+    return String::empty;
 }
 
-double MidiMessage::getMidiNoteInHertz (const int noteNumber, const double frequencyOfA) noexcept
+double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept
 {
     return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
 }

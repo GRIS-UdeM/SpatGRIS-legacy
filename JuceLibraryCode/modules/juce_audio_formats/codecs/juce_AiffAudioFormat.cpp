@@ -668,14 +668,13 @@ public:
     //==============================================================================
     bool write (const int** data, int numSamples) override
     {
-        jassert (numSamples >= 0);
         jassert (data != nullptr && *data != nullptr); // the input must contain at least one channel!
 
         if (writeFailed)
             return false;
 
-        const size_t bytes = numChannels * (size_t) numSamples * bitsPerSample / 8;
-        tempBlock.ensureSize (bytes, false);
+        const size_t bytes = (size_t) numSamples * numChannels * bitsPerSample / 8;
+        tempBlock.ensureSize ((size_t) bytes, false);
 
         switch (bitsPerSample)
         {
@@ -696,10 +695,13 @@ public:
             writeFailed = true;
             return false;
         }
+        else
+        {
+            bytesWritten += bytes;
+            lengthInSamples += (uint64) numSamples;
 
-        bytesWritten += bytes;
-        lengthInSamples += (uint64) numSamples;
-        return true;
+            return true;
+        }
     }
 
 private:
@@ -713,7 +715,7 @@ private:
         using namespace AiffFileHelpers;
 
         const bool couldSeekOk = output->setPosition (headerPosition);
-        ignoreUnused (couldSeekOk);
+        (void) couldSeekOk;
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header
@@ -1001,7 +1003,7 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
                                                      const StringPairArray& metadataValues,
                                                      int /*qualityOptionIndex*/)
 {
-    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
+    if (getPossibleBitDepths().contains (bitsPerSample))
         return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels, (unsigned int) bitsPerSample, metadataValues);
 
     return nullptr;

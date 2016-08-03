@@ -33,7 +33,6 @@ public:
           fixedSize (fixedSize_),
           drawBar (drawBar_)
     {
-        setWantsKeyboardFocus (false);
     }
 
     bool getToolbarItemSizes (int toolbarThickness, bool /*isToolbarVertical*/,

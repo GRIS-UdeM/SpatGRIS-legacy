@@ -46,7 +46,7 @@ public:
         CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
     }
 
-    ~MessageQueue() noexcept
+    ~MessageQueue()
     {
         CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
         CFRunLoopSourceInvalidate (runLoopSource);
@@ -56,19 +56,14 @@ public:
     void post (MessageManager::MessageBase* const message)
     {
         messages.add (message);
-        wakeUp();
-    }
-
-private:
-    ReferenceCountedArray<MessageManager::MessageBase, CriticalSection> messages;
-    CFRunLoopRef runLoop;
-    CFRunLoopSourceRef runLoopSource;
-
-    void wakeUp() noexcept
-    {
         CFRunLoopSourceSignal (runLoopSource);
         CFRunLoopWakeUp (runLoop);
     }
+
+private:
+    ReferenceCountedArray <MessageManager::MessageBase, CriticalSection> messages;
+    CFRunLoopRef runLoop;
+    CFRunLoopSourceRef runLoopSource;
 
     bool deliverNextMessage()
     {
@@ -89,16 +84,17 @@ private:
         return true;
     }
 
-    void runLoopCallback() noexcept
+    void runLoopCallback()
     {
         for (int i = 4; --i >= 0;)
             if (! deliverNextMessage())
                 return;
 
-        wakeUp();
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
     }
 
-    static void runLoopSourceCallback (void* info) noexcept
+    static void runLoopSourceCallback (void* info)
     {
         static_cast<MessageQueue*> (info)->runLoopCallback();
     }

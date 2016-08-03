@@ -103,8 +103,7 @@ public:
             inputThread->signalThreadShouldExit();
     }
 
-    void handleIncomingMidiMessage (snd_seq_event*, const MidiMessage&);
-    void handlePartialSysexMessage (snd_seq_event*, const uint8*, int, double);
+    void handleIncomingMidiMessage (const MidiMessage& message, int port);
 
     snd_seq_t* get() const noexcept     { return handle; }
 
@@ -120,7 +119,7 @@ private:
     {
     public:
         MidiInputThread (AlsaClient& c)
-            : Thread ("Juce MIDI Input"), client (c), concatenator (2048)
+            : Thread ("Juce MIDI Input"), client (c)
         {
             jassert (client.input && client.get() != nullptr);
         }
@@ -160,9 +159,13 @@ private:
 
                                 snd_midi_event_reset_decode (midiParser);
 
-                                concatenator.pushMidiData (buffer, (int) numBytes,
-                                                           Time::getMillisecondCounter() * 0.001,
-                                                           inputEvent, client);
+                                if (numBytes > 0)
+                                {
+                                    const MidiMessage message ((const uint8*) buffer, (int) numBytes,
+                                                               Time::getMillisecondCounter() * 0.001);
+
+                                    client.handleIncomingMidiMessage (message, inputEvent->dest.port);
+                                }
 
                                 snd_seq_free_event (inputEvent);
                             }
@@ -177,7 +180,6 @@ private:
 
     private:
         AlsaClient& client;
-        MidiDataConcatenator concatenator;
     };
 
     ScopedPointer<MidiInputThread> inputThread;
@@ -280,11 +282,6 @@ public:
         callback->handleIncomingMidiMessage (midiInput, message);
     }
 
-    void handlePartialSysexMessage (const uint8* messageData, int numBytesSoFar, double timeStamp)
-    {
-        callback->handlePartialSysexMessage (midiInput, messageData, numBytesSoFar, timeStamp);
-    }
-
 private:
     AlsaPort port;
     MidiInput* midiInput;
@@ -294,20 +291,12 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlsaPortAndCallback)
 };
 
-void AlsaClient::handleIncomingMidiMessage (snd_seq_event_t* event, const MidiMessage& message)
+void AlsaClient::handleIncomingMidiMessage (const MidiMessage& message, int port)
 {
     const ScopedLock sl (callbackLock);
 
-    if (AlsaPortAndCallback* const cb = activeCallbacks[event->dest.port])
+    if (AlsaPortAndCallback* const cb = activeCallbacks[port])
         cb->handleIncomingMidiMessage (message);
-}
-
-void AlsaClient::handlePartialSysexMessage (snd_seq_event* event, const uint8* messageData, int numBytesSoFar, double timeStamp)
-{
-    const ScopedLock sl (callbackLock);
-
-    if (AlsaPortAndCallback* const cb = activeCallbacks[event->dest.port])
-        cb->handlePartialSysexMessage (messageData, numBytesSoFar, timeStamp);
 }
 
 //==============================================================================

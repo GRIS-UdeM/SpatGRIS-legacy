@@ -239,7 +239,7 @@ void MessageManager::runDispatchLoop()
             {
                 // An AppKit exception will kill the app, but at least this provides a chance to log it.,
                 std::runtime_error ex (std::string ("NSException: ") + [[e name] UTF8String] + ", Reason:" + [[e reason] UTF8String]);
-                JUCEApplicationBase::sendUnhandledException (&ex, __FILE__, __LINE__);
+                JUCEApplication::sendUnhandledException (&ex, __FILE__, __LINE__);
             }
             @finally
             {
@@ -356,8 +356,8 @@ void MessageManager::broadcastMessage (const String& message)
 }
 
 // Special function used by some plugin classes to re-post carbon events
-void __attribute__ ((visibility("default"))) repostCurrentNSEvent();
-void __attribute__ ((visibility("default"))) repostCurrentNSEvent()
+void repostCurrentNSEvent();
+void repostCurrentNSEvent()
 {
     struct EventReposter  : public CallbackMessage
     {

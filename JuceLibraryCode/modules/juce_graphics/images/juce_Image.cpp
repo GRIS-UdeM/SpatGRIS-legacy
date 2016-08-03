@@ -58,17 +58,10 @@ Image ImageType::convert (const Image& source) const
     Image newImage (create (src.pixelFormat, src.width, src.height, false));
     Image::BitmapData dest (newImage, Image::BitmapData::writeOnly);
 
-    if (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat)
-    {
-        for (int y = 0; y < dest.height; ++y)
-            memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.lineStride);
-    }
-    else
-    {
-        for (int y = 0; y < dest.height; ++y)
-            for (int x = 0; x < dest.width; ++x)
-                dest.setPixelColour (x, y, src.getPixelColour (x, y));
-    }
+    jassert (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat);
+
+    for (int y = 0; y < dest.height; ++y)
+        memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.lineStride);
 
     return newImage;
 }
@@ -102,7 +95,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData::Ptr clone() override
+    ImagePixelData* clone() override
     {
         SoftwarePixelData* s = new SoftwarePixelData (pixelFormat, width, height, false);
         memcpy (s->imageData, imageData, (size_t) (lineStride * height));
@@ -153,13 +146,13 @@ class SubsectionPixelData  : public ImagePixelData
 public:
     SubsectionPixelData (ImagePixelData* const im, const Rectangle<int>& r)
         : ImagePixelData (im->pixelFormat, r.getWidth(), r.getHeight()),
-          sourceImage (im), area (r)
+          image (im), area (r)
     {
     }
 
     LowLevelGraphicsContext* createLowLevelContext() override
     {
-        LowLevelGraphicsContext* g = sourceImage->createLowLevelContext();
+        LowLevelGraphicsContext* g = image->createLowLevelContext();
         g->clipToRectangle (area);
         g->setOrigin (area.getPosition());
         return g;
@@ -167,16 +160,16 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        sourceImage->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
+        image->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
 
         if (mode != Image::BitmapData::readOnly)
             sendDataChangeMessage();
     }
 
-    ImagePixelData::Ptr clone() override
+    ImagePixelData* clone() override
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
-        const ScopedPointer<ImageType> type (createType());
+        const ScopedPointer<ImageType> type (image->createType());
 
         Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
 
@@ -185,17 +178,18 @@ public:
             g.drawImageAt (Image (this), 0, 0);
         }
 
+        newImage.getPixelData()->incReferenceCount();
         return newImage.getPixelData();
     }
 
-    ImageType* createType() const override          { return sourceImage->createType(); }
+    ImageType* createType() const override          { return image->createType(); }
 
     /* as we always hold a reference to image, don't double count */
-    int getSharedCount() const noexcept override    { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
+    int getSharedCount() const noexcept override    { return getReferenceCount() + image->getSharedCount() - 1; }
 
 private:
     friend class Image;
-    const ImagePixelData::Ptr sourceImage;
+    const ImagePixelData::Ptr image;
     const Rectangle<int> area;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionPixelData)

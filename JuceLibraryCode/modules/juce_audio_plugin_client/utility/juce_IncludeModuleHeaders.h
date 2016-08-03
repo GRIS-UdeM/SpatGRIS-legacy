@@ -31,12 +31,12 @@ using namespace juce;
 
 namespace juce
 {
-    #define Component juce::Component
+    #if JUCE_MAC
+     #define Point     juce::Point
+     #define Component juce::Component
 
-   #if JUCE_MAC
-    #define Point juce::Point
-    void repostCurrentNSEvent();
-   #endif
+     void repostCurrentNSEvent();
+    #endif
 
     //==============================================================================
     inline const PluginHostType& getHostType()
@@ -46,6 +46,6 @@ namespace juce
     }
 }
 
-extern AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
 
 #endif   // JUCE_INCLUDEMODULEHEADERS_H_INCLUDED

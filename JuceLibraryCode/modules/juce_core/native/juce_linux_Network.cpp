@@ -429,15 +429,14 @@ private:
         writeValueIfNotPresent (header, userHeaders, "Connection:", "close");
 
         if (isPost)
+        {
             writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postData.getSize()));
-
-        if (userHeaders.isNotEmpty())
-            header << "\r\n" << userHeaders;
-
-        header << "\r\n";
-
-        if (isPost)
-            header << postData;
+            header << userHeaders << "\r\n" << postData;
+        }
+        else
+        {
+            header << "\r\n" << userHeaders << "\r\n";
+        }
 
         return header.getMemoryBlock();
     }

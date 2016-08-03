@@ -33,6 +33,7 @@
 #ifndef FLAC__STREAM_DECODER_H
 #define FLAC__STREAM_DECODER_H
 
+#include <stdio.h> /* for FILE */
 #include "export.h"
 #include "format.h"
 

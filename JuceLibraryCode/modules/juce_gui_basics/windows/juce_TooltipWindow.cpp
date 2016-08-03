@@ -92,8 +92,7 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
 
             addToDesktop (ComponentPeer::windowHasDropShadow
                             | ComponentPeer::windowIsTemporary
-                            | ComponentPeer::windowIgnoresKeyPresses
-                            | ComponentPeer::windowIgnoresMouseClicks);
+                            | ComponentPeer::windowIgnoresKeyPresses);
         }
 
         toFront (false);

@@ -181,17 +181,16 @@ public:
     void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
                       const int topLevelMenuId, const int topLevelIndex)
     {
-        const PopupMenu::Item& i = iter.getItem();
-        NSString* text = juceStringToNS (i.text);
+        NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf ("<end>", false, true));
 
         if (text == nil)
             text = nsEmptyString();
 
-        if (i.isSeparator)
+        if (iter.isSeparator)
         {
             [menuToAddTo addItem: [NSMenuItem separatorItem]];
         }
-        else if (i.isSectionHeader)
+        else if (iter.isSectionHeader)
         {
             NSMenuItem* item = [menuToAddTo addItemWithTitle: text
                                                       action: nil
@@ -199,9 +198,9 @@ public:
 
             [item setEnabled: false];
         }
-        else if (i.subMenu != nullptr)
+        else if (iter.subMenu != nullptr)
         {
-            if (i.text == recentItemsMenuName)
+            if (iter.itemName == recentItemsMenuName)
             {
                 if (recent == nullptr)
                     recent = new RecentFilesMenuItem();
@@ -220,10 +219,10 @@ public:
                                                       action: nil
                                                keyEquivalent: nsEmptyString()];
 
-            [item setTag: i.itemID];
-            [item setEnabled: i.isEnabled];
+            [item setTag: iter.itemId];
+            [item setEnabled: iter.isEnabled];
 
-            NSMenu* sub = createMenu (*i.subMenu, i.text, topLevelMenuId, topLevelIndex, false);
+            NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex, false);
             [menuToAddTo setSubmenu: sub forItem: item];
             [sub release];
         }
@@ -233,19 +232,19 @@ public:
                                                       action: @selector (menuItemInvoked:)
                                                keyEquivalent: nsEmptyString()];
 
-            [item setTag: i.itemID];
-            [item setEnabled: i.isEnabled];
-            [item setState: i.isTicked ? NSOnState : NSOffState];
+            [item setTag: iter.itemId];
+            [item setEnabled: iter.isEnabled];
+            [item setState: iter.isTicked ? NSOnState : NSOffState];
             [item setTarget: (id) callback];
 
-            NSMutableArray* info = [NSMutableArray arrayWithObject: [NSNumber numberWithUnsignedLongLong: (pointer_sized_uint) (void*) i.commandManager]];
+            NSMutableArray* info = [NSMutableArray arrayWithObject: [NSNumber numberWithUnsignedLongLong: (pointer_sized_uint) (void*) iter.commandManager]];
             [info addObject: [NSNumber numberWithInt: topLevelIndex]];
             [item setRepresentedObject: info];
 
-            if (i.commandManager != nullptr)
+            if (iter.commandManager != nullptr)
             {
-                const Array<KeyPress> keyPresses (i.commandManager->getKeyMappings()
-                                                     ->getKeyPressesAssignedToCommand (i.itemID));
+                const Array<KeyPress> keyPresses (iter.commandManager->getKeyMappings()
+                                                     ->getKeyPressesAssignedToCommand (iter.itemId));
 
                 if (keyPresses.size() > 0)
                 {
