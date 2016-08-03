@@ -154,8 +154,6 @@ static const float kSourceMinDistance = 2.5 * 0.5;
 static const float kSourceMaxDistance = 20 * 0.5;
 static const float kSourceDefaultDistance = 5 * 0.5;
 
-static const float kSpeakerDefaultAttenuation = 0;
-
 static const float kSmoothMin = 1;
 static const float kSmoothMax = 200;
 static const float kSmoothDefault = 50;
@@ -837,6 +835,9 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    float previouslyLoudestVolume = -1.f;
+    int loudestSpeaker = -1;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)

@@ -335,4 +335,9 @@ TODO TODAY
 
 * new spatgris version
 * new octogris version
+-------------------- 2016-08-03 -----------------
+spatgris logic
+output 3 = 5
+4 = 3
+5 = 4
 

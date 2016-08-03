@@ -1268,27 +1268,25 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
     }
 }
 
-void SpatGrisAudioProcessor::setSpeakerVolume(int source, float volume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse) {
+void SpatGrisAudioProcessor::setSpeakerVolume(int source, float targetVolume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse) {
     float oldVolume = mSpeakerVolumes[source][o];
-    float targetVolume = volume;
-    float sm_n = 1-sm_o;
-    float currentVolume = oldVolume * sm_o + targetVolume * sm_n;
+    float currentVolume = sm_o * oldVolume + (1-sm_o) * targetVolume;
     mSpeakerVolumes.getReference(source).set(o, currentVolume);	// with exp. smoothing on volume
-    //mSpeakerVolumes.getReference(source).set(o, volume);		// no exp. smoothing on volume
+    //mSpeakerVolumes.getReference(source).set(o, targetVolume);		// no exp. smoothing on volume
     if (!p_pvSpeakersCurrentlyInUse.empty()){
         p_pvSpeakersCurrentlyInUse[o] = true;
     }
 }
 
 void SpatGrisAudioProcessor::addToOutputs(int source, float sample, float **outputs, int f) {
-    const Array<float> &volumes = mSpeakerVolumes[source];
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-        float a = dbToLinear(kSpeakerDefaultAttenuation);
         float m = 1 - output_m[f];
-        float output_adj = a * m;
-        float *output = outputs[o];
-        output[f] += sample * volumes[o] * output_adj;
+        outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
+        if (mSpeakerVolumes[source][o] > previouslyLoudestVolume){
+            previouslyLoudestVolume = mSpeakerVolumes[source][o];
+            loudestSpeaker = o;
+        }
     }
 }
 
@@ -1333,8 +1331,6 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
-
-
     float fOldValuesPortion = rampParameters(p_pfParams, p_fSampleRate, p_iTotalSamples);
     
 	// clear outputs[]
@@ -1405,7 +1401,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
-                    setSpeakerVolume(iCurSource, vLeft, fOldValuesPortion, left, vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vLeft,  fOldValuesPortion, left,  vSpeakersCurrentlyInUse);
                     setSpeakerVolume(iCurSource, vRight, fOldValuesPortion, right, vSpeakersCurrentlyInUse);
 				} else {
 					// one side is empty!
@@ -1633,6 +1629,8 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
                 setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, empty);
             }
             addToOutputs(i, s, outputs, f);
+            int i = 23;
+            i++;
         }
     }
 }
@@ -1661,9 +1659,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **o
 		float output_adj[kChunkSize]; {
 			float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
 			for (unsigned int f = 0; f < frames; f++){
-				float a = dbToLinear(kSpeakerDefaultAttenuation);
-				float m = 1 - output_m[f];
-				output_adj[f] = a * m;
+				output_adj[f] = 1 - output_m[f];
 			}
 		}
         for (int i = 0; i < mNumberOfSources; i++) {
