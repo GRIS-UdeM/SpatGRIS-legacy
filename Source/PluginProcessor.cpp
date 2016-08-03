@@ -283,13 +283,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mJoystickEnabled = 0;
     m_bOscSpatSenderIsConnected = false;
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
-    
-    m_iPrevLeft = -1;
-    m_iPrevRight = -1;
-    m_iPrevFLeft = -1;
-    m_iPrevFRight = -1;
-    m_iPrevBLeft = -1;
-    m_iPrevBRight = -1;
 	
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
@@ -1421,7 +1414,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
 				}
-                m_bWasInMiddle = false;
 			}
             //if we're inside the main circle, 4 speakers will play
             else {
@@ -1473,7 +1465,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					setSpeakerVolume(iCurSource, back, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
 				}
-                m_bWasInMiddle = true;
 			}
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){

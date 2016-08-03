@@ -707,8 +707,7 @@ public:
 	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
 	
 protected:
-	FPoint destinationForSource(int s, FPoint o)
-	{
+	FPoint destinationForSource(int s, FPoint o) {
 		return FPoint(o.x,-o.y);
 	}
 };
@@ -721,8 +720,7 @@ public:
 	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
 	
 protected:
-	FPoint destinationForSource(int s, FPoint o)
-	{
+	FPoint destinationForSource(int s, FPoint o) {
 		return FPoint(-o.x,o.y);
 	}
 };
@@ -735,16 +733,13 @@ public:
 	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
 	
 protected:
-	FPoint destinationForSource(int s, FPoint o)
-	{
+	FPoint destinationForSource(int s, FPoint o) {
 		int bestSpeaker = 0;
 		float bestDistance = o.getDistanceFrom(mFilter->getSpeakerXY(0));
 		
-		for (int i = 1; i < mFilter->getNumberOfSpeakers(); i++)
-		{
+		for (int i = 1; i < mFilter->getNumberOfSpeakers(); i++) {
 			float d = o.getDistanceFrom(mFilter->getSpeakerXY(i));
-			if (d < bestDistance)
-			{
+			if (d < bestDistance) {
 				bestSpeaker = i;
 				bestDistance = d;
 			}
@@ -757,10 +752,8 @@ protected:
 
 int Trajectory::NumberOfTrajectories() { return TotalNumberTrajectories-1; }
 
-String Trajectory::GetTrajectoryName(int i)
-{
-    switch(i)
-    {
+String Trajectory::GetTrajectoryName(int i) {
+    switch(i) {
         case Circle: return "Circle";
         case EllipseTr: return "Ellipse";
         case Spiral: return "Spiral";
@@ -776,8 +769,8 @@ String Trajectory::GetTrajectoryName(int i)
 }
 
 Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats,
-                                             AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, float p_fWidth, const std::pair<float, float> &endPair)
-{
+                                             AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation,
+                                             float p_fTurns, float p_fWidth, const std::pair<float, float> &endPair) {
     
     bool ccw, in;
     float speed;
@@ -826,8 +819,7 @@ Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *f
     }
     
     
-    switch(type)
-    {
+    switch(type) {
         case Circle:                     return new CircleTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns);
         case EllipseTr:                  return new EllipseTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns, p_fWidth);
         case Spiral:                     return new SpiralTrajectory(filter, p_pMover, duration, beats, times, ccw, true, bReturn, p_fTurns, endPair);
