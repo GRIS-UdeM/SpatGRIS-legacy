@@ -283,13 +283,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mJoystickEnabled = 0;
     m_bOscSpatSenderIsConnected = false;
 	mSmoothedParametersRamps.resize(kNumberOfParameters);
-    
-    m_iPrevLeft = -1;
-    m_iPrevRight = -1;
-    m_iPrevFLeft = -1;
-    m_iPrevFRight = -1;
-    m_iPrevBLeft = -1;
-    m_iPrevBRight = -1;
 	
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
@@ -510,7 +503,6 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     mInputOutputMode = p_iInputOutputMode-1;
     
     switch (mInputOutputMode){
-            
         case i1o2:
             setNumberOfSources(1, false);
             setNumberOfSpeakers(2, false);
@@ -526,6 +518,10 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
         case i1o8:
             setNumberOfSources(1, false);
             setNumberOfSpeakers(8, false);
+            break;
+        case i1o12:
+            setNumberOfSources(1, false);
+            setNumberOfSpeakers(12, false);
             break;
         case i1o16:
             setNumberOfSources(1, false);
@@ -547,6 +543,10 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(2, false);
             setNumberOfSpeakers(8, false);
             break;
+        case i2o12:
+            setNumberOfSources(2, false);
+            setNumberOfSpeakers(12, false);
+            break;
         case i2o16:
             setNumberOfSources(2, false);
             setNumberOfSpeakers(16, false);
@@ -563,6 +563,10 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(4, false);
             setNumberOfSpeakers(8, false);
             break;
+        case i4o12:
+            setNumberOfSources(4, false);
+            setNumberOfSpeakers(12, false);
+            break;
         case i4o16:
             setNumberOfSources(4, false);
             setNumberOfSpeakers(16, false);
@@ -575,6 +579,10 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(6, false);
             setNumberOfSpeakers(8, false);
             break;
+        case i6o12:
+            setNumberOfSources(6, false);
+            setNumberOfSpeakers(12, false);
+            break;
         case i6o16:
             setNumberOfSources(6, false);
             setNumberOfSpeakers(16, false);
@@ -583,12 +591,16 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(8, false);
             setNumberOfSpeakers(8, false);
             break;
+        case i8o12:
+            setNumberOfSources(8, false);
+            setNumberOfSpeakers(12, false);
+            break;
         case i8o16:
             setNumberOfSources(8, false);
             setNumberOfSpeakers(16, false);
             break;
-		default:
-			jassertfalse;
+        default:
+            jassert(0);
     }
 }
 
@@ -605,6 +617,9 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
     } else if (mNumberOfSources == 1 && mNumberOfSpeakers == 8){
         mInputOutputMode =  i1o8;
         return;
+    } else if (mNumberOfSources == 1 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i1o12;
+        return;
     } else if (mNumberOfSources == 1 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i1o16;
         return;
@@ -620,6 +635,9 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
     } else if (mNumberOfSources == 2 && mNumberOfSpeakers == 8){
         mInputOutputMode =  i2o8;
         return;
+    } else if (mNumberOfSources == 2 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i2o12;
+        return;
     }  else if (mNumberOfSources == 2 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i2o16;
         return;
@@ -632,6 +650,9 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
     } else if (mNumberOfSources == 4 && mNumberOfSpeakers == 8){
         mInputOutputMode =  i4o8;
         return;
+    } else if (mNumberOfSources == 4 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i4o12;
+        return;
     } else if (mNumberOfSources == 4 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i4o16;
         return;
@@ -641,16 +662,23 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
     } else if (mNumberOfSources == 6 && mNumberOfSpeakers == 8){
         mInputOutputMode =  i6o8;
         return;
+    } else if (mNumberOfSources == 6 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i6o12;
+        return;
     } else if (mNumberOfSources == 6 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i6o16;
         return;
     } else if (mNumberOfSources == 8 && mNumberOfSpeakers == 8){
         mInputOutputMode =  i8o8;
         return;
+    } else if (mNumberOfSources == 8 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i8o12;
+        return;
     } else if (mNumberOfSources == 8 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i8o16;
         return;
     }
+    jassert(0);
     jassert(0);
 }
 
@@ -1386,7 +1414,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
 				}
-                m_bWasInMiddle = false;
 			}
             //if we're inside the main circle, 4 speakers will play
             else {
@@ -1438,7 +1465,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 					
 					setSpeakerVolume(iCurSource, back, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
 				}
-                m_bWasInMiddle = true;
 			}
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
