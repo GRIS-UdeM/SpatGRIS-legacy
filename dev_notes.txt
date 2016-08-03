@@ -340,4 +340,12 @@ spatgris logic
 output 3 = 5
 4 = 3
 5 = 4
+Alright, this bullshit was due to juce version 4.2.0 and up. Fixed. 
 
+Now. what to do? What kinds of things to test in hexa?
+* how to use 12 speakers and those kinds of things, in DP, etc, #72
+    * So I tried using vsts instead of AU, and i got something similar (although vsts work a lot worse than AUs). All output bundles work except for o12. 
+* reaper only outputs on 1+2, #74
+
+
+* spatium
