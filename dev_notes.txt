@@ -349,3 +349,11 @@ Now. what to do? What kinds of things to test in hexa?
 
 
 * spatium
+--------------- 2016-08-04 ----------------
+Robert posted some issues. 
+* leap deactivated in octogris
+    * easily fixed
+* trace not disappearing in zirkosc
+    *ignore for now, why not use spatgris
+* jaggy joystick trace everywhere
+    * probably cannot fix this, but need to look into that more at school because my joystick is acting real weird! 
