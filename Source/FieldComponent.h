@@ -28,7 +28,7 @@
 #define FIELDCOMPONENT_H_INCLUDED
 
 #include "PluginProcessor.h"
-#include "GrisLookAndFeel.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 #include "SourceMover.h"
 #include "deque"
 

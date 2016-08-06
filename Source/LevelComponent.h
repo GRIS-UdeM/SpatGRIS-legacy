@@ -27,9 +27,8 @@
 #ifndef LEVELCOMPONENT_H_INCLUDED
 #define LEVELCOMPONENT_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "GrisLookAndFeel.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 
 //==============================================================================
 /*

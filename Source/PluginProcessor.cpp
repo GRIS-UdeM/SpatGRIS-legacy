@@ -73,12 +73,12 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 #include <string>
 #include <windows.h>
 
-	template<class T>
-	string toString(const T &value) {
-		ostringstream os;
-		os << value;
-		return os.str();
-	}
+	//template<class T>
+	//string toString(const T &value) {
+	//	ostringstream os;
+	//	os << value;
+	//	return os.str();
+	//}
 #endif
 
 JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
