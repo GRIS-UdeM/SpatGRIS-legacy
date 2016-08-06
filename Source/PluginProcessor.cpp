@@ -150,13 +150,15 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 ,m_iSourceLocationChanged(-1)
 ,m_bPreventSourceLocationUpdate(false)
 {
-//
-//#if USE_LEAP
-//	char winDir[MAX_PATH];//will hold path of above dll
-//	GetCurrentDirectory(sizeof(winDir), winDir);//dll is in same dir as exe
-//	strcat(winDir, "\\Leap.dll");//concentrate dll name with path
-//	HINSTANCE DLL = LoadLibrary(winDir);//load example dll
-//#endif
+
+#if WIN32
+#if USE_LEAP
+	char winDir[MAX_PATH];							//will hold path of above dll
+	GetCurrentDirectory(sizeof(winDir), winDir);	//dll is in same dir as exe
+	strcat(winDir, "\\Leap.dll");					//concentrate dll name with path
+	HINSTANCE DLL = LoadLibrary(winDir);			//load example dll
+#endif
+#endif
     
     m_pOscSpatThread        = new OscSpatThread(this);
     m_pSourceUpdateThread   = new SourceUpdateThread(this);

@@ -45,10 +45,11 @@ using namespace std;
 
 #if WIN32
     #define M_PI 3.14159265358979323846264338327950288
-#else
+//#else
     #ifndef USE_LEAP
         #define USE_LEAP 1
     #endif
+#else
     #ifndef USE_JOYSTICK
         #define USE_JOYSTICK 1
     #endif
