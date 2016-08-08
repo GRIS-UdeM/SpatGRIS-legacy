@@ -304,24 +304,45 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
         if(!m_bJoystickButtonsCurentlyPressed[iCurBut]) {
             continue;
         }
+        //smoothing values
+        const float smooth = denormalize(kSmoothMin, kSmoothMax, mFilter->getSmoothing()); // milliseconds
+        const float fOldValuesPortion = powf(0.01f, 1000.f / smooth);
+        
         //Switch to detect what part of the device is being used
         switch (usage) {
-            case 48:{
-                //Normalizing the coordinate from every joystick as float between 0 and 1, multiplied by the size of the panel to have the new x coordinate of the new point.
-                m_fCurX01 = (scaledValue  / maxValue);
-                FPoint prevPosition = mFilter->getSourceXY01(iCurBut);
-                if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5)) <= 1.26) {
-                    FPoint newPosition(m_fCurX01, m_fCurY01);
-                    mEditor->getMover()->move(newPosition, kHID);
-                }}
+            case 48:
+                {
+                    //Normalizing the coordinate from every joystick as float between 0 and 1, multiplied by the size of the panel to have the new x coordinate of the new point.
+                    float fNewX01 = (scaledValue  / maxValue);
+                
+                    //smooting new position
+                    if (m_fCurX01 > 0){
+                        m_fCurX01 = fOldValuesPortion * m_fCurX01 + (1-fOldValuesPortion) * fNewX01;
+                    } else {
+                        m_fCurX01 = fNewX01;
+                    }
+                
+                    if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5)) <= 1.26) {
+                        FPoint newPosition(m_fCurX01, m_fCurY01);
+                        mEditor->getMover()->move(newPosition, kHID);
+                    }
+                }
                 break;
-            case 49:{
-                //Normalizing the coordonate from every joystick as float between -1 and 1, multiplied by the size of the panel to have the new x coordinate of the new point.
-                m_fCurY01 = (1 - (scaledValue  / (maxValue)));
-                if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5))<=1.26) {
-                    FPoint newPoint(m_fCurX01, m_fCurY01);
-                    mEditor->getMover()->move(newPoint, kHID);
-                }}
+            case 49:
+                {
+                    //Normalizing the coordonate from every joystick as float between -1 and 1, multiplied by the size of the panel to have the new x coordinate of the new point.
+                    float fNewY01 = (1 - (scaledValue  / (maxValue)));
+                    if (m_fCurY01 > 0){
+                        m_fCurY01 = fOldValuesPortion * m_fCurY01 + (1-fOldValuesPortion) * fNewY01;
+                    } else {
+                        m_fCurY01 = fNewY01;
+                    }
+                
+                    if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5))<=1.26) {
+                        FPoint newPoint(m_fCurX01, m_fCurY01);
+                        mEditor->getMover()->move(newPoint, kHID);
+                    }
+                }
                 break;
             case 53:
                 //printf("Axe RZ !!!! \n");

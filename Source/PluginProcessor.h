@@ -469,6 +469,8 @@ public:
     float getSourceAzimSpan01(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
     float getSourceElevSpan01(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
     
+    float getSmoothing() const { return mParameters.getUnchecked(kSmooth); }
+    
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
     
     inline int getParamForSpeakerX(int index) const { return kSpeakerX + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
