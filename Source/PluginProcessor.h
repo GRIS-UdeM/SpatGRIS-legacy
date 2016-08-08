@@ -837,8 +837,9 @@ private:
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
     
-    float previouslyLoudestVolume = -1.f;
-    int loudestSpeaker = -1;
+    //debug for #72
+//    float previouslyLoudestVolume = -1.f;
+//    int loudestSpeaker = -1;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)

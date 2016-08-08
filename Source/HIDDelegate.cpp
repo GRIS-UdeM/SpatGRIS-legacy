@@ -40,8 +40,8 @@ HIDDelegate::HIDDelegate(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorE
 mFilter (filter),
 mEditor (editor),
 m_iNbOfJoystickButtons(0),
-vx(0),
-vy(0),
+m_fCurX01(0),
+m_fCurY01(0),
 deviceSetRef(NULL),
 deviceRef(NULL)
 {
@@ -304,31 +304,24 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
         if(!m_bJoystickButtonsCurentlyPressed[iCurBut]) {
             continue;
         }
-        FPoint newPoint;
         //Switch to detect what part of the device is being used
         switch (usage) {
-            case 48:
+            case 48:{
                 //Normalizing the coordinate from every joystick as float between 0 and 1, multiplied by the size of the panel to have the new x coordinate of the new point.
-                vx = (scaledValue  / maxValue);
-                newPoint = mFilter->getSourceXY01(iCurBut);
-                
-                if(((vx-0.5)*(vx-0.5))+((vy-0.5)*(vy-0.5)) <= 1.26) {
-                    newPoint.setX(vx);   //modifying the old point into the new one
-                    newPoint.setY(vy);
-                    mEditor->getMover()->move(newPoint, kHID);
-                }
+                m_fCurX01 = (scaledValue  / maxValue);
+                FPoint prevPosition = mFilter->getSourceXY01(iCurBut);
+                if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5)) <= 1.26) {
+                    FPoint newPosition(m_fCurX01, m_fCurY01);
+                    mEditor->getMover()->move(newPosition, kHID);
+                }}
                 break;
-            case 49:
+            case 49:{
                 //Normalizing the coordonate from every joystick as float between -1 and 1, multiplied by the size of the panel to have the new x coordinate of the new point.
-                vy = (1 - (scaledValue  / (maxValue)));
-                //Converting the scaled value of the Y axis send by te joystick to the type of coordinates used by setSourceXY
-                newPoint = mFilter->getSourceXY01(iCurBut);
-                //vx = newPoint.getX();
-                if(((vx-0.5)*(vx-0.5))+((vy-0.5)*(vy-0.5))<=1.26) {
-                    newPoint.setX(vx);
-                    newPoint.setY(vy);
+                m_fCurY01 = (1 - (scaledValue  / (maxValue)));
+                if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5))<=1.26) {
+                    FPoint newPoint(m_fCurX01, m_fCurY01);
                     mEditor->getMover()->move(newPoint, kHID);
-                }
+                }}
                 break;
             case 53:
                 //printf("Axe RZ !!!! \n");

@@ -69,7 +69,7 @@ private:
     //! Table memorizing button states
     vector<bool> m_bJoystickButtonsCurentlyPressed;
     //! Variables recording the last and present coordinates (calculated or not)
-    float vx, vy;
+    float m_fCurX01, m_fCurY01;
     //! Set of devices address
     CFSetRef deviceSetRef;
     //! Current device address

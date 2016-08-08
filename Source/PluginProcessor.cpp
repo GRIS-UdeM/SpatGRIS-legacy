@@ -1275,10 +1275,11 @@ void SpatGrisAudioProcessor::addToOutputs(int source, float sample, float **outp
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
-        if (mSpeakerVolumes[source][o] > previouslyLoudestVolume){
-            previouslyLoudestVolume = mSpeakerVolumes[source][o];
-            loudestSpeaker = o;
-        }
+        //debug for #72
+//        if (mSpeakerVolumes[source][o] > previouslyLoudestVolume){
+//            previouslyLoudestVolume = mSpeakerVolumes[source][o];
+//            loudestSpeaker = o;
+//        }
     }
 }
 
