@@ -347,7 +347,7 @@ void FieldComponent::paint (Graphics& g)
         g.strokePath (trajectoryPath, PathStrokeType (2.0f, PathStrokeType::JointStyle::curved));
     }
     
-    if (m_dqAllPathPoints.size() > m_iMaxPathLines){
+    while (m_dqAllPathPoints.size() > m_iMaxPathLines){
         m_dqAllPathPoints.pop_front();
     }
 }
