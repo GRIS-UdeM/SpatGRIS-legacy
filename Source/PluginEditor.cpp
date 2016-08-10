@@ -1580,7 +1580,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     
     //if called from actually pressing enter, put focus on something else
     if (!m_bIsReturnKeyPressedCalledFromFocusLost){
-        this->grabKeyboardFocus();
+        mMovementModeCombo->grabKeyboardFocus();
     }
 }
 
