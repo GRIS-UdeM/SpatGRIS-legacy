@@ -232,7 +232,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mHostChangedProperty = 0;
 	mProcessCounter = 0;
 	//mLastTimeInSamples = -1;
-	mProcessMode = kPanVolumeMode;
+	setProcessMode(kPanVolumeMode);
 	mRoutingMode = kNormalRouting;
     //version 9
     updateInputOutputMode();
@@ -1901,7 +1901,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mOscSendEnabled     = xmlState->getIntAttribute ("mOscSendEnabled", 0);
             mOscSendPort        = xmlState->getIntAttribute ("mOscSendPort", 9000);
             mOscSendIp          = xmlState->getStringAttribute ("mOscSendIp", mOscSendIp);
-            mProcessMode        = xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode);
+            setProcessMode(xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode));
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
             
             setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
