@@ -943,7 +943,8 @@ AudioProcessorEditor (ownerFilter)
     mFilter->setCalculateLevels(true);
     
     //resizable corner
-    m_oResizeLimits.setSizeLimits (960-150, 420-150, 1560, 1020);
+//    m_oResizeLimits.setSizeLimits (960-150, 420-150, 1560, 1020);
+    m_oResizeLimits.setSizeLimits (kMinFieldSize + (2*kMargin), kMinFieldSize + (2*kMargin), 1560, 1020);
     addAndMakeVisible (m_pResizer = new ResizableCornerComponent (this, &m_oResizeLimits));
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
@@ -1231,6 +1232,9 @@ void SpatGrisAudioProcessorEditor::resized()
     int fieldWidth = w - (kMargin + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin);
     int fieldHeight = h - (kMargin + kMargin);
     int fieldSize = jmin(fieldWidth, fieldHeight);
+    if (fieldSize < kMinFieldSize){
+        fieldSize = kMinFieldSize;
+    }
     
     mField->setBounds(kMargin, kMargin, fieldSize, fieldSize);
     mFilter->setFieldWidth(fieldSize);

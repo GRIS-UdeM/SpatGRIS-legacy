@@ -205,12 +205,13 @@ static const float kThetaLockRadius = 0.05;
 static const float kThetaLockRampRadius = 0.025;
 static const float kSourceDefaultRadius = 1.f;
 
-static const int    kMargin = 10;
-static const int    kCenterColumnWidth = 180;
-static const int    kDefaultFieldSize = 500;
-static const int    kRightColumnWidth = 340;
-static const int    kDefaultWidth  = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin;
-static const int    kDefaultHeight = kMargin + kDefaultFieldSize + kMargin;
+static const int    kMargin             = 10;
+static const int    kCenterColumnWidth  = 180;
+static const int    kDefaultFieldSize   = 500;
+static const int    kMinFieldSize       = 300;
+static const int    kRightColumnWidth   = 340;
+static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin;
+static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin;
 
 //==============================================================================
 static inline float normalize(float min, float max, float value)
