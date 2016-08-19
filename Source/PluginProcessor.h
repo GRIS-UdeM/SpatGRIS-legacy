@@ -310,6 +310,9 @@ public:
 	bool getShowGridLines() const { return mShowGridLines; }
 	void setShowGridLines(bool s) { mShowGridLines = s; }
     
+    bool getOscActive() const { return m_bOscActive; }
+    void setOscActive(bool s) { m_bOscActive = s; }
+    
     bool getIndependentMode() const { return mTrSeparateAutomationMode; }
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
     
@@ -726,6 +729,7 @@ private:
     bool mLinkElevSpan;
 	int m_iMovementMode;
 	bool mShowGridLines;
+    bool m_bOscActive;
     bool mTrSeparateAutomationMode;
     int mGuiWidth;
     int mGuiHeight;

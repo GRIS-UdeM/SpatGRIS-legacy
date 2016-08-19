@@ -221,7 +221,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	setMovementMode(0);
     
     
-	mShowGridLines = false;
+	mShowGridLines  = false;
+    m_bOscActive    = true;
 	mTrSeparateAutomationMode = false;
     mIsNumberSourcesChanged = false;
     mIsNumberSpeakersChanged = false;
@@ -365,7 +366,7 @@ void SpatGrisAudioProcessor::disconnectOscSpat(){
 }
 
 void SpatGrisAudioProcessor::sendOscSpatValues(){
-    if  (mProcessMode != kOscSpatMode || !m_bOscSpatSenderIsConnected){
+    if  (mProcessMode != kOscSpatMode || !m_bOscActive || !m_bOscSpatSenderIsConnected){
         return;
     }
     
@@ -1801,6 +1802,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     
     xml.setAttribute ("kDataVersion", kDataVersion);
     xml.setAttribute ("mShowGridLines", mShowGridLines);
+    xml.setAttribute ("m_bOscActive", m_bOscActive);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
     xml.setAttribute ("m_iMovementMode", m_iMovementMode);
     xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
@@ -1887,6 +1889,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 return;
             }
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
+            m_bOscActive        = xmlState->getIntAttribute ("m_bOscActive", 1);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
             setMovementMode(xmlState->getIntAttribute ("m_iMovementMode", 0));
             mLinkSurfaceOrPan   = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);

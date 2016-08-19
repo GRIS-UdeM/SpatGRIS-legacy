@@ -440,7 +440,7 @@ AudioProcessorEditor (ownerFilter)
             mRoutingModeCombo = cb;
         }
         
-
+        mOscActiveButton = addCheckbox("Osc Active", mFilter->getOscActive(), x, y, w, dh, box);
         //-----------------------------
         // start 3rd column
         y = kMargin;
@@ -1705,6 +1705,9 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         mFilter->setShowGridLines(button->getToggleState());
         mField->repaint();
     }
+    else if (button == mOscActiveButton) {
+        mFilter->setOscActive(button->getToggleState());
+    }
     else if (button == mTrSeparateAutomationMode) {
         mFilter->setIndependentMode(button->getToggleState());
     }
@@ -2103,12 +2106,13 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #if USE_TOUCH_OSC
         updateOscComponent(mOsc);
 #endif
-        mShowGridLines->setToggleState(mFilter->getShowGridLines(), dontSendNotification);
-        mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(), dontSendNotification);
-        mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(), dontSendNotification);
-        mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(), dontSendNotification);
-        mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(), dontSendNotification);
-        mApplyFilterButton->setToggleState(mFilter->getApplyFilter(), dontSendNotification);
+        mShowGridLines->setToggleState(mFilter->getShowGridLines(),             dontSendNotification);
+        mOscActiveButton->setToggleState(mFilter->getOscActive(),               dontSendNotification);
+        mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(),dontSendNotification);
+        mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(),     dontSendNotification);
+        mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
+        mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
+        mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
     }
     
 #if TIME_THINGS
