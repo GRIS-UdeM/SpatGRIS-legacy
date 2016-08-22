@@ -153,10 +153,19 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 
 #if WIN32
 #if USE_LEAP
-	char winDir[MAX_PATH];							//will hold path of above dll
-	GetCurrentDirectory(sizeof(winDir), winDir);	//dll is in same dir as exe
-	strcat(winDir, "\\Leap.dll");					//concentrate dll name with path
-	HINSTANCE DLL = LoadLibrary(winDir);			//load example dll
+	//char winDir[MAX_PATH];							//will hold path of above dll
+	//GetCurrentDirectory(sizeof(winDir), winDir);	//dll is in same dir as exe
+	////strcat(winDir, "\\Leap.dll");					//concentrate dll name with path
+	////HINSTANCE DLL = LoadLibrary(winDir);			//load example dll
+
+	//char sysDir[MAX_PATH];
+	//sysDir[0] = 0;
+	//GetSystemDirectory(sysDir, (UINT)numElementsInArray(sysDir));
+	//strcat(sysDir, "\\Leap.dll");
+	//HINSTANCE DLL = LoadLibrary(sysDir);			//load example dll
+	//HINSTANCE DLL = LoadLibrary("C:\\Users\\barth\\Documents\\Leap.dll");			//load example dll
+	//DBG(sysDir);
+
 #endif
 #endif
     
@@ -1973,5 +1982,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
+	HINSTANCE DLL = LoadLibrary("C:\\Users\\barth\\Documents\\Leap.dll");			//load example dll
     return new SpatGrisAudioProcessor();
 }
