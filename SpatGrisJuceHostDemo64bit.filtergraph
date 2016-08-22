@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FILTERGRAPH>
+  <FILTER uid="1" x="0.5" y="0.10000000000000000555">
+    <PLUGIN name="Audio Input" descriptiveName="" format="Internal" category="I/O devices"
+            manufacturer="ROLI Ltd." version="1.0" file="" uid="246006c0"
+            isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="0"
+            numOutputs="2" isShell="0"/>
+    <STATE>0.</STATE>
+  </FILTER>
+  <FILTER uid="2" x="0.25" y="0.10000000000000000555">
+    <PLUGIN name="Midi Input" descriptiveName="" format="Internal" category="I/O devices"
+            manufacturer="ROLI Ltd." version="1.0" file="" uid="cb5fde0b"
+            isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="0"
+            numOutputs="0" isShell="0"/>
+    <STATE>0.</STATE>
+  </FILTER>
+  <FILTER uid="3" x="0.5" y="0.9000000000000000222">
+    <PLUGIN name="Audio Output" descriptiveName="" format="Internal" category="I/O devices"
+            manufacturer="ROLI Ltd." version="1.0" file="" uid="724248cb"
+            isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="2"
+            numOutputs="0" isShell="0"/>
+    <STATE>0.</STATE>
+  </FILTER>
+  <FILTER uid="4" x="0.5289062500000000222" y="0.42113323124042878476"
+          uiLastX_Normal="40" uiLastY_Normal="2" uiopen_Normal="0">
+    <PLUGIN name="SpatGRIS" descriptiveName="SpatGris" format="VST" category="Effect"
+            manufacturer="UdeM" version="V1.5" file="C:\Users\barth\Documents\git\SpatGRIS\Builds\VisualStudio2015\x64\Release_x64\SpatGRIS.dll"
+            uid="53706174" isInstrument="0" fileTime="156b3f780f2" infoUpdateTime="156b3fc4b05"
+            numInputs="8" numOutputs="16" isShell="0"/>
+    <STATE>3316.CMlaKA....fQBMDZ....ALEbgQG...vC....A..............................................................................................................................................................................CTY0PxDxRL...7LETAQ0QRkzTeMUQTQURNczTfrFQgQWXVUlbyk1at0iHwHBHsMEZuc2QxkFYLklakMWOh.iHfz1Wh8zbiEzXzklck0iHwHBHsQkbI4FYkAWYtQVYtQWSuQVY8HBLh.RaekVSuYWYsUlaz0zajUVOh.iHfzFSo41ZSUmblE1Xk8jbPEla8HBLh.RaLklaqEjdo01TvEla8HBLh.RaLklaqUDakY2TvEla8HBLh.RaGUWZWkFYzgVOhDCL1.iHfz1Q0kFRkk1YnQWOhTiLvHBHscTcoQUXh0iH0HBHs8zbiwTYgA2TuUmbiUVOh.iHfz1SyMlTkMVYoYWYE4VXhwVYj0iHvHBHs8zbiIUYiUVZ1UFTuIGc8HBNv.CLh.RaOM2XSUlajUjagIFakQVOh.iHfz1SyM1Tk4FYP8lbz0iH4.CLvHBHs8zbiMUYtQVRv0iHwjiLtDiM33RLtDCLvHBHsAkbuMVYyMWSuQVY8HRLh.RaAAGbrkmQowFckIWOhDiHfzVRtAWcz8TczAWcz0zajUVOhDCNh.RaSI2XPwVXiUVak4FcM8FYk0iHwHBHsMEbPwVXiUVak4FcM8FYk0iHwHBHsMkbiMUYrU1XzUFY8HBLh.RaSA2TkwVYiQWYj0iHwHBHs8UZTIGQoIWYiQWZu4VOh.iHfz1WoQkbRUFc0Ima8HBLh.RaekFUxQUdvUVOh.iHfz1WoQkbSI2XSUFakMFc8HRKwHBHs8kYTIGQ0IWXzk1at0iH0HBHs8UZTIWUtkFcy0iHwHBHs8kYTImTkAWYgQ2b8HRLh.RaeYFUxQTXsAWYtklam0iHvHBHs8kYTIGU0Imay0iHwHBHs8kYTIGQkYWZgQWZu4VOh.iHfz1WlQkbEwFaoA2bkcUZjQGZ8HBLtHSMh.RaeYVQtQFSuMVXzk1atgUOh.iK0HBHs8kYE4FYL81XgQWZu4VV8HBLtTiHfzFSkEFbE4VXhwVYj0iHvHBHq0TX3MEbg4lUuwVcsUVOh.iHfrlTuUGco41YV8Fa00VY8HBLtjSMxLCNvjSM0HSL4HiM3bSN3fyLh.RaR8Vczklam0zajUVOh.iHfr1Ts81azgVOh.iKxPiMxLSLwTyL1.yMyXCNzXSNxPiHfrlUuwVcsUlSkElb8HBLtPCLv.CLv.CL0jiMvPiMzPyM2TCMh.xZV8Fa00VYMkFY8HBLtbSMh.xZV8Fa00VYFElb8HBLtXSN4jSN4jCN3.yM4.yMw.CMzjiLh.xZFkFazUlbNUVXx0iHwHBHqYTZrQWYx0TZj0iHv3BN4jSN4jSN2XSL0fSLzHCL3jCNzHBHqYTZrQWYxYTXx0iHv3RMh.Raek1SyM1TvEFcwLGcSI2XIQVOhDiHfz1Wo8zbiMEbgQGTuIGc8HRL3.yLxHBHyI2XvfWOh.iKz.CMyHSNwHSLwDiL3HyLzfiMyLiHfLmbiASd8HBLtbyLvjiM4jCL0fSMyHyMwPCNzLCNh.xbxMFLj0iHv3RLzHCN0bSLyPyLzHSL4LiMvLSMxHBHyI2XvDzT8HBLh.xbxMFLEMUOh.iHfLmbiECd8HBLtTSN0XyMvfyM3fCN2DyM1TSLyXyMh.xbxMVL40iHv3xMy.SN1jSNvTCN0LiL2DCM3PyL3HBHyI2XwPVOh.iKwPiL3TyMwPSNxPyLyTCM2jyMyXiHfLmbiESPS0iHvHBHyI2XwTzT8HBLh.xbxMlL30iHv3hL1jCLy.CL4PSLzXyMxfSMwTiMyHBHyI2XxjWOh.iK0jSM1bCL3DSNxfiL0LSL2LCNxfiHfLmbiICY8HBLtDCMxfSM2DCM4HCMyLSMzbSN2LiMh.xbxMlLAMUOh.iHfLmbiISQS0iHvHBHyI2XyfWOh.iK2LCL4XSN4.SM3TyLxbSLzfCMyfiHfLmbiMSd8HBLtTSN0XyMvfyM3fCN2DyM1TSLyXyMh.xbxM1Lj0iHv3RLzHCN0bSLzjiLzLyL0PyM4byL1HBHyI2XyDzT8HBLh.xbxM1LEMUOh.iHfLmbiQCd8HBLtHiM4.yLvDiLyjCM4.SMvjCLyLiLh.xbxMFM40iHv3BMvPyLxjSL0.SNwTSLzTCN2PCLxHBHyI2XzPVOh.iKwPiL3TyMwPSNxPyLyTCM2jyMyXiHfLmbiQSPS0iHvHBHyI2XzTzT8HBLh.xbxMVM30iHv3xMy.SN1jSNvTCN0LiL2DCM3PyL3HBHyI2X0jWOh.iKz.CMyHSNwTCL4DSMwPSM3bCMvHiHfLmbiUCY8HBLtDCMxfSM2DCM4HCMyLSMzbSN2LiMh.xbxMVMAMUOh.iHfLmbiUSQS0iHvHBHyI2X1fWOh.iKz.CMyHSNxDCL0DSN2jCL1PSNzDiHfLmbiYSd8HBLtHiM4.yLv.SNzDCM1biL3TSL0XyLh.xbxMlMj0iHv3RLzHCN0bSLzjiLzLyL0PyM4byL1HBHyI2X1DzT8HBLh.xbxMlMEMUOh.iHfLmbicCd8HBLtTSN0XyMvfyM3fCN2DyM1TSLyXyMh.xbxM1M40iHv3hL1jCLy.SL0LyM0DyL2LiL4DCLxHBHyI2X2PVOh.iKwPiL3TyMwPSNxPyLyTCM2jyMyXiHfLmbicSPS0iHvHBHyI2X2TzT8HBLh.xbvsFL30iHv3BM0DiLxbyL4XyMxXiMvfiL2XyL2HBHyA2ZvjWOh.iK2PSMwjiMyPiLzXCNxXSL2DCN2TiHfLGbqASa8HBLh.xbvsVL30iHv3RMzfyM2HSM2LCM2DCL1jyLyTSNzHBHyA2ZwjWOh.iK2PSMwjiMyPiLzXCNxXSL2DCN2TiHfLGbqESa8HBLh.xbvslL30iHv3xL1DSLvbCMvjCLv.yL4XyMxfSMxHBHyA2ZxjWOh.iK2.yM3XyMyfyL4TiM4.SNwbSN1jiHfLGbqISa8HBLh.xbvs1L30iHv3hMyfCN4HSMyDyL4PSN0fCM4XCL4HBHyA2ZyjWOh.iK2.yM3XyMyfyL4TiM4.SNwbSN1jiHfLGbqMSa8HBLh.xbvsFM30iHv3hL4HSLyHSM3XiLz.yM1fCMyHiMxHBHyA2ZzjWOh.iK1LCN3jiL0LSLyjCM4TCNzjiMvjiHfLGbqQSa8HBLh.xbvsVM30iHv3xMvbCN1byL3LSN0XSNvjSL2jiM4HBHyA2Z0jWOh.iK1LCN3jiL0LSLyjCM4TCNzjiMvjiHfLGbqUSa8HBLh.xbvslM30iHv3hL0PCNvLiM0bSMyDyMyfiL3DiL0HBHyA2Z1jWOh.iK0PCN2biL0byLzbSLvXSNyLSM4PiHfLGbqYSa8HBLh.xbvs1M30iHv3xMzTSL4XyLzHCM1fiL1DyMwfyM0HBHyA2Z2jWOh.iK0PCN2biL0byLzbSLvXSNyLSM4PiHfLGbqcSa8HBLh.xbvsFN30iHv3hL0PCNvLiM0bSMyDyMyfiL3DiL0HBHyA2Z3jWOh.iKzTSLxHyMzHiM0HCN4LCL1XCMvXiHfLGbqgSa8HBLh.xbvsVN30iHv3xMzTSL4XyLzHCM1fiL1DyMwfyM0HBHyA2Z4jWOh.iKzTSLxHyMzHiM0HCN4LCL1XCMvXiHfLGbqkSa8HBLh.xbvsVLvfWOh.iKxjiLwLiL0TiMzLCNzPiMvPCM4HiHfLGbqECL40iHv3xL1DSLvbCM1fiMvTCLzDSMvLSNwHBHyA2Zw.Sa8HBLh.xbvsVLwfWOh.iK2.yM3XyMyfyL4TiM4.SNwbSN1jiHfLGbqESL40iHv3xL1DSLvbCMyfCNvHyMwjSLwXiLwHBHyA2ZwDSa8HBLh.xbvsVLxfWOh.iKyXSLw.yMz.SNv.CLyjiM2HCN0HiHfLGbqEiL40iHv3hL4HSLyHiMwXCLzLCL4.CNx.yLwHBHyA2ZwHSa8HBLh.xbvsVLyfWOh.iK1LCN3jiL0LSLyjCM4TCNzjiMvjiHfLGbqEyL40iHv3hL4HSLyHSM3XiLz.yM1fCMyHiMxHBHyA2ZwLSa8HBLh.xbvsVLzfWOh.iKzTSLxHyMyjiM2HiM1.CNxbiMybiHfLGbqECM40iHv3hL0PCNvLiM3byLyPCL1.iM1fSN0HBHyA2ZwPSa8HBLh.xbvsVL0fWOh.iK0PCN2biL0byLzbSLvXSNyLSM4PiHfLGbqESM40iHv3hL0PCNvLiM0bSMyDyMyfiL3DiL0HBHyA2ZwTSa8HBLh7hO..</STATE>
+  </FILTER>
+  <CONNECTION srcFilter="4" srcChannel="0" dstFilter="3" dstChannel="0"/>
+  <CONNECTION srcFilter="4" srcChannel="1" dstFilter="3" dstChannel="1"/>
+</FILTERGRAPH>
