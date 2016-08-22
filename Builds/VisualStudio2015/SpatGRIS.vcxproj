@@ -103,8 +103,7 @@
       <OutputFile>$(IntDir)\SpatGRIS.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>xcopy /yr "C:\Users\barth\Documents\sdks\LeapSDK\lib\x86\Leap.dll" "$(TargetDir)"
-copy /Y "$(OutDir)\$(TargetFileName)" "$(OutDir)\$(TargetName).vst3"</Command>
+      <Command>copy /Y "$(OutDir)\$(TargetFileName)" "$(OutDir)\$(TargetName).vst3"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_x86|Win32'">

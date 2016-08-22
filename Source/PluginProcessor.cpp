@@ -35,6 +35,7 @@ static const float kLevelReleaseDefault = 100;
 
 #include <algorithm>
 
+
 #if JUCE_MSVC
 #include <sstream>
 #include <string>
@@ -151,8 +152,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 ,m_bPreventSourceLocationUpdate(false)
 {
 
-#if WIN32
-#if USE_LEAP
+#if WIN32 & USE_LEAP
 	//char winDir[MAX_PATH];							//will hold path of above dll
 	//GetCurrentDirectory(sizeof(winDir), winDir);	//dll is in same dir as exe
 	////strcat(winDir, "\\Leap.dll");					//concentrate dll name with path
@@ -165,9 +165,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	//HINSTANCE DLL = LoadLibrary(sysDir);			//load example dll
 	//HINSTANCE DLL = LoadLibrary("C:\\Users\\barth\\Documents\\Leap.dll");			//load example dll
 	//DBG(sysDir);
+#endif
 
-#endif
-#endif
     
     m_pOscSpatThread        = new OscSpatThread(this);
     m_pSourceUpdateThread   = new SourceUpdateThread(this);
@@ -1982,6 +1981,5 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-	HINSTANCE DLL = LoadLibrary("C:\\Users\\barth\\Documents\\Leap.dll");			//load example dll
-    return new SpatGrisAudioProcessor();
+	return new SpatGrisAudioProcessor();
 }
