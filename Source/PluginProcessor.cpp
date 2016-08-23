@@ -232,8 +232,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mShowGridLines  = false;
     m_bOscActive    = true;
 	mTrSeparateAutomationMode = false;
-    mIsNumberSourcesChanged = false;
-    mIsNumberSpeakersChanged = false;
+//    mIsNumberSourcesChanged = false;
+//    mIsNumberSpeakersChanged = false;
     mGuiWidth = kDefaultWidth,
     mGuiHeight = kDefaultHeight,
 	mGuiTab = 0;
@@ -600,6 +600,16 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(8, false);
             setNumberOfSpeakers(16, false);
             break;
+#if USE_12_SOURCES
+        case i12o12:
+            setNumberOfSources(12, false);
+            setNumberOfSpeakers(12, false);
+            break;
+        case i12o16:
+            setNumberOfSources(12, false);
+            setNumberOfSpeakers(16, false);
+            break;
+#endif
         default:
             jassert(0);
     }
@@ -639,7 +649,7 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
     } else if (mNumberOfSources == 2 && mNumberOfSpeakers == 12){
         mInputOutputMode =  i2o12;
         return;
-    }  else if (mNumberOfSources == 2 && mNumberOfSpeakers == 16){
+    } else if (mNumberOfSources == 2 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i2o16;
         return;
     } else if (mNumberOfSources == 4 && mNumberOfSpeakers == 4){
@@ -679,7 +689,16 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
         mInputOutputMode =  i8o16;
         return;
     }
-    jassert(0);
+#if USE_12_SOURCES
+    else if (mNumberOfSources == 12 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i12o12;
+        return;
+    } else if (mNumberOfSources == 12 && mNumberOfSpeakers == 16){
+        mInputOutputMode =  i12o16;
+        return;
+    }
+#endif
+
     jassert(0);
 }
 
@@ -696,9 +715,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
         return;
-    } else {
-        mIsNumberSourcesChanged = true;
     }
+//    else {
+//        mIsNumberSourcesChanged = true;
+//    }
     
     //prevents audio process thread from running
     suspendProcessing (true);
@@ -752,11 +772,15 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
                 }
             }
         }
+        mSpeakerVolumes.clear();
         for (int i = 0; i < mNumberOfSources; i++){
             mLockedThetas.set(i, getSourceRT(i).y);
             mPrevRs.set(i, getSourceRT(i).x);
             mPrevTs.set(i, getSourceRT(i).y);
-            
+            mSpeakerVolumes.add(Array<float>());
+            for (int j = 0; j < mNumberOfSpeakers; j++){
+                mSpeakerVolumes[j].add(0);
+            }
         }
         mHostChangedParameter++;
     }
@@ -775,9 +799,10 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     //if new number of speakers is same as before, return
     if (p_iNewNumberOfSpeakers == mNumberOfSpeakers){
         return;
-    } else {
-        mIsNumberSpeakersChanged = true;
     }
+//    else {
+//        mIsNumberSpeakersChanged = true;
+//    }
     
     //prevents audio process thread from running
     suspendProcessing (true);

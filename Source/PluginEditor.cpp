@@ -986,6 +986,11 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpk
     if (iMaxSources >=8 && iMaxSpeakers >=8)  { mInputOutputModeCombo->addItem("8x8",  i8o8+1);  }
     if (iMaxSources >=8 && iMaxSpeakers >=12) { mInputOutputModeCombo->addItem("8x12", i8o12+1); }
     if (iMaxSources >=8 && iMaxSpeakers >=16) { mInputOutputModeCombo->addItem("8x16", i8o16+1); }
+    
+#if USE_12_SOURCES
+    if (iMaxSources >=12 && iMaxSpeakers >=12) { mInputOutputModeCombo->addItem("12x12", i12o12+1); }
+    if (iMaxSources >=12 && iMaxSpeakers >=16) { mInputOutputModeCombo->addItem("12x16", i12o16+1); }
+#endif
 
     //then select the current mode, if it is valid. otherwise change it in mFilter
     int mode = mFilter->getInputOutputMode();

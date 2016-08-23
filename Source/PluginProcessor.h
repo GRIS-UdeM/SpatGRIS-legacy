@@ -55,6 +55,11 @@ using namespace std;
 	#define USE_LEAP 1
 #endif
 
+#ifndef USE_12_SOURCES
+#define USE_12_SOURCES 1
+#endif
+
+
 #if JUCE_MSVC
     size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #endif
@@ -130,7 +135,7 @@ enum AllTrajectoryTypes {
 
 //because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
 enum InputOutputModes {
-    i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12
+    i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12, i12o12, i12o16
 };
 
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
@@ -662,11 +667,11 @@ public:
 	Trajectory::Ptr getTrajectory() { return mTrajectory; }
 	void setTrajectory(Trajectory::Ptr t) { mTrajectory = t; }
     
-    bool getIsSourcesChanged(){ return mIsNumberSourcesChanged;}
-    bool getIsSpeakersChanged(){ return mIsNumberSpeakersChanged;}
+//    bool getIsSourcesChanged(){ return mIsNumberSourcesChanged;}
+//    bool getIsSpeakersChanged(){ return mIsNumberSpeakersChanged;}
     
-    void setIsSourcesChanged(bool pIsNumberSourcesChanged){ mIsNumberSourcesChanged = pIsNumberSourcesChanged;}
-    void setIsSpeakersChanged(bool pIsNumberSpeakersChanged){ mIsNumberSpeakersChanged = pIsNumberSpeakersChanged;}
+//    void setIsSourcesChanged(bool pIsNumberSourcesChanged){ mIsNumberSourcesChanged = pIsNumberSourcesChanged;}
+//    void setIsSpeakersChanged(bool pIsNumberSpeakersChanged){ mIsNumberSpeakersChanged = pIsNumberSpeakersChanged;}
     
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
@@ -775,8 +780,8 @@ private:
 	int mRoutingMode;
 	AudioSampleBuffer mRoutingTempAudioBuffer;
     
-    bool mIsNumberSourcesChanged;
-    bool mIsNumberSpeakersChanged;
+//    bool mIsNumberSourcesChanged;
+//    bool mIsNumberSpeakersChanged;
 	
 	bool mSmoothedParametersInited;
 	Array<float> mSmoothedParameters;
