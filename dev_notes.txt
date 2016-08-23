@@ -357,3 +357,11 @@ Robert posted some issues.
     *ignore for now, why not use spatgris
 * jaggy joystick trace everywhere
     * probably cannot fix this, but need to look into that more at school because my joystick is acting real weird! 
+
+-------------- 2016-08-23 ----------------------
+so as of today, it appears the windows version of spatgris is working. I had some issues finding totalmix (it's in system32) and with audio glitches (changed asio buffer from 256 to 512 samples and fine), and the issue that new reaper projects do not seem to work at all. 
+
+DP on windows: only mono and stereo seem to work, see #86
+Reaper on windows: new projects can only spatialise in stereo, probably configuration problem, see #74
+
+
