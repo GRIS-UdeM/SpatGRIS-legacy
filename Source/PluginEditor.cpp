@@ -627,21 +627,21 @@ AudioProcessorEditor (ownerFilter)
         mTrProgressBar->setSize(tew, dh);
         mTrProgressBar->setTopLeftPosition(x, y);
         
-        Trajectory::Ptr t = mFilter->getTrajectory();
-        if (t){
-            mTrProgressBar->setVisible(true);
-        } else {
+//        Trajectory::Ptr t = mFilter->getTrajectory();
+//        if (t){
+//            mTrProgressBar->setVisible(true);
+//        } else {
             mTrProgressBar->setVisible(false);
-        }
+//        }
         
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
-        mTrStateEditor = mFilter->getTrState();
-        if (mTrStateEditor == kTrWriting){
-            mTrWriteButton->setToggleState(true, dontSendNotification);
-            mTrWriteButton->setButtonText("Cancel");
-        }
+//        mTrStateEditor = mFilter->getTrState();
+//        if (mTrStateEditor == kTrWriting){
+//            mTrWriteButton->setToggleState(true, dontSendNotification);
+//            mTrWriteButton->setButtonText("Cancel");
+//        }
         
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
@@ -1612,8 +1612,10 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mFilter->setTrajectory(nullptr);
             mFilter->setIsRecordingAutomation(false);
             mFilter->restoreCurrentLocations();
+            
             mTrWriteButton->setButtonText("Ready");
             mTrProgressBar->setVisible(false);
+            
             mTrStateEditor = kTrReady;
             mFilter->setTrState(mTrStateEditor);
             t->stop();
@@ -1637,11 +1639,11 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mFilter->storeCurrentLocations();
             JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
             mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
-            mTrWriteButton->setButtonText("Cancel");
             mTrStateEditor = kTrWriting;
             mFilter->setTrState(mTrStateEditor);
             
             mTrProgressBar->setValue(0);
+            mTrWriteButton->setButtonText("Cancel");
             mTrProgressBar->setVisible(true);
         }
     }
@@ -2028,30 +2030,30 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     clock_t init = clock();
 #endif
 
-    switch(mTrStateEditor)	{
-		case kTrWriting: {
-			Trajectory::Ptr t = mFilter->getTrajectory();
-			if (t) {
-				mTrProgressBar->setValue(t->progress());
-                int iCurCycle = t->progressCycle();
-                if (mTrCycleCount != iCurCycle){
-                    mField->clearTrajectoryPath();
-                    mTrCycleCount = iCurCycle;
-                }
-			} else {
-				mTrWriteButton->setButtonText("Ready");
-                mTrWriteButton->setToggleState(false, dontSendNotification);
-                mFilter->restoreCurrentLocations(-1);
-				mTrProgressBar->setVisible(false);
-                mTrStateEditor = kTrReady;
-				mFilter->setTrState(mTrStateEditor);
-                mFilter->setIsRecordingAutomation(false);
-                //this is to erase the trajectory path
-                fieldChanged();
-			}
-		}
-		break;
-	}
+    if (mTrStateEditor == kTrWriting){
+        Trajectory::Ptr t = mFilter->getTrajectory();
+        if (t) {
+            mTrProgressBar->setValue(t->progress());
+            int iCurCycle = t->progressCycle();
+            if (mTrCycleCount != iCurCycle){
+                mField->clearTrajectoryPath();
+                mTrCycleCount = iCurCycle;
+            }
+        } else {
+            
+            mTrWriteButton->setButtonText("Ready");
+            mTrWriteButton->setToggleState(false, dontSendNotification);
+            mTrProgressBar->setVisible(false);
+            
+            mFilter->restoreCurrentLocations(-1);
+            mTrStateEditor = kTrReady;
+            mFilter->setTrState(mTrStateEditor);
+            mFilter->setIsRecordingAutomation(false);
+            //this is to erase the trajectory path
+            fieldChanged();
+        }
+    }
+
     
 #if TIME_THINGS
     clock_t timeTraj = clock();
