@@ -270,6 +270,7 @@ private:
     void updateSpeakerLocationTextEditor();
     void updateMovementModeCombo();
     void updateTrajectoryTypeComponents();
+    void updateTrajectoryStartComponent(bool p_bIsStarting);
     void updateEndLocationTextEditors();
     void updateInputOutputCombo(bool p_bResetSrcAndSpkPositions = true);
     void updateProcessModeComponents();

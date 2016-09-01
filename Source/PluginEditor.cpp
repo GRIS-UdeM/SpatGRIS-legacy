@@ -1596,22 +1596,12 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         }
 #endif
         Trajectory::Ptr t = mFilter->getTrajectory();
-        //a trajectory exists, so we want to cancel it
+        //if a trajectory exists
         if (t) {
-            mFilter->setTrajectory(nullptr);
-            mFilter->setIsRecordingAutomation(false);
-            //we're calling restoreCurrentLocations
-            mFilter->restoreCurrentLocations(-1);
-            
-            ////////////////////////////////////////////////////////////////////////
-            mTrWriteButton->setButtonText("Ready");
-            mTrProgressBar->setVisible(false);
-            ////////////////////////////////////////////////////////////////////////
-            
-            setTrStateEditor(kTrReady);
-            
-            t->stop();
-            mNeedRepaint = true;
+            t->stop();                              //stop it
+            mFilter->setTrajectory(nullptr);        //delete it
+            updateTrajectoryStartComponent(false);  //re-activate trajectory components
+            mNeedRepaint = true;                    //repaint stuff
         }
         //a trajectory does not exist, create one
         else {
@@ -1630,17 +1620,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
             
             
-            mFilter->storeCurrentLocations();
-            mFilter->setIsRecordingAutomation(true);    //this starts the source update thread
-            
-            
-            setTrStateEditor(kTrWriting);
-            
-            ////////////////////////////////////////////////////////////////////////
-            mTrProgressBar->setValue(0);
-            mTrWriteButton->setButtonText("Cancel");
-            mTrProgressBar->setVisible(true);
-            ////////////////////////////////////////////////////////////////////////
+            updateTrajectoryStartComponent(true);
         }
     }
     else if (button == mTrEndPointButton) {
@@ -2017,6 +1997,23 @@ void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
     mSpT->setText(String(curPosition.y * 180. / M_PI));
 }
 
+void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStarting){
+    if (p_bIsStarting){
+        mFilter->storeCurrentLocations();
+        setTrStateEditor(kTrWriting);
+        mTrProgressBar->setValue(0);
+        mFilter->setIsRecordingAutomation(true);    //this starts the source update thread
+        mTrWriteButton->setButtonText("Cancel");
+        mTrProgressBar->setVisible(true);
+    } else {
+        mFilter->setIsRecordingAutomation(false);
+        mFilter->restoreCurrentLocations(-1);
+        setTrStateEditor(kTrReady);
+        mTrWriteButton->setButtonText("Ready");
+        mTrProgressBar->setVisible(false);
+    }
+}
+
 
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
@@ -2029,6 +2026,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     if (mTrStateEditor == kTrWriting){
         Trajectory::Ptr t = mFilter->getTrajectory();
         if (t) {
+            //if we're writing a trajectory, update the progressbar and trajectory path
             mTrProgressBar->setValue(t->progress());
             int iCurCycle = t->progressCycle();
             if (mTrCycleCount != iCurCycle){
@@ -2036,18 +2034,9 @@ void SpatGrisAudioProcessorEditor::timerCallback()
                 mTrCycleCount = iCurCycle;
             }
         } else {
-            
-            /////////////////////////////////////////////////////////////////////////////
-            mTrWriteButton->setButtonText("Ready");
-            mTrWriteButton->setToggleState(false, dontSendNotification);
-            mTrProgressBar->setVisible(false);
-            /////////////////////////////////////////////////////////////////////////////
-            
-            mFilter->restoreCurrentLocations(-1);
-            setTrStateEditor(kTrReady);
-            mFilter->setIsRecordingAutomation(false);
-            
-            fieldChanged();                     //this is to erase the trajectory path
+            updateTrajectoryStartComponent(false);                          //re-activate trajectory components
+            mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
+            fieldChanged();                                                 //erase the trajectory path
         }
     }
 
