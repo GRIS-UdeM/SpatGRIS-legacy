@@ -2014,7 +2014,6 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStar
     }
 }
 
-
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
