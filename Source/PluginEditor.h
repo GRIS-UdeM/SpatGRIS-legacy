@@ -240,6 +240,11 @@ private:
     Component*  mTrEndPointLabel;
 
     int mTrStateEditor;
+    void setTrStateEditor(int p_iState){
+        mTrStateEditor = p_iState;
+        mFilter->setTrState(mTrStateEditor);
+    }
+    
     int mTrCycleCount;
 	
 	// osc, leap
@@ -264,7 +269,7 @@ private:
     void updateSourceLocationTextEditor(bool p_bUpdateFilter);
     void updateSpeakerLocationTextEditor();
     void updateMovementModeCombo();
-    void updateTrajectoryComponents();
+    void updateTrajectoryTypeComponents();
     void updateEndLocationTextEditors();
     void updateInputOutputCombo(bool p_bResetSrcAndSpkPositions = true);
     void updateProcessModeComponents();

@@ -696,7 +696,7 @@ public:
     void setEndLocationXY01(std::pair<float, float> pair){ m_fEndLocationXY01 = pair; }
     
     void storeCurrentLocations();
-    void restoreCurrentLocations(int p_iLocToRestore = -1);
+    void restoreCurrentLocations(int p_iLocToRestore);
 	void reset();
     
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);

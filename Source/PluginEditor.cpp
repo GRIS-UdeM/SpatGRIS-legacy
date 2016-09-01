@@ -626,23 +626,12 @@ AudioProcessorEditor (ownerFilter)
         mTrProgressBar = new MiniProgressBar();
         mTrProgressBar->setSize(tew, dh);
         mTrProgressBar->setTopLeftPosition(x, y);
-        
-//        Trajectory::Ptr t = mFilter->getTrajectory();
-//        if (t){
-//            mTrProgressBar->setVisible(true);
-//        } else {
-            mTrProgressBar->setVisible(false);
-//        }
+        mTrProgressBar->setVisible(false);
         
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
-//        mTrStateEditor = mFilter->getTrState();
-//        if (mTrStateEditor == kTrWriting){
-//            mTrWriteButton->setToggleState(true, dontSendNotification);
-//            mTrWriteButton->setButtonText("Cancel");
-//        }
-        
+       
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
         addLabel("Movements:", x, y, w-50, dh, box);
@@ -1104,7 +1093,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     repaint();
 }
 
-void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
+void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
     int iSelectedTrajectory = mFilter->getTrType();
     //if pendulum is selected
 
@@ -1611,19 +1600,23 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         if (t) {
             mFilter->setTrajectory(nullptr);
             mFilter->setIsRecordingAutomation(false);
-            mFilter->restoreCurrentLocations();
+            //we're calling restoreCurrentLocations
+            mFilter->restoreCurrentLocations(-1);
             
+            ////////////////////////////////////////////////////////////////////////
             mTrWriteButton->setButtonText("Ready");
             mTrProgressBar->setVisible(false);
+            ////////////////////////////////////////////////////////////////////////
             
-            mTrStateEditor = kTrReady;
-            mFilter->setTrState(mTrStateEditor);
+            setTrStateEditor(kTrReady);
+            
             t->stop();
             mNeedRepaint = true;
         }
         //a trajectory does not exist, create one
         else {
             JUCE_COMPILER_WARNING("we should probably use the values coming from the processor? And all conversions (like /360) should be done in processor, I think")
+            JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
             float   duration        = mTrDuration->getText().getFloatValue();
             bool    beats           = mTrUnits->getSelectedId() == 1;
             float   repeats         = mTrRepeats->getText().getFloatValue();
@@ -1634,17 +1627,20 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             float   p_fHalfWidth    = mTrEllipseWidthTextEditor->getText().getFloatValue();
             float   p_fTurns        = mTrTurnsTextEditor->getText().getFloatValue();
             unique_ptr<AllTrajectoryDirections> direction = Trajectory::getCurDirection(type, mTrDirectionComboBox->getSelectedId());
-
-            mFilter->setIsRecordingAutomation(true);
-            mFilter->storeCurrentLocations();
-            JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
             mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
-            mTrStateEditor = kTrWriting;
-            mFilter->setTrState(mTrStateEditor);
             
+            
+            mFilter->storeCurrentLocations();
+            mFilter->setIsRecordingAutomation(true);    //this starts the source update thread
+            
+            
+            setTrStateEditor(kTrWriting);
+            
+            ////////////////////////////////////////////////////////////////////////
             mTrProgressBar->setValue(0);
             mTrWriteButton->setButtonText("Cancel");
             mTrProgressBar->setVisible(true);
+            ////////////////////////////////////////////////////////////////////////
         }
     }
     else if (button == mTrEndPointButton) {
@@ -1686,7 +1682,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         
         //if we're loading a preset, make sure we keep the current source and speaker locations
         if (m_bLoadingPreset){
-            mFilter->restoreCurrentLocations();
+            mFilter->restoreCurrentLocations(-1);
             m_bLoadingPreset = false;
         }
         //repaint the field, could probably just set mFieldNeedRepaint = true
@@ -1985,7 +1981,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     {
         int type = mTrTypeComboBox->getSelectedId();
         mFilter->setTrType(type);
-        updateTrajectoryComponents();
+        updateTrajectoryTypeComponents();
     }
     else if (comboBox ==  mTrDirectionComboBox)
     {
@@ -2041,16 +2037,17 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             }
         } else {
             
+            /////////////////////////////////////////////////////////////////////////////
             mTrWriteButton->setButtonText("Ready");
             mTrWriteButton->setToggleState(false, dontSendNotification);
             mTrProgressBar->setVisible(false);
+            /////////////////////////////////////////////////////////////////////////////
             
             mFilter->restoreCurrentLocations(-1);
-            mTrStateEditor = kTrReady;
-            mFilter->setTrState(mTrStateEditor);
+            setTrStateEditor(kTrReady);
             mFilter->setIsRecordingAutomation(false);
-            //this is to erase the trajectory path
-            fieldChanged();
+            
+            fieldChanged();                     //this is to erase the trajectory path
         }
     }
 
