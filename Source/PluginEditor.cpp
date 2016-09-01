@@ -1619,7 +1619,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             unique_ptr<AllTrajectoryDirections> direction = Trajectory::getCurDirection(type, mTrDirectionComboBox->getSelectedId());
             mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
             
-            
             updateTrajectoryStartComponent(true);
         }
     }
@@ -1997,6 +1996,16 @@ void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
     mSpT->setText(String(curPosition.y * 180. / M_PI));
 }
 
+void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting){
+    if (p_bIsStarting){
+        p_oComponent->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+        p_oComponent->setEnabled(false);
+    } else {
+        p_oComponent->setColour(TextEditor::textColourId, juce::Colours::black);
+        p_oComponent->setEnabled(true);
+    }
+}
+
 void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStarting){
     if (p_bIsStarting){
         mFilter->storeCurrentLocations();
@@ -2012,6 +2021,22 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStar
         mTrWriteButton->setButtonText("Ready");
         mTrProgressBar->setVisible(false);
     }
+    
+    updateSingleTrajectoryStartComponent(mTrDampeningTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDeviationTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrTurnsTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrEllipseWidthTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrEndPointButton, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrResetEndButton, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrSeparateAutomationMode, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrReturnComboBox, p_bIsStarting);
+
+    
 }
 
 //==============================================================================

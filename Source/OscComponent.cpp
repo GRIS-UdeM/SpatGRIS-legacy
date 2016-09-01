@@ -79,7 +79,7 @@ public:
         x += cw + m;
         
         mReceiveIp = new TextEditor();
-        mReceiveIp->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+//        mReceiveIp->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
         mReceiveIp->setFont(mGrisFeel.getFont());
         mReceiveIp->setSize(iw, dh);
         mReceiveIp->setTopLeftPosition(x, y);
