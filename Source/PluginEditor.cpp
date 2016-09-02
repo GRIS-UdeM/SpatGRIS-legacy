@@ -1023,6 +1023,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mOscSpat1stSrcIdTextEditor->setVisible(true);
         mOscSpatPortLabel->setVisible(true);
         mOscSpatPortTextEditor->setVisible(true);
+        mOscActiveButton->setVisible(true);
         
         mAzimSpanSlider->setEnabled(true);
         mAzimSpanLabel->setEnabled(true);
@@ -1045,6 +1046,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mOscSpat1stSrcIdTextEditor->setVisible(false);
         mOscSpatPortLabel->setVisible(false);
         mOscSpatPortTextEditor->setVisible(false);
+        mOscActiveButton->setVisible(false);
 
         mAzimSpanSlider->setEnabled(false);
         mAzimSpanLabel->setEnabled(false);
