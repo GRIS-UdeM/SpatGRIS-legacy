@@ -1906,11 +1906,11 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         
         int iSelectedMode = comboBox->getSelectedId() - 1;
         //if we're playing, just set combobox back to what it was and return
-        if(mFilter->isPlaying()){
-            int iCurMode = mFilter->getMovementMode() + 1;
-            mMovementModeCombo->setSelectedId(iCurMode);
-            return;
-        } else {
+//        if(mFilter->isPlaying()){
+//            int iCurMode = mFilter->getMovementMode() + 1;
+//            mMovementModeCombo->setSelectedId(iCurMode);
+//            return;
+//        } else {
             mFilter->setMovementMode(iSelectedMode);
             if(mFilter->getNumberOfSources() > 1){
                 switch (iSelectedMode) {
@@ -1933,7 +1933,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                         break;
                 }
             }
-        }
+//        }
     }
     else if (comboBox == mRoutingModeCombo) {
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
