@@ -56,7 +56,7 @@
 		AAAC67D4263DA75F7C541EE3 /* juce_gui_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE7E5DF6F838ED6446019124 /* juce_gui_basics.mm */; };
 		ADE606E9654B3EF899191559 /* PluginEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E3B03A738441659AEC9376 /* PluginEditor.cpp */; };
 		B0B72164C8A3ED7CD83D2858 /* juce_osc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8C6565CAF670C7129B196DF /* juce_osc.cpp */; };
-		B1EC484A1D78FAD200D07BA7 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		B1064FB31D79C3B2002C581D /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		B378F196776FD008F0ED4EA2 /* AUBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 965B3F877D7BEA87D4489B8B /* AUBuffer.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		B6B84F39203CE00BE267B359 /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F46516B5ACBA00B9606D180 /* CAVectorUnit.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		B6D7952F46E362B1A5B4BE2F /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8B94EB70412EFA7441864D8 /* juce_core.mm */; };
@@ -88,13 +88,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		B1EC48491D78FACC00D07BA7 /* CopyFiles */ = {
+		B1064FB21D79C3AB002C581D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				B1EC484A1D78FAD200D07BA7 /* libLeap.dylib in CopyFiles */,
+				B1064FB31D79C3B2002C581D /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2984,7 +2984,7 @@
 				9B535A1C434303D4AA33E340 /* Rez */,
 				AFBAB6135653C9B7B9F10AA5 /* Sources */,
 				AE1FAB299C5E8BE3F6E82000 /* Frameworks */,
-				B1EC48491D78FACC00D07BA7 /* CopyFiles */,
+				B1064FB21D79C3AB002C581D /* CopyFiles */,
 				ACB59ACAAF55A1838119385D /* Post-build script */,
 			);
 			buildRules = (
@@ -3003,7 +3003,7 @@
 		46CB48D29713829397AFADF0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0440;
 			};
 			buildConfigurationList = 465764387A5B1C8F5EA3A7C6 /* Build configuration list for PBXProject "SpatGRIS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -3133,6 +3133,7 @@
 		261FA8AA033C4D19C9F482DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -3150,7 +3151,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					"\"~/Documents/sdks/steinberg/VST3 SDK\"",
+					"\"~/Documents/sdks/VST3.6.5 SDK\"",
 					"\"~/SDKs/VST3 SDK\"",
 					../../JuceLibraryCode,
 					../../JuceLibraryCode/modules,
@@ -3171,7 +3172,6 @@
 					"-lLeap",
 				);
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\"";
-				PRODUCT_BUNDLE_IDENTIFIER = com.UdeM.SpatGRIS;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = component;
 			};
@@ -3180,6 +3180,7 @@
 		40ACBD50202375DB656EB74F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -3198,7 +3199,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					"\"~/Documents/sdks/steinberg/VST3 SDK\"",
+					"\"~/Documents/sdks/VST3.6.5 SDK\"",
 					"\"~/SDKs/VST3 SDK\"",
 					../../JuceLibraryCode,
 					../../JuceLibraryCode/modules,
@@ -3219,7 +3220,6 @@
 					"-lLeap",
 				);
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\"";
-				PRODUCT_BUNDLE_IDENTIFIER = com.UdeM.SpatGRIS;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = component;
 			};
@@ -3230,7 +3230,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
@@ -3240,7 +3239,6 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = SpatGRIS;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
@@ -3251,7 +3249,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
