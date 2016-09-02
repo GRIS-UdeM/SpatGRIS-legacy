@@ -179,15 +179,16 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
         mParameters.add(0);
     }
     
-	mParameters.set(kSmooth, normalize(kSmoothMin, kSmoothMax, kSmoothDefault));
-	mParameters.set(kVolumeNear, normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault));
-	mParameters.set(kVolumeMid, normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault));
-	mParameters.set(kVolumeFar, normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault));
-	mParameters.set(kFilterNear, normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault));
-	mParameters.set(kFilterMid, normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault));
-	mParameters.set(kFilterFar, normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault));
+	mParameters.set(kSmooth,        normalize(kSmoothMin, kSmoothMax, kSmoothDefault));
+	mParameters.set(kVolumeNear,    normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault));
+	mParameters.set(kVolumeMid,     normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault));
+	mParameters.set(kVolumeFar,     normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault));
+	mParameters.set(kFilterNear,    normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault));
+	mParameters.set(kFilterMid,     normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault));
+	mParameters.set(kFilterFar,     normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault));
 	mParameters.set(kMaxSpanVolume, normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault));
 	mParameters.set(kRoutingVolume, normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
+    mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
 
 	mSmoothedParametersInited = false;
 	mSmoothedParameters.ensureStorageAllocated(kNumberOfParameters);
