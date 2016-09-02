@@ -1999,18 +1999,14 @@ void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
 void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting){    
     if (p_bIsStarting){
         if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
-            String text = te->getText();
-            te->clear();
             te->setColour (TextEditor::textColourId, juce::Colour::greyLevel(.6));
-            te->setText (text);
+            te->applyFontToAllText (mGrisFeel.getFont());
         }
         p_oComponent->setEnabled(false);
     } else {
         if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
-            String text = te->getText();
-            te->clear();
             te->setColour (TextEditor::textColourId, juce::Colours::black);
-            te->setText (text);
+            te->applyFontToAllText (mGrisFeel.getFont());
         }
         p_oComponent->setEnabled(true);
     }
