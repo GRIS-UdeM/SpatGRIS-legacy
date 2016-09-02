@@ -216,7 +216,7 @@ private:
     ComboBox* mTrReturnComboBox;
     
 	TextEditor *mTrDuration;
-	ComboBox *mTrUnits;
+	ComboBox   *mTrUnits;
 	TextEditor *mTrRepeats;
     TextEditor *mTrDampeningTextEditor;
     Component  *mTrDampeningLabel;

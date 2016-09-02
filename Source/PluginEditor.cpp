@@ -1996,12 +1996,22 @@ void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
     mSpT->setText(String(curPosition.y * 180. / M_PI));
 }
 
-void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting){
+void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting){    
     if (p_bIsStarting){
-        p_oComponent->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
+        if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
+            String text = te->getText();
+            te->clear();
+            te->setColour (TextEditor::textColourId, juce::Colour::greyLevel(.6));
+            te->setText (text);
+        }
         p_oComponent->setEnabled(false);
     } else {
-        p_oComponent->setColour(TextEditor::textColourId, juce::Colours::black);
+        if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
+            String text = te->getText();
+            te->clear();
+            te->setColour (TextEditor::textColourId, juce::Colours::black);
+            te->setText (text);
+        }
         p_oComponent->setEnabled(true);
     }
 }
@@ -2022,21 +2032,24 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStar
         mTrProgressBar->setVisible(false);
     }
     
-    updateSingleTrajectoryStartComponent(mTrDampeningTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrDeviationTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrTurnsTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDampeningTextEditor,    p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDeviationTextEditor,    p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrTurnsTextEditor,        p_bIsStarting);
     updateSingleTrajectoryStartComponent(mTrEllipseWidthTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrEndPointButton, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrResetEndButton, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrEndPointButton,         p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrResetEndButton,       p_bIsStarting);
     updateSingleTrajectoryStartComponent(mTrSeparateAutomationMode, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrDirectionComboBox, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrReturnComboBox, p_bIsStarting);
-
-    
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrReturnComboBox,         p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrTypeComboBox,           p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDuration,               p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrUnits,                  p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrRepeats,                p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   p_bIsStarting);
 }
 
 //==============================================================================
