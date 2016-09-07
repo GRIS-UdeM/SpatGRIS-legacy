@@ -427,7 +427,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     if (!areSame(fOldValue, newValue)){
         if (newValue == 0){
             DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
-            return;
+            //return;
         }
         
         mParameters.set(index, newValue);
