@@ -227,7 +227,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
-	setMovementMode(0);
+	setMovementMode(0, false);
     
     
 	mShowGridLines  = false;
@@ -308,7 +308,7 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
 }
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
-        if (mNumberOfSources == 1 || m_bIsRecordingAutomation || m_iMovementMode == 0) {
+        if (mNumberOfSources == 1 || m_bIsRecordingAutomation || getMovementMode() == 0) {
             m_pSourceUpdateThread->stopThread(500);
         } else if (!m_pSourceUpdateThread->isThreadRunning()){
             m_pSourceUpdateThread->startThread();
@@ -1813,7 +1813,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mShowGridLines", mShowGridLines);
     xml.setAttribute ("m_bOscActive", m_bOscActive);
     xml.setAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
-    xml.setAttribute ("m_iMovementMode", m_iMovementMode);
+    xml.setAttribute ("m_iMovementMode", getMovementMode());
     xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
     xml.setAttribute ("mLinkAzimSpan", mLinkAzimSpan);
     xml.setAttribute ("mLinkElevSpan", mLinkElevSpan);
@@ -1900,7 +1900,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             m_bOscActive        = xmlState->getIntAttribute ("m_bOscActive", 1);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
-            setMovementMode(xmlState->getIntAttribute ("m_iMovementMode", 0));
+            setMovementMode(xmlState->getIntAttribute ("m_iMovementMode", 0), false);
             mLinkSurfaceOrPan   = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
             mLinkAzimSpan       = xmlState->getIntAttribute ("mLinkAzimSpan", 0);
             mLinkElevSpan       = xmlState->getIntAttribute ("mLinkElevSpan", 0);

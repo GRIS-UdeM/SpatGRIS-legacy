@@ -51,9 +51,9 @@ using namespace std;
     #endif
 #endif
 
-#ifndef USE_LEAP
-	#define USE_LEAP 1
-#endif
+//#ifndef USE_LEAP
+//	#define USE_LEAP 1
+//#endif
 
 #if JUCE_MSVC
     size_t strlcpy(char * dst, const char * src, size_t dstsize);
@@ -321,11 +321,24 @@ public:
     bool getIndependentMode() const { return mTrSeparateAutomationMode; }
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
     
-	int getMovementMode() const { return m_iMovementMode; }
+	//int getMovementMode() const { return m_iMovementMode; }
 
-    void setMovementMode(int s) {
-        m_iMovementMode = s;
-        startOrStopSourceUpdateThread();
+ //   void setMovementMode(int s) {
+ //       m_iMovementMode = s;
+ //       startOrStopSourceUpdateThread();
+ //   }
+
+	int getMovementMode() { 
+		return static_cast<int>(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode)));
+	}
+
+    void setMovementMode(int i, bool p_bNotifyHost = true) {
+		if (p_bNotifyHost){
+			setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
+		} else {
+			setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
+		}
+		startOrStopSourceUpdateThread();
     }
 	
 	bool getLinkDistance() const { return mLinkSurfaceOrPan; }

@@ -50,7 +50,7 @@ public:
         mMouseDown = true;
         
         bool resetToDefault = e.mods.isAltDown();
-        //IF WE NEED TO RESET SLIDER TO DEFAULT VALUE
+        //IF ALT IS PRESSED WE NEED TO RESET SLIDER TO DEFAULT VALUE
         if (resetToDefault) {
             double newVal;
             switch(mParamType) {
