@@ -626,23 +626,12 @@ AudioProcessorEditor (ownerFilter)
         mTrProgressBar = new MiniProgressBar();
         mTrProgressBar->setSize(tew, dh);
         mTrProgressBar->setTopLeftPosition(x, y);
-        
-        Trajectory::Ptr t = mFilter->getTrajectory();
-        if (t){
-            mTrProgressBar->setVisible(true);
-        } else {
-            mTrProgressBar->setVisible(false);
-        }
+        mTrProgressBar->setVisible(false);
         
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
-        mTrStateEditor = mFilter->getTrState();
-        if (mTrStateEditor == kTrWriting){
-            mTrWriteButton->setToggleState(true, dontSendNotification);
-            mTrWriteButton->setButtonText("Cancel");
-        }
-        
+       
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
         addLabel("Movements:", x, y, w-50, dh, box);
@@ -1034,6 +1023,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mOscSpat1stSrcIdTextEditor->setVisible(true);
         mOscSpatPortLabel->setVisible(true);
         mOscSpatPortTextEditor->setVisible(true);
+        mOscActiveButton->setVisible(true);
         
         mAzimSpanSlider->setEnabled(true);
         mAzimSpanLabel->setEnabled(true);
@@ -1056,6 +1046,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mOscSpat1stSrcIdTextEditor->setVisible(false);
         mOscSpatPortLabel->setVisible(false);
         mOscSpatPortTextEditor->setVisible(false);
+        mOscActiveButton->setVisible(false);
 
         mAzimSpanSlider->setEnabled(false);
         mAzimSpanLabel->setEnabled(false);
@@ -1104,7 +1095,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     repaint();
 }
 
-void SpatGrisAudioProcessorEditor::updateTrajectoryComponents(){
+void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
     int iSelectedTrajectory = mFilter->getTrType();
     //if pendulum is selected
 
@@ -1607,21 +1598,17 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         }
 #endif
         Trajectory::Ptr t = mFilter->getTrajectory();
-        //a trajectory exists, so we want to cancel it
+        //if a trajectory exists
         if (t) {
-            mFilter->setTrajectory(nullptr);
-            mFilter->setIsRecordingAutomation(false);
-            mFilter->restoreCurrentLocations();
-            mTrWriteButton->setButtonText("Ready");
-            mTrProgressBar->setVisible(false);
-            mTrStateEditor = kTrReady;
-            mFilter->setTrState(mTrStateEditor);
-            t->stop();
-            mNeedRepaint = true;
+            t->stop();                              //stop it
+            mFilter->setTrajectory(nullptr);        //delete it
+            updateTrajectoryStartComponent(false);  //re-activate trajectory components
+            mNeedRepaint = true;                    //repaint stuff
         }
         //a trajectory does not exist, create one
         else {
             JUCE_COMPILER_WARNING("we should probably use the values coming from the processor? And all conversions (like /360) should be done in processor, I think")
+            JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
             float   duration        = mTrDuration->getText().getFloatValue();
             bool    beats           = mTrUnits->getSelectedId() == 1;
             float   repeats         = mTrRepeats->getText().getFloatValue();
@@ -1632,17 +1619,9 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             float   p_fHalfWidth    = mTrEllipseWidthTextEditor->getText().getFloatValue();
             float   p_fTurns        = mTrTurnsTextEditor->getText().getFloatValue();
             unique_ptr<AllTrajectoryDirections> direction = Trajectory::getCurDirection(type, mTrDirectionComboBox->getSelectedId());
-
-            mFilter->setIsRecordingAutomation(true);
-            mFilter->storeCurrentLocations();
-            JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
             mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
-            mTrWriteButton->setButtonText("Cancel");
-            mTrStateEditor = kTrWriting;
-            mFilter->setTrState(mTrStateEditor);
             
-            mTrProgressBar->setValue(0);
-            mTrProgressBar->setVisible(true);
+            updateTrajectoryStartComponent(true);
         }
     }
     else if (button == mTrEndPointButton) {
@@ -1684,7 +1663,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         
         //if we're loading a preset, make sure we keep the current source and speaker locations
         if (m_bLoadingPreset){
-            mFilter->restoreCurrentLocations();
+            mFilter->restoreCurrentLocations(-1);
             m_bLoadingPreset = false;
         }
         //repaint the field, could probably just set mFieldNeedRepaint = true
@@ -1927,11 +1906,11 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         
         int iSelectedMode = comboBox->getSelectedId() - 1;
         //if we're playing, just set combobox back to what it was and return
-        if(mFilter->isPlaying()){
-            int iCurMode = mFilter->getMovementMode() + 1;
-            mMovementModeCombo->setSelectedId(iCurMode);
-            return;
-        } else {
+//        if(mFilter->isPlaying()){
+//            int iCurMode = mFilter->getMovementMode() + 1;
+//            mMovementModeCombo->setSelectedId(iCurMode);
+//            return;
+//        } else {
             mFilter->setMovementMode(iSelectedMode);
             if(mFilter->getNumberOfSources() > 1){
                 switch (iSelectedMode) {
@@ -1954,7 +1933,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                         break;
                 }
             }
-        }
+//        }
     }
     else if (comboBox == mRoutingModeCombo) {
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
@@ -1983,7 +1962,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     {
         int type = mTrTypeComboBox->getSelectedId();
         mFilter->setTrType(type);
-        updateTrajectoryComponents();
+        updateTrajectoryTypeComponents();
     }
     else if (comboBox ==  mTrDirectionComboBox)
     {
@@ -2019,6 +1998,57 @@ void SpatGrisAudioProcessorEditor::updateSpeakerLocationTextEditor(){
     mSpT->setText(String(curPosition.y * 180. / M_PI));
 }
 
+void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting){    
+    if (p_bIsStarting){
+        if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
+            te->setColour (TextEditor::textColourId, juce::Colour::greyLevel(.6));
+            te->applyFontToAllText (mGrisFeel.getFont());
+        }
+        p_oComponent->setEnabled(false);
+    } else {
+        if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
+            te->setColour (TextEditor::textColourId, juce::Colours::black);
+            te->applyFontToAllText (mGrisFeel.getFont());
+        }
+        p_oComponent->setEnabled(true);
+    }
+}
+
+void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStarting){
+    if (p_bIsStarting){
+        mFilter->storeCurrentLocations();
+        setTrStateEditor(kTrWriting);
+        mTrProgressBar->setValue(0);
+        mFilter->setIsRecordingAutomation(true);    //this starts the source update thread
+        mTrWriteButton->setButtonText("Cancel");
+        mTrProgressBar->setVisible(true);
+    } else {
+        mFilter->setIsRecordingAutomation(false);
+        mFilter->restoreCurrentLocations(-1);
+        setTrStateEditor(kTrReady);
+        mTrWriteButton->setButtonText("Ready");
+        mTrProgressBar->setVisible(false);
+    }
+    
+    updateSingleTrajectoryStartComponent(mTrDampeningTextEditor,    p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDeviationTextEditor,    p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrTurnsTextEditor,        p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrEllipseWidthTextEditor, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrEndPointButton,         p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrResetEndButton,       p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrSeparateAutomationMode, p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrReturnComboBox,         p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrTypeComboBox,           p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrDuration,               p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrUnits,                  p_bIsStarting);
+    updateSingleTrajectoryStartComponent(mTrRepeats,                p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     p_bIsStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   p_bIsStarting);
+}
 
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
@@ -2028,30 +2058,23 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     clock_t init = clock();
 #endif
 
-    switch(mTrStateEditor)	{
-		case kTrWriting: {
-			Trajectory::Ptr t = mFilter->getTrajectory();
-			if (t) {
-				mTrProgressBar->setValue(t->progress());
-                int iCurCycle = t->progressCycle();
-                if (mTrCycleCount != iCurCycle){
-                    mField->clearTrajectoryPath();
-                    mTrCycleCount = iCurCycle;
-                }
-			} else {
-				mTrWriteButton->setButtonText("Ready");
-                mTrWriteButton->setToggleState(false, dontSendNotification);
-                mFilter->restoreCurrentLocations(-1);
-				mTrProgressBar->setVisible(false);
-                mTrStateEditor = kTrReady;
-				mFilter->setTrState(mTrStateEditor);
-                mFilter->setIsRecordingAutomation(false);
-                //this is to erase the trajectory path
-                fieldChanged();
-			}
-		}
-		break;
-	}
+    if (mTrStateEditor == kTrWriting){
+        Trajectory::Ptr t = mFilter->getTrajectory();
+        if (t) {
+            //if we're writing a trajectory, update the progressbar and trajectory path
+            mTrProgressBar->setValue(t->progress());
+            int iCurCycle = t->progressCycle();
+            if (mTrCycleCount != iCurCycle){
+                mField->clearTrajectoryPath();
+                mTrCycleCount = iCurCycle;
+            }
+        } else {
+            updateTrajectoryStartComponent(false);                          //re-activate trajectory components
+            mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
+            fieldChanged();                                                 //erase the trajectory path
+        }
+    }
+
     
 #if TIME_THINGS
     clock_t timeTraj = clock();

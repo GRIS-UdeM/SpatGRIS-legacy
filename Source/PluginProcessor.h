@@ -97,10 +97,11 @@ enum constantParameters{
 	kFilterFar =			6 + kNonConstantParameters,
 	kMaxSpanVolume =		7 + kNonConstantParameters,
 	kRoutingVolume =		8 + kNonConstantParameters,
-	kConstantParameters =	9
+    kMovementMode =         9 + kNonConstantParameters,
+	kConstantParameters =	10
 };
 
-#define kNumberOfParameters (kConstantParameters + kNonConstantParameters)
+#define kNumberOfParameters (kNonConstantParameters + kConstantParameters)
 
 //==============================================================================
 static const float kSourceRadius = 10;
@@ -192,6 +193,10 @@ static const float kMaxSpanVolumeDefault = 0;
 static const float kRoutingVolumeMin = -120;
 static const float kRoutingVolumeMax = 6;
 static const float kRoutingVolumeDefault = 0;
+
+static const float kMovementModeMin = 0;
+static const float kMovementModeMax = 6;
+static const float kMovementModeDefault = 0;
 
 static const float kSpanMin = 0;
 static const float kSpanMax = 2;
@@ -696,7 +701,7 @@ public:
     void setEndLocationXY01(std::pair<float, float> pair){ m_fEndLocationXY01 = pair; }
     
     void storeCurrentLocations();
-    void restoreCurrentLocations(int p_iLocToRestore = -1);
+    void restoreCurrentLocations(int p_iLocToRestore);
 	void reset();
     
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
@@ -727,7 +732,7 @@ private:
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
     bool mLinkElevSpan;
-	int m_iMovementMode;
+//	int m_iMovementMode;
 	bool mShowGridLines;
     bool m_bOscActive;
     bool mTrSeparateAutomationMode;
