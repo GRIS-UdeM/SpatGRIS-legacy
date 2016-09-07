@@ -51,9 +51,9 @@ using namespace std;
     #endif
 #endif
 
-//#ifndef USE_LEAP
-//	#define USE_LEAP 1
-//#endif
+#ifndef USE_LEAP
+	#define USE_LEAP 1
+#endif
 
 #if JUCE_MSVC
     size_t strlcpy(char * dst, const char * src, size_t dstsize);

@@ -472,6 +472,7 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 	if (index == kFilterFar)	return "Filter Far";
 	if (index == kMaxSpanVolume)return "Max span volume";
 	if (index == kRoutingVolume)return "Routing volume";
+    if (index == kMovementMode) return "Movement Mode";
 	
     if (index < mNumberOfSources * kParamsPerSource) {
 		String s("Source ");
