@@ -1608,19 +1608,23 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         //a trajectory does not exist, create one
         else {
             JUCE_COMPILER_WARNING("we should probably use the values coming from the processor? And all conversions (like /360) should be done in processor, I think")
-            JUCE_COMPILER_WARNING("instead of having this super long list of arguments, we should use a dictionnary or something, with e.g., key = p_fHalfWidth and value = .05")
-            float   duration        = mTrDuration->getText().getFloatValue();
-            bool    beats           = mTrUnits->getSelectedId() == 1;
-            float   repeats         = mTrRepeats->getText().getFloatValue();
-            int     type            = mTrTypeComboBox->getSelectedId();
-            bool    bReturn         = (mTrReturnComboBox->getSelectedId() == 2);
-            float   p_fDampening    = mTrDampeningTextEditor->getText().getFloatValue();
-            float   p_fDeviation    = mTrDeviationTextEditor->getText().getFloatValue()/360;
-            float   p_fHalfWidth    = mTrEllipseWidthTextEditor->getText().getFloatValue();
-            float   p_fTurns        = mTrTurnsTextEditor->getText().getFloatValue();
-            unique_ptr<AllTrajectoryDirections> direction = Trajectory::getCurDirection(type, mTrDirectionComboBox->getSelectedId());
-            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats,
-                                                                p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
+    
+            TrajectoryProperties properties;
+            properties.type         = mTrTypeComboBox->getSelectedId();
+            properties.filter       = mFilter;
+            properties.mover        = m_pMover;
+            properties.duration     = mTrDuration->getText().getFloatValue();
+            properties.beats        = mTrUnits->getSelectedId() == 1;
+            properties.direction    = Trajectory::getCurDirection(properties.type, mTrDirectionComboBox->getSelectedId());
+            properties.bReturn      = (mTrReturnComboBox->getSelectedId() == 2);
+            properties.repeats      = mTrRepeats->getText().getFloatValue();
+            properties.dampening    = mTrDampeningTextEditor->getText().getFloatValue();
+            properties.deviation    = mTrDeviationTextEditor->getText().getFloatValue()/360;
+            properties.turns        = mTrTurnsTextEditor->getText().getFloatValue();
+            properties.width        = mTrEllipseWidthTextEditor->getText().getFloatValue();
+            properties.endPoint     = mFilter->getEndLocationXY01();
+            
+            mFilter->setTrajectory(Trajectory::CreateTrajectory(properties));
             
             updateTrajectoryStartComponent(true);
         }

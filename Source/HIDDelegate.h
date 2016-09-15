@@ -1,17 +1,27 @@
-/*!
- * ==============================================================================
- *
- *  HIDDelegate.h
- *  Created: 12 March 2015 1:23:01pm
- *  Author:  Antoine L.
- *  Description :
- *  HIDDelegate allows you to create a object handling the HIDManager through the help of Reference
- *  Counted Object which deletes it in a safe and proper way.
- *  First create the IOHIDManager then the HIDDelegate that you initialize with the Initialize_HID method.
- *  HIDDelegate constructor needs two arguments which are the addresses of
- *  the main components of the plugin the Audio Processor and the Audio Processor
- *  Editor.
- * ==============================================================================
+/*
+ ==============================================================================
+ SpatGRIS: multichannel sound spatialization plug-in.
+ 
+ Copyright (C) 2015  GRIS-UdeM
+ 
+ HIDDelegate.h
+ Created: 12 March 2015 1:23:01pm
+ 
+ Developers: Antoine Missout, Vincent Berthiaume
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ==============================================================================
  */
 
 #ifndef __Octogris2__HIDDelegate__

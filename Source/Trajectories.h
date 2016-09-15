@@ -49,6 +49,22 @@ enum AllTrajectoryDirections {
     None
 };
 
+struct TrajectoryProperties {
+    int                     type;
+    SpatGrisAudioProcessor* filter;
+    SourceMover*            mover;
+    float                   duration;
+    bool                    beats;
+    std::unique_ptr<AllTrajectoryDirections> direction;
+    bool                    bReturn;
+    float                   repeats;
+    float                   dampening;
+    float                   deviation;
+    float                   turns;
+    float                   width;
+    FPoint                  endPoint;
+};
+
 class Trajectory : public ReferenceCountedObject
 {
 public:
@@ -56,8 +72,7 @@ public:
 
 	static int NumberOfTrajectories();
 	static String GetTrajectoryName(int i);
-	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction,
-                                            bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, float p_fWidth, FPoint endPair);
+	static Trajectory::Ptr CreateTrajectory(const TrajectoryProperties& properties);
     
     
     static std::unique_ptr<std::vector<String>> getAllPossibleDirections(int p_iTrajectory);
@@ -81,7 +96,7 @@ private:
 	void start();
 	
 protected:
-	Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times);
+	Trajectory(const TrajectoryProperties& properties);
 	SpatGrisAudioProcessor *mFilter;
     SourceMover *m_pMover;
 	bool m_bStarted, m_bStopped;

@@ -76,18 +76,21 @@ void Trajectory::stop() {
 	m_bStopped = true;
 }
 
-Trajectory::Trajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
-    :mFilter(filter)
-    ,m_pMover(p_pMover)
+Trajectory::Trajectory(const TrajectoryProperties& properties)
+    :mFilter(properties.filter)
+    ,m_pMover(properties.mover)
 	,m_bStarted(false)
 	,m_bStopped(false)
 	,m_fTimeDone(0)
-	,m_fDurationSingleTraj(duration)
-	,m_bUseBeats(beats)
+	,m_fDurationSingleTraj(properties.duration)
+	,m_bUseBeats(properties.beats)
 {
-	if (m_fDurationSingleTraj < 0.0001) m_fDurationSingleTraj = 0.0001;
-	if (times < 0.0001) times = 0.0001;
-	m_fTotalDuration = m_fDurationSingleTraj * times;
+    if (m_fDurationSingleTraj < 0.0001) {
+        m_fDurationSingleTraj = 0.0001;
+    }
+    
+    float fRepeats = (properties.repeats < 0.0001) ? 0.0001 : properties.repeats;
+	m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
 }
 
 //using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
@@ -136,7 +139,8 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedT
             *pDirection = static_cast<AllTrajectoryDirections>(p_iSelectedDirection);
             break;
         case RandomTrajectory:
-            *pDirection = static_cast<AllTrajectoryDirections>(p_iSelectedDirection+9);
+            *pDirection = static_cast<AllTrajectoryDirections>(p_iSelectedDirection+8);
+            DBG("random direction is " + to_string(*pDirection));
             break;
         case RandomTarget:
         case SymXTarget:
@@ -179,11 +183,13 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTraject
 // ==============================================================================
 class CircleTrajectory : public Trajectory {
 public:
-    CircleTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
-    : Trajectory(filter, p_pMover, duration, beats, times)
-    , mCCW(ccw)
-    , m_fTurns(p_fTurns)
-    {}
+//    CircleTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
+    CircleTrajectory(const TrajectoryProperties& properties)
+    : Trajectory(properties)
+    , mCCW(*properties.direction == CCW)
+    , m_fTurns(properties.turns)
+    {
+    }
     
 protected:
     void childProcess(float duration, float seconds) {
@@ -291,15 +297,18 @@ private:
 
 class SpiralTrajectory : public Trajectory {
 public:
-    JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
-    JUCE_COMPILER_WARNING("make a struct containing all trajectory parameters")
-    SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const FPoint &endPair)
-    : Trajectory(filter, p_pMover, duration, beats, times)
-    , m_bCCW(ccw)
-    , m_bReturn(rt)
-    , m_fTurns(p_fTurns)
-    , m_fEndPairXY01(endPair)
-    { }
+    SpiralTrajectory(const TrajectoryProperties& properties)
+    : Trajectory(properties)
+    , m_bReturn(properties.bReturn)
+    , m_fTurns(properties.turns)
+    , m_fEndPairXY01(properties.endPoint)
+    {
+        if (*properties.direction == InCCW || *properties.direction == OutCCW){
+            m_bCCW = true;
+        } else {
+            m_bCCW = false;
+        }
+    }
     
 protected:
     void childInit() {
@@ -363,14 +372,18 @@ private:
 class PendulumTrajectory : public Trajectory
 {
 public:
-    PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const FPoint &endPair)
-    :Trajectory(filter, p_pMover, duration, beats, times)
-    , mCCW(ccw)
-    , m_bRT(rt)
-    , m_fDeviation(fDeviation)
-    , m_fTotalDampening(p_fDampening)
+    PendulumTrajectory(const TrajectoryProperties& properties)
+    :Trajectory(properties)
+    , m_bRT(properties.bReturn)
+    , m_fDeviation(properties.deviation)
+    , m_fTotalDampening(properties.dampening)
     {
-        mEndPointXy01 = FPoint(endPair.x, 1-endPair.y);
+        mEndPointXy01 = FPoint(properties.endPoint.x, 1-properties.endPoint.y);
+        if (*properties.direction == InCCW || *properties.direction == OutCCW){
+            mCCW = true;
+        } else {
+            mCCW = false;
+        }
     }
 
 protected:
@@ -439,11 +452,11 @@ private:
 class EllipseTrajectory : public Trajectory
 {
 public:
-	EllipseTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns, float p_fWidth)
-	: Trajectory(filter, p_pMover, duration, beats, times)
-    , mCCW(ccw)
-    , m_fTurns(p_fTurns)
-    , m_fWidth(p_fWidth)
+	EllipseTrajectory(const TrajectoryProperties& properties)
+	: Trajectory(properties)
+    , mCCW(*properties.direction == CCW)
+    , m_fTurns(properties.turns)
+    , m_fWidth(properties.width)
     { }
 	
 protected:
@@ -526,11 +539,26 @@ private:
 class RandomTrajectoryClass : public Trajectory
 {
 public:
-	RandomTrajectoryClass(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, float speed)
-	: Trajectory(filter, p_pMover, duration, beats, times)
+	RandomTrajectoryClass(const TrajectoryProperties& properties)
+	: Trajectory(properties)
     , mClock(0)
-    , mSpeed(speed)
-    {}
+    {
+        switch(*properties.direction){
+                case Slow:
+                    mSpeed = .02;
+                    break;
+                case Mid:
+                    mSpeed = .06;
+                    break;
+                case Fast:
+                    mSpeed = .1;
+                    break;
+            default:
+                DBG(*properties.direction);
+                jassert(0);
+                return;
+        }
+    }
 	
 protected:
     void childProcess(float duration, float seconds){
@@ -594,10 +622,10 @@ private:
 class TargetTrajectory : public Trajectory
 {
 public:
-	TargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool p_bReturn = false)
-	: Trajectory(filter, p_pMover, duration, beats, times)
+	TargetTrajectory(const TrajectoryProperties& properties)
+	: Trajectory(properties)
     , mCycle(-1)
-    , m_bReturn(p_bReturn)
+    , m_bReturn(properties.bReturn)
     {}
 	
 protected:
@@ -661,8 +689,8 @@ private:
 class RandomTargetTrajectory : public TargetTrajectory
 {
 public:
-	RandomTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool p_bReturn)
-	: TargetTrajectory(filter, p_pMover, duration, beats, times, p_bReturn) {}
+	RandomTargetTrajectory(const TrajectoryProperties& properties)
+	: TargetTrajectory(properties) {}
 	
 protected:
 	FPoint destinationForSource(int s, FPoint o) {
@@ -693,8 +721,8 @@ private:
 class SymXTargetTrajectory : public TargetTrajectory
 {
 public:
-	SymXTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
-	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
+	SymXTargetTrajectory(const TrajectoryProperties& properties)
+	: TargetTrajectory(properties) {}
 	
 protected:
 	FPoint destinationForSource(int s, FPoint o) {
@@ -706,8 +734,8 @@ protected:
 class SymYTargetTrajectory : public TargetTrajectory
 {
 public:
-	SymYTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
-	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
+	SymYTargetTrajectory(const TrajectoryProperties& properties)
+	: TargetTrajectory(properties) {}
 	
 protected:
 	FPoint destinationForSource(int s, FPoint o) {
@@ -719,8 +747,8 @@ protected:
 class ClosestSpeakerTargetTrajectory : public TargetTrajectory
 {
 public:
-	ClosestSpeakerTargetTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times)
-	: TargetTrajectory(filter, p_pMover, duration, beats, times) {}
+	ClosestSpeakerTargetTrajectory(const TrajectoryProperties& properties)
+	: TargetTrajectory(properties) {}
 	
 protected:
 	FPoint destinationForSource(int s, FPoint o) {
@@ -758,67 +786,19 @@ String Trajectory::GetTrajectoryName(int i) {
     return "";
 }
 
-Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats,
-                                             AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation,
-                                             float p_fTurns, float p_fWidth,  FPoint endPair) {
+Trajectory::Ptr Trajectory::CreateTrajectory(const TrajectoryProperties& properties) {
     
-    bool ccw, in;
-    float speed;
-    
-    if (direction != None)
-    switch (direction) {
-        case CW:
-            ccw = false;
-            break;
-        case CCW:
-            ccw = true;
-            break;
-        case In:
-            in = true;
-            break;
-        case Out:
-            in = false;
-            break;
-        case InCW:
-            in = true;
-            ccw = false;
-            break;
-        case InCCW:
-            in = true;
-            ccw = true;
-            break;
-        case OutCW:
-            in = false;
-            ccw = false;
-            break;
-        case OutCCW:
-            in = false;
-            ccw = true;
-            break;
-        case Slow:
-            speed = .02;
-            break;
-        case Mid:
-            speed = .06;
-            break;
-        case Fast:
-            speed = .1;
-            break;
-        default:
-            break;
-    }
-    
-    
-    switch(type) {
-        case Circle:                     return new CircleTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns);
-        case EllipseTr:                  return new EllipseTrajectory(filter, p_pMover, duration, beats, times, ccw, p_fTurns, p_fWidth);
-        case Spiral:                     return new SpiralTrajectory(filter, p_pMover, duration, beats, times, ccw, true, bReturn, p_fTurns, endPair);
-        case Pendulum:                   return new PendulumTrajectory(filter, p_pMover, duration, beats, times, in, ccw, bReturn, p_fDampening, p_fDeviation, endPair);
-        case RandomTrajectory:           return new RandomTrajectoryClass(filter, p_pMover, duration, beats, times, speed);
-        case RandomTarget:               return new RandomTargetTrajectory(filter, p_pMover, duration, beats, times, bReturn);
-        case SymXTarget:                 return new SymXTargetTrajectory(filter, p_pMover, duration, beats, times);
-        case SymYTarget:                 return new SymYTargetTrajectory(filter, p_pMover, duration, beats, times);
-        case ClosestSpeakerTarget:       return new ClosestSpeakerTargetTrajectory(filter, p_pMover, duration, beats, times);
+    switch(properties.type) {
+
+        case Circle:                     return new CircleTrajectory                (properties);
+        case EllipseTr:                  return new EllipseTrajectory               (properties);
+        case Spiral:                     return new SpiralTrajectory                (properties);
+        case Pendulum:                   return new PendulumTrajectory              (properties);
+        case RandomTrajectory:           return new RandomTrajectoryClass           (properties);
+        case RandomTarget:               return new RandomTargetTrajectory          (properties);
+        case SymXTarget:                 return new SymXTargetTrajectory            (properties);
+        case SymYTarget:                 return new SymYTargetTrajectory            (properties);
+        case ClosestSpeakerTarget:       return new ClosestSpeakerTargetTrajectory  (properties);
     }
     jassert(0);
     return nullptr;
