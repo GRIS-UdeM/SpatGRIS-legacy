@@ -140,7 +140,6 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedT
             break;
         case RandomTrajectory:
             *pDirection = static_cast<AllTrajectoryDirections>(p_iSelectedDirection+8);
-            DBG("random direction is " + to_string(*pDirection));
             break;
         case RandomTarget:
         case SymXTarget:
@@ -554,7 +553,6 @@ public:
                     mSpeed = .1;
                     break;
             default:
-                DBG(*properties.direction);
                 jassert(0);
                 return;
         }
