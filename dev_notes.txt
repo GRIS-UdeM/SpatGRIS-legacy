@@ -365,3 +365,17 @@ DP on windows: only mono and stereo seem to work, see #86
 Reaper on windows: new projects can only spatialise in stereo, probably configuration problem, see #74
 
 
+------------- 2016-09-15 -------------------
+current priorities from Robert:
+
+À court terme:
+• nouveau mode de trajectoire avec sliders, différentes vitesses de début et de fin, etc
+• le mode x12 dans DP et les problèmes de VU-mètre
+• améliorer le mode internal routing
+• intégrer les trajectoires dans SpatGRIS directement pour remplacer les automations des séquenceurs.
+
+À moyen terme:
+• faire un spatgris server pour remplacer Jack et Soundflower
+• faire notre propre logiciel de spatialisation pour remplacer le Zirkonium avec les fonctions VBAP, DBAP et Ambisonique (qui peut très bien être une copie de la version actuelle pour commencer, puisqu’elle roule sous PureData, donc en logiciel libre).
+
+So it seems i will work on trajectories. 
