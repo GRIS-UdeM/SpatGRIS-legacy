@@ -102,12 +102,6 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleDirections(int p_iTraj
             vDirections->push_back("Clockwise");
             vDirections->push_back("Counter Clockwise");
             break;
-//        case Spiral:
-//            vDirections->push_back("In, Clockwise");
-//            vDirections->push_back("In, Counter Clockwise");
-//            vDirections->push_back("Out, Clockwise");
-//            vDirections->push_back("Out, Counter Clockwise");
-//            break;
         case RandomTrajectory:
             vDirections->push_back("Slow");
             vDirections->push_back("Mid");
@@ -131,7 +125,6 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedT
     unique_ptr<AllTrajectoryDirections> pDirection (new AllTrajectoryDirections);
     
     switch (p_iSelectedTrajectory) {
-            
         case Circle:
         case EllipseTr:
             *pDirection = static_cast<AllTrajectoryDirections>(p_iSelectedDirection);
@@ -180,11 +173,8 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTraject
         default:
             jassert(0);
     }
-    
     return vReturns;
 }
-
-
 
 // ==============================================================================
 class CircleTrajectory : public Trajectory {
@@ -303,7 +293,7 @@ class SpiralTrajectory : public Trajectory {
 public:
     JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
     JUCE_COMPILER_WARNING("make a struct containing all trajectory parameters")
-    SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
+    SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const FPoint &endPair)
     : Trajectory(filter, p_pMover, duration, beats, times)
     , m_bCCW(ccw)
     , m_bReturn(rt)
@@ -314,7 +304,7 @@ public:
 protected:
     void childInit() {
         mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
-        mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
+        mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.x, m_fEndPairXY01.y));
         //if start ray is bigger than end ray, we are going in
         m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
     }
@@ -351,14 +341,14 @@ protected:
             fTranslationFactor = 1-fTranslationFactor;
         }
         if (m_bGoingIn){
-            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first -.5);
-            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
+            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.x -.5);
+            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.y-.5);
         } else {
             //here, fTranslationFactor grows linearly, the rest is constants
 //            FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(kRadiusMax, mStartPointRt.y);
                         FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(mEndPointRt.x, mStartPointRt.y);
-            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first  - untranslatedEndOutPointXY01.x);
-            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second - untranslatedEndOutPointXY01.y);
+            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.x  - untranslatedEndOutPointXY01.x);
+            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.y - untranslatedEndOutPointXY01.y);
         }
         m_pMover->move(curPointXY01, kTrajectory);
     }
@@ -366,21 +356,21 @@ protected:
 private:
     bool m_bCCW, m_bGoingIn, m_bReturn;
     float m_fTurns;
-    std::pair<float, float> m_fEndPairXY01;
+    FPoint m_fEndPairXY01;
     FPoint mStartPointRt, mEndPointRt;
 };
 // ================================================================================================
 class PendulumTrajectory : public Trajectory
 {
 public:
-    PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const std::pair<float, float> &endPair)
+    PendulumTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool in, bool ccw, bool rt, float p_fDampening, float fDeviation, const FPoint &endPair)
     :Trajectory(filter, p_pMover, duration, beats, times)
     , mCCW(ccw)
     , m_bRT(rt)
     , m_fDeviation(fDeviation)
     , m_fTotalDampening(p_fDampening)
     {
-        mEndPointXy01 = FPoint(endPair.first, 1-endPair.second);
+        mEndPointXy01 = FPoint(endPair.x, 1-endPair.y);
     }
 
 protected:
@@ -770,7 +760,7 @@ String Trajectory::GetTrajectoryName(int i) {
 
 Trajectory::Ptr Trajectory::CreateTrajectory(int type, SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats,
                                              AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation,
-                                             float p_fTurns, float p_fWidth, const std::pair<float, float> &endPair) {
+                                             float p_fTurns, float p_fWidth,  FPoint endPair) {
     
     bool ccw, in;
     float speed;

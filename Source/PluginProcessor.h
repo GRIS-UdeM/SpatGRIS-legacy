@@ -710,8 +710,8 @@ public:
     void setIsSettingEndPoint(bool isSetting){ m_bIsSettingEndPoint = isSetting; }
     bool isSettingEndPoint(){ return m_bIsSettingEndPoint; }
     
-    std::pair<float, float> getEndLocationXY01(){ return m_fEndLocationXY01; }
-    void setEndLocationXY01(std::pair<float, float> pair){ m_fEndLocationXY01 = pair; }
+    FPoint getEndLocationXY01(){ return m_fEndLocationXY01; }
+    void setEndLocationXY01(FPoint point){ m_fEndLocationXY01 = point; }
     
     void storeCurrentLocations();
     void restoreCurrentLocations(int p_iLocToRestore);
@@ -849,7 +849,7 @@ private:
     
     bool m_bPreventSourceLocationUpdate;
     bool m_bIsSettingEndPoint;
-    std::pair <float, float> m_fEndLocationXY01;
+    FPoint m_fEndLocationXY01;
     bool m_bJustSelectedEndPoint;
 
     OSCSender mOscSpatSender;

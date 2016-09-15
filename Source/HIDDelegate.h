@@ -65,7 +65,7 @@ private:
     SpatGrisAudioProcessor *mFilter;
     SpatGrisAudioProcessorEditor *mEditor;
     //! Number of counted buttons
-    int m_iNbOfJoystickButtons;
+    long m_iNbOfJoystickButtons;
     //! Table memorizing button states
     vector<bool> m_bJoystickButtonsCurentlyPressed;
     //! Variables recording the last and present coordinates (calculated or not)

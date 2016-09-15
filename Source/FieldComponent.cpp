@@ -372,7 +372,7 @@ void FieldComponent::mouseDown(const MouseEvent &event)
         //get point of current event
         float fCenteredX01 = (float)event.x/fieldWidth;//-_ZirkOSC_Center_X;
         float fCenteredY01 = (float)event.y/fieldHeight;//-_ZirkOSC_Center_Y;
-        mFilter->setEndLocationXY01(make_pair (fCenteredX01, fCenteredY01));
+        mFilter->setEndLocationXY01(FPoint(fCenteredX01, fCenteredY01));
         mFilter->setIsSettingEndPoint(false);
         mFilter->setJustSelectedEndPoint(true);
     }

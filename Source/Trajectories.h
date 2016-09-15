@@ -28,6 +28,7 @@
 #define TRAJECTORIES_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
+typedef Point<float> FPoint;
 #include <memory>
 
 class SpatGrisAudioProcessor;
@@ -55,7 +56,10 @@ public:
 
 	static int NumberOfTrajectories();
 	static String GetTrajectoryName(int i);
-	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction, bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, float p_fWidth, const std::pair<float, float> &endPair);
+	static Trajectory::Ptr CreateTrajectory(int i, SpatGrisAudioProcessor *filter, SourceMover *mover, float duration, bool beats, AllTrajectoryDirections direction,
+                                            bool bReturn, float times, float p_fDampening, float p_fDeviation, float p_fTurns, float p_fWidth, FPoint endPair);
+    
+    
     static std::unique_ptr<std::vector<String>> getAllPossibleDirections(int p_iTrajectory);
     static std::unique_ptr<AllTrajectoryDirections> getCurDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
     static std::unique_ptr<std::vector<String>> getAllPossibleReturns(int p_iTrajectory);

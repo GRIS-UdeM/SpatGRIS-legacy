@@ -996,8 +996,8 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpk
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
-    std::pair<float, float> endLocation = mFilter->getEndLocationXY01();
-    FPoint pointRT = mFilter->convertXy012Rt(FPoint(endLocation.first, 1-endLocation.second), false);
+    FPoint endLocation = mFilter->getEndLocationXY01();
+    FPoint pointRT = mFilter->convertXy012Rt(FPoint(endLocation.x, 1-endLocation.y), false);
     pointRT.y *= 360/(2*M_PI);
 #if WIN32
 	m_pTrEndRayTextEditor->setText(toString(pointRT.x));
@@ -1566,7 +1566,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         float fEndAngle = m_pTrEndAngleTextEditor->getText().getFloatValue();
         if (fEndRay >= 0 && fEndRay <= 2 && fEndAngle >= 0 && fEndAngle <= 360 ){
             FPoint endPoint = mFilter->convertRt2Xy01(fEndRay, fEndAngle*M_PI/180);
-            mFilter->setEndLocationXY01(make_pair (endPoint.x, 1-endPoint.y));
+            mFilter->setEndLocationXY01(FPoint (endPoint.x, 1-endPoint.y));
         }
         updateEndLocationTextEditors();
     } else {
@@ -1619,7 +1619,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             float   p_fHalfWidth    = mTrEllipseWidthTextEditor->getText().getFloatValue();
             float   p_fTurns        = mTrTurnsTextEditor->getText().getFloatValue();
             unique_ptr<AllTrajectoryDirections> direction = Trajectory::getCurDirection(type, mTrDirectionComboBox->getSelectedId());
-            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats, p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
+            mFilter->setTrajectory(Trajectory::CreateTrajectory(type, mFilter, m_pMover, duration, beats, *direction, bReturn, repeats,
+                                                                p_fDampening, p_fDeviation, p_fTurns, p_fHalfWidth, mFilter->getEndLocationXY01()));
             
             updateTrajectoryStartComponent(true);
         }
@@ -1648,8 +1649,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         if (mFilter->getTrType() == Pendulum){
             setDefaultPendulumEndpoint();
         } else {
-            pair<float, float> pair = make_pair(.5, .5);
-            mFilter->setEndLocationXY01(pair);
+            FPoint point (.5, .5);
+            mFilter->setEndLocationXY01(point);
         }
         updateEndLocationTextEditors();
     }
@@ -1889,7 +1890,7 @@ void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
     pointRT.y += M_PI;
     JUCE_COMPILER_WARNING("throughout the code, need to check conversions, especially pertaining to the end location of trajectories. Also need to make the y consistent so that we don't revert it in only some cases")
     FPoint pointXY = mFilter->convertRt2Xy01(pointRT.x, pointRT.y);
-    mFilter->setEndLocationXY01(make_pair(pointXY.x, 1-pointXY.y));
+    mFilter->setEndLocationXY01(FPoint(pointXY.x, 1-pointXY.y));
 }
 
 
