@@ -51,7 +51,7 @@ public:
     //! Set for the table memorizing button states
     void setButtonPressedTab(u_int32_t index, bool state);
     //! Return the number of button counted on the joystick
-    int getNbButton(){return m_iNbOfJoystickButtons;};
+    long getNbButton(){return m_iNbOfJoystickButtons;};
     //! Return the address of the device
     IOHIDDeviceRef getDeviceRef(){return deviceRef;}
     //! Return the address of the set of devices

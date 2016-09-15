@@ -29,13 +29,6 @@
 const String kOscPathSourceXY = "/Octo/SourceXY";
 const String kOscPathSelectSource = "/Octo/Source";
 
-static void osc_err_handler(int num, const char *msg, const char *path){
-	fprintf(stderr, "osc_err_handler num: %d msg: %s path: %s\n",
-					num,
-					msg ? msg : "(null)",
-					path ? path : "(null)");
-}
-
 static String getLocalIPAddress(){
 //    Array<IPAddress> addresses;
 //    IPAddress::findAllAddresses (addresses);

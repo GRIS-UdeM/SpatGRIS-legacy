@@ -1704,66 +1704,6 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 }
 
 //==============================================================================
-static inline void appendIntData(MemoryBlock& destData, int32_t d)
-{
-	destData.append(&d, sizeof(d));
-}
-static inline int32_t readIntData(const void* &data, int &dataLength, int32_t defaultValue)
-{
-	int32_t r;
-	if (dataLength >= sizeof(float))
-	{
-		const int32_t *pv = static_cast<const int32_t*>(data);
-		r = *pv++;
-		data = static_cast<const void*>(pv);
-		dataLength -= sizeof(int32_t);
-	}
-	else
-	{
-		fprintf(stderr, "readIntData failed: not enough data...\n");
-		r = defaultValue;
-		dataLength = 0;
-	}
-	return r;
-}
-static inline void appendFloatData(MemoryBlock& destData, float d)
-{
-	destData.append(&d, sizeof(d));
-}
-static inline float readFloatData(const void* &data, int &dataLength, float defaultValue)
-{
-	float r;
-	if (dataLength >= sizeof(float))
-	{
-		const float *pv = static_cast<const float*>(data);
-		r = *pv++;
-		data = static_cast<const void*>(pv);
-		dataLength -= sizeof(float);
-	}
-	else
-	{
-		fprintf(stderr, "readFloatData failed: not enough data...\n");
-		r = defaultValue;
-		dataLength = 0;
-	}
-	return r;
-}
-static inline void appendStringData(MemoryBlock& destData, const char *d, int length) {
-	destData.append(d, length);
-}
-static inline void readStringData(const void* &data, int &dataLength, const char *defaultValue, char *d, int length) {
-	if (dataLength >= length) {
-		const char *pv = static_cast<const char*>(data);
-		memcpy(d, pv, length);
-		d[length-1] = 0;
-		data = static_cast<const void*>(pv + length);
-		dataLength -= length;
-	} else {
-		fprintf(stderr, "readStringData failed: not enough data...\n");
-		strlcpy(d, defaultValue, length);
-		dataLength = 0;
-	}
-}
 
 void SpatGrisAudioProcessor::storeCurrentLocations(){
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
