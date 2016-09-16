@@ -9,7 +9,7 @@
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="SpatGrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris"
               pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.2.3"
-              pluginIsMidiEffectPlugin="0" companyName="UdeM" buildAUv3="0">
+              pluginIsMidiEffectPlugin="0" companyName="UdeM" buildAUv3="1">
   <MAINGROUP id="rRl79u" name="SpatGRIS">
     <GROUP id="{48A026D6-2EE7-E714-8C68-003BA85B16C8}" name="GrisCommonFiles">
       <FILE id="jDkaGa" name="GrisLookAndFeel.h" compile="0" resource="0"

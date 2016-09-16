@@ -997,8 +997,8 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     
     //check whether we're currently playing
     AudioPlayHead::CurrentPositionInfo cpi;
-    getPlayHead()->getCurrentPosition(cpi);
-    m_bIsPlaying = cpi.isPlaying;
+    //getPlayHead()->getCurrentPosition(cpi);
+    m_bIsPlaying = false;//cpi.isPlaying;
     
     //set various variables
     double sampleRate = getSampleRate();
