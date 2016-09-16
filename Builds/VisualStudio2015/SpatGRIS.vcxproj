@@ -212,6 +212,7 @@
     <ClCompile Include="..\..\HIDManager\ImmHIDUtilAddOn.cpp"/>
     <ClCompile Include="..\..\HIDManager\IOHIDDevice_.cpp"/>
     <ClCompile Include="..\..\HIDManager\IOHIDElement_.cpp"/>
+    <ClCompile Include="..\..\Source\Router.cpp"/>
     <ClCompile Include="..\..\Source\HIDDelegate.cpp"/>
     <ClCompile Include="..\..\Source\FieldComponent.cpp"/>
     <ClCompile Include="..\..\Source\FirFilter.cpp"/>
@@ -220,7 +221,6 @@
     <ClCompile Include="..\..\Source\OscComponent.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginEditor.cpp"/>
-    <ClCompile Include="..\..\Source\Routing.cpp"/>
     <ClCompile Include="..\..\Source\SourceMover.cpp"/>
     <ClCompile Include="..\..\Source\Trajectories.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
@@ -1399,6 +1399,7 @@
     <ClInclude Include="..\..\HIDManager\IOHIDDevice_.h"/>
     <ClInclude Include="..\..\HIDManager\IOHIDElement_.h"/>
     <ClInclude Include="..\..\HIDManager\IOHIDLib_.h"/>
+    <ClInclude Include="..\..\Source\Router.h"/>
     <ClInclude Include="..\..\Source\Areas.h"/>
     <ClInclude Include="..\..\Source\ParamSliderGris.h"/>
     <ClInclude Include="..\..\Source\HIDDelegate.h"/>
@@ -1410,7 +1411,6 @@
     <ClInclude Include="..\..\Source\OscComponent.h"/>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>
-    <ClInclude Include="..\..\Source\Routing.h"/>
     <ClInclude Include="..\..\Source\SourceMover.h"/>
     <ClInclude Include="..\..\Source\Trajectories.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>

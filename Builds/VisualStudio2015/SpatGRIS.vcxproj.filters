@@ -340,6 +340,9 @@
     <ClCompile Include="..\..\HIDManager\IOHIDElement_.cpp">
       <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Router.cpp">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\HIDDelegate.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
@@ -362,9 +365,6 @@
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PluginEditor.cpp">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Routing.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\SourceMover.cpp">
@@ -1692,6 +1692,9 @@
     <ClInclude Include="..\..\HIDManager\IOHIDLib_.h">
       <Filter>SpatGRIS\HIDManager</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Router.h">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Areas.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
@@ -1723,9 +1726,6 @@
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PluginEditor.h">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Routing.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SourceMover.h">

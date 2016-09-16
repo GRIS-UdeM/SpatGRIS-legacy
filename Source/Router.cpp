@@ -1,10 +1,9 @@
 /*
- ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
  
  Copyright (C) 2015  GRIS-UdeM
  
- PluginEditor.h
+ Router.cpp
  
  Developers: Antoine Missout, Vincent Berthiaume
  
@@ -23,31 +22,42 @@
  ==============================================================================
  */
 
-#ifndef ROUTING_H_INCLUDED
-#define ROUTING_H_INCLUDED
+#include "Router.h"
 
-#include "../JuceLibraryCode/JuceHeader.h"
-
-#define kChannels (16)
-#define kMaxSize (1024)
-
-class Router
+Router & Router::instance()
 {
-private:
-	Router();
-	~Router();
+	static Router r;
+	return r;
+}
 
-	AudioSampleBuffer mOutputs;
-	SpinLock mLock;
+Router::Router()
+:
+	mOutputs(kChannels, kMaxSize)
+{
 
-public:
-	static Router & instance();
+}
+
+Router::~Router()
+{
+
+}
+
+void Router::accumulate(int channels, int frames, const AudioSampleBuffer &buffer)
+{
+	SpinLock::ScopedLockType guard(mLock);
+	for (int c = 0; c < channels; c++)
+		mOutputs.addFrom(c, 0, buffer, c, 0, frames);
+}
+
+float ** Router::outputBuffers(int frames)
+{
+	if (frames > kMaxSize)
+	{
+		printf("unexpected frames size: %d\n", frames);
+		jassertfalse;
+		return NULL;
+	}
 	
-	void accumulate(int channels, int frames, const AudioSampleBuffer &buffer);
-	void reset() { mOutputs.clear(); }
-	void clear(int channel) { mOutputs.clear(channel, 0, mOutputs.getNumSamples()); }
-	
-	float ** outputBuffers(int frames);
-};
+	return mOutputs.getArrayOfWritePointers();
+}
 
-#endif  // ROUTING_H_INCLUDED
