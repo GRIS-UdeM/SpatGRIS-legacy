@@ -1071,7 +1071,9 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	
     //for each source, get pointer (**inputs) to content of buffer, and denormalize x and y.
     //Interestingly, because we only have one buffer going in and out of this function, we initially always have the same number of inputs and outputs.
+    JUCE_COMPILER_WARNING("no mem allocation in realtime thread. Need to use an array of vectors or whatever AudioBuffer buffer can give us")
 	float **inputs = new float* [mNumberOfSources];
+//    vector<float> inputs [mNumberOfSources];
     for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
         //get the inputs
 		inputs[iCurSource] = buffer.getWritePointer(iCurSource);
@@ -1086,6 +1088,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	
     //get output pointer (**outputs) from same buffer that we got the inputs from
 	float **outputs = new float*[mNumberOfSpeakers];
+    JUCE_COMPILER_WARNING("no mem allocation in realtime thread. Need to use an array of vectors or whatever AudioBuffer buffer can give us")
 	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
         //if we're in internal write, get write buffer from mRoutingTempAudioBuffer, otherwise get it from the main buffer function argument
 		outputs[iCurOutput] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(iCurOutput) : buffer.getWritePointer(iCurOutput);
@@ -1145,22 +1148,22 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	
 	if (mRoutingMode == kInternalWrite){
 		// apply routing volume
-		int i = kRoutingVolume;
-		float currentParam = mSmoothedParameters[i];
-		float targetParam = params[i];
-		float *ramp = mSmoothedParametersRamps.getReference(i).b;
-		const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
-		const float sm_o = powf(0.01f, 1000.f / (smooth * sampleRate));
-		const float sm_n = 1 - sm_o;
+		float currentParam  = mSmoothedParameters[kRoutingVolume];
+		float targetParam   = params[kRoutingVolume];
+		float *ramp         = mSmoothedParametersRamps.getReference(kRoutingVolume).b;
+		const float smooth  = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
+		const float sm_o    = powf(0.01f, 1000.f / (smooth * sampleRate));
+		const float sm_n    = 1 - sm_o;
 		for (unsigned int f = 0; f < oriFramesToProcess; f++) {
-			currentParam = currentParam * sm_o + targetParam * sm_n;
-			ramp[f] = dbToLinear(currentParam);
+			currentParam  = currentParam * sm_o + targetParam * sm_n;
+			ramp[f]       = dbToLinear(currentParam);
 		}
-		mSmoothedParameters.setUnchecked(i, currentParam);
+		mSmoothedParameters.setUnchecked(kRoutingVolume, currentParam);
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
 			float *output = mRoutingTempAudioBuffer.getWritePointer(o);
-			for (unsigned int f = 0; f < oriFramesToProcess; f++)
+            for (unsigned int f = 0; f < oriFramesToProcess; f++){
 				output[f] *= ramp[f];
+            }
 		}
 	}
 #if USE_DB_METERS

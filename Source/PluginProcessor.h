@@ -136,7 +136,7 @@ enum InputOutputModes {
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
 
 enum RoutingModes{
-    kNormalRouting = 0
+     kNormalRouting = 0
     ,kInternalWrite
     ,kInternalRead12
     ,kInternalRead34

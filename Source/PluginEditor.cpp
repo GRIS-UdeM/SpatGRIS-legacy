@@ -1016,6 +1016,15 @@ void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
 #endif
 }
 
+void SpatGrisAudioProcessorEditor::updateRoutingModeComponents(){
+    if (mFilter->getRoutingMode() == kInternalWrite){
+        asfadsf
+    } else {
+    asdasdf
+    }
+}
+
+
 void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
     int iSelectedMode = mFilter->getProcessMode();
     if (iSelectedMode == kOscSpatMode){
@@ -1941,7 +1950,9 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 //        }
     }
     else if (comboBox == mRoutingModeCombo) {
+        this will update the number of speakers in the processor, not sure this is the smartest place to do that
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
+        updateRoutingModeComponents();
 	}
     else if (comboBox == mProcessModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;

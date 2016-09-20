@@ -275,6 +275,7 @@ private:
     void updateEndLocationTextEditors();
     void updateInputOutputCombo(bool p_bResetSrcAndSpkPositions = true);
     void updateProcessModeComponents();
+    void updateRoutingModeComponents();
 	
 	Component* addLabel(const String &s, int x, int y, int w, int h, Component *into);
 	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
