@@ -944,7 +944,12 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
     mInputOutputModeCombo->clear();
     //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
-    int iMaxSpeakers = mFilter->getTotalNumOutputChannels();
+    int iMaxSpeakers;
+    if (mFilter->getRoutingMode() == kInternalWrite){
+        iMaxSpeakers = 16;
+    } else {
+        iMaxSpeakers = mFilter->getTotalNumOutputChannels();
+    }
 
     if (iMaxSpeakers >=2)  { mInputOutputModeCombo->addItem("1x2",  i1o2+1);  }
     if (iMaxSpeakers >=4)  { mInputOutputModeCombo->addItem("1x4",  i1o4+1);  }
@@ -1008,11 +1013,12 @@ void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
 }
 
 void SpatGrisAudioProcessorEditor::updateRoutingModeComponents(){
-    if (mFilter->getRoutingMode() == kInternalWrite){
-        
-    } else {
-
-    }
+//    if (mFilter->getRoutingMode() == kInternalWrite){
+//        
+//    } else {
+//
+//    }
+    updateInputOutputCombo();
 }
 
 
