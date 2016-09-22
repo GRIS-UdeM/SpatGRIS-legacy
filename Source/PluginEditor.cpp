@@ -1949,7 +1949,6 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     else if (comboBox == mRoutingModeCombo) {
         JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
-        JUCE_COMPILER_WARNING("this needs to be implemented")
         updateRoutingModeComponents();
 	}
     else if (comboBox == mProcessModeCombo) {
