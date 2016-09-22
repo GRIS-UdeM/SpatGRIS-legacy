@@ -412,7 +412,7 @@ AudioProcessorEditor (ownerFilter)
             mComponents.add(mInputOutputModeCombo);
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
             y += dh + 5;
-            updateInputOutputCombo(false);
+            updateInputOutputCombo();
         }
         mRoutingModeLabel = addLabel("Routing mode:", x, y, w, dh, box);
         y += dh + 5;
@@ -940,8 +940,7 @@ AudioProcessorEditor (ownerFilter)
     startTimer(kTimerDelay);
 }
 
-JUCE_COMPILER_WARNING("unclear why there is a function here, since only called once in constructor")
-void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpkPositions){
+void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
     mInputOutputModeCombo->clear();
     //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
@@ -985,14 +984,6 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(bool p_bResetSrcAndSpk
     }
     
     mInputOutputModeCombo->setSelectedId(mode);
-    
-    JUCE_COMPILER_WARNING("well, in fact these 2 calls are just never made because this function is never called with a true argument")
-    //these don't work because of various things not being constructed when this method is called in the constructor. Need to extract
-    //the relevant parts of buttonClicked(mApplyInputOutputModeButton) in a method, and call that new method from here
-    if (p_bResetSrcAndSpkPositions){
-        applyCurrentSrcPlacement();
-        applyCurrentSpkPlacement();
-    }
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
@@ -1018,9 +1009,9 @@ void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
 
 void SpatGrisAudioProcessorEditor::updateRoutingModeComponents(){
     if (mFilter->getRoutingMode() == kInternalWrite){
-        asfadsf
+        
     } else {
-    asdasdf
+
     }
 }
 
@@ -1950,8 +1941,9 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 //        }
     }
     else if (comboBox == mRoutingModeCombo) {
-        this will update the number of speakers in the processor, not sure this is the smartest place to do that
+        JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
+        JUCE_COMPILER_WARNING("this needs to be implemented")
         updateRoutingModeComponents();
 	}
     else if (comboBox == mProcessModeCombo) {

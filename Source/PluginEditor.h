@@ -273,7 +273,7 @@ private:
     void updateTrajectoryStartComponent(bool p_bIsStarting);
     void updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting);
     void updateEndLocationTextEditors();
-    void updateInputOutputCombo(bool p_bResetSrcAndSpkPositions = true);
+    void updateInputOutputCombo();
     void updateProcessModeComponents();
     void updateRoutingModeComponents();
 	

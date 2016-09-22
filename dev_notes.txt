@@ -379,3 +379,25 @@ current priorities from Robert:
 • faire notre propre logiciel de spatialisation pour remplacer le Zirkonium avec les fonctions VBAP, DBAP et Ambisonique (qui peut très bien être une copie de la version actuelle pour commencer, puisqu’elle roule sous PureData, donc en logiciel libre).
 
 So it seems i will work on trajectories. 
+-------------- 2016-09-22 ------------------
+#91
+currently, when m_bAllowInputOutputModeSelection, we setNumberOfSpeakers to getTotalNumOutputChannels(). This works in ableton live, but not in DP, in reaper vst3 and/or au, etc, etc. We need to setNumberOfSpeakers to 16, and send extra outputs to the internal buffer.
+
+TESTING INTERNAL ROUTINGS
+DP
+    * the number of outputs for spatgris on client track is limited by the number of outputs on the track. 
+        * So cannot have more than ix12 since this is the max mode (and it doesn't work well so in effect only ix8 is available)
+    
+    *  we don't have audio on server tracks if we don't listen on the corresponding bus
+        * can we have 2 output busses?
+
+LIVE
+    * server track do not need to listen on corresponding bus 
+    * cannot seem to have audio on tracks > 8 
+
+LOGIC
+    * like DP, client spatgris limited by number of output tracks (probably an AU thing)
+    * upon opening project, need to deactivate and reactivate plugin to get any audio.
+
+ALL
+    * we don't seem to be writing audio on tracks 8-16. The internal read 910, 1112, 1314, 1516 do not get any audio. 
