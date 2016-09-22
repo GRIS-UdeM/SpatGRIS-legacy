@@ -400,4 +400,4 @@ LOGIC
     * upon opening project, need to deactivate and reactivate plugin to get any audio.
 
 ALL
-    * we don't seem to be writing audio on tracks 8-16. Thse internal read 910, 1112, 1314, 1516 do not get any audio. 
+    * we don't seem to be writing audio on tracks 8-16. Thse internal read 910, 1112, 1314, 1516 do not get any audio. This is now fixed with ad3621242ec7c3a59c41d8577310cd8fdb99a839
