@@ -32,32 +32,29 @@ Router & Router::instance()
 
 Router::Router()
 :
-	mOutputs(kChannels, kMaxSize)
+	mOutputBuffers(kChannels, kMaxSize)
 {
-
 }
 
 Router::~Router()
 {
-
 }
 
 void Router::accumulate(int channels, int frames, const AudioSampleBuffer &buffer)
 {
 	SpinLock::ScopedLockType guard(mLock);
-	for (int c = 0; c < channels; c++)
-		mOutputs.addFrom(c, 0, buffer, c, 0, frames);
+    //copy content of each channel into the outputBuffers. Seems like it should be fast, but maybe worth checking
+    for (int c = 0; c < channels; c++){
+		mOutputBuffers.addFrom(c, 0, buffer, c, 0, frames);
+    }
 }
 
-float ** Router::outputBuffers(int frames)
-{
-	if (frames > kMaxSize)
-	{
+float ** Router::outputBuffers(int frames) {
+	if (frames > kMaxSize) {
 		printf("unexpected frames size: %d\n", frames);
 		jassertfalse;
 		return NULL;
 	}
-	
-	return mOutputs.getArrayOfWritePointers();
+	return mOutputBuffers.getArrayOfWritePointers();
 }
 

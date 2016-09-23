@@ -401,3 +401,11 @@ LOGIC
 
 ALL
     * we don't seem to be writing audio on tracks 8-16. Thse internal read 910, 1112, 1314, 1516 do not get any audio. This is now fixed with ad3621242ec7c3a59c41d8577310cd8fdb99a839
+
+--------------------- 2016-09-23 ------------------------
+#93. seems like the problem is that we're reading garbage when first reading into the internal buffer. 
+possible problems:
+    * mOutputBuffers contains garbage upon instantiation, and we're reading that. doesn't seem to be the case, clearing it doesn't change anything
+    * we're initially writing some garbage in it
+        
+    * we should be ramping whatever we put in it

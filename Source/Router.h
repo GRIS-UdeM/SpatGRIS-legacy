@@ -37,15 +37,15 @@ private:
 	Router();
 	~Router();
 
-	AudioSampleBuffer mOutputs;
+    AudioBuffer<float> mOutputBuffers;
 	SpinLock mLock;
 
 public:
 	static Router & instance();
 	
 	void accumulate(int channels, int frames, const AudioSampleBuffer &buffer);
-	void reset() { mOutputs.clear(); }
-	void clear(int channel) { mOutputs.clear(channel, 0, mOutputs.getNumSamples()); }
+	void reset() { mOutputBuffers.clear(); }
+	void clear(int channel) { mOutputBuffers.clear(channel, 0, mOutputBuffers.getNumSamples()); }
 	
 	float ** outputBuffers(int frames);
 };

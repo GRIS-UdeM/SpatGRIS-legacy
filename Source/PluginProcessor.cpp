@@ -1008,7 +1008,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     unsigned int inFramesToProcess = oriFramesToProcess;        //we need a copy of this because inFramesToProcess will be modified below
 	
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
-	if (mProcessMode != kOscSpatMode && mRoutingMode > kInternalWrite) {
+	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
 		buffer.clear();
         //maximum number of output channels when writing to internal is 2. Higher outputs will be ignored
 		int outChannels = (mNumberOfSpeakers > 2) ? 2 : mNumberOfSpeakers;
@@ -1188,7 +1188,6 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 #endif
     
 	if (mRoutingMode == kInternalWrite) {
-		// accumulate in internal buffer
 		Router::instance().accumulate(mNumberOfSpeakers, oriFramesToProcess, mRoutingTempAudioBuffer);
 		buffer.clear();
 	}
