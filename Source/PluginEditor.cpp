@@ -951,6 +951,7 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
         iMaxSpeakers = mFilter->getTotalNumOutputChannels();
     }
 
+    if (iMaxSpeakers >=1)  { mInputOutputModeCombo->addItem("1x1",  i1o1+1);  }
     if (iMaxSpeakers >=2)  { mInputOutputModeCombo->addItem("1x2",  i1o2+1);  }
     if (iMaxSpeakers >=4)  { mInputOutputModeCombo->addItem("1x4",  i1o4+1);  }
     if (iMaxSpeakers >=6)  { mInputOutputModeCombo->addItem("1x6",  i1o6+1);  }
@@ -1681,7 +1682,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         mField->repaint();
         
         //ensure movement mode stays valid
-        if (iSelectedMode == i1o2 || iSelectedMode == i1o4 || iSelectedMode == i1o6 || iSelectedMode == i1o8 || iSelectedMode == i1o16){
+        if (iSelectedMode == i1o1 || iSelectedMode == i1o2 || iSelectedMode == i1o4 || iSelectedMode == i1o6 || iSelectedMode == i1o8 || iSelectedMode == i1o16){
             mMovementModeCombo->setSelectedId(1);
         }
     }
