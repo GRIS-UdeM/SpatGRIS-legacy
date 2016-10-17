@@ -401,3 +401,12 @@ LOGIC
 
 ALL
     * we don't seem to be writing audio on tracks 8-16. Thse internal read 910, 1112, 1314, 1516 do not get any audio. This is now fixed with ad3621242ec7c3a59c41d8577310cd8fdb99a839
+
+------------- 2016-10-17 ----------------
+ok. #95. 2 problems
+1 - azimuth slider changes elevation and vice-versa
+2 - the span wedge is drawn at a different elevation than the source
+
+
+
+

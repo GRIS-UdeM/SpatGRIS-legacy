@@ -548,7 +548,7 @@ public:
     
     void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
     
-    FPoint getSourceAzimElev(int i) {
+    FPoint getSourceAzimElev(int i, bool bUseCosElev = false) {
         //get source position in [-kRadiusMax, kRadiusMax]
         FPoint pXY = getSourceXY(i);
 
@@ -561,11 +561,14 @@ public:
             hypo = kRadiusMax;
         }
         
-//        float fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
-//        fElev /= (M_PI/2);                      //making range [0,1]
-//        fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
-        
-        float fElev = (kRadiusMax-hypo)/4;
+        float fElev;
+        if (bUseCosElev){
+            fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
+            fElev /= (M_PI/2);                      //making range [0,1]
+            fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
+        } else {
+            fElev = (kRadiusMax-hypo)/4;
+        }
 
         return FPoint(fAzim, fElev);
     }

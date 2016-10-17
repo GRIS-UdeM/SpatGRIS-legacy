@@ -202,11 +202,12 @@ void FieldComponent::paint (Graphics& g)
                 hue -= 1;
             }
 
-            float HRElevSpan = 90*mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,90]
+            float HRElevSpan = 90* mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,90]
             float HRAzimSpan = 360*mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,360]
             
+            
             //get current azim+elev in angles
-            FPoint azimElev = mFilter->getSourceAzimElev(i);
+            FPoint azimElev = mFilter->getSourceAzimElev(i, true);  //azim is [-1,1],  elevation is [0,.5]
             float HRAzim = azimElev.x * 180;   //in zirkosc [-180,180]
             float HRElev = azimElev.y * 180;   //in zirkosc [0,89.9999]
  
@@ -231,19 +232,18 @@ void FieldComponent::paint (Graphics& g)
             Path myPath;
             float x = screenMinElev.getX();
             float y = screenMinElev.getY();
-            float _ZirkOSC_Center_X = fieldWidth/2;
-            float _ZirkOSC_Center_Y = fieldWidth/2;
-            myPath.startNewSubPath(_ZirkOSC_Center_X+x,_ZirkOSC_Center_Y+y);
+            float fFieldCenter = fieldWidth/2;
+            myPath.startNewSubPath(fFieldCenter+x,fFieldCenter+y);
             
             //half first arc center
-            myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim), degreeToRadian(-HRAzim + HRAzimSpan/2 ));
+            myPath.addCentredArc(    fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim),                      degreeToRadian(-HRAzim + HRAzimSpan/2 ));
             
             if (maxElev.getY()> 90.f) { // if we are over the top of the dome we draw the adjacent angle
-                myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, maxRadius, maxRadius, 0.0, M_PI+degreeToRadian(-HRAzim + HRAzimSpan/2), M_PI+degreeToRadian(-HRAzim - HRAzimSpan/2));
+                myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, M_PI+degreeToRadian(-HRAzim + HRAzimSpan/2),  M_PI+degreeToRadian(-HRAzim - HRAzimSpan/2));
             } else {
-                myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, maxRadius, maxRadius, 0.0, degreeToRadian(-HRAzim+HRAzimSpan/2), degreeToRadian(-HRAzim-HRAzimSpan/2));
+                myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, degreeToRadian(-HRAzim+HRAzimSpan/2),         degreeToRadian(-HRAzim-HRAzimSpan/2));
             }
-            myPath.addCentredArc(_ZirkOSC_Center_X, _ZirkOSC_Center_Y, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim-HRAzimSpan/2), degreeToRadian(-HRAzim));
+            myPath.addCentredArc    (fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim-HRAzimSpan/2),         degreeToRadian(-HRAzim));
             myPath.closeSubPath();
             
             g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
@@ -295,29 +295,28 @@ void FieldComponent::paint (Graphics& g)
 	// - - - - - - - - - - - -
 	for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
 		const float radius = kSourceRadius, diameter = kSourceDiameter;
-		FPoint p = getSourcePoint(i);
+		FPoint pCurLoc = getSourcePoint(i);
 		
 		float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
 		if (hue > 1) hue -= 1;
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
 
+        //draw the line that goes with every source
 		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
 			FPoint rt = mFilter->getSourceRT(i);
 			float r = rt.x;
 			float t = rt.y;
 			FPoint p1 = convertSourceRT(1, t);
 			FPoint p2 = convertSourceRT((r >= .999) ? 2 : -1, t);
-            
-			//draw the line that goes with every source
             g.drawLine(Line<float>(p1, p2));
 		}
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 1));
-		g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
+		g.fillEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter);
 		
 		g.setColour(Colours::red);
-		g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
+		g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 1);
 		
 		String s;
         if (mFilter->getProcessMode() == kOscSpatMode){
@@ -328,12 +327,10 @@ void FieldComponent::paint (Graphics& g)
 	
 		g.setColour(Colours::black);
         g.setFont(mGrisFeel.getFont());
-		g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter,
-					Justification(Justification::centred), false);
+		g.drawText(s, pCurLoc.x - radius + 1, pCurLoc.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
 					
 		g.setColour(Colours::white);
-		g.drawText(s, p.x - radius, p.y - radius, diameter, diameter,
-					Justification(Justification::centred), false);
+		g.drawText(s, pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, Justification(Justification::centred), false);
 	}
     // TRAJECTORY PATH
     if (m_dqAllPathPoints.size() > 2){
