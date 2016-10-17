@@ -238,7 +238,7 @@ void FieldComponent::paint (Graphics& g)
             //half first arc center
             myPath.addCentredArc(    fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim),                      degreeToRadian(-HRAzim + HRAzimSpan/2 ));
             
-            if (maxElev.getY()> 90.f) { // if we are over the top of the dome we draw the adjacent angle
+            if (maxElev.getY() > 90.f) { // if we are over the top of the dome we draw the adjacent angle
                 myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, M_PI+degreeToRadian(-HRAzim + HRAzimSpan/2),  M_PI+degreeToRadian(-HRAzim - HRAzimSpan/2));
             } else {
                 myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, degreeToRadian(-HRAzim+HRAzimSpan/2),         degreeToRadian(-HRAzim-HRAzimSpan/2));
