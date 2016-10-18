@@ -202,8 +202,10 @@ void FieldComponent::paint (Graphics& g)
                 hue -= 1;
             }
 
-            float HRElevSpan = 90* mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,90]
-            float HRAzimSpan = 360*mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,360]
+//            float HRElevSpan = 90* mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,90]
+//            float HRAzimSpan = 360*mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,360]
+            float HRAzimSpan = 360*mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,360]
+            float HRElevSpan = 90 *mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,90]
             
             
             //get current azim+elev in angles
