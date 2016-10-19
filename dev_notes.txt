@@ -420,4 +420,28 @@ ok. #95. 2 problems
 1 - azimuth slider changes elevation and vice-versa
 2 - the span wedge is drawn at a different elevation than the source
 
+------------ 2016-10-19 -----------------
+ok. 
+
+FAST
+- couleurs max
+- trajectoires
+
+SLOW: comment faire de la spatialization x par x 
+- INTERNAL ROUTING
+    * plugins clients (write) sur les pistes, plugins server sur d'autres pistes (read)
+    * why do we need to send audio to server (read) tracks? Shouldn't they just read audio in the router buffers?
+- tester pre vs post fader in DP
+    - actually, other DAWs will only allow post fader sends, not plugins
+- tester internal routing post fader octogris 
+    - investigate what is wrong with spatgris
+    - mix when several clients write to internal write?
+
+SOUNDFLOWER
+- how to change buffer size in code
+
+TO READ
+- Gary candel, audio spatialization different from visual 
+
+
 
