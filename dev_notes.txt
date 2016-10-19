@@ -431,6 +431,26 @@ SLOW: comment faire de la spatialization x par x
 - INTERNAL ROUTING
     * plugins clients (write) sur les pistes, plugins server sur d'autres pistes (read)
     * why do we need to send audio to server (read) tracks? Shouldn't they just read audio in the router buffers?
+        * with DP, this is necessary. E.g, to have internal routing work in dome, need to send audio to server tracks
+        that read on busses > 8
+        * i have no idea why that is. perhaps just to activate the plugin? Is it like that in other daws?
+            * logic: 
+            * DP: for the write plugin to be activated, it needs to have an output. The actual output doesn't matter, 
+            as long as ANOTHER TRACK IS LISTENING to that output. For instance, you can have a write track on bus 3-4, 
+            another random audio track on bus 1-2, one read on 3-4 (to activate the write track), and the other reads
+            all on bus 1-2 (listening to random, non spatgris audio track), and all reads are going to work because they
+            are not actually listening on the inputs/outputs. 
+            E.g., spatgris 2x8 with an output to bus 1-2. For the read plugins to work, they need to have an input (any)
+            and the correct analog output pair. For the input, it doesnt' matter which one, e.g., they can all use bus 1-2.
+                * DP doesn't seem to glitch that much  
+            * reaper: write track doesn't need any special outputs. Read tracks must have a hardware output to the 
+            correct outputs
+                * reaper is crackling and popping AF during playback, and always cliping on first playback
+            * live: 
+    * apparently release mode uses a lot less power than debug mode. Actually able to run it in 2x16
+        * with spatgris release, resting is 22%, full spatialization is 70%
+
+
 - tester pre vs post fader in DP
     - actually, other DAWs will only allow post fader sends, not plugins
 - tester internal routing post fader octogris 
