@@ -488,6 +488,33 @@ TODO
 -fix glitches with internal routing in reaper and logic
 -find out more about side chaining in juce
     * the idea would be to use sends to do internal routing. that way, the write-track fader will still work. 
+    * what is the difference between sends and side chaining? side chaining is when, in a plugin you select to receive info from another plugin
+
+    REAPER
+        * FX sidechaining is using one audio signal (the source signal) to trigger an effect that is applied to another audio signal (the target
+          signal). This can be accomplished by creating a send from the source track, to ***higher-numbered channels on the target track***. For 
+          example, to use the stereo output of track A as a sidechain input for an FX on track B, create a send from track A channels 1+2 to 
+          track B channels 3+4. Sends can be created using the Routing Matrix, or the track routing dialog on either the source or target tracks,
+          or by simply dragging the source track I/O routing button to the target track.
+        * So for this to work, we'd have the source track, with like 8 channels, 
+
+CURRENT INTERNAL ROUTING: 
+    * source track 
+        * does spatialisation
+        * write all audio to the router buffer (up to 16 speakers), 
+    * read tracks 
+        * read audio from 2 specific buffer channels 
+        * output that audio onto the hardware outputs 
 
 
+PROBLEMS WITH THIS
+    * limited to 16 speakers 
+        * could add more, but would it scale?
+        * would need to look into special multi-threading algorithms, essentially remaking jack/soundflower
+    * we need to configure for a specific number of speakers. 
+        * At home I have 4 speakers. So my write plugin is in 2x4, and I have 2 tracks that read channels 12 and 34. In concert, I have
+          32 speakers. So i need to have my write track in 2x32, with 16 tracks that read channels 12, 34, .. 3132.
+        * by contrast, with the zirkonium, my write track only cares about the source position, and doesn't know anything about the speakers. 
+          So I only need to load a different jack/zirkonium configuration. No need to touch the project. 
+    * 
 
