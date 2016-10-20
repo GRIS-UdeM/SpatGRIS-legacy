@@ -84,8 +84,15 @@ public:
 	
 	bool process(float seconds, float beats);
 	float progress();
-    float progressCycle();
+    int progressCycle();
 	void stop();
+    
+    float getSpeed(){ return m_fSpeed;}
+    void  setSpeed(float p_fSpeed){
+        if (p_fSpeed >= -2.f && p_fSpeed <= 2.f){
+            m_fSpeed = p_fSpeed;
+        }
+    }
 	
 protected:
 	virtual void childProcess(float duration, float seconds) = 0;

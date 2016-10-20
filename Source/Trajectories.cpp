@@ -78,12 +78,12 @@ bool Trajectory::process(float seconds, float beats) {
 }
 
 float Trajectory::progress() {
-	return m_fTimeDone / m_fTotalDuration;
+	return m_fSpeed * m_fTimeDone / m_fTotalDuration;
 }
 
 //the returned value here will change integers when we're done with one trajectory cycle. E.g., .1,.2,.3,.4,.5,.6,.7,.8,.9, 1.0 (new cycle), 1.1, 1.2 ... 2.0 (new cycle), etc
-float Trajectory::progressCycle(){
-    return m_fTimeDone / m_fDurationSingleTraj;
+int Trajectory::progressCycle(){
+    return (int) (m_fTimeDone / m_fDurationSingleTraj);
 }
 
 void Trajectory::stop() {
