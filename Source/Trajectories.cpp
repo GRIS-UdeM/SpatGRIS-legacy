@@ -28,7 +28,25 @@
 #include "PluginProcessor.h"
 #include "SourceMover.h"
 
-// ==============================================================================
+
+Trajectory::Trajectory(const TrajectoryProperties& properties)
+:mFilter(properties.filter)
+,m_pMover(properties.mover)
+,m_bStarted(false)
+,m_bStopped(false)
+,m_fTimeDone(0)
+,m_fDurationSingleTraj(properties.duration)
+,m_bUseBeats(properties.beats)
+,m_fSpeed(2.f)
+{
+    if (m_fDurationSingleTraj < 0.0001) {
+        m_fDurationSingleTraj = 0.0001;
+    }
+    
+    float fRepeats = (properties.repeats < 0.0001) ? 0.0001 : properties.repeats;
+    m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
+}
+
 void Trajectory::start() {
     //tell mover to start the automation, etc
     m_pMover->begin(mFilter->getSrcSelected(), kTrajectory);
@@ -46,7 +64,7 @@ bool Trajectory::process(float seconds, float beats) {
     if (!m_bStarted) {
         start();
     }
-	if (m_fTimeDone >= m_fTotalDuration) {
+	if (m_fSpeed*m_fTimeDone >= m_fTotalDuration) {
         stop();
 		return true;
 	}
@@ -72,23 +90,6 @@ void Trajectory::stop() {
 	if (!m_bStarted || m_bStopped) return;
     m_pMover->end(kTrajectory);
 	m_bStopped = true;
-}
-
-Trajectory::Trajectory(const TrajectoryProperties& properties)
-    :mFilter(properties.filter)
-    ,m_pMover(properties.mover)
-	,m_bStarted(false)
-	,m_bStopped(false)
-	,m_fTimeDone(0)
-	,m_fDurationSingleTraj(properties.duration)
-	,m_bUseBeats(properties.beats)
-{
-    if (m_fDurationSingleTraj < 0.0001) {
-        m_fDurationSingleTraj = 0.0001;
-    }
-    
-    float fRepeats = (properties.repeats < 0.0001) ? 0.0001 : properties.repeats;
-	m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
 }
 
 //using a unique_ptr here is correct. see http://stackoverflow.com/questions/6876751/differences-between-unique-ptr-and-shared-ptr
@@ -192,7 +193,8 @@ protected:
     void childProcess(float duration, float seconds) {
         //figure delta theta
         float integralPart;
-        float fDeltaTheta = m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
+        float fDeltaTheta = m_fSpeed * m_fTurns * m_fTimeDone / m_fDurationSingleTraj;
+
         fDeltaTheta = modf(fDeltaTheta/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
         if (!mCCW) fDeltaTheta = -fDeltaTheta;
         fDeltaTheta = fDeltaTheta * 2 * M_PI;
@@ -319,7 +321,7 @@ protected:
         //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         float fDeltaTheta, integralPart;
         int iMultiple = (m_bReturn ? 2 : 1);    //in return spiral, delta angle goes twice as fast
-        fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
+        fDeltaTheta = iMultiple * fmodf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
         if (m_bCCW){
             fDeltaTheta = -fDeltaTheta;
         }
@@ -405,7 +407,7 @@ protected:
         float fCurX01, fCurY01, integralPart;
         int iReturn = m_bRT ? 2:1;
         //calculate current progress and dampening
-        float fCurrentProgress  = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
+        float fCurrentProgress  = modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
         float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
         //if y is dependent, use slope equation, otherwise just go vertically. All calculations in cartesian coordinates.
         if (m_bYisDependent){
@@ -464,7 +466,7 @@ protected:
 	void childProcess(float duration, float seconds) {
         float integralPart;
         //calculate delta theta
-        float fDeltaTheta = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
+        float fDeltaTheta = modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
         if (!mCCW){
             fDeltaTheta = -fDeltaTheta;
         }
@@ -572,8 +574,8 @@ protected:
                     
                     FPoint p = mFilter->getSourceXY(iCurSrc);
                     
-                    p.x += (rand1 - 0.5) * mSpeed;
-                    p.y += (rand2 - 0.5) * mSpeed;
+                    p.x += m_fSpeed * (rand1 - 0.5) * mSpeed;
+                    p.y += m_fSpeed * (rand2 - 0.5) * mSpeed;
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
@@ -632,7 +634,7 @@ protected:
 
         bool bWriteAutomationForAllSources = mFilter->getIndependentMode();
         
-        float p = m_fTimeDone / m_fDurationSingleTraj;
+        float p = m_fSpeed * m_fTimeDone / m_fDurationSingleTraj;
         int iSelectedSrc = mFilter->getSrcSelected();
         JUCE_COMPILER_WARNING("couldn't we simply do that for a lot of other trajectories when we need to know the cycle count?")
 		int cycle = (int)p;

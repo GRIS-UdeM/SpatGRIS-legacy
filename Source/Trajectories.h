@@ -99,11 +99,12 @@ protected:
 	Trajectory(const TrajectoryProperties& properties);
 	SpatGrisAudioProcessor *mFilter;
     SourceMover *m_pMover;
-	bool m_bStarted, m_bStopped;
+	bool  m_bStarted, m_bStopped;
 	float m_fTimeDone;
 	float m_fDurationSingleTraj;
 	float m_fTotalDuration;
-	bool m_bUseBeats;
+	bool  m_bUseBeats;
+    float m_fSpeed;
 };
 
 #endif  // TRAJECTORIES_H_INCLUDED
