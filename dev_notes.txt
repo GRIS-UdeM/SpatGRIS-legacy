@@ -475,9 +475,19 @@ CONCLUSIONS FROM ALL THIS
 SOUNDFLOWER
     - how to change buffer size in code: i believe this is right at the top of soundflowerengine.cpp! BLOCK_SIZE
     - this page https://github.com/RogueAmoeba/Soundflower-Original/tree/master/Installer says that soundflower allows each
-    client to use its own buffer size
+      client to use its own buffer size
+
+
 TO READ
 - Gary candel, audio spatialization different from visual 
+
+
+--------------------- 2016-10-20 -------------------
+TODO
+-read on vbap and find how to implement
+-fix glitches with internal routing in reaper and logic
+-find out more about side chaining in juce
+    * the idea would be to use sends to do internal routing. that way, the write-track fader will still work. 
 
 
 

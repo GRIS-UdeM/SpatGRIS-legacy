@@ -1014,11 +1014,6 @@ void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
 }
 
 void SpatGrisAudioProcessorEditor::updateRoutingModeComponents(){
-//    if (mFilter->getRoutingMode() == kInternalWrite){
-//        
-//    } else {
-//
-//    }
     updateInputOutputCombo();
 }
 
