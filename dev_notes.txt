@@ -488,7 +488,7 @@ TODO
 -fix glitches with internal routing in reaper and logic
 -find out more about side chaining in juce
     * the idea would be to use sends to do internal routing. that way, the write-track fader will still work. 
-    * what is the difference between sends and side chaining? side chaining is when, in a plugin you select to receive info from another plugin
+    * what is the difference between sends and side chaining? 
 
     REAPER
         * FX sidechaining is using one audio signal (the source signal) to trigger an effect that is applied to another audio signal (the target
@@ -518,3 +518,7 @@ PROBLEMS WITH THIS
           So I only need to load a different jack/zirkonium configuration. No need to touch the project. 
     * 
 
+
+------
+#30
+    avant de commencer à changer le mode de trajectoires, je pensais changer l'interface. ouain.

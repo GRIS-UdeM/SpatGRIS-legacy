@@ -334,10 +334,9 @@ void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
         }
     }
 #endif
+    
 	// keep count of number of editors
-	if (c) mCalculateLevels++;
-	else mCalculateLevels--;
-	
+    (c) ? mCalculateLevels++ :  mCalculateLevels--;
 }
 
 void SpatGrisAudioProcessor::setProcessMode(int s) {
