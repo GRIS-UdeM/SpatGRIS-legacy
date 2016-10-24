@@ -522,3 +522,46 @@ PROBLEMS WITH THIS
 ------
 #30
     avant de commencer à changer le mode de trajectoires, je pensais changer l'interface. ouain.
+
+------------ 2016-10-24 --------------
+TODO 
+
+* see how to get glitches with soundflower in studio
+* be able to build and use soundflower
+
+On the other hand, maybe I should just go with jack. So maybe try to understant jack's code. and license to see if I can use it or not. yeah. use jack. 
+
+JACK
+    * jack 2 is compatible with windows, but not jack 1
+    * jack uses the LGPL so I can do what I want
+
+BUILDING JACK   
+    * had to change one line, will commit
+    * had to change target from osx 10.4 to 10.9
+    * cannot find opus.h
+    * now some stuff is building, some stuff isn't, but I can't seem to run anything. Furthermore it seems like there are many many different parts
+      to jack. Like I need to make a list
+
+ALL JACK THINGS
+    * jackdmp (i think) main command line program. not sure how to use it at all 
+    * the gui on mac is called jackPilot
+    * there are 2 scripts in macos/, install_jackdmp and remove_jackdmp. install doesn't work because it's not seeing whatever it has to copy. 
+      copying the script to macos/build/Development, where a bunch of the stuff is, doesn't work either. 
+
+READING JACK DOCUMENTATION (in applications/jack/)
+    * jack is a low-latency audio server, originally written for linux
+    * jack osx includes:
+        * jack server: core stuff (this must be jackdmp)
+        * jack router: the driver that allows any core audio osx app to become a jack client
+        * jack plugins: jack-aware (?) au and vst
+            * right now, these plugins are only visible in reaper, and on macpro only logic sees jack...
+        * jack pilot: gui that controls jack server and its connections
+        * netjack: jack over a network, doc says it is not installed
+    * SYSTEM ARCHITECTURE
+        * jack server is the core, allowing audio communication between jack-enabled applications and audio devices. 
+        * 3 types of jack-enabled applications
+            * native jack applications
+                * built-in support for interacting with a jack server. Examples are PD and Ardour. Apparently Native instruments allows this too. 
+            * jack-enabled core audio apps
+                * use the jack router driver (when selected as audio device) to communicate with jack server. 
+    
