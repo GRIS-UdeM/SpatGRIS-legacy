@@ -563,6 +563,7 @@ UNINSTALLING JACK
 * now that I uninstalled this, my jack server control no longer works. it says:
     * dyld: Library not loaded: /Library/Frameworks/Jackmp.framework/Versions/A/Jackmp
     * i pasted that stuff in there and that error went away
+
 * now I get this: exec of JACK server (command = "/usr/local/bin/jackd") failed: No such file or directory. 
     * No idea where this comes from. Re-installing jack 0.92_b3 from dropbox to see if file gets there.
         * installers says it will install 
@@ -570,3 +571,23 @@ UNINSTALLING JACK
             * jack router
             * jack audio plugins
             * jack pilot
+        * need to restart after installation...
+        * this worked. after installation, I can run my jack_server_control. 
+        * turns out that jackd is a symbolic link to jackdmp. ALRIGHT. 
+            * this is all the stuff that the installed copied to /usr/local/bin
+                jack_connect
+                jack_disconnect
+                jack_load
+                jack_lsp
+                jack_metro
+                jack_netsource
+                jack_unload
+                jackd
+                jackdmp
+            * i have all of those in macosx/build/development
+
+* alright, so my jack_control_server works because it connects to the jack that is installed. I need to NOT do that, 
+  and use my jackdmp. For that, I need to get the install script to work. so uninstall jack again.  
+
+
+* reaper cannot use the router, but DP, logic and live can
