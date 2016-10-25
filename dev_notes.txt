@@ -522,3 +522,51 @@ PROBLEMS WITH THIS
 ------
 #30
     avant de commencer à changer le mode de trajectoires, je pensais changer l'interface. ouain.
+
+
+
+
+
+
+
+
+
+
+
+--------------- 2016-10-25 ------------------------
+
+Alright, So i forgot to push my stuff. i was reading the jack doc. there are multiple parts. 
+ORDER OF THINGS TO RUN
+    jackmp server 64 bits
+    jackmp.framework 64 bits
+
+
+so. got to build most of the targets, one by one manually. For universal bundles that wont build, building the 64 bits version often 
+works, and subsequently building the universal can work.  
+
+jacknet won't build because it requires libsamplerate.a. I don't care about either.
+what I need is to have jackdmp working. I know it can build. 
+
+NEED TO 
+    * figure how to use jackdmp
+        * look at the doc?
+        * do I need to install this stuff?
+    * can i build a gui? where is the code for that?
+    * see if I can use my built thing with hexa
+
+UNINSTALLING JACK
+* i think both the macpro and nicolai have the same version of jack. looking at about jack, it says
+    * jackdmp       1.9.11
+    * jackrouter    0.9.7
+    * jackPilot     1.7.4
+
+* now that I uninstalled this, my jack server control no longer works. it says:
+    * dyld: Library not loaded: /Library/Frameworks/Jackmp.framework/Versions/A/Jackmp
+    * i pasted that stuff in there and that error went away
+* now I get this: exec of JACK server (command = "/usr/local/bin/jackd") failed: No such file or directory. 
+    * No idea where this comes from. Re-installing jack 0.92_b3 from dropbox to see if file gets there.
+        * installers says it will install 
+            * jack server
+            * jack router
+            * jack audio plugins
+            * jack pilot
