@@ -632,3 +632,7 @@ needed to be removed because they woudn't build:
     * net_adapter
     * audio adapter
     * jack net
+
+alright, so this is obviously not working well at all, there are a lot of packages that were building on nicolai
+that are not building here. not sure what this is about. But also not sure that I should be spending time on this
+in hexa. what are the pressing spatialization issues? 

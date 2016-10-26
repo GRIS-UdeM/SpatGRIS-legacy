@@ -480,8 +480,8 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 			case kSourceX:          s << " - X"; break;
 			case kSourceY:          s << " - Y"; break;
 			case kSourceD:          s << " - S"; break;
-            case kSourceAzimSpan:   s << " -AS"; break;
-            case kSourceElevSpan:   s << " -ES"; break;
+            case kSourceAzimSpan:   s << " - AS"; break;
+            case kSourceElevSpan:   s << " - ES"; break;
             default: return String::empty;
 		}
 		return s;
