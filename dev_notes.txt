@@ -376,12 +376,14 @@ current priorities from Robert:
 
 À moyen terme:
 • faire un spatgris server pour remplacer Jack et Soundflower
-• faire notre propre logiciel de spatialisation pour remplacer le Zirkonium avec les fonctions VBAP, DBAP et Ambisonique (qui peut très bien être une copie de la version actuelle pour commencer, puisqu’elle roule sous PureData, donc en logiciel libre).
+• faire notre propre logiciel de spatialisation pour remplacer le Zirkonium avec les fonctions VBAP, DBAP et Ambisonique (qui peut très bien être 
+  une copie de la version actuelle pour commencer, puisqu’elle roule sous PureData, donc en logiciel libre).
 
 So it seems i will work on trajectories. 
 -------------- 2016-09-22 ------------------
 #91
-currently, when m_bAllowInputOutputModeSelection, we setNumberOfSpeakers to getTotalNumOutputChannels(). This works in ableton live, but not in DP, in reaper vst3 and/or au, etc, etc. We need to setNumberOfSpeakers to 16, and send extra outputs to the internal buffer.
+currently, when m_bAllowInputOutputModeSelection, we setNumberOfSpeakers to getTotalNumOutputChannels(). This works in ableton live, but not in DP, 
+in reaper vst3 and/or au, etc, etc. We need to setNumberOfSpeakers to 16, and send extra outputs to the internal buffer.
 
 TESTING INTERNAL ROUTINGS
 DP
@@ -403,7 +405,6 @@ ALL
     * we don't seem to be writing audio on tracks 8-16. Thse internal read 910, 1112, 1314, 1516 do not get any audio. This is now fixed with ad3621242ec7c3a59c41d8577310cd8fdb99a839
 
 
-
 --------------------- 2016-09-23 ------------------------
 #93. seems like the problem is that we're reading garbage when first reading into the internal buffer. 
 possible problems:
@@ -412,13 +413,12 @@ possible problems:
         
     * we should be ramping whatever we put in it 
     
-    bcc16d67b832d5b0a2a7d4f3911f8c4ee325a6cd
-
 
 ------------- 2016-10-17 ----------------
 ok. #95. 2 problems
 1 - azimuth slider changes elevation and vice-versa
 2 - the span wedge is drawn at a different elevation than the source
+
 
 ------------ 2016-10-19 -----------------
 ok. 
@@ -636,3 +636,14 @@ needed to be removed because they woudn't build:
 alright, so this is obviously not working well at all, there are a lot of packages that were building on nicolai
 that are not building here. not sure what this is about. But also not sure that I should be spending time on this
 in hexa. what are the pressing spatialization issues? 
+
+
+TESTING SPATGRIS+JACK+ZIRK
+    * Reaper
+        * some speakers are reversed
+    * Logic
+        * same weird speaker problem (even with zirkosc)
+        * apparently I cannot use sources numbers > 2 ???
+    * DP
+        *same
+other than this weird stuff, it seems to work well. 
