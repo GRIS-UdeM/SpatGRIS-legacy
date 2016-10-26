@@ -574,8 +574,8 @@ ORDER OF THINGS TO RUN
     jackmp.framework 64 bits
 
 
-so. got to build most of the targets, one by one manually. For universal bundles that wont build, building the 64 bits version often 
-works, and subsequently building the universal can work.  
+so. got to build most of the targets, one by one manually. For universal bundles that wont build, building the 64 bits 
+version often works, and subsequently building the universal can work.  
 
 jacknet won't build because it requires libsamplerate.a. I don't care about either.
 what I need is to have jackdmp working. I know it can build. 
@@ -624,3 +624,11 @@ UNINSTALLING JACK
 
 
 * reaper cannot use the router, but DP, logic and live can
+
+
+------------ 2016-10-26 ------------
+attempting to build in hexa. created new scheme by duplicating a 64 bit scheme and adding all the other products.
+needed to be removed because they woudn't build:
+    * net_adapter
+    * audio adapter
+    * jack net
