@@ -376,12 +376,14 @@ current priorities from Robert:
 
 À moyen terme:
 • faire un spatgris server pour remplacer Jack et Soundflower
-• faire notre propre logiciel de spatialisation pour remplacer le Zirkonium avec les fonctions VBAP, DBAP et Ambisonique (qui peut très bien être une copie de la version actuelle pour commencer, puisqu’elle roule sous PureData, donc en logiciel libre).
+• faire notre propre logiciel de spatialisation pour remplacer le Zirkonium avec les fonctions VBAP, DBAP et Ambisonique (qui peut très bien être 
+  une copie de la version actuelle pour commencer, puisqu’elle roule sous PureData, donc en logiciel libre).
 
 So it seems i will work on trajectories. 
 -------------- 2016-09-22 ------------------
 #91
-currently, when m_bAllowInputOutputModeSelection, we setNumberOfSpeakers to getTotalNumOutputChannels(). This works in ableton live, but not in DP, in reaper vst3 and/or au, etc, etc. We need to setNumberOfSpeakers to 16, and send extra outputs to the internal buffer.
+currently, when m_bAllowInputOutputModeSelection, we setNumberOfSpeakers to getTotalNumOutputChannels(). This works in ableton live, but not in DP, 
+in reaper vst3 and/or au, etc, etc. We need to setNumberOfSpeakers to 16, and send extra outputs to the internal buffer.
 
 TESTING INTERNAL ROUTINGS
 DP
@@ -403,7 +405,6 @@ ALL
     * we don't seem to be writing audio on tracks 8-16. Thse internal read 910, 1112, 1314, 1516 do not get any audio. This is now fixed with ad3621242ec7c3a59c41d8577310cd8fdb99a839
 
 
-
 --------------------- 2016-09-23 ------------------------
 #93. seems like the problem is that we're reading garbage when first reading into the internal buffer. 
 possible problems:
@@ -412,13 +413,12 @@ possible problems:
         
     * we should be ramping whatever we put in it 
     
-    bcc16d67b832d5b0a2a7d4f3911f8c4ee325a6cd
-
 
 ------------- 2016-10-17 ----------------
 ok. #95. 2 problems
 1 - azimuth slider changes elevation and vice-versa
 2 - the span wedge is drawn at a different elevation than the source
+
 
 ------------ 2016-10-19 -----------------
 ok. 
@@ -523,15 +523,48 @@ PROBLEMS WITH THIS
 #30
     avant de commencer à changer le mode de trajectoires, je pensais changer l'interface. ouain.
 
+------------ 2016-10-24 --------------
+TODO 
 
+* see how to get glitches with soundflower in studio
+* be able to build and use soundflower
 
+On the other hand, maybe I should just go with jack. So maybe try to understant jack's code. and license to see if I can use it or not. yeah. use jack. 
 
+JACK
+    * jack 2 is compatible with windows, but not jack 1
+    * jack uses the LGPL so I can do what I want
 
+BUILDING JACK   
+    * had to change one line, will commit
+    * had to change target from osx 10.4 to 10.9
+    * cannot find opus.h
+    * now some stuff is building, some stuff isn't, but I can't seem to run anything. Furthermore it seems like there are many many different parts
+      to jack. Like I need to make a list
 
+ALL JACK THINGS
+    * jackdmp (i think) main command line program. not sure how to use it at all 
+    * the gui on mac is called jackPilot
+    * there are 2 scripts in macos/, install_jackdmp and remove_jackdmp. install doesn't work because it's not seeing whatever it has to copy. 
+      copying the script to macos/build/Development, where a bunch of the stuff is, doesn't work either. 
 
-
-
-
+READING JACK DOCUMENTATION (in applications/jack/)
+    * jack is a low-latency audio server, originally written for linux
+    * jack osx includes:
+        * jack server: core stuff (this must be jackdmp)
+        * jack router: the driver that allows any core audio osx app to become a jack client
+        * jack plugins: jack-aware (?) au and vst
+            * right now, these plugins are only visible in reaper, and on macpro only logic sees jack...
+        * jack pilot: gui that controls jack server and its connections
+        * netjack: jack over a network, doc says it is not installed
+    * SYSTEM ARCHITECTURE
+        * jack server is the core, allowing audio communication between jack-enabled applications and audio devices. 
+        * 3 types of jack-enabled applications
+            * native jack applications
+                * built-in support for interacting with a jack server. Examples are PD and Ardour. Apparently Native instruments allows this too. 
+            * jack-enabled core audio apps
+                * use the jack router driver (when selected as audio device) to communicate with jack server. 
+    
 
 --------------- 2016-10-25 ------------------------
 
@@ -546,6 +579,11 @@ BUILDING PRODUCTS
 
     * jacknet won't build because it requires libsamplerate.a. I don't care about either.
     * what I need is to have jackdmp working. I know it can build. 
+so. got to build most of the targets, one by one manually. For universal bundles that wont build, building the 64 bits 
+version often works, and subsequently building the universal can work.  
+
+jacknet won't build because it requires libsamplerate.a. I don't care about either.
+what I need is to have jackdmp working. I know it can build. 
 
 ============
 NEED TO 
@@ -629,3 +667,26 @@ RANDOM NOTES
 * reaper cannot use the router, but DP, logic and live can
 * a bunch of the libraries I had to add the headers for (in jack/) are right in macosx/, e.g., libopus.a, 
   libaften*.a
+
+
+------------ 2016-10-26 ------------
+attempting to build in hexa. created new scheme by duplicating a 64 bit scheme and adding all the other products.
+needed to be removed because they woudn't build:
+    * net_adapter
+    * audio adapter
+    * jack net
+
+alright, so this is obviously not working well at all, there are a lot of packages that were building on nicolai
+that are not building here. not sure what this is about. But also not sure that I should be spending time on this
+in hexa. what are the pressing spatialization issues? 
+
+
+TESTING SPATGRIS+JACK+ZIRK
+    * Reaper
+        * some speakers are reversed
+    * Logic
+        * same weird speaker problem (even with zirkosc)
+        * apparently I cannot use sources numbers > 2 ???
+    * DP
+        *same
+other than this weird stuff, it seems to work well. 
