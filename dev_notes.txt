@@ -539,31 +539,38 @@ BUILDING JACK
     * had to change one line, will commit
     * had to change target from osx 10.4 to 10.9
     * cannot find opus.h
-    * now some stuff is building, some stuff isn't, but I can't seem to run anything. Furthermore it seems like there are many many different parts
-      to jack. Like I need to make a list
+    * now some stuff is building, some stuff isn't, but I can't seem to run anything. 
+      Furthermore it seems like there are many many different parts to jack. Like I 
+      need to make a list
 
 ALL JACK THINGS
-    * jackdmp (i think) main command line program. not sure how to use it at all 
+    * jackdmp is main command line program, ie the server 
     * the gui on mac is called jackPilot
-    * there are 2 scripts in macos/, install_jackdmp and remove_jackdmp. install doesn't work because it's not seeing whatever it has to copy. 
-      copying the script to macos/build/Development, where a bunch of the stuff is, doesn't work either. 
+    * there are 2 scripts in macos/, install_jackdmp and remove_jackdmp. install doesn't
+      work because it's not seeing whatever it has to copy. Copying the script to 
+      macos/build/Development, where a bunch of the stuff is, doesn't work either. 
 
 READING JACK DOCUMENTATION (in applications/jack/)
     * jack is a low-latency audio server, originally written for linux
     * jack osx includes:
         * jack server: core stuff (this must be jackdmp)
-        * jack router: the driver that allows any core audio osx app to become a jack client
+        * jack router: the driver that allows any core audio osx app to become a 
+          jack client
         * jack plugins: jack-aware (?) au and vst
-            * right now, these plugins are only visible in reaper, and on macpro only logic sees jack...
+            * right now, these plugins are only visible in reaper, and on macpro only
+              logic sees jack...
         * jack pilot: gui that controls jack server and its connections
         * netjack: jack over a network, doc says it is not installed
     * SYSTEM ARCHITECTURE
-        * jack server is the core, allowing audio communication between jack-enabled applications and audio devices. 
+        * jack server is the core, allowing audio communication between jack-enabled 
+          applications and audio devices. 
         * 3 types of jack-enabled applications
             * native jack applications
-                * built-in support for interacting with a jack server. Examples are PD and Ardour. Apparently Native instruments allows this too. 
+                * built-in support for interacting with a jack server. Examples are PD 
+                  and Ardour. Apparently Native instruments allows this too. 
             * jack-enabled core audio apps
-                * use the jack router driver (when selected as audio device) to communicate with jack server. 
+                * use the jack router driver (when selected as audio device) to 
+                  communicate with jack server. 
     
 
 --------------- 2016-10-25 ------------------------
@@ -655,18 +662,17 @@ HOW TO USE JACKDMP
         * telling JACK that your application is ready to start processing data.
     * The simple_client.c example demonstrates a complete (simple!) JACK application that just copies 
       the signal arriving at its input port to its output port
+
+
 HERE IS THE DOC FOR JACKD
-    * https://github.com/jackaudio/jackaudio.github.com/wiki/jackd(1)
-    * 
-
-
-* this is code for a juce plugin using jack: https://forum.juce.com/t/example-of-using-jack-with-juce/1385/2
+* https://github.com/jackaudio/jackaudio.github.com/wiki/jackd(1)
 
 
 RANDOM NOTES
 * reaper cannot use the router, but DP, logic and live can
 * a bunch of the libraries I had to add the headers for (in jack/) are right in macosx/, e.g., libopus.a, 
   libaften*.a
+* this is code for a juce plugin using jack: https://forum.juce.com/t/example-of-using-jack-with-juce/1385/2
 
 
 ------------ 2016-10-26 ------------
