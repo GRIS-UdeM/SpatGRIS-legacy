@@ -536,31 +536,38 @@ PROBLEMS WITH THIS
 --------------- 2016-10-25 ------------------------
 
 Alright, So i forgot to push my stuff. i was reading the jack doc. there are multiple parts. 
-ORDER OF THINGS TO RUN
-    jackmp server 64 bits
-    jackmp.framework 64 bits
 
+BUILDING PRODUCTS
+    * started with those:
+        jackmp server 64 bits
+        jackmp.framework 64 bits
+    * then got to build most of the targets, one by one manually. For universal bundles that wont build, building the 64 bits 
+      version often works, and subsequently building the universal can work.  
 
-so. got to build most of the targets, one by one manually. For universal bundles that wont build, building the 64 bits version often 
-works, and subsequently building the universal can work.  
+    * jacknet won't build because it requires libsamplerate.a. I don't care about either.
+    * what I need is to have jackdmp working. I know it can build. 
 
-jacknet won't build because it requires libsamplerate.a. I don't care about either.
-what I need is to have jackdmp working. I know it can build. 
-
+============
 NEED TO 
-    * figure how to use jackdmp
-        * look at the doc?
-        * do I need to install this stuff?
-    * can i build a gui? where is the code for that?
+    * uninstall current jack
+    * figure how to install jackdmp
+    * figure out how to use jackdmp, without the gui
+        * can i build a gui? where is the code for that?
     * see if I can use my built thing with hexa
+===========
 
-UNINSTALLING JACK
+
+UNINSTALLING CURRENT JACK 
 * i think both the macpro and nicolai have the same version of jack. looking at about jack, it says
     * jackdmp       1.9.11
     * jackrouter    0.9.7
     * jackPilot     1.7.4
 
-* now that I uninstalled this, my jack server control no longer works. it says:
+
+
+
+INSTALLING MY VERSION OF JACK
+* now that I uninstalled jack, my jack server control no longer works. it says:
     * dyld: Library not loaded: /Library/Frameworks/Jackmp.framework/Versions/A/Jackmp
     * i pasted that stuff in there and that error went away
 
@@ -573,7 +580,7 @@ UNINSTALLING JACK
             * jack pilot
         * need to restart after installation...
         * this worked. after installation, I can run my jack_server_control. 
-        * turns out that jackd is a symbolic link to jackdmp. ALRIGHT. 
+        * turns out that jackd is a symbolic link to jackdmp. I think jackd is jack1 and jackdmp is jack2. 
             * this is all the stuff that the installed copied to /usr/local/bin
                 jack_connect
                 jack_disconnect
@@ -589,5 +596,36 @@ UNINSTALLING JACK
 * alright, so my jack_control_server works because it connects to the jack that is installed. I need to NOT do that, 
   and use my jackdmp. For that, I need to get the install script to work. so uninstall jack again.  
 
+* goddammit jackdmp_install script wasn't running because not chmoded to 777
+* there are a lot less files copied in /usr/local/bin
+    jack_load
+    jack_unload
+    jackd
+    jackdmp
+* but now jack_server_control works!
 
+
+
+HOW TO USE JACKDMP
+* http://jackaudio.github.io/api/
+    * to use jack, your program provides a callback function that is executed at the right time. 
+    * all audio is represented as 32 bit floats (double is 64 bits)
+    * Using JACK within your program is very simple, and typically consists of just:
+        * calling jack_client_open() to connect to the JACK server.
+        * registering "ports" to enable data to be moved to and from your application.
+        * registering a "process callback" which will be called at the right time by the JACK server.
+        * telling JACK that your application is ready to start processing data.
+    * The simple_client.c example demonstrates a complete (simple!) JACK application that just copies 
+      the signal arriving at its input port to its output port
+HERE IS THE DOC FOR JACKD
+    * https://github.com/jackaudio/jackaudio.github.com/wiki/jackd(1)
+    * 
+
+
+* this is code for a juce plugin using jack: https://forum.juce.com/t/example-of-using-jack-with-juce/1385/2
+
+
+RANDOM NOTES
 * reaper cannot use the router, but DP, logic and live can
+* a bunch of the libraries I had to add the headers for (in jack/) are right in macosx/, e.g., libopus.a, 
+  libaften*.a
