@@ -696,3 +696,17 @@ TESTING SPATGRIS+JACK+ZIRK
     * DP
         *same
 other than this weird stuff, it seems to work well. 
+
+---------- 2016-10-31 ----------
+So the plan is to find how to interact with jackdmp. In order to do that, there
+are a bunch of examples, including simple_client.c. But I don't know how to build
+that file. There is a build thing-y included with the project, waf, but it gives
+me the same kind of errors that i got with xcode, it can't find 
+Jack::JackDriver::Initialize() et al. 
+
+alright, I don't get this waf stuff. 
+
+Looking at the xcode project, I see that there are a bunch of clients in there. 
+They don't have the simple_client.c, but latent_client.c claims to do something
+very similar. and it so happens that xcode creates a product for that .c, which
+is jack_latent_client.
