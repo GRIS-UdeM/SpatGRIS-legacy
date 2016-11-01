@@ -710,3 +710,7 @@ Looking at the xcode project, I see that there are a bunch of clients in there.
 They don't have the simple_client.c, but latent_client.c claims to do something
 very similar. and it so happens that xcode creates a product for that .c, which
 is jack_latent_client.
+
+the latent client is a client that handles latency, we don't need this. I pasted
+into it the code from simple_client.c, and now we can run that code, which 
+produces 2 sines, one on the left and one on the right. 
