@@ -714,3 +714,16 @@ is jack_latent_client.
 the latent client is a client that handles latency, we don't need this. I pasted
 into it the code from simple_client.c, and now we can run that code, which 
 produces 2 sines, one on the left and one on the right. 
+
+--------- 2016-11-02 ------------
+in hexa today. what to do?
+* retest zirkonium pipeline
+    * speaker 3?
+    * order of speakers in top?
+    * IDs higher than 2?
+* test trajectories?
+
+* #72 x12 in DP
+    * 
+
+
