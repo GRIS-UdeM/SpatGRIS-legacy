@@ -732,5 +732,54 @@ in hexa today. what to do?
 * #72 x12 in DP
     * there seems to be something wrong with the audio unit format, like it's 
       not able to use 12 inputs or outputs...
+    * alright, so my understanding is that juce doesn't allow any bus to have more than 8
+      (or 9) actually channels. This is seen at juce_pluginBustUtilities.h line 239.
+    * a bit lower, line 252, we call layoutListCompatibleWithChannelCount() which calls
+      constructors for AudioChannelSets, like AudioChannelSet::create7point1(). There is
+      none for 10.2, or 12 , or anything above 7.1
+    * this somehow doesn't stop reaper from using 8x16. It just flies through the failed
+      asserts and somehow make it work... (for both AU and vsts) this is not the case for
+      DP or logic
+    * this page list the speakers in 10.2 format (https://en.wikipedia.org/wiki/10.2_surround_sound):
+        Seven front channels: Left Wide, Left Height, Left, Center, Right, Right Height, Right Wide
+        Three surround channels: Left Surround, Back Surround, Right Surround
+        Two LFE channels: LFE Left and LFE Right
+        * so that's
+        Left Wide
+        Left Height
+        Left
+        Center
+        Right
+        Right Height
+        Right Wide
+        Left Surround
+        Back Surround
+        Right Surround
+        LFE Left
+        LFE Right
 
+    * and the available channels in juce are (enum ChannelType)
+        left            = 1,
+        right           = 2,
+        centre          = 3,
 
+        subbass         = 4,
+        surroundLeft    = 5,
+        surroundRight   = 6,
+        centreLeft      = 7,
+        centreRight     = 8,
+        surround        = 9,
+        sideLeft        = 10,
+        sideRight       = 11,
+        topMiddle       = 12,
+        topFrontLeft    = 13,
+        topFrontCentre  = 14,
+        topFrontRight   = 15,
+        topRearLeft     = 16,
+        topRearCentre   = 17,
+        topRearRight    = 18,
+        wideLeft        = 19,
+        wideRight       = 20,
+        subbass2        = 21,
+
+    * I am in the middle of implementing this!

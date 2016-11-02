@@ -236,7 +236,7 @@ private:
 
     void findAllCompatibleLayoutsForBus (bool isInput, int busNr)
     {
-        const int maxNumChannels = 9;
+        const int maxNumChannels = 12;
 
         SupportedBusLayouts& layouts = getSupportedBusLayouts (isInput, busNr);
         layouts.supportedLayouts.clear();
@@ -366,6 +366,10 @@ private:
                 sets.add (AudioChannelSet::create7point1());
                 sets.add (AudioChannelSet::createFront7point1());
                 break;
+            case 12:
+                sets.add (AudioChannelSet::create10point2());
+                break;
+
         }
 
         return sets;

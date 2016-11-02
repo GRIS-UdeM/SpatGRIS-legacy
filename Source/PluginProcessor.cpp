@@ -605,10 +605,10 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(8, false);
             setNumberOfSpeakers(16, false);
             break;
-//        case i12o12:
-//            setNumberOfSources(12, false);
-//            setNumberOfSpeakers(12, false);
-//            break;
+        case i12o12:
+            setNumberOfSources(12, false);
+            setNumberOfSpeakers(12, false);
+            break;
         default:
             jassertfalse;
     }
@@ -691,10 +691,10 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
         mInputOutputMode =  i8o16;
         return;
     }
-//    else if (mNumberOfSources == 12 && mNumberOfSpeakers == 12){
-//        mInputOutputMode =  i12o12;
-//        return;
-//    }
+    else if (mNumberOfSources == 12 && mNumberOfSpeakers == 12){
+        mInputOutputMode =  i12o12;
+        return;
+    }
     
     jassertfalse;
 }

@@ -919,7 +919,6 @@ public:
         const int newNumChannels = static_cast<int> (format.NumberChannels());
         const int oldNumChannels = busUtils.getNumChannels (isInput, busNr);
 
-        
         if (newNumChannels == oldNumChannels)
             return true;
         
