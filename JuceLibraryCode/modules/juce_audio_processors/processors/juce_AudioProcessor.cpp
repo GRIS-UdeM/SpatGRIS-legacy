@@ -453,8 +453,6 @@ bool AudioProcessor::setPreferredBusArrangement (bool isInput, int busIndex, con
         return false;
 
     AudioProcessorBus& bus = buses.getReference (busIndex);
-    
-    std::cout << oldNumInputs << ", " << oldNumOutputs << std::endl;
 
    #ifdef JucePlugin_PreferredChannelConfigurations
     // the user is using the deprecated way to specify channel configurations

@@ -49,8 +49,10 @@ void FirFilter::setSampleRate(int sr) {
 		}
 	}
 	
-	if (sr) fprintf(stderr, "Octogris: unsupported sample rate %d for filtering...\n", sr);
-	mFir = -1;
+    if (sr) {
+//        fprintf(stderr, "Spatgris: unsupported sample rate %d for filtering...\n", sr);
+        DBG("Spatgris: unsupported sample rate %d for filtering...\n" + sr);
+    }	mFir = -1;
 }
 
 float FirFilter::process(float sample, int distance)

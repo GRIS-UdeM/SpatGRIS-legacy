@@ -37,7 +37,7 @@ Trajectory::Trajectory(const TrajectoryProperties& properties)
 ,m_fTimeDone(0)
 ,m_fDurationSingleTraj(properties.duration)
 ,m_bUseBeats(properties.beats)
-,m_fSpeed(2.f)
+,m_fSpeed(1.f)
 {
     if (m_fDurationSingleTraj < 0.0001) {
         m_fDurationSingleTraj = 0.0001;
