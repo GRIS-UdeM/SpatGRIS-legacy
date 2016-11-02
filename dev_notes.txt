@@ -719,11 +719,18 @@ produces 2 sines, one on the left and one on the right.
 in hexa today. what to do?
 * retest zirkonium pipeline
     * speaker 3?
+        * there definitely seems to be something up
     * order of speakers in top?
+        * they replaced the audio interface, and did the wiring differently, so 
+          we had to change our speaker and server setup
     * IDs higher than 2?
+        * in DAW, need to select different jack outputs for the different tracks
+          otherwise we're just overwriting what we're sending to the zirkonium
+          through jack
 * test trajectories?
 
 * #72 x12 in DP
-    * 
+    * there seems to be something wrong with the audio unit format, like it's 
+      not able to use 12 inputs or outputs...
 
 
