@@ -941,13 +941,17 @@ AudioProcessorEditor (ownerFilter)
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
-    mInputOutputModeCombo->clear();
+
+	if (mInputOutputModeCombo->getNumItems() > 0){
+		mInputOutputModeCombo->clear();
+	}
     //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
     int iMaxSpeakers;
     if (mFilter->getRoutingMode() == kInternalWrite){
         iMaxSpeakers = 16;
     } else {
+
         iMaxSpeakers = mFilter->getTotalNumOutputChannels();
     }
 
@@ -1911,7 +1915,6 @@ void SpatGrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor){
 void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
     if (comboBox == mMovementModeCombo) {
-        
         int iSelectedMode = comboBox->getSelectedId() - 1;
         //if we're playing, just set combobox back to what it was and return
 //        if(mFilter->isPlaying()){
