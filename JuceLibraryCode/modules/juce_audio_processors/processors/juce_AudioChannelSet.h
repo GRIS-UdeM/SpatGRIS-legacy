@@ -99,7 +99,7 @@ public:
     /** Creates a set for a 7.1 surround setup (with side instead of rear speakers). */
     static AudioChannelSet createFront7point1();
     
-        static AudioChannelSet createFront10point2();
+    static AudioChannelSet create10point2();
 
     /** Creates a set of untyped discrete channels. */
     static AudioChannelSet discreteChannels (int numChannels);

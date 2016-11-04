@@ -164,7 +164,7 @@ AudioChannelSet AudioChannelSet::create7point0()      { return AudioChannelSet (
 AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << topRearLeft) | (1u << topRearRight)); }
 AudioChannelSet AudioChannelSet::createFront7point0() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << centreLeft) | (1u << centreRight)); }
 AudioChannelSet AudioChannelSet::createFront7point1() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << centreLeft) | (1u << centreRight)); }
-AudioChannelSet AudioChannelSet::createFront10point2(){ return AudioChannelSet ((1u << wideLeft) | (1u << sideLeft) | (1u << left) | (1u << center) | (1u << right)  | (1u << sideRight) | (1u << wideRight) | (1u << surroundLeft) | (1u << surround) | (1u << surroundRight) | (1u << subbass) | (1u << subbass2)); }
+AudioChannelSet AudioChannelSet::create10point2()     { return AudioChannelSet ((1u << wideLeft) | (1u << sideLeft) | (1u << left) | (1u << centre) | (1u << right)  | (1u << sideRight) | (1u << wideRight) | (1u << surroundLeft) | (1u << surround) | (1u << surroundRight) | (1u << subbass) | (1u << subbass2)); }
 
 
 AudioChannelSet AudioChannelSet::discreteChannels (int numChannels)
