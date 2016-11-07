@@ -81,7 +81,18 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
     if (mFilter->getNumberOfSources() > 1) {
         //calculate delta for selected source
         JUCE_COMPILER_WARNING("in an ideal world, mSourcesDownRT and mFilter->getOldSrcLocRT(mSelectedSrc) would be the same thing")
-        FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
+        //FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
+        FPoint oldSelSrcPosRT;
+        if(mMoverType == kSourceThread){
+            oldSelSrcPosRT = mFilter->getOldSrcLocRT(mSelectedSrc);
+            cout << "sourceThreadMove " << oldSelSrcPosRT.x << ", " << oldSelSrcPosRT.y << newLine;
+        } else {
+            oldSelSrcPosRT = mSourcesDownRT[mSelectedSrc];
+        }
+        
+        
+        
+        
         FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
         

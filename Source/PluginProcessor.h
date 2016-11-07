@@ -328,7 +328,6 @@ public:
     void setMovementMode(int i, bool p_bNotifyHost = true) {
 		if (p_bNotifyHost){
 			setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
-            startOrStopSourceUpdateThread();
 		} else {
 			setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
 		}

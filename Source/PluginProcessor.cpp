@@ -308,15 +308,17 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
 }
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
-    JUCE_COMPILER_WARNING("if m_bIsRecordingAutomation is no longer used, we need to remove it everywhere")
-        if (mNumberOfSources == 1 ||/* m_bIsRecordingAutomation ||*/ getMovementMode() == 0) {
-            m_pSourceUpdateThread->stopThread(500);
-        } else if (!m_pSourceUpdateThread->isThreadRunning()){
-            m_pSourceUpdateThread->startThread();
-        }
+    //we don't want the thread to run when we only have 1 source, when we're recording automation (because then the regular move
+    //will already move all sources according to movement constraints, and when we're in independent mode.
+    if (mNumberOfSources == 1 || m_bIsRecordingAutomation || getMovementMode() == 0) {
+        m_pSourceUpdateThread->stopThread(500);
+    } else if (!m_pSourceUpdateThread->isThreadRunning()){
+        m_pSourceUpdateThread->startThread();
     }
+}
 
 void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
+//    cout << "SourceThreadCalled";
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
         m_pMover->begin(iSourceChanged, kSourceThread);
@@ -431,12 +433,18 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         }
         
         mParameters.set(index, newValue);
+        
+        if (index == kMovementMode){
+            startOrStopSourceUpdateThread();
+        }
 
         if (!m_bPreventSourceLocationUpdate){
             if (index == getParamForSourceX(0) || index == getParamForSourceY(0)) {
                 setSourceLocationChanged(0);
+//                cout << "setParameter: Source " << 0 << " has moved\n";
             } else if (index == getParamForSourceX(1) || index == getParamForSourceY(1)) {
                 setSourceLocationChanged(1);
+//                cout << "setParameter: Source " << 1 << " has moved\n";
             } else if (index == getParamForSourceX(2) || index == getParamForSourceY(2)) {
                 setSourceLocationChanged(2);
             } else if (index == getParamForSourceX(3) || index == getParamForSourceY(3)) {
@@ -452,9 +460,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
             }
         }
         
-        if (index == kMovementMode){
-            startOrStopSourceUpdateThread();
-        }
+        
         mHostChangedParameter++;
     }
 }
@@ -462,6 +468,9 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
     mParameters.set(index, newValue);
+//    if (index == kMovementMode){
+//        startOrStopSourceUpdateThread();
+//    }
     sendParamChangeMessageToListeners(index, newValue);
 }
 
@@ -784,11 +793,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     //restart audio processing
     suspendProcessing (false);
     
-    if (mNumberOfSources > 1 && m_pSourceUpdateThread != NULL && !m_pSourceUpdateThread->isThreadRunning()){
-        m_pSourceUpdateThread->startThread();
-    } else if (m_pSourceUpdateThread != NULL && m_pSourceUpdateThread->isThreadRunning()){
-        m_pSourceUpdateThread->stopThread(500);
-    }
+    startOrStopSourceUpdateThread();
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
