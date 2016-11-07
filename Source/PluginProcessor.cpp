@@ -308,6 +308,7 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
 }
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
+    JUCE_COMPILER_WARNING("if m_bIsRecordingAutomation is no longer used, we need to remove it everywhere")
         if (mNumberOfSources == 1 ||/* m_bIsRecordingAutomation ||*/ getMovementMode() == 0) {
             m_pSourceUpdateThread->stopThread(500);
         } else if (!m_pSourceUpdateThread->isThreadRunning()){
