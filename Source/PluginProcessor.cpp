@@ -450,6 +450,10 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
                 setSourceLocationChanged(7);
             }
         }
+        
+        if (index == kMovementMode){
+            startOrStopSourceUpdateThread();
+        }
         mHostChangedParameter++;
     }
 }

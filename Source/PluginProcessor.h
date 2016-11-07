@@ -321,13 +321,6 @@ public:
     bool getIndependentMode() const { return mTrSeparateAutomationMode; }
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
     
-	//int getMovementMode() const { return m_iMovementMode; }
-
- //   void setMovementMode(int s) {
- //       m_iMovementMode = s;
- //       startOrStopSourceUpdateThread();
- //   }
-
 	int getMovementMode() { 
 		return static_cast<int>(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode)));
 	}
@@ -335,12 +328,12 @@ public:
     void setMovementMode(int i, bool p_bNotifyHost = true) {
 		if (p_bNotifyHost){
 			setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
+            startOrStopSourceUpdateThread();
 		} else {
 			setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
 		}
-		startOrStopSourceUpdateThread();
     }
-	
+    
 	bool getLinkDistance() const { return mLinkSurfaceOrPan; }
 	void setLinkDistance(bool s) { mLinkSurfaceOrPan = s; }
 
