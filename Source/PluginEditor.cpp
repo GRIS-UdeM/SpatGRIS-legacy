@@ -114,13 +114,15 @@ private:
 class Box : public Component
 {
 public:
-    Box(bool useViewport) {
+    Box(bool useViewport, GrisLookAndFeel *feel) {
         if (useViewport) {
             mContent = new Component();
             mViewport = new Viewport();
             mViewport->setViewedComponent(mContent, false);
             mViewport->setScrollBarsShown(true, false);
-            mViewport->setScrollBarThickness(5);
+            mViewport->setScrollBarThickness(10);
+            mViewport->getVerticalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            mViewport->setLookAndFeel(feel);
             addAndMakeVisible(mViewport);
         }
         mBgColour = Colour::fromRGB(200,200,200);
@@ -262,7 +264,7 @@ AudioProcessorEditor (ownerFilter)
     {
         int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
         //SOURCE PARAMETER BOX
-        mSourcesBox = new Box(true);
+        mSourcesBox = new Box(true, &mGrisFeel);
         mSourcesBox->setBackgroundColor(tabBg);
         addAndMakeVisible(mSourcesBox);
         mComponents.add(mSourcesBox);
@@ -324,7 +326,7 @@ AudioProcessorEditor (ownerFilter)
     
     // speakers
     {
-        mSpeakersBox = new Box(true);
+        mSpeakersBox = new Box(true, &mGrisFeel);
         mSpeakersBox->setBackgroundColor(tabBg);
         addAndMakeVisible(mSpeakersBox);
         mComponents.add(mSpeakersBox);
