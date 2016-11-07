@@ -308,7 +308,7 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
 }
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
-        if (mNumberOfSources == 1 || m_bIsRecordingAutomation || getMovementMode() == 0) {
+        if (mNumberOfSources == 1 ||/* m_bIsRecordingAutomation ||*/ getMovementMode() == 0) {
             m_pSourceUpdateThread->stopThread(500);
         } else if (!m_pSourceUpdateThread->isThreadRunning()){
             m_pSourceUpdateThread->startThread();
