@@ -245,13 +245,13 @@
  #define JucePlugin_EditorRequiresKeyboardFocus  0
 #endif
 #ifndef  JucePlugin_Version
- #define JucePlugin_Version                0.1.7
+ #define JucePlugin_Version                0.1.8
 #endif
 #ifndef  JucePlugin_VersionCode
- #define JucePlugin_VersionCode            0x107
+ #define JucePlugin_VersionCode            0x108
 #endif
 #ifndef  JucePlugin_VersionString
- #define JucePlugin_VersionString          "0.1.7"
+ #define JucePlugin_VersionString          "0.1.8"
 #endif
 #ifndef  JucePlugin_VSTUniqueID
  #define JucePlugin_VSTUniqueID            JucePlugin_PluginCode
@@ -311,13 +311,13 @@
  #define JucePlugin_AAXDisableMultiMono    0
 #endif
 #ifndef  JucePlugin_MaxNumInputChannels
- #define JucePlugin_MaxNumInputChannels    16
+ #define JucePlugin_MaxNumInputChannels    12
 #endif
 #ifndef  JucePlugin_MaxNumOutputChannels
  #define JucePlugin_MaxNumOutputChannels   16
 #endif
 #ifndef  JucePlugin_PreferredChannelConfigurations
- #define JucePlugin_PreferredChannelConfigurations  {8,16}, {1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}
+ #define JucePlugin_PreferredChannelConfigurations  {8,16}, {1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}, {12,12}
 #endif
 
 #endif  // __JUCE_APPCONFIG_ZTKXIG__

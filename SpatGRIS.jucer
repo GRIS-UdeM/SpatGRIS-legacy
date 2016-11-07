@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.1.7"
+<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.1.8"
               bundleIdentifier="com.UdeM.SpatGRIS" includeBinaryInAppConfig="1"
               buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="SpatGris" pluginDesc="SpatGris" pluginManufacturer="UdeM"
-              pluginManufacturerCode="UdeM" pluginCode="Spat" pluginChannelConfigs="{12,12}"
+              pluginManufacturerCode="UdeM" pluginCode="Spat" pluginChannelConfigs="{8,16}, {1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}, {12,12}"
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="SpatGrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris"

@@ -921,8 +921,6 @@ public:
 
         if (newNumChannels == oldNumChannels)
             return true;
-        
-        DBG ("attempting to set input " + std::to_string(isInput) + " to " + std::to_string(newNumChannels) + " channels");
 
         PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
 

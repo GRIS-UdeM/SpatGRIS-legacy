@@ -28,7 +28,6 @@
 #include "PluginProcessor.h"
 #include "SourceMover.h"
 
-
 Trajectory::Trajectory(const TrajectoryProperties& properties)
 :mFilter(properties.filter)
 ,m_pMover(properties.mover)

@@ -10,6 +10,7 @@
 		004E29914D939E3E4685E921 /* juce_data_structures.mm in Sources */ = {isa = PBXBuildFile; fileRef = DF951D481763A0A88DD73572 /* juce_data_structures.mm */; };
 		0401E33BEA0A1048A678DB23 /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = E4BD418F8CB7CE3E78B996C6 /* juce_audio_processors.mm */; };
 		0CC32A0140D035C26DFA9FCE /* juce_RTAS_DigiCode1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 98883D0EAB9BF4C98C6D1110 /* juce_RTAS_DigiCode1.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
+		0D7D14CC1DD0F60C004CDAF0 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1111834A1AF4A290032237DE /* AUCarbonViewControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 201E445B33653CBCBDFEF788 /* AUCarbonViewControl.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		1A7D392E905CA39DD3F64B49 /* HID_Queue_Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CD3992A710C26FFEC6A67E86 /* HID_Queue_Utilities.cpp */; };
 		1D5DB0C471235F0DC99EDB1D /* SourceMover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 351ED414B7D7027BC011357F /* SourceMover.cpp */; };
@@ -81,20 +82,19 @@
 		F3B3611A9086A4FFA03544EE /* Trajectories.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CD5FCE049486FBB737BF8460 /* Trajectories.cpp */; };
 		F55AF54A4E418A9C9C2E31C1 /* OscComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32245EAF81307F1BCDAA96A4 /* OscComponent.cpp */; };
 		F5CFF1ECCB34C8430532933B /* AUOutputBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD2C7404690F305AC2686D15 /* AUOutputBase.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
-		F648F8DA1DCA7A2200AB0E34 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F69AF11ADE7161CDF02E803F /* HID_Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AF464D04B65762BF08B0227C /* HID_Utilities.cpp */; };
 		F78409593DB775450C268216 /* RecentFilesMenuTemplate.nib in Resources */ = {isa = PBXBuildFile; fileRef = 281829C2382995B67A43416C /* RecentFilesMenuTemplate.nib */; };
 		F9FB6055178C7DBBA8A431BE /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE474CB5F842D6FBF9D1B6FC /* MusicDeviceBase.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F648F8D91DCA7A1D00AB0E34 /* CopyFiles */ = {
+		0D7D14CB1DD0F605004CDAF0 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F648F8DA1DCA7A2200AB0E34 /* libLeap.dylib in CopyFiles */,
+				0D7D14CC1DD0F60C004CDAF0 /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2984,7 +2984,7 @@
 				9B535A1C434303D4AA33E340 /* Rez */,
 				AFBAB6135653C9B7B9F10AA5 /* Sources */,
 				AE1FAB299C5E8BE3F6E82000 /* Frameworks */,
-				F648F8D91DCA7A1D00AB0E34 /* CopyFiles */,
+				0D7D14CB1DD0F605004CDAF0 /* CopyFiles */,
 				ACB59ACAAF55A1838119385D /* Post-build script */,
 			);
 			buildRules = (
@@ -3144,8 +3144,8 @@
 					"_DEBUG=1",
 					"DEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.1.7",
-					"JUCE_APP_VERSION_HEX=0x107",
+					"JUCE_APP_VERSION=0.1.8",
+					"JUCE_APP_VERSION_HEX=0x108",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;
@@ -3180,7 +3180,6 @@
 		40ACBD50202375DB656EB74F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -3192,8 +3191,8 @@
 					"_NDEBUG=1",
 					"NDEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.1.7",
-					"JUCE_APP_VERSION_HEX=0x107",
+					"JUCE_APP_VERSION=0.1.8",
+					"JUCE_APP_VERSION_HEX=0x108",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3267,6 +3266,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
