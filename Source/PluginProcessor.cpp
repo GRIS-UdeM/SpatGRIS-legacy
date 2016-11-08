@@ -313,7 +313,7 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
     //we don't want the thread to run when we only have 1 source, when we're recording automation (because then the regular move
     //will already move all sources according to movement constraints, and when we're in independent mode.
-    if (mNumberOfSources == 1 || m_bIsRecordingAutomation || getMovementMode() == 0) {
+    if (mNumberOfSources == 1 || m_bIsRecordingAutomation /*|| getMovementMode() == 0*/) {
         m_pSourceUpdateThread->stopThread(500);
     } else if (!m_pSourceUpdateThread->isThreadRunning()){
         m_pSourceUpdateThread->startThread();
@@ -321,9 +321,8 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
 }
 
 void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
-    cout << ".";
     int iSourceChanged = getSourceLocationChanged();
-    if (iSourceChanged != -1){
+    if (getMovementMode() != 0 && iSourceChanged != -1){
         JUCE_COMPILER_WARNING("these begin and end should probably be when we start and stop the thread...? Or we the thread is running but we're playing/stopping?")
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
@@ -341,7 +340,6 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
                 }
                 int paramIndex = getParamForSourceAzimSpan(i);
                 if (getParameter(paramIndex) != fCurAzimSpan){
-                    cout << "azimspan " << i << ": " << fCurAzimSpan << "\n";
                     setParameterNotifyingHost(paramIndex, fCurAzimSpan);
                 }
             }
@@ -352,7 +350,6 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
     int iSourceElevSpanChanged = getSourceElevSpanChanged();
     if (iSourceElevSpanChanged != -1){
         if (mLinkElevSpan){
-            cout << "elevspan changed\n";
             float fCurElevSpan = getParameter(getParamForSourceElevSpan(iSourceElevSpanChanged));
             for (int i = 0; i < getNumberOfSources(); ++i) {
                 if (i == iSourceElevSpanChanged){
@@ -360,7 +357,6 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
                 }
                 int paramIndex = getParamForSourceElevSpan(i);
                 if (getParameter(paramIndex) != fCurElevSpan){
-                    cout << "elevspan " << i << ": " << fCurElevSpan << "\n";
                     setParameterNotifyingHost(paramIndex, fCurElevSpan);
                 }
             }

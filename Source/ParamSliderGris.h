@@ -80,8 +80,8 @@ public:
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceAzimSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
-//                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
-                        mFilter->setParameter(paramIndex, newVal);
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+//                        mFilter->setParameter(paramIndex, newVal);
                     }
                 }
                 mFilter->setPreventSourceAzimElevSpanUpdate(false);
@@ -90,8 +90,8 @@ public:
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceElevSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
-//                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
-                        mFilter->setParameter(paramIndex, newVal);
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+//                        mFilter->setParameter(paramIndex, newVal);
                     }
                 }
                 mFilter->setPreventSourceAzimElevSpanUpdate(false);
@@ -176,14 +176,11 @@ public:
         } else if (mParamType == kParamAzimSpan) {
             const float newVal = (float)getValue();
             if (mLink->getToggleState()) {
-                mFilter->setPreventSourceAzimElevSpanUpdate(true);
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceAzimSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal)
-//                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
-                        mFilter->setParameter(paramIndex, newVal);
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
                 }
-                mFilter->setPreventSourceAzimElevSpanUpdate(false);
             } else {
                 if (mFilter->getParameter(mParamIndex) != newVal){
                     mFilter->setParameterNotifyingHost(mParamIndex, newVal);
@@ -192,14 +189,11 @@ public:
         } else if (mParamType == kParamElevSpan) {
             const float newVal = (float)getValue();
             if (mLink->getToggleState()) {
-                mFilter->setPreventSourceAzimElevSpanUpdate(true);
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceElevSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal)
-//                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
-                        mFilter->setParameter(paramIndex, newVal);
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
                 }
-                mFilter->setPreventSourceAzimElevSpanUpdate(false);
             } else {
                 if (mFilter->getParameter(mParamIndex) != newVal){
                     mFilter->setParameterNotifyingHost(mParamIndex, newVal);

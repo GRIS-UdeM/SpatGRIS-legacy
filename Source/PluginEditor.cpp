@@ -2166,7 +2166,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     
     if (mFieldNeedRepaint || mNeedRepaint){
         mField->repaint();
-        cout << "repaint\n";
     }
 
 #if TIME_THINGS
