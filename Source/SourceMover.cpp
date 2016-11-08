@@ -46,6 +46,7 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->setIsRecordingAutomation(true);
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->beginParameterChangeGesture(kMovementMode);
         
         //if we are not in independent mode and have more than 1 source
         if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
@@ -176,6 +177,7 @@ void SourceMover::end(MoverType mt) {
     } else if (mMoverType != kSourceThread){
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->endParameterChangeGesture(kMovementMode);
         mFilter->setIsRecordingAutomation(false);
         mField->clearTrajectoryPath();
     }
