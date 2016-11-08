@@ -2102,7 +2102,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mTrEndPointLabel->setVisible(false);
         mFilter->setJustSelectedEndPoint(false);
     }
-		
+    JUCE_COMPILER_WARNING("what is the difference between a property and a parameter???")
 	uint64_t hcp = mFilter->getHostChangedProperty();
 	if (hcp != mHostChangedProperty) {
 		mHostChangedProperty = hcp;
@@ -2186,6 +2186,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #endif
     
     if (mNeedRepaint){
+        mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
         if(mFilter->getGuiTab() == 0){
             int w = (mTabs->getTabContentComponent(0)->getWidth() - kMargin) / 3 - kMargin;
             mMovementModeCombo->setBounds(kMargin, kMargin+kDefaultLabelHeight+5, w, kDefaultLabelHeight);

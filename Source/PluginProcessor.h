@@ -322,7 +322,7 @@ public:
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
     
 	int getMovementMode() { 
-		return static_cast<int>(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode)));
+		return static_cast<int>(round(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode))));
 	}
 
     void setMovementMode(int i, bool p_bNotifyHost = true) {
