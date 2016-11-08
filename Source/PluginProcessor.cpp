@@ -514,6 +514,17 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
     return String::empty;
 }
 
+void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
+    if (p_bNotifyHost){
+        setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
+    } else {
+        setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
+    }
+    if (m_pMover){
+        m_pMover->storeDownPositions();
+    }
+}
+
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
     mInputOutputMode = p_iInputOutputMode-1;

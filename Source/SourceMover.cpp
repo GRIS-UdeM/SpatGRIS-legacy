@@ -47,14 +47,18 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
         mFilter->beginParameterChangeGesture(kMovementMode);
-        
-        //if we are not in independent mode and have more than 1 source
-        if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
-            int iNbrSrc = mFilter->getNumberOfSources();
-            for (int j = 0; j < iNbrSrc; j++) {
-                mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
-                mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
-            }
+
+        storeDownPositions();
+    }
+}
+
+void SourceMover::storeDownPositions(){
+    //if we are not in independent mode and have more than 1 source, we store the initial position of all sources
+    if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
+        int iNbrSrc = mFilter->getNumberOfSources();
+        for (int j = 0; j < iNbrSrc; j++) {
+            mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
+            mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
         }
     }
 }
@@ -65,7 +69,7 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
         return;
     }
     
-    //move selected item only if not kSourceThread, since in kSourceThread item is already moved by automation
+    //move selected source to pointXY01 (and store in setOldSrcLocRT) only if not kSourceThread. In kSourceThread it is already being moved by automation
     if (mMoverType != kSourceThread){
         mFilter->setSourceXY01(mSelectedSrc, pointXY01);
         mFilter->setOldSrcLocRT(mSelectedSrc, mFilter->convertXy012Rt(pointXY01));
@@ -74,26 +78,12 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
         }
     }
     
-    int iMovementMode = mFilter->getMovementMode();
-    if (iMovementMode == 0){
-        return; //independent, so no need to move unselected sources
-    }
-    
-    if (mFilter->getNumberOfSources() > 1) {
+    // if we're not in independent mode and have more than 1 source
+    if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
         //calculate delta for selected source
-        JUCE_COMPILER_WARNING("in an ideal world, mSourcesDownRT and mFilter->getOldSrcLocRT(mSelectedSrc) would be the same thing")
-        //FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
-        FPoint oldSelSrcPosRT;
-        if(mMoverType == kSourceThread){
-            oldSelSrcPosRT = mFilter->getOldSrcLocRT(mSelectedSrc);
-            cout << "sourceThreadMove " << oldSelSrcPosRT.x << ", " << oldSelSrcPosRT.y << newLine;
-        } else {
-            oldSelSrcPosRT = mSourcesDownRT[mSelectedSrc];
-        }
         
-        
-        
-        
+        //in normal, non-source-thread mode, we calculate delta for selected source compared to its starting point
+        FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
         FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
         
@@ -190,10 +180,10 @@ void SourceMover::updateNumberOfSources(){
     mSourcesDownRT.clear();
     mSourcesAngularOrder.clear();
     
-    mSourcesDownXY.ensureStorageAllocated(mFilter->getNumberOfSources());
-    mSourcesDownRT.ensureStorageAllocated(mFilter->getNumberOfSources());
-    mSourcesAngularOrder.ensureStorageAllocated(mFilter->getNumberOfSources());
-    
+//    mSourcesDownXY.ensureStorageAllocated(mFilter->getNumberOfSources());
+//    mSourcesDownRT.ensureStorageAllocated(mFilter->getNumberOfSources());
+//    mSourcesAngularOrder.ensureStorageAllocated(mFilter->getNumberOfSources());
+    JUCE_COMPILER_WARNING("not sure this makes any sense. Could call storeDownPositions instead?")
     for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
         mSourcesDownXY.add(FPoint(0,0));
         mSourcesDownRT.add(FPoint(0,0));

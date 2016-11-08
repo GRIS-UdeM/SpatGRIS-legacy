@@ -324,14 +324,7 @@ public:
 	int getMovementMode() { 
 		return static_cast<int>(round(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode))));
 	}
-
-    void setMovementMode(int i, bool p_bNotifyHost = true) {
-		if (p_bNotifyHost){
-			setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
-		} else {
-			setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
-		}
-    }
+    void setMovementMode(int i, bool p_bNotifyHost = true);
     
 	bool getLinkDistance() const { return mLinkSurfaceOrPan; }
 	void setLinkDistance(bool s) { mLinkSurfaceOrPan = s; }
@@ -715,9 +708,8 @@ public:
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
     
     FPoint  getOldSrcLocRT(int id){return mOldSrcLocRT[id];}
-    void    setOldSrcLocRT(int id, FPoint pointRT){
-        mOldSrcLocRT[id] = pointRT;
-    }
+    void    setOldSrcLocRT(int id, FPoint pointRT){ mOldSrcLocRT[id] = pointRT; }
+    
     bool isPlaying(){ return m_bIsPlaying;}
     void threadUpdateNonSelectedSourcePositions();
     void startOrStopSourceUpdateThread();

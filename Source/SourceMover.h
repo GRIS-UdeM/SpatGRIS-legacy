@@ -58,6 +58,7 @@ public:
     void setSymmetricX();
     void setSymmetricY();
 	void move(FPoint p, MoverType mt);
+    void storeDownPositions();
 	void end(MoverType mt);
     
     void setFieldComponent(FieldComponent* field){
