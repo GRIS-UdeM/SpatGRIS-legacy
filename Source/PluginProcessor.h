@@ -682,7 +682,14 @@ public:
 
     void setSourceLocationChanged(int i)    {  m_iSourceLocationChanged = i;    }
     int  getSourceLocationChanged()         { return m_iSourceLocationChanged;  }
+    
+    void setSourceAzimSpanChanged(int i)    {  m_iSourceAzimSpanChanged = i;    }
+    int  getSourceAzimSpanChanged()         { return m_iSourceAzimSpanChanged;  }
 
+    void setSourceElevSpanChanged(int i)    {  m_iSourceElevSpanChanged = i;    }
+    int  getSourceElevSpanChanged()         { return m_iSourceElevSpanChanged;  }
+    
+    
     int getSrcSelected() const {return mSrcSelected;}
     int getSpSelected() const  {return mSpSelected;}
     
@@ -694,6 +701,7 @@ public:
 	void setSpSelected(int p_i){ mSpSelected = p_i; }
 
     void setPreventSourceLocationUpdate(bool b){ m_bPreventSourceLocationUpdate = b; }
+    void setPreventSourceAzimElevSpanUpdate(bool b){ m_bPreventSourceAzimElevSpanUpdate = b; }
     
     void setIsSettingEndPoint(bool isSetting){ m_bIsSettingEndPoint = isSetting; }
     bool isSettingEndPoint(){ return m_bIsSettingEndPoint; }
@@ -833,8 +841,11 @@ private:
     std::vector<FirFilter> mFilters;
     bool m_bIsRecordingAutomation;
     int m_iSourceLocationChanged;
+    int m_iSourceAzimSpanChanged;
+    int m_iSourceElevSpanChanged;
     
     bool m_bPreventSourceLocationUpdate;
+    bool m_bPreventSourceAzimElevSpanUpdate;
     bool m_bIsSettingEndPoint;
     FPoint m_fEndLocationXY01;
     bool m_bJustSelectedEndPoint;

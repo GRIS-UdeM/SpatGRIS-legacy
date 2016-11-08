@@ -149,7 +149,10 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 :mFilters()
 ,m_bIsRecordingAutomation(false)
 ,m_iSourceLocationChanged(-1)
+,m_iSourceAzimSpanChanged(-1)
+,m_iSourceElevSpanChanged(-1)
 ,m_bPreventSourceLocationUpdate(false)
+,m_bPreventSourceAzimElevSpanUpdate(false)
 {
 
 #if WIN32 & USE_LEAP
@@ -318,7 +321,7 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
 }
 
 void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
-//    cout << "SourceThreadCalled";
+    cout << ".";
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
         JUCE_COMPILER_WARNING("these begin and end should probably be when we start and stop the thread...? Or we the thread is running but we're playing/stopping?")
@@ -326,6 +329,43 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
         setSourceLocationChanged(-1);
+    }
+
+    int iSourceAzimSpanChanged = getSourceAzimSpanChanged();
+    if (iSourceAzimSpanChanged != -1){
+        if (mLinkAzimSpan){
+            float fCurAzimSpan = getParameter(getParamForSourceAzimSpan(iSourceAzimSpanChanged));
+            for (int i = 0; i < getNumberOfSources(); ++i) {
+                if (i == iSourceAzimSpanChanged){
+                    continue;
+                }
+                int paramIndex = getParamForSourceAzimSpan(i);
+                if (getParameter(paramIndex) != fCurAzimSpan){
+                    cout << "azimspan " << i << ": " << fCurAzimSpan << "\n";
+                    setParameterNotifyingHost(paramIndex, fCurAzimSpan);
+                }
+            }
+        }
+        setSourceAzimSpanChanged(-1);
+    }
+    
+    int iSourceElevSpanChanged = getSourceElevSpanChanged();
+    if (iSourceElevSpanChanged != -1){
+        if (mLinkElevSpan){
+            cout << "elevspan changed\n";
+            float fCurElevSpan = getParameter(getParamForSourceElevSpan(iSourceElevSpanChanged));
+            for (int i = 0; i < getNumberOfSources(); ++i) {
+                if (i == iSourceElevSpanChanged){
+                    continue;
+                }
+                int paramIndex = getParamForSourceElevSpan(i);
+                if (getParameter(paramIndex) != fCurElevSpan){
+                    cout << "elevspan " << i << ": " << fCurElevSpan << "\n";
+                    setParameterNotifyingHost(paramIndex, fCurElevSpan);
+                }
+            }
+        }
+        setSourceElevSpanChanged(-1);
     }
 }
 
@@ -443,24 +483,24 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         }
 
         if (!m_bPreventSourceLocationUpdate){
-            if (index == getParamForSourceX(0) || index == getParamForSourceY(0)) {
-                setSourceLocationChanged(0);
-//                cout << "setParameter: Source " << 0 << " has moved\n";
-            } else if (index == getParamForSourceX(1) || index == getParamForSourceY(1)) {
-                setSourceLocationChanged(1);
-//                cout << "setParameter: Source " << 1 << " has moved\n";
-            } else if (index == getParamForSourceX(2) || index == getParamForSourceY(2)) {
-                setSourceLocationChanged(2);
-            } else if (index == getParamForSourceX(3) || index == getParamForSourceY(3)) {
-                setSourceLocationChanged(3);
-            } else if (index == getParamForSourceX(4) || index == getParamForSourceY(4)) {
-                setSourceLocationChanged(4);
-            } else if (index == getParamForSourceX(5) || index == getParamForSourceY(5)) {
-                setSourceLocationChanged(5);
-            } else if (index == getParamForSourceX(6) || index == getParamForSourceY(6)) {
-                setSourceLocationChanged(6);
-            } else if (index == getParamForSourceX(7) || index == getParamForSourceY(7)) {
-                setSourceLocationChanged(7);
+            for (int iCurSource = 0; iCurSource < getNumberOfSources(); ++iCurSource){
+                if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource)) {
+                    setSourceLocationChanged(iCurSource);
+                    break;
+                }
+            }
+        }
+        
+        if (!m_bPreventSourceAzimElevSpanUpdate){
+            for (int iCurSource = 0; iCurSource < getNumberOfSources(); ++iCurSource){
+                if (index == getParamForSourceAzimSpan(iCurSource)){
+                    setSourceAzimSpanChanged(iCurSource);
+                    break;
+                }
+                if (index == getParamForSourceElevSpan(iCurSource)){
+                    setSourceElevSpanChanged(iCurSource);
+                    break;
+                }
             }
         }
         
