@@ -321,6 +321,7 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
 //    cout << "SourceThreadCalled";
     int iSourceChanged = getSourceLocationChanged();
     if (iSourceChanged != -1){
+        JUCE_COMPILER_WARNING("these begin and end should probably be when we start and stop the thread...? Or we the thread is running but we're playing/stopping?")
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);
@@ -435,6 +436,9 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         mParameters.set(index, newValue);
         
         if (index == kMovementMode){
+            if (m_pMover){
+                m_pMover->storeDownPositions();
+            }
             startOrStopSourceUpdateThread();
         }
 
@@ -519,9 +523,6 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
         setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
     } else {
         setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
-    }
-    if (m_pMover){
-        m_pMover->storeDownPositions();
     }
 }
 
