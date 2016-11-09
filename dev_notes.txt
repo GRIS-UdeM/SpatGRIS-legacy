@@ -783,3 +783,10 @@ in hexa today. what to do?
         subbass2        = 21,
 
     * I am in the middle of implementing this!
+
+------------------ 2016-11-09 --------------
+#101 and #104
+Apparently it is possible to have steps (getParameterNumSteps()) and potentially to 
+get different names for different steps with getParameterText()?
+
+also getParameterLabel() returns the units for a specific parameter

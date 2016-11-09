@@ -102,10 +102,10 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
             }
             //all x's and y's here are actually r's and t's
             switch(mFilter->getMovementMode()) {
-                case 1:     // circular
-                case 2:     // circular, fixed radius
-                case 3:     // circular, fixed angle
-                case 4:{    // circular, fully fixed
+                case Circular:
+                case CircularFixedRadius:
+                case CircularFixedAngle:
+                case CircularFullyFixed:{
                     //calculate new position for curSrc using delta for selected source
                     FPoint oldCurSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(iCurSrc) : mSourcesDownRT[iCurSrc];
                     FPoint newCurSrcPosRT = oldCurSrcPosRT + delSelSrcPosRT;
@@ -126,7 +126,7 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
                     mFilter->setOldSrcLocRT(iCurSrc, newCurSrcPosRT);
                     break;
                 }
-                case 5:{      // delta lock
+                case DeltaLock:{
                     FPoint delSelSrcPosXY;
                     if (mMoverType == kSourceThread){
                         delSelSrcPosXY = mFilter->convertRt2Xy(newSelSrcPosRT) - mFilter->convertRt2Xy(oldSelSrcPosRT);
@@ -142,11 +142,11 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
                     mFilter->setOldSrcLocRT(iCurSrc, mFilter->convertXy2Rt(newCurSrcPosXY, false));
                     break;
                 }
-                case 6:  // sym x
+                case SymmetricX:
                     vyo = 1 - vyo;
                     mFilter->setSourceXY01(iCurSrc, FPoint(vxo, vyo));
                     break;
-                case 7: // sym y
+                case SymmetricY: 
                     vxo = 1 - vxo;
                     mFilter->setSourceXY01(iCurSrc, FPoint(vxo, vyo));
                     break;

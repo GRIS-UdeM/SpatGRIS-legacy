@@ -778,9 +778,10 @@ String Trajectory::GetTrajectoryName(int i) {
         case SymXTarget: return "Sym X Target";
         case SymYTarget: return "Sym Y Target";
         case ClosestSpeakerTarget: return "Closest Speaker Target";
+        default:
+            jassertfalse;
+            return "";
     }
-    jassert(0);
-    return "";
 }
 
 Trajectory::Ptr Trajectory::CreateTrajectory(const TrajectoryProperties& properties) {

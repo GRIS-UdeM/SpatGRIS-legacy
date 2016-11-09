@@ -1353,6 +1353,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
 }
 
 void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
+    JUCE_COMPILER_WARNING("this needs to be redone using the movement mode enum")
     int index = 1;
     mMovementModeCombo->addItem("Independent", index++);
     if (mFilter->getNumberOfSources() > 1){
@@ -1369,7 +1370,7 @@ void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
     int iCurMode = mFilter->getMovementMode() + 1;
     if (mMovementModeCombo->getItemText(iCurMode-1) == ""){
         mMovementModeCombo->setSelectedId(1);
-        mFilter->setMovementMode(0);    //0 is independent
+        mFilter->setMovementMode(Independent);    //0 is independent
     } else {
         mMovementModeCombo->setSelectedId(iCurMode);
     }

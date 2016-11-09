@@ -922,12 +922,32 @@ void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
             offset += delta;
         }
     }
-    
+}
+
+int SpatGrisAudioProcessor::getParameterNumSteps (int index){
+    cout << "getParameterNumSteps " << index << newLine;
+    switch (index) {
+        case kMovementMode:
+                cout << "getParameterNumSteps TotalNumberMovementModes" << newLine;
+            return TotalNumberMovementModes;
+            break;
+            
+        default:
+            return getDefaultNumParameterSteps();
+    }
 }
 
 const String SpatGrisAudioProcessor::getParameterText (int index)
 {
-    return String::empty;
+    switch (index) {
+        case kMovementMode:
+            return GetMovementModeName(getMovementMode());
+            break;
+            
+        default:
+            return String::empty;
+    }
+
 }
 
 const String SpatGrisAudioProcessor::getInputChannelName (int channelIndex) const

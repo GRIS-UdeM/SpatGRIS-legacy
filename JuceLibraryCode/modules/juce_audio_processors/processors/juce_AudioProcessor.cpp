@@ -300,6 +300,7 @@ String AudioProcessor::getParameterText (int index, int maximumStringLength)
 
 int AudioProcessor::getParameterNumSteps (int index)
 {
+    std::cout << "AudioProcessor::getParameterNumSteps\n";
     if (AudioProcessorParameter* p = managedParameters[index])
         return p->getNumSteps();
 

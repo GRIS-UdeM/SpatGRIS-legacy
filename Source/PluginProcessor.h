@@ -128,6 +128,18 @@ enum AllTrajectoryTypes {
     TotalNumberTrajectories
 };
 
+enum AllMovementModes {
+    Independent = 0,
+    Circular,
+    CircularFixedRadius,
+    CircularFixedAngle,
+    CircularFullyFixed,
+    DeltaLock,
+    SymmetricX,
+    SymmetricY,
+    TotalNumberMovementModes
+};
+
 
 //because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
 enum InputOutputModes {
@@ -277,14 +289,33 @@ public:
     //==============================================================================
     const String getName() const;
 
-    int getNumParameters();
-
-    float getParameter (int index);
     void setParameter (int index, float newValue);
-	void setParameterNotifyingHost (int index, float newValue);
+    void setParameterNotifyingHost (int index, float newValue);
 
-    const String getParameterName (int index);
-    const String getParameterText (int index);
+    
+    int             getNumParameters();
+    float           getParameter (int index);
+    int             getParameterNumSteps (int index);
+    const String    getParameterName (int index);
+    const String    getParameterText (int index);
+
+    String GetMovementModeName(int i) {
+        switch(i) {
+            case Independent: return "Independent";
+            case Circular: return "Circular";
+            case CircularFixedRadius: return "CircularFixedRadius";
+            case CircularFixedAngle: return "CircularFixedAngle";
+            case CircularFullyFixed: return "CircularFullyFixed";
+            case DeltaLock: return "DeltaLock";
+            case SymmetricX: return "SymmetricX";
+            case SymmetricY: return "SymmetricY";
+            default:
+                jassertfalse;
+                return "";
+        }
+        
+    }
+
 
     const String getInputChannelName (int channelIndex) const;
     const String getOutputChannelName (int channelIndex) const;
