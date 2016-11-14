@@ -925,16 +925,16 @@ void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
 }
 
 int SpatGrisAudioProcessor::getParameterNumSteps (int index){
-    cout << "getParameterNumSteps " << index << newLine;
-    switch (index) {
-        case kMovementMode:
-                cout << "getParameterNumSteps TotalNumberMovementModes" << newLine;
-            return TotalNumberMovementModes;
-            break;
-            
-        default:
+//    cout << "getParameterNumSteps " << index << newLine;
+//    switch (index) {
+//        case kMovementMode:
+//                cout << "getParameterNumSteps TotalNumberMovementModes" << newLine;
+//            return TotalNumberMovementModes;
+//            break;
+//            
+//        default:
             return getDefaultNumParameterSteps();
-    }
+//    }
 }
 
 const String SpatGrisAudioProcessor::getParameterText (int index)
@@ -1039,13 +1039,15 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         updateInputOutputMode();
     } else {
         //this is basically only done in unknown daws and in AUeval (or whatever)
-        setNumberOfSources(getTotalNumInputChannels(), true);
+        setNumberOfSources (getTotalNumInputChannels(),  true);
         setNumberOfSpeakers(getTotalNumOutputChannels(), true);
     }
     
     for (int i = 0; i < mNumberOfSources; i++) {
         mFilters[i].setSampleRate(static_cast<int>(sampleRate));
     }
+    
+        cout << "prepare to play " << sampleRate << " " << samplesPerBlock << " " << getNumberOfSources() << "x" << getNumberOfSpeakers() << "\n";
 }
 
 void SpatGrisAudioProcessor::reset() {

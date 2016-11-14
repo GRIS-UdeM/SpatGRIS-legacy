@@ -2176,7 +2176,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #if USE_DB_METERS
     if (!mFilter->getIsRecordingAutomation()){
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-        mLevels.getUnchecked(i)->refreshIfNeeded();
+            mLevels.getUnchecked(i)->refreshIfNeeded();
         }
     }
 #endif
