@@ -58,6 +58,10 @@ public:
     void clearTrajectoryPath();
     void updatePositionTrace(float p_fX, float p_fY);
     
+    void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
+    bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
+    
+    
     bool isDestructed(){
         return bIsDestructed;
     }
@@ -89,6 +93,7 @@ private:
     int m_iMaxPathLines;
     std::deque<FPoint> m_dqAllPathPoints;
     bool bIsDestructed;
+    bool m_bJustSelectedEndPoint;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

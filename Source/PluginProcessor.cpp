@@ -271,7 +271,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_fTrEllipseWidth = .25f;
     m_fEndLocationXY01 = FPoint(.5, .5);
     m_bIsSettingEndPoint = false;
-    m_bJustSelectedEndPoint = false;
     
     m_iOscSpat1stSrcId = 1;
     m_iOscSpatPort = 18032;

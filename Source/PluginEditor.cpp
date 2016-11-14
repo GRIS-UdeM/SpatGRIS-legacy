@@ -2069,10 +2069,10 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStar
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
-#if TIME_THINGS
-    std::ostringstream oss;
-    clock_t init = clock();
-#endif
+//#if TIME_THINGS
+//    std::ostringstream oss;
+//    clock_t init = clock();
+//#endif
 
     if (mTrStateEditor == kTrWriting){
         Trajectory::Ptr t = mFilter->getTrajectory();
@@ -2092,17 +2092,22 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     }
 
     
-#if TIME_THINGS
-    clock_t timeTraj = clock();
-    oss << "traj\t" << timeTraj - init << "\t";
-#endif
-    if (mFilter->justSelectedEndPoint()){
+//#if TIME_THINGS
+//    clock_t timeTraj = clock();
+//    oss << "traj\t" << timeTraj - init << "\t";
+//#endif
+    
+    //field component calls setJustSelectedEndPoint()
+//    if (mFilter->justSelectedEndPoint()){
+    if (mField->justSelectedEndPoint()){
         updateEndLocationTextEditors();
         mTrEndPointButton->setToggleState(false, dontSendNotification);
         mTrEndPointButton->setButtonText("Set end point");
         mTrEndPointLabel->setVisible(false);
-        mFilter->setJustSelectedEndPoint(false);
+//        mFilter->setJustSelectedEndPoint(false);
+        mField->setJustSelectedEndPoint(false);
     }
+    
     JUCE_COMPILER_WARNING("what is the difference between a property and a parameter???")
 	uint64_t hcp = mFilter->getHostChangedProperty();
 	if (hcp != mHostChangedProperty) {
@@ -2154,10 +2159,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
     }
     
-#if TIME_THINGS
-    clock_t timeProperty = clock();
-    oss << "property\t" << timeProperty - timeTraj << "\t";
-#endif
+//#if TIME_THINGS
+//    clock_t timeProperty = clock();
+//    oss << "property\t" << timeProperty - timeTraj << "\t";
+//#endif
 
     hcp = mFilter->getHostChangedParameter();
     if (hcp != mHostChangedParameter) {
@@ -2169,22 +2174,22 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mField->repaint();
     }
 
-#if TIME_THINGS
-    clock_t timeField = clock();
-    oss << "field\t" << timeField - timeProperty << "\t";
-#endif
-#if USE_DB_METERS
-    if (!mFilter->getIsRecordingAutomation()){
-        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-            mLevels.getUnchecked(i)->refreshIfNeeded();
-        }
-    }
-#endif
+//#if TIME_THINGS
+//    clock_t timeField = clock();
+//    oss << "field\t" << timeField - timeProperty << "\t";
+//#endif
+//#if USE_DB_METERS
+//    if (!mFilter->getIsRecordingAutomation()){
+//        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
+//            mLevels.getUnchecked(i)->refreshIfNeeded();
+//        }
+//    }
+//#endif
 
-#if TIME_THINGS
-    clock_t timeLevels = clock();
-    oss << "levels\t" << timeLevels - timeField << "\t";
-#endif
+//#if TIME_THINGS
+//    clock_t timeLevels = clock();
+//    oss << "levels\t" << timeLevels - timeField << "\t";
+//#endif
     
     if (mNeedRepaint){
         mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
@@ -2203,10 +2208,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         }
         
         
-#if TIME_THINGS
-        clock_t timeGuiTab = clock();
-        oss << "GuiTab\t" << timeGuiTab - timeLevels << "\t";
-#endif
+//#if TIME_THINGS
+//        clock_t timeGuiTab = clock();
+//        oss << "GuiTab\t" << timeGuiTab - timeLevels << "\t";
+//#endif
       
         mSmoothingSlider->setValue(mFilter->getParameter(kSmooth));
         mVolumeFar->setValue(mFilter->getParameter(kVolumeFar));
@@ -2217,19 +2222,19 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mFilterMid->setValue(mFilter->getParameter(kFilterMid));
         mFilterFar->setValue(mFilter->getParameter(kFilterFar));
         mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
-#if TIME_THINGS
-        clock_t timeValues = clock();
-        oss << "Values\t" << timeValues - timeGuiTab << "\t";
-#endif
+//#if TIME_THINGS
+//        clock_t timeValues = clock();
+//        oss << "Values\t" << timeValues - timeGuiTab << "\t";
+//#endif
         if (!mFilter->isPlaying()){
             updateSourceLocationTextEditor(false);
             updateSpeakerLocationTextEditor();
         }
         
-#if TIME_THINGS
-        clock_t timeTextEd = clock();
-        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
-#endif
+//#if TIME_THINGS
+//        clock_t timeTextEd = clock();
+//        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
+//#endif
       
 
         updateSourceLocationTextEditor(false);
@@ -2248,35 +2253,25 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
             mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
         }
-#if TIME_THINGS
-        clock_t timeSpeakers = clock();
-        oss << "Speakers\t" << timeSpeakers - timeSources << "\t";
-#endif
+        
+//#if TIME_THINGS
+//        clock_t timeSpeakers = clock();
+//        oss << "Speakers\t" << timeSpeakers - timeSources << "\t";
+//#endif
     }
-    
-#if TIME_THINGS
-    clock_t timeRepaint = clock();
-    oss << "repaint\t" << timeRepaint - timeLevels << "\t";
-#endif
-    
-    mNeedRepaint = false;
-    mFieldNeedRepaint = false;
-    
-#if TIME_THINGS
-    clock_t timeSourceUpdate = clock();
-    oss << "SourceUpdate\t" << timeSourceUpdate - timeRepaint << "\t";
-#endif
-    
+
     if (mOsc) {
         mOsc->heartbeat();
     }
     
-#if TIME_THINGS
-    clock_t timeOsc = clock();
-    oss << "osc\t" << timeOsc - timeSourceUpdate;
-    mTimingVector.push_back(oss.str());
-#endif
+//#if TIME_THINGS
+//    clock_t timeOsc = clock();
+//    oss << "osc\t" << timeOsc - timeSpeakers;
+//    mTimingVector.push_back(oss.str());
+//#endif
     
+    mNeedRepaint        = false;
+    mFieldNeedRepaint   = false;
     startTimer(kTimerDelay);
 }
 

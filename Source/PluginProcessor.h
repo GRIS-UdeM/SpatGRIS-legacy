@@ -368,10 +368,7 @@ public:
     
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
-    
-    void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
-    bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
-    
+        
 	int getRoutingMode() const { return mRoutingMode; }
 	void setRoutingMode(int s) {
         mRoutingMode = s;
@@ -879,7 +876,6 @@ private:
     bool m_bPreventSourceAzimElevSpanUpdate;
     bool m_bIsSettingEndPoint;
     FPoint m_fEndLocationXY01;
-    bool m_bJustSelectedEndPoint;
 
     OSCSender mOscSpatSender;
     bool m_bOscSpatSenderIsConnected;

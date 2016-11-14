@@ -35,6 +35,7 @@ FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *move
 , m_iCurPathLines(0)
 , m_iMaxPathLines(10)
 , bIsDestructed(false)
+, m_bJustSelectedEndPoint(false)
 {
     m_pMover->setFieldComponent(this);
 }
@@ -381,7 +382,8 @@ void FieldComponent::mouseDown(const MouseEvent &event)
         float fCenteredY01 = (float)event.y/fieldHeight;//-_ZirkOSC_Center_Y;
         mFilter->setEndLocationXY01(FPoint(fCenteredX01, fCenteredY01));
         mFilter->setIsSettingEndPoint(false);
-        mFilter->setJustSelectedEndPoint(true);
+//        mFilter->setJustSelectedEndPoint(true);
+        setJustSelectedEndPoint(true);
     }
 
 	
