@@ -98,8 +98,9 @@ void FieldComponent::paint (Graphics& g)
 //	g.setColour(Colour(grey, grey, grey));
     g.setColour(mGrisFeel.getFieldColor());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
-	// - - - - - - - - - - - -
-	// draw back circles
+	
+    // - - - - - - - - - - - -
+	// draw big background circles
 	// - - - - - - - - - - - -
 	g.setColour(Colours::white);
     int iCurRadius = (processMode == kOscSpatMode) ? kRadiusMax : 1;
@@ -108,6 +109,13 @@ void FieldComponent::paint (Graphics& g)
 		float x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 	}
+    //draw cross if in kOscSpatMode
+    if(processMode == kOscSpatMode){
+        g.setColour(Colours::white);
+        g.drawLine(fieldWidth/2, kSourceRadius, fieldWidth/2, fieldHeight-kSourceRadius);
+        g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
+    }
+    
 	if (processMode != kFreeVolumeMode) {
 		g.setColour(Colour::fromFloatRGBA(0.5f, 0.5f, 0.5f, 1));
 		float w = (kThetaLockRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
