@@ -790,3 +790,11 @@ Apparently it is possible to have steps (getParameterNumSteps()) and potentially
 get different names for different steps with getParameterText()?
 
 also getParameterLabel() returns the units for a specific parameter
+
+------------------ 2016-11-14---------------
+#97: vst3s crash reaper
+it seems that the problem is that with vst3s, preparetoplay is called
+over and over again, setting the number of ixo to 8x16, 2x2, then 1x1.
+Commenting the part in preparetoplay that does that makes the plugin
+load, but then we're in 12x12 instead of 8x16. so why don't we forget
+about the vst3s for now...!
