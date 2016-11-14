@@ -1047,7 +1047,7 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         mFilters[i].setSampleRate(static_cast<int>(sampleRate));
     }
     
-        cout << "prepare to play " << sampleRate << " " << samplesPerBlock << " " << getNumberOfSources() << "x" << getNumberOfSpeakers() << "\n";
+//        cout << "prepare to play " << sampleRate << " " << samplesPerBlock << " " << getNumberOfSources() << "x" << getNumberOfSpeakers() << "\n";
 }
 
 void SpatGrisAudioProcessor::reset() {
