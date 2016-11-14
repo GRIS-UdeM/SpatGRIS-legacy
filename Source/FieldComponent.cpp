@@ -102,8 +102,8 @@ void FieldComponent::paint (Graphics& g)
 	// draw back circles
 	// - - - - - - - - - - - -
 	g.setColour(Colours::white);
-    float iCurRadius = 1;//(processMode == kOscSpatMode) ? kRadiusMax : 1;
-	for (; iCurRadius <= kRadiusMax; iCurRadius += 1) {
+    int iCurRadius = (processMode == kOscSpatMode) ? kRadiusMax : 1;
+	for (; iCurRadius <= kRadiusMax; ++iCurRadius) {
 		float w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
 		float x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
