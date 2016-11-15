@@ -821,4 +821,6 @@ ok, so my edits to editor::timercallback created a bunch of issues
               processor->setSrcSelected, which increases mHostChangedParameterProcessor
         - dragging a source causes an internal field refresh
             - calls mover::move
-when we stop, we want the db meters to go black
+    X-when we stop, we want the db meters to go black
+    X-mute buttons can be automatted, and when reading automation, they do change from 
+     unmuted to muted, but not from muted to unmuted...!

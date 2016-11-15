@@ -1312,14 +1312,14 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
 void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor){
     //remove old stuff
     Component *ct = mSpeakersBox->getContent();
-    for (int iCurLevelComponent = 0; iCurLevelComponent < mMutes.size(); ++iCurLevelComponent){
-        ct->removeChildComponent(mMutes.getUnchecked(iCurLevelComponent));
+    for (int iCurLevelComponent = 0; iCurLevelComponent < mMuteButtons.size(); ++iCurLevelComponent){
+        ct->removeChildComponent(mMuteButtons.getUnchecked(iCurLevelComponent));
 #if USE_DB_METERS
         ct->removeChildComponent(mLevelComponents.getUnchecked(iCurLevelComponent));
         mComponents.removeObject(mLevelComponents.getUnchecked(iCurLevelComponent));
 #endif
     }
-    mMutes.clear();
+    mMuteButtons.clear();
     mSpSelectCombo->clear();
 #if USE_DB_METERS
     mLevelComponents.clear();
@@ -1341,7 +1341,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
 		float fMute = mFilter->getSpeakerM(i);
 		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
         mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
-        mMutes.add(mute);
+        mMuteButtons.add(mute);
         const int muteWidth = 50;
 #if USE_DB_METERS
         juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
@@ -1613,7 +1613,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
 
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
-        if (button == mMutes[i]) {
+        if (button == mMuteButtons[i]) {
             float v = button->getToggleState() ? 1.f : 0.f;
             mFilter->setParameterNotifyingHost(mFilter->getParamForSpeakerM(i), v);
             mFieldNeedRepaint = true;
@@ -2228,7 +2228,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //        clock_t timeValues = clock();
 //        oss << "Values\t" << timeValues - timeGuiTab << "\t";
 //#endif
-        
+        //so these text editors will update only when we're not playing and moving stuff around
         if (!mFilter->isPlaying()){
             updateSourceLocationTextEditor(false);
             updateSpeakerLocationTextEditor();
@@ -2238,14 +2238,13 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //        clock_t timeTextEd = clock();
 //        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
 //#endif
-        
+        //update sliders and mute, these could be automated
         int iSelSrc = mFilter->getSrcSelected();
 		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
         mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
         mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
-
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-            mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
+            mMuteButtons.getUnchecked(i)->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
         }
         
 //#if TIME_THINGS

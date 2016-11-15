@@ -157,7 +157,7 @@ private:
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
 
-	Array<ToggleButton*> mMutes;
+	Array<ToggleButton*> mMuteButtons;
     
 #if USE_DB_METERS
 	Array<LevelComponent*> mLevelComponents;
