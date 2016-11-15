@@ -815,4 +815,10 @@ parameters are also presets
 ok, so my edits to editor::timercallback created a bunch of issues
     X-field will not refresh when changing processmode
     X- surface, azimspan, elevspan slider not refreshing field
+    X- moving a source doesn't cause refresh to source location editor
+        - clicking on source does refresh it, but dragging it doesn;t
+            - clicking on source calls mover->begin, which calls 
+              processor->setSrcSelected, which increases mHostChangedParameterProcessor
+        - dragging a source causes an internal field refresh
+            - calls mover::move
 

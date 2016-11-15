@@ -2169,8 +2169,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mSpSelectCombo->    setSelectedId(mFilter->getSpSelected());
         mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
         mSpPlacementCombo-> setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
-        updateSourceLocationTextEditor(false);
-        updateSpeakerLocationTextEditor();
+
         
         mTrTypeComboBox->           setSelectedId(mFilter->getTrType());
         mTrDuration->               setText(String(mFilter->getTrDuration()));
@@ -2247,10 +2246,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //        clock_t timeTextEd = clock();
 //        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
 //#endif
-      
-
-        updateSourceLocationTextEditor(false);
-        updateSpeakerLocationTextEditor();
         
         int iSelSrc = mFilter->getSrcSelected();
 
