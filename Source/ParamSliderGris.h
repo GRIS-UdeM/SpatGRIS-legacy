@@ -245,13 +245,10 @@ public:
         return value;
     }
     
-    //examples the paramIndex is the number used for processor->getparameter() and the type is something like source or speaker
-    void setParamIndexAndType(int pParamIndex, int pParamType){
-        mParamIndex = pParamIndex;
-        mParamType = pParamType;
-    }
+    
     
 private:
+    //examples the paramIndex is the number used for processor->getparameter() and the type is something like source or speaker
     int mParamIndex, mParamType;
     ToggleButton *mLink;
     SpatGrisAudioProcessor *mFilter;

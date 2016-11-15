@@ -1104,8 +1104,6 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSurfaceOrPanSlider->setEnabled(true);
         mSurfaceOrPanLabel->setEnabled(true);
         mSurfaceOrPanLinkButton->setEnabled(true);
-        int iSelSrc = mFilter->getSrcSelected();
-        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
         mSurfaceOrPanSlider->valueChanged();
     }
     if (mFilter->getProcessMode() == kPanSpanMode){
@@ -2248,14 +2246,9 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //#endif
         
         int iSelSrc = mFilter->getSrcSelected();
-
-        static_cast<ParamSliderGRIS*>(mSurfaceOrPanSlider)->setParamIndexAndType(mFilter->getParamForSourceD(iSelSrc), kParamSource);
-        static_cast<ParamSliderGRIS*>(mAzimSpanSlider)->setParamIndexAndType(mFilter->getParamForSourceAzimSpan(iSelSrc), kParamAzimSpan);
-        static_cast<ParamSliderGRIS*>(mElevSpanSlider)->setParamIndexAndType(mFilter->getParamForSourceElevSpan(iSelSrc), kParamElevSpan);
-
 		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
-        mAzimSpanSlider->setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
-        mElevSpanSlider->setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
+        mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
+        mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
 
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
             mMutes.getUnchecked(i)->setToggleState(mFilter->getSpeakerM(i), dontSendNotification);
