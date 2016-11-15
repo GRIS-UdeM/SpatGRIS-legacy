@@ -103,6 +103,9 @@ public:
 	
     //! Called every 50ms;
 	void timerCallback();
+    void propertyChanged();
+    void updateTrajectoryStuff();
+    void repaintTheStuff();
 	void audioProcessorChanged (AudioProcessor* processor);
 	void audioProcessorParameterChanged (AudioProcessor* processor, int parameterIndex, float newValue);
 				

@@ -2089,22 +2089,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //    clock_t init = clock();
 //#endif
 
-    if (mTrStateEditor == kTrWriting){
-        Trajectory::Ptr t = mFilter->getTrajectory();
-        if (t) {
-            //if we're writing a trajectory, update the progressbar and trajectory path
-            mTrProgressBar->setValue(t->progress());
-            int iCurCycle = t->progressCycle();
-            if (mTrCycleCount != iCurCycle){
-                mField->clearTrajectoryPath();
-                mTrCycleCount = iCurCycle;
-            }
-        } else {
-            updateTrajectoryStartComponent(false);                          //re-activate trajectory components
-            mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
-        }
-        mFieldNeedRepaint = true;
-    }
+    updateTrajectoryStuff();
   
 //#if TIME_THINGS
 //    clock_t timeLevels = clock();
@@ -2133,57 +2118,13 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mField->setJustSelectedEndPoint(false);
     }
     
-    //------------------------------------- CHANGED PROPERTY -------------------------------------
     //properties are only updated when loading a preset, vs parameters are updated all the time
     //parameters are anything that can be automated or changed randomly by the processor
     //properties are things that the user can only change with the gui, and save as preset
 	uint64_t hcpProcessor = mFilter->getHostChangedProperty();
 	if (hcpProcessor != mHostChangedPropertyEditor) {
-		mHostChangedPropertyEditor = hcpProcessor;
-
-        JUCE_COMPILER_WARNING("WHAT IS THIS?!?!?!?!")
-		if (mFilter->getIsAllowInputOutputModeSelection()){
-            int iCurMode = mInputOutputModeCombo->getSelectedId();
-            int iNewMode = mFilter->getInputOutputMode();
-            if (iNewMode != iCurMode){
-                mFilter->storeCurrentLocations();
-                m_bLoadingPreset = true;
-                mInputOutputModeCombo->setSelectedId(iNewMode);
-                buttonClicked(mApplyInputOutputModeButton);
-            }
-        }
-        
-        updateMovementModeComboPosition();
-        
-        mProcessModeCombo-> setSelectedId(mFilter->getProcessMode() + 1);
-        mOscLeapSourceCb->  setSelectedId(mFilter->getOscLeapSource() + 1);
-        mSrcSelectCombo->   setSelectedId(mFilter->getSrcSelected()+1);
-        mSpSelectCombo->    setSelectedId(mFilter->getSpSelected());
-        mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
-        mSpPlacementCombo-> setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
-
-        
-        mTrTypeComboBox->           setSelectedId(mFilter->getTrType());
-        mTrDuration->               setText(String(mFilter->getTrDuration()));
-        mTrUnits->                  setSelectedId(mFilter->getTrUnits());
-        mTrRepeats->                setText(String(mFilter->getTrRepeats()));
-        mTrDampeningTextEditor->    setText(String(mFilter->getTrDampening()));
-        mTrDeviationTextEditor->    setText(String(mFilter->getTrDeviation()*360));
-        mTrEllipseWidthTextEditor-> setText(String(mFilter->getTrEllipseWidth()*2));
-        mTrTurnsTextEditor->        setText(String(mFilter->getTrTurns()));
-        mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
-        mOscSpatPortTextEditor->    setText(String(mFilter->getOscSpatPort()));
-
-#if USE_TOUCH_OSC
-        updateOscComponent(mOsc);
-#endif
-        mShowGridLines->setToggleState(mFilter->getShowGridLines(),             dontSendNotification);
-        mOscActiveButton->setToggleState(mFilter->getOscActive(),               dontSendNotification);
-        mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(),dontSendNotification);
-        mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(),     dontSendNotification);
-        mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
-        mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
-        mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
+        mHostChangedPropertyEditor = hcpProcessor;
+        propertyChanged();
     }
     
 //#if TIME_THINGS
@@ -2191,8 +2132,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //    oss << "property\t" << timeProperty - timeTraj << "\t";
 //#endif
 
-    
-//------------------------------------- CHANGED PARAMETER -------------------------------------
+
     hcpProcessor = mFilter->getHostChangedParameter();
     if (hcpProcessor != mHostChangedParameterEditor) {
         mHostChangedParameterEditor = hcpProcessor;
@@ -2211,46 +2151,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //#endif
     
     if (mNeedRepaint){
-        mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
-        
-        //apparently all these sliders are automatable
-        mSmoothingSlider->      setValue(mFilter->getParameter(kSmooth));
-        mVolumeFar->            setValue(mFilter->getParameter(kVolumeFar));
-        mVolumeMid->            setValue(mFilter->getParameter(kVolumeMid));
-        mVolumeNear->           setValue(mFilter->getParameter(kVolumeNear));
-        mMaxSpanVolumeSlider->  setValue(mFilter->getParameter(kMaxSpanVolume));
-        mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
-        mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
-        mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
-        mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
-
-//#if TIME_THINGS
-//        clock_t timeValues = clock();
-//        oss << "Values\t" << timeValues - timeGuiTab << "\t";
-//#endif
-        //so these text editors will update only when we're not playing and moving stuff around
-        if (!mFilter->isPlaying()){
-            updateSourceLocationTextEditor(false);
-            updateSpeakerLocationTextEditor();
-        }
-        
-//#if TIME_THINGS
-//        clock_t timeTextEd = clock();
-//        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
-//#endif
-        //update sliders and mute, these could be automated
-        int iSelSrc = mFilter->getSrcSelected();
-		mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
-        mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
-        mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
-        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-            mMuteButtons.getUnchecked(i)->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
-        }
-        
-//#if TIME_THINGS
-//        clock_t timeSpeakers = clock();
-//        oss << "Speakers\t" << timeSpeakers - timeSources << "\t";
-//#endif
+        repaintTheStuff();
     }
 
     if (mOsc) {
@@ -2266,6 +2167,114 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     mNeedRepaint        = false;
     mFieldNeedRepaint   = false;
     startTimer(kTimerDelay);
+}
+
+void SpatGrisAudioProcessorEditor::updateTrajectoryStuff(){
+    if (mTrStateEditor == kTrWriting){
+        Trajectory::Ptr t = mFilter->getTrajectory();
+        if (t) {
+            //if we're writing a trajectory, update the progressbar and trajectory path
+            mTrProgressBar->setValue(t->progress());
+            int iCurCycle = t->progressCycle();
+            if (mTrCycleCount != iCurCycle){
+                mField->clearTrajectoryPath();
+                mTrCycleCount = iCurCycle;
+            }
+        } else {
+            updateTrajectoryStartComponent(false);                          //re-activate trajectory components
+            mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
+        }
+        mFieldNeedRepaint = true;
+    }
+}
+
+//this is essentially called when loading a preset
+void SpatGrisAudioProcessorEditor::propertyChanged(){
+    //update input/output mode, making sure to store and restore current locations
+    if (mFilter->getIsAllowInputOutputModeSelection()){
+        int iNewMode = mFilter->getInputOutputMode();
+        if (iNewMode != mInputOutputModeCombo->getSelectedId()){
+            mFilter->storeCurrentLocations();
+            m_bLoadingPreset = true;
+            mInputOutputModeCombo->setSelectedId(iNewMode);
+            buttonClicked(mApplyInputOutputModeButton);
+        }
+    }
+    
+    updateMovementModeComboPosition();
+    
+    mProcessModeCombo-> setSelectedId(mFilter->getProcessMode() + 1);
+    mOscLeapSourceCb->  setSelectedId(mFilter->getOscLeapSource() + 1);
+    mSrcSelectCombo->   setSelectedId(mFilter->getSrcSelected()+1);
+    mSpSelectCombo->    setSelectedId(mFilter->getSpSelected());
+    mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
+    mSpPlacementCombo-> setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
+    
+    
+    mTrTypeComboBox->           setSelectedId(mFilter->getTrType());
+    mTrDuration->               setText(String(mFilter->getTrDuration()));
+    mTrUnits->                  setSelectedId(mFilter->getTrUnits());
+    mTrRepeats->                setText(String(mFilter->getTrRepeats()));
+    mTrDampeningTextEditor->    setText(String(mFilter->getTrDampening()));
+    mTrDeviationTextEditor->    setText(String(mFilter->getTrDeviation()*360));
+    mTrEllipseWidthTextEditor-> setText(String(mFilter->getTrEllipseWidth()*2));
+    mTrTurnsTextEditor->        setText(String(mFilter->getTrTurns()));
+    mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
+    mOscSpatPortTextEditor->    setText(String(mFilter->getOscSpatPort()));
+    
+#if USE_TOUCH_OSC
+    updateOscComponent(mOsc);
+#endif
+    mShowGridLines->setToggleState(mFilter->getShowGridLines(),             dontSendNotification);
+    mOscActiveButton->setToggleState(mFilter->getOscActive(),               dontSendNotification);
+    mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(),dontSendNotification);
+    mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(),     dontSendNotification);
+    mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
+    mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
+    mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
+}
+
+void SpatGrisAudioProcessorEditor::repaintTheStuff(){
+    mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
+    
+    //apparently all these sliders are automatable
+    mSmoothingSlider->      setValue(mFilter->getParameter(kSmooth));
+    mVolumeFar->            setValue(mFilter->getParameter(kVolumeFar));
+    mVolumeMid->            setValue(mFilter->getParameter(kVolumeMid));
+    mVolumeNear->           setValue(mFilter->getParameter(kVolumeNear));
+    mMaxSpanVolumeSlider->  setValue(mFilter->getParameter(kMaxSpanVolume));
+    mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
+    mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
+    mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
+    mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
+    
+    //#if TIME_THINGS
+    //        clock_t timeValues = clock();
+    //        oss << "Values\t" << timeValues - timeGuiTab << "\t";
+    //#endif
+    //so these text editors will update only when we're not playing and moving stuff around
+    if (!mFilter->isPlaying()){
+        updateSourceLocationTextEditor(false);
+        updateSpeakerLocationTextEditor();
+    }
+    
+    //#if TIME_THINGS
+    //        clock_t timeTextEd = clock();
+    //        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
+    //#endif
+    //update sliders and mute, these could be automated
+    int iSelSrc = mFilter->getSrcSelected();
+    mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
+    mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
+    mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
+    for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
+        mMuteButtons.getUnchecked(i)->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
+    }
+    
+    //#if TIME_THINGS
+    //        clock_t timeSpeakers = clock();
+    //        oss << "Speakers\t" << timeSpeakers - timeSources << "\t";
+    //#endif
 }
 
 void SpatGrisAudioProcessorEditor::audioProcessorChanged (AudioProcessor* processor){
