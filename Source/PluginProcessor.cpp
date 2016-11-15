@@ -498,8 +498,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
                 }
             }
         }
-        
-        
         mHostChangedParameterProcessor++;
     }
 }
@@ -507,9 +505,15 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
     mParameters.set(index, newValue);
-//    if (index == kMovementMode){
-//        startOrStopSourceUpdateThread();
-//    }
+    switch(index % kParamsPerSource) {
+        case kSourceD:
+        case kSourceAzimSpan:
+        case kSourceElevSpan:
+            ++mHostChangedParameterProcessor;
+            break;
+        default:
+            break;
+    }    
     sendParamChangeMessageToListeners(index, newValue);
 }
 

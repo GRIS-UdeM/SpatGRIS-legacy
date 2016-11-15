@@ -1618,7 +1618,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         if (button == mMutes[i]) {
             float v = button->getToggleState() ? 1.f : 0.f;
             mFilter->setParameterNotifyingHost(mFilter->getParamForSpeakerM(i), v);
-            cout << "speakers button filed repain\n";
             mFieldNeedRepaint = true;
             return;
         }
@@ -1637,7 +1636,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             t->stop();                              //stop it
             mFilter->setTrajectory(nullptr);        //delete it
             updateTrajectoryStartComponent(false);  //re-activate trajectory components
-            cout << "write button filed repain\n";
             mFieldNeedRepaint = true;
         }
         //a trajectory does not exist, create one
@@ -1707,7 +1705,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             m_bLoadingPreset = false;
         }
         //repaint the field
-        cout << "apply button filed repain\n";
         mFieldNeedRepaint = true;
         
         //ensure movement mode stays valid
@@ -1723,7 +1720,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (button == mShowGridLines) {
         mFilter->setShowGridLines(button->getToggleState());
-        cout << "grid button filed repain\n";
         mFieldNeedRepaint = true;
     }
     else if (button == mOscActiveButton) {
@@ -2212,11 +2208,9 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mNeedRepaint        = true;
         //repainting the field is required for reading movement automations (and potentially other things)
         mFieldNeedRepaint   = true;
-        cout << "param filed repain\n";
     }
     
     if (mFieldNeedRepaint){
-        cout << "filed repain\n";
         mField->repaint();
     }
 

@@ -107,10 +107,7 @@ public:
 	void audioProcessorParameterChanged (AudioProcessor* processor, int parameterIndex, float newValue);
 				
 	//void refreshSize();
-	void fieldChanged() {
-        cout << "change filed repain\n";
-        mFieldNeedRepaint = true;
-    }
+	void fieldChanged() { mFieldNeedRepaint = true; }
 	
     //! Return the number of the source selected for the Leap Motion
 	int getOscLeapSource() { return mFilter->getOscLeapSource(); }
