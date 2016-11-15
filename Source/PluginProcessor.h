@@ -439,7 +439,8 @@ public:
 	int getGuiTab() const { return mGuiTab; }
 	void setGuiTab(int s) {
         mGuiTab = s;
-        ++mHostChangedParameterProcessor;
+//        ++mHostChangedParameterProcessor;
+        ++mHostChangedPropertyProcessor;
     }
 
     void sendOscSpatValues();

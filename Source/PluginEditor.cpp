@@ -97,7 +97,9 @@ public:
     { }
     
     void currentTabChanged (int newCurrentTabIndex, const String& newCurrentTabName) override{
-        if (!mInited) return;
+        if (!mInited) {
+            return;
+        }
         
         //printf("Octogris: currentTabChanged\n");
         mFilter->setGuiTab(newCurrentTabIndex);
@@ -930,7 +932,8 @@ AudioProcessorEditor (ownerFilter)
     }
     
     mTabs->initDone();
-    
+    updateMovementModeComboPosition();
+
     mFilter->setCalculateLevels(true);
     
     //resizable corner
@@ -940,6 +943,25 @@ AudioProcessorEditor (ownerFilter)
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
     startTimer(kTimerDelay);
+}
+
+
+void SpatGrisAudioProcessorEditor::updateMovementModeComboPosition(){
+    if(mFilter->getGuiTab() == 0){
+        int w = (mTabs->getTabContentComponent(0)->getWidth() - kMargin) / 3 - kMargin;
+        mMovementModeCombo->setBounds(kMargin, kMargin+kDefaultLabelHeight+5, w, kDefaultLabelHeight);
+        mTabs->getTabContentComponent(0)->addAndMakeVisible(mMovementModeCombo);
+        mTabs->getTabContentComponent(1)->removeChildComponent(mMovementModeCombo);
+    } else if(mFilter->getGuiTab() == 1){
+        int cbw = 130;
+        int x = 2*cbw + 2*kMargin;
+        int y = kMargin + 2 * (kDefaultLabelHeight + 5);
+        int w = (mTabs->getTabContentComponent(1)->getWidth() - kMargin) / 3 - kMargin;
+        mMovementModeCombo->setBounds(x, y, w, kDefaultLabelHeight);
+        mTabs->getTabContentComponent(1)->addAndMakeVisible(mMovementModeCombo);
+        mTabs->getTabContentComponent(0)->removeChildComponent(mMovementModeCombo);
+    }
+
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
@@ -1595,6 +1617,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         if (button == mMutes[i]) {
             float v = button->getToggleState() ? 1.f : 0.f;
             mFilter->setParameterNotifyingHost(mFilter->getParamForSpeakerM(i), v);
+            cout << "speakers button filed repain\n";
             mFieldNeedRepaint = true;
             return;
         }
@@ -1613,6 +1636,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             t->stop();                              //stop it
             mFilter->setTrajectory(nullptr);        //delete it
             updateTrajectoryStartComponent(false);  //re-activate trajectory components
+            cout << "write button filed repain\n";
             mFieldNeedRepaint = true;
         }
         //a trajectory does not exist, create one
@@ -1682,6 +1706,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             m_bLoadingPreset = false;
         }
         //repaint the field
+        cout << "apply button filed repain\n";
         mFieldNeedRepaint = true;
         
         //ensure movement mode stays valid
@@ -1697,6 +1722,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (button == mShowGridLines) {
         mFilter->setShowGridLines(button->getToggleState());
+        cout << "grid button filed repain\n";
         mFieldNeedRepaint = true;
     }
     else if (button == mOscActiveButton) {
@@ -2087,8 +2113,8 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         } else {
             updateTrajectoryStartComponent(false);                          //re-activate trajectory components
             mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
-            mFieldNeedRepaint = true;                                                 //erase the trajectory path
         }
+        mFieldNeedRepaint = true;
     }
   
 //#if TIME_THINGS
@@ -2137,7 +2163,8 @@ void SpatGrisAudioProcessorEditor::timerCallback()
                 buttonClicked(mApplyInputOutputModeButton);
             }
         }
-
+        
+        updateMovementModeComboPosition();
         
         mProcessModeCombo-> setSelectedId(mFilter->getProcessMode() + 1);
         mOscLeapSourceCb->  setSelectedId(mFilter->getOscLeapSource() + 1);
@@ -2184,9 +2211,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mNeedRepaint        = true;
         //repainting the field is required for reading movement automations (and potentially other things)
         mFieldNeedRepaint   = true;
+        cout << "param filed repain\n";
     }
     
     if (mFieldNeedRepaint){
+        cout << "filed repain\n";
         mField->repaint();
     }
 
@@ -2195,39 +2224,19 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //    oss << "field\t" << timeField - timeProperty << "\t";
 //#endif
     
-
-    
     if (mNeedRepaint){
         mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
-        if(mFilter->getGuiTab() == 0){
-            int w = (mTabs->getTabContentComponent(0)->getWidth() - kMargin) / 3 - kMargin;
-            mMovementModeCombo->setBounds(kMargin, kMargin+kDefaultLabelHeight+5, w, kDefaultLabelHeight);
-            mTabs->getTabContentComponent(0)->addAndMakeVisible(mMovementModeCombo);
-        } else if(mFilter->getGuiTab() == 1){
-            
-            int cbw = 130;
-            int x = 2*cbw + 2*kMargin;
-            int y = kMargin + 2 * (kDefaultLabelHeight + 5);
-            int w = (mTabs->getTabContentComponent(1)->getWidth() - kMargin) / 3 - kMargin;
-            mMovementModeCombo->setBounds(x, y, w, kDefaultLabelHeight);
-            mTabs->getTabContentComponent(1)->addAndMakeVisible(mMovementModeCombo);
-        }
         
-        
-//#if TIME_THINGS
-//        clock_t timeGuiTab = clock();
-//        oss << "GuiTab\t" << timeGuiTab - timeLevels << "\t";
-//#endif
-      
-        mSmoothingSlider->setValue(mFilter->getParameter(kSmooth));
-        mVolumeFar->setValue(mFilter->getParameter(kVolumeFar));
-        mVolumeMid->setValue(mFilter->getParameter(kVolumeMid));
-        mVolumeNear->setValue(mFilter->getParameter(kVolumeNear));
-        mMaxSpanVolumeSlider->setValue(mFilter->getParameter(kMaxSpanVolume));
-        mFilterNear->setValue(mFilter->getParameter(kFilterNear));
-        mFilterMid->setValue(mFilter->getParameter(kFilterMid));
-        mFilterFar->setValue(mFilter->getParameter(kFilterFar));
-        mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
+        //apparently all these sliders are automatable
+        mSmoothingSlider->      setValue(mFilter->getParameter(kSmooth));
+        mVolumeFar->            setValue(mFilter->getParameter(kVolumeFar));
+        mVolumeMid->            setValue(mFilter->getParameter(kVolumeMid));
+        mVolumeNear->           setValue(mFilter->getParameter(kVolumeNear));
+        mMaxSpanVolumeSlider->  setValue(mFilter->getParameter(kMaxSpanVolume));
+        mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
+        mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
+        mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
+        mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
 
 //#if TIME_THINGS
 //        clock_t timeValues = clock();

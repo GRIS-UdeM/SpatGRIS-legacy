@@ -107,7 +107,10 @@ public:
 	void audioProcessorParameterChanged (AudioProcessor* processor, int parameterIndex, float newValue);
 				
 	//void refreshSize();
-	void fieldChanged() { mFieldNeedRepaint = true; }
+	void fieldChanged() {
+        cout << "change filed repain\n";
+        mFieldNeedRepaint = true;
+    }
 	
     //! Return the number of the source selected for the Leap Motion
 	int getOscLeapSource() { return mFilter->getOscLeapSource(); }
@@ -274,6 +277,7 @@ private:
     void updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting);
     void updateEndLocationTextEditors();
     void updateInputOutputCombo();
+    void updateMovementModeComboPosition();
     void updateProcessModeComponents();
     void updateRoutingModeComponents();
 	

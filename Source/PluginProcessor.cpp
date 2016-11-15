@@ -240,9 +240,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mIsNumberSpeakersChanged = false;
     mGuiWidth = kDefaultWidth,
     mGuiHeight = kDefaultHeight,
-	mGuiTab = 0;
 	mHostChangedParameterProcessor = 0;
 	mHostChangedPropertyProcessor = 0;
+    setGuiTab(0);
 	mProcessCounter = 0;
 	//mLastTimeInSamples = -1;
 	setProcessMode(kPanVolumeMode);
@@ -1941,7 +1941,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mLinkElevSpan       = xmlState->getIntAttribute ("mLinkElevSpan", 0);
             mGuiWidth           = xmlState->getIntAttribute ("mGuiWidth", kDefaultWidth);
             mGuiHeight          = xmlState->getIntAttribute ("mGuiHeight", kDefaultHeight);
-            mGuiTab             = xmlState->getIntAttribute ("mGuiTab", 0);
+            setGuiTab(xmlState->getIntAttribute ("mGuiTab", 0));
             mOscLeapSource      = xmlState->getIntAttribute ("mOscLeapSource", 0);
             mOscReceiveEnabled  = xmlState->getIntAttribute ("mOscReceiveEnabled", 0);
             mOscReceivePort     = xmlState->getIntAttribute ("mOscReceivePort", 8000);
