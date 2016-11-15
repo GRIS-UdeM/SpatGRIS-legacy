@@ -160,7 +160,7 @@ private:
 	Array<ToggleButton*> mMutes;
     
 #if USE_DB_METERS
-	Array<LevelComponent*> mLevels;
+	Array<LevelComponent*> mLevelComponents;
    	Array<Slider*> mAttenuations;
 #endif
     

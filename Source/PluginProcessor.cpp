@@ -366,6 +366,7 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
 
 //==============================================================================
 void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
+    JUCE_COMPILER_WARNING("what does this function do?")
 #if USE_DB_METERS
     if (!mCalculateLevels && c){
         for (int i = 0; i < mNumberOfSpeakers; i++){

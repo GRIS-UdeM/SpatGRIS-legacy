@@ -1315,14 +1315,14 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
     for (int iCurLevelComponent = 0; iCurLevelComponent < mMutes.size(); ++iCurLevelComponent){
         ct->removeChildComponent(mMutes.getUnchecked(iCurLevelComponent));
 #if USE_DB_METERS
-        ct->removeChildComponent(mLevels.getUnchecked(iCurLevelComponent));
-        mComponents.removeObject(mLevels.getUnchecked(iCurLevelComponent));
+        ct->removeChildComponent(mLevelComponents.getUnchecked(iCurLevelComponent));
+        mComponents.removeObject(mLevelComponents.getUnchecked(iCurLevelComponent));
 #endif
     }
     mMutes.clear();
     mSpSelectCombo->clear();
 #if USE_DB_METERS
-    mLevels.clear();
+    mLevelComponents.clear();
 #endif
     
     //put new stuff
@@ -1349,7 +1349,7 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
         lc->setBounds(level);
         ct->addAndMakeVisible(lc);
         mComponents.add(lc);
-        mLevels.add(lc);
+        mLevelComponents.add(lc);
 #endif
         
         y += dh + 5;
@@ -1940,35 +1940,29 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
     if (comboBox == mMovementModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
-        //if we're playing, just set combobox back to what it was and return
-//        if(mFilter->isPlaying()){
-//            int iCurMode = mFilter->getMovementMode() + 1;
-//            mMovementModeCombo->setSelectedId(iCurMode);
-//            return;
-//        } else {
-            mFilter->setMovementMode(iSelectedMode);
-            if(mFilter->getNumberOfSources() > 1){
-                switch (iSelectedMode) {
-                    case 2:
-                        m_pMover->setEqualRadius();
-                        break;
-                    case 3:
-                        m_pMover->setEqualAngles();
-                        break;
-                    case 4:
-                        m_pMover->setEqualRadiusAndAngles();
-                        break;
-                    case 6:
-                        m_pMover->setSymmetricX();
-                        break;
-                    case 7:
-                        m_pMover->setSymmetricY();
-                        break;
-                    default:
-                        break;
-                }
+        mFilter->setMovementMode(iSelectedMode);
+        if(mFilter->getNumberOfSources() > 1){
+            switch (iSelectedMode) {
+                case 2:
+                    m_pMover->setEqualRadius();
+                    break;
+                case 3:
+                    m_pMover->setEqualAngles();
+                    break;
+                case 4:
+                    m_pMover->setEqualRadiusAndAngles();
+                    break;
+                case 6:
+                    m_pMover->setSymmetricX();
+                    break;
+                case 7:
+                    m_pMover->setSymmetricY();
+                    break;
+                default:
+                    break;
             }
-//        }
+        }
+        
     }
     else if (comboBox == mRoutingModeCombo) {
         JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
@@ -2119,8 +2113,8 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     
 #if USE_DB_METERS
     if (!mFilter->getIsRecordingAutomation()){
-        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-            mLevels.getUnchecked(i)->refreshIfNeeded();
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){            
+            mLevelComponents.getUnchecked(i)->refreshIfNeeded();
         }
     }
 #endif
