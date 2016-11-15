@@ -142,8 +142,8 @@ private:
 	bool mFieldNeedRepaint;
     bool m_bIsReturnKeyPressedCalledFromFocusLost;
     bool m_bLoadingPreset;
-    uint64_t mHostChangedParameter;
-	uint64_t mHostChangedProperty;
+    uint64_t mHostChangedParameterEditor;
+	uint64_t mHostChangedPropertyEditor;
     
     Slider          *mSurfaceOrPanSlider;
     ToggleButton    *mSurfaceOrPanLinkButton;

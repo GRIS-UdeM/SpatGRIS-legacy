@@ -798,3 +798,15 @@ over and over again, setting the number of ixo to 8x16, 2x2, then 1x1.
 Commenting the part in preparetoplay that does that makes the plugin
 load, but then we're in 12x12 instead of 8x16. so why don't we forget
 about the vst3s for now...!
+
+#103
+what is the difference between a property and a parameter?
+properties are presets
+parameters are also presets
+
+* only loading presets triggers a refresh for properties
+* these trigger a refresh for parameters
+    * setParameters
+    * setNumberOfSources
+    * setNumberOfSpeakers
+    * loading a preset

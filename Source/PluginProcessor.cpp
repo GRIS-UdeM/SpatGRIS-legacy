@@ -241,8 +241,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mGuiWidth = kDefaultWidth,
     mGuiHeight = kDefaultHeight,
 	mGuiTab = 0;
-	mHostChangedParameter = 0;
-	mHostChangedProperty = 0;
+	mHostChangedParameterProcessor = 0;
+	mHostChangedPropertyProcessor = 0;
 	mProcessCounter = 0;
 	//mLastTimeInSamples = -1;
 	setProcessMode(kPanVolumeMode);
@@ -500,7 +500,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         }
         
         
-        mHostChangedParameter++;
+        mHostChangedParameterProcessor++;
     }
 }
 
@@ -835,7 +835,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
             mPrevTs.set(i, getSourceRT(i).y);
             
         }
-        mHostChangedParameter++;
+        mHostChangedParameterProcessor++;
     }
     //restart audio processing
     suspendProcessing (false);
@@ -879,7 +879,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
             			mSpeakerVolumes[j].add(0);
             }
         }
-        mHostChangedParameter++;
+        mHostChangedParameterProcessor++;
     }
     //starts audio processing again
     suspendProcessing (false);
@@ -2009,8 +2009,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             }
         }
     }
-    mHostChangedParameter++;
-    mHostChangedProperty++;
+    mHostChangedParameterProcessor++;
+    mHostChangedPropertyProcessor++;
 }
 
 //==============================================================================

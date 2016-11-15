@@ -205,12 +205,12 @@ AudioProcessorEditor (ownerFilter)
 //    m_pJoystickUpdateThread = new JoystickUpdateThread(this);
 //    mComponents.add(m_pJoystickUpdateThread);
     
-    mHostChangedParameter = mFilter->getHostChangedParameter();
-    mHostChangedProperty = mFilter->getHostChangedProperty();
+    mHostChangedParameterEditor = mFilter->getHostChangedParameter();
+    mHostChangedPropertyEditor  = mFilter->getHostChangedProperty();
     
-    mNeedRepaint = false;
-    mFieldNeedRepaint = false;
-	m_bLoadingPreset = false;
+    mNeedRepaint        = false;
+    mFieldNeedRepaint   = false;
+	m_bLoadingPreset    = false;
     mFilter->addListener(this);
     
     // main field
@@ -1101,7 +1101,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSurfaceOrPanLabel->setEnabled(false);
         mSurfaceOrPanLinkButton->setEnabled(false);
     }
-    repaint();
+    mNeedRepaint = true;
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
@@ -1556,7 +1556,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
         if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
             mFilter->setOscSpat1stSrcId(i1stSrcId);
-            repaint();
+            mNeedRepaint = true;
         }
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
     }
@@ -1595,7 +1595,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         if (button == mMutes[i]) {
             float v = button->getToggleState() ? 1.f : 0.f;
             mFilter->setParameterNotifyingHost(mFilter->getParamForSpeakerM(i), v);
-            mField->repaint();
+            mFieldNeedRepaint = true;
             return;
         }
     }
@@ -1613,7 +1613,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             t->stop();                              //stop it
             mFilter->setTrajectory(nullptr);        //delete it
             updateTrajectoryStartComponent(false);  //re-activate trajectory components
-            mNeedRepaint = true;                    //repaint stuff
+            mFieldNeedRepaint = true;
         }
         //a trajectory does not exist, create one
         else {
@@ -1681,8 +1681,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             mFilter->restoreCurrentLocations(-1);
             m_bLoadingPreset = false;
         }
-        //repaint the field, could probably just set mFieldNeedRepaint = true
-        mField->repaint();
+        //repaint the field
+        mFieldNeedRepaint = true;
         
         //ensure movement mode stays valid
         if (iSelectedMode == i1o1 || iSelectedMode == i1o2 || iSelectedMode == i1o4 || iSelectedMode == i1o6 || iSelectedMode == i1o8 || iSelectedMode == i1o16){
@@ -1697,7 +1697,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (button == mShowGridLines) {
         mFilter->setShowGridLines(button->getToggleState());
-        mField->repaint();
+        mFieldNeedRepaint = true;
     }
     else if (button == mOscActiveButton) {
         mFilter->setOscActive(button->getToggleState());
@@ -2087,36 +2087,46 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         } else {
             updateTrajectoryStartComponent(false);                          //re-activate trajectory components
             mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
-            fieldChanged();                                                 //erase the trajectory path
+            mFieldNeedRepaint = true;                                                 //erase the trajectory path
         }
     }
-
+  
+//#if TIME_THINGS
+//    clock_t timeLevels = clock();
+//    oss << "levels\t" << timeLevels - timeField << "\t";
+//#endif
+    
+#if USE_DB_METERS
+    if (!mFilter->getIsRecordingAutomation()){
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
+            mLevels.getUnchecked(i)->refreshIfNeeded();
+        }
+    }
+#endif
+    
     
 //#if TIME_THINGS
 //    clock_t timeTraj = clock();
 //    oss << "traj\t" << timeTraj - init << "\t";
 //#endif
     
-    //field component calls setJustSelectedEndPoint()
-//    if (mFilter->justSelectedEndPoint()){
     if (mField->justSelectedEndPoint()){
         updateEndLocationTextEditors();
         mTrEndPointButton->setToggleState(false, dontSendNotification);
         mTrEndPointButton->setButtonText("Set end point");
         mTrEndPointLabel->setVisible(false);
-//        mFilter->setJustSelectedEndPoint(false);
         mField->setJustSelectedEndPoint(false);
     }
     
-    JUCE_COMPILER_WARNING("what is the difference between a property and a parameter???")
-	uint64_t hcp = mFilter->getHostChangedProperty();
-	if (hcp != mHostChangedProperty) {
-		mHostChangedProperty = hcp;
+    //------------------------------------- CHANGED PROPERTY -------------------------------------
+    //properties are only updated when loading a preset, vs parameters are updated all the time
+    //parameters are anything that can be automated or changed randomly by the processor
+    //properties are things that the user can only change with the gui, and save as preset
+	uint64_t hcpProcessor = mFilter->getHostChangedProperty();
+	if (hcpProcessor != mHostChangedPropertyEditor) {
+		mHostChangedPropertyEditor = hcpProcessor;
 
-		mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
-		mProcessModeCombo->setSelectedId(mFilter->getProcessMode() + 1);
-        mOscLeapSourceCb->setSelectedId(mFilter->getOscLeapSource() + 1);
-        
+        JUCE_COMPILER_WARNING("WHAT IS THIS?!?!?!?!")
 		if (mFilter->getIsAllowInputOutputModeSelection()){
             int iCurMode = mInputOutputModeCombo->getSelectedId();
             int iNewMode = mFilter->getInputOutputMode();
@@ -2127,25 +2137,27 @@ void SpatGrisAudioProcessorEditor::timerCallback()
                 buttonClicked(mApplyInputOutputModeButton);
             }
         }
+
         
-        mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
-        mSpSelectCombo->setSelectedId(mFilter->getSpSelected());
-        
+        mProcessModeCombo-> setSelectedId(mFilter->getProcessMode() + 1);
+        mOscLeapSourceCb->  setSelectedId(mFilter->getOscLeapSource() + 1);
+        mSrcSelectCombo->   setSelectedId(mFilter->getSrcSelected()+1);
+        mSpSelectCombo->    setSelectedId(mFilter->getSpSelected());
         mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
+        mSpPlacementCombo-> setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
         updateSourceLocationTextEditor(false);
-        mSpPlacementCombo->setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
         updateSpeakerLocationTextEditor();
         
-        mTrTypeComboBox->setSelectedId(mFilter->getTrType());
-        mTrDuration->setText(String(mFilter->getTrDuration()));
-        mTrUnits->setSelectedId(mFilter->getTrUnits());
-        mTrRepeats->setText(String(mFilter->getTrRepeats()));
-        mTrDampeningTextEditor->setText(String(mFilter->getTrDampening()));
-        mTrDeviationTextEditor->setText(String(mFilter->getTrDeviation()*360));
-        mTrEllipseWidthTextEditor->setText(String(mFilter->getTrEllipseWidth()*2));
-        mTrTurnsTextEditor->setText(String(mFilter->getTrTurns()));
+        mTrTypeComboBox->           setSelectedId(mFilter->getTrType());
+        mTrDuration->               setText(String(mFilter->getTrDuration()));
+        mTrUnits->                  setSelectedId(mFilter->getTrUnits());
+        mTrRepeats->                setText(String(mFilter->getTrRepeats()));
+        mTrDampeningTextEditor->    setText(String(mFilter->getTrDampening()));
+        mTrDeviationTextEditor->    setText(String(mFilter->getTrDeviation()*360));
+        mTrEllipseWidthTextEditor-> setText(String(mFilter->getTrEllipseWidth()*2));
+        mTrTurnsTextEditor->        setText(String(mFilter->getTrTurns()));
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
-        mOscSpatPortTextEditor->setText(String(mFilter->getOscSpatPort()));
+        mOscSpatPortTextEditor->    setText(String(mFilter->getOscSpatPort()));
 
 #if USE_TOUCH_OSC
         updateOscComponent(mOsc);
@@ -2164,13 +2176,17 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //    oss << "property\t" << timeProperty - timeTraj << "\t";
 //#endif
 
-    hcp = mFilter->getHostChangedParameter();
-    if (hcp != mHostChangedParameter) {
-        mHostChangedParameter = hcp;
-        mNeedRepaint = true;
+    
+//------------------------------------- CHANGED PARAMETER -------------------------------------
+    hcpProcessor = mFilter->getHostChangedParameter();
+    if (hcpProcessor != mHostChangedParameterEditor) {
+        mHostChangedParameterEditor = hcpProcessor;
+        mNeedRepaint        = true;
+        //repainting the field is required for reading movement automations (and potentially other things)
+        mFieldNeedRepaint   = true;
     }
     
-    if (mFieldNeedRepaint || mNeedRepaint){
+    if (mFieldNeedRepaint){
         mField->repaint();
     }
 
@@ -2178,18 +2194,8 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //    clock_t timeField = clock();
 //    oss << "field\t" << timeField - timeProperty << "\t";
 //#endif
-//#if USE_DB_METERS
-//    if (!mFilter->getIsRecordingAutomation()){
-//        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-//            mLevels.getUnchecked(i)->refreshIfNeeded();
-//        }
-//    }
-//#endif
+    
 
-//#if TIME_THINGS
-//    clock_t timeLevels = clock();
-//    oss << "levels\t" << timeLevels - timeField << "\t";
-//#endif
     
     if (mNeedRepaint){
         mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
@@ -2222,10 +2228,12 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mFilterMid->setValue(mFilter->getParameter(kFilterMid));
         mFilterFar->setValue(mFilter->getParameter(kFilterFar));
         mRoutingVolumeSlider->setValue(mFilter->getParameter(kRoutingVolume));
+
 //#if TIME_THINGS
 //        clock_t timeValues = clock();
 //        oss << "Values\t" << timeValues - timeGuiTab << "\t";
 //#endif
+        
         if (!mFilter->isPlaying()){
             updateSourceLocationTextEditor(false);
             updateSpeakerLocationTextEditor();
@@ -2284,7 +2292,8 @@ void SpatGrisAudioProcessorEditor::audioProcessorChanged (AudioProcessor* proces
 //}
 
 void SpatGrisAudioProcessorEditor::audioProcessorParameterChanged(AudioProcessor* processor, int parameterIndex, float newValue){
-    mNeedRepaint = true;
+//    mNeedRepaint = true;
+//    mFieldNeedRepaint   = true;
 }
 
 //==============================================================================

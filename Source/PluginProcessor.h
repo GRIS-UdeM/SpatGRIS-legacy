@@ -439,7 +439,7 @@ public:
 	int getGuiTab() const { return mGuiTab; }
 	void setGuiTab(int s) {
         mGuiTab = s;
-        ++mHostChangedParameter;
+        ++mHostChangedParameterProcessor;
     }
 
     void sendOscSpatValues();
@@ -486,8 +486,8 @@ public:
 		return m_bAllowInputOutputModeSelection;
 	}
 
-	uint64_t getHostChangedParameter() { return mHostChangedParameter; }
-	uint64_t getHostChangedProperty() { return mHostChangedProperty; }
+	uint64_t getHostChangedParameter() { return mHostChangedParameterProcessor; }
+	uint64_t getHostChangedProperty() { return mHostChangedPropertyProcessor; }
 	uint64_t getProcessCounter() { return mProcessCounter; }
 	
     int getNumberOfSources() const { return mNumberOfSources; }
@@ -723,7 +723,7 @@ public:
     
     void setSrcSelected(int p_i){
     	mSrcSelected = p_i;
-        mHostChangedParameter++;
+        mHostChangedParameterProcessor++;
 	}
 
 	void setSpSelected(int p_i){ mSpSelected = p_i; }
@@ -808,8 +808,8 @@ private:
 	int mOscSendPort;
     String mOscSendIp;
 
-	uint64_t mHostChangedParameter;
-	uint64_t mHostChangedProperty;
+	uint64_t mHostChangedParameterProcessor;
+	uint64_t mHostChangedPropertyProcessor;
 	uint64_t mProcessCounter;
 	
 	int mProcessMode;
