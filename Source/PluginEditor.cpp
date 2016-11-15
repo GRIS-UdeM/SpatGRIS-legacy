@@ -1124,6 +1124,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSurfaceOrPanLinkButton->setEnabled(false);
     }
     mNeedRepaint = true;
+    mFieldNeedRepaint = true;
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){

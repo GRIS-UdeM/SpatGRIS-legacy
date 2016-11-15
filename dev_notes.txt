@@ -810,3 +810,8 @@ parameters are also presets
     * setNumberOfSources
     * setNumberOfSpeakers
     * loading a preset
+
+-----------------2016-11-15-----------------
+ok, so my edits to editor::timercallback created a bunch of issues
+-field will not refresh when
+    * changing processmode
