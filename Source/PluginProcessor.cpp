@@ -322,7 +322,8 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
 void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
     int iSourceChanged = getSourceLocationChanged();
     if (getMovementMode() != 0 && iSourceChanged != -1){
-        JUCE_COMPILER_WARNING("these begin and end should probably be when we start and stop the thread...? Or we the thread is running but we're playing/stopping?")
+        //with kSourceThread, these begin and end only set the movertype to kSourceThread, they don't start or end automations.
+        //and since they are only called when a source was actually moved, it's fine to use (and block) the mover for that
         m_pMover->begin(iSourceChanged, kSourceThread);
         m_pMover->move(getSourceXY01(iSourceChanged), kSourceThread);
         m_pMover->end(kSourceThread);

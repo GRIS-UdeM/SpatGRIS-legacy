@@ -63,7 +63,7 @@ void SourceMover::storeDownPositions(){
     }
 }
 
-//in kSourceThread, FPoint p is the current location of the selected source, as read on the automation
+//in kSourceThread, FPoint p is the current location of the selected source, as read on the automation, and we move only the non-selected sources based on location of selected source
 void SourceMover::move(FPoint pointXY01, MoverType mt) {
     if (mMoverType != mt){
         return;
@@ -83,7 +83,7 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
         //calculate delta for selected source
         
         //in normal, non-source-thread mode, we calculate delta for selected source compared to its starting point
-        FPoint oldSelSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(mSelectedSrc) : mSourcesDownRT[mSelectedSrc];
+        FPoint oldSelSrcPosRT = (mMoverType != kSourceThread) ? mSourcesDownRT[mSelectedSrc] : mFilter->getOldSrcLocRT(mSelectedSrc);
         FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
         
@@ -102,12 +102,13 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
             }
             //all x's and y's here are actually r's and t's
             switch(mFilter->getMovementMode()) {
+                //these are all the same because in fixed cases, sources were moved right when the movement mode was selected
                 case Circular:
                 case CircularFixedRadius:
                 case CircularFixedAngle:
                 case CircularFullyFixed:{
                     //calculate new position for curSrc using delta for selected source
-                    FPoint oldCurSrcPosRT = (mMoverType == kSourceThread) ? mFilter->getOldSrcLocRT(iCurSrc) : mSourcesDownRT[iCurSrc];
+                    FPoint oldCurSrcPosRT = (mMoverType != kSourceThread) ? mSourcesDownRT[iCurSrc] : mFilter->getOldSrcLocRT(iCurSrc);
                     FPoint newCurSrcPosRT = oldCurSrcPosRT + delSelSrcPosRT;
                     if (newCurSrcPosRT.x < 0){
                         newCurSrcPosRT.x = 0;

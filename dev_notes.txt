@@ -824,3 +824,7 @@ ok, so my edits to editor::timercallback created a bunch of issues
     X-when we stop, we want the db meters to go black
     X-mute buttons can be automatted, and when reading automation, they do change from 
      unmuted to muted, but not from muted to unmuted...!
+
+----------------2016-11-16--------------------
+#105
+

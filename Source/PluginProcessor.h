@@ -756,7 +756,6 @@ private:
 	Trajectory::Ptr mTrajectory;
 
     FPoint mOldSrcLocRT[JucePlugin_MaxNumInputChannels];
-
     
 	Array<float> mParameters;
 	
