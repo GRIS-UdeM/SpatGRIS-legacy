@@ -219,8 +219,11 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		m_bAllowInputOutputModeSelection = false;
 	}
     
+    std::unique_ptr<SourceMover> pMover(new SourceMover(this));
+    m_pMover = std::move(pMover);
+    
     //SET SOURCES AND SPEAKERS
-    int iSources = getTotalNumInputChannels();
+    int iSources  = getTotalNumInputChannels();
     int iSpeakers = getTotalNumOutputChannels();
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
@@ -297,8 +300,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
-    std::unique_ptr<SourceMover> pMover(new SourceMover(this));
-    m_pMover = std::move(pMover);
+
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
@@ -307,6 +309,11 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
         t->stop();
         setTrajectory(nullptr);
     }
+}
+
+void SpatGrisAudioProcessor::setDownPosition(int id, FPoint pointRT){
+    m_pMover->storeDownPosition(id, pointRT);
+//    mOldSrcLocRT[id] = pointRT;
 }
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
@@ -474,7 +481,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         
         if (index == kMovementMode){
             if (m_pMover){
-                m_pMover->storeDownPositions();
+                m_pMover->storeAllDownPositions();
             }
             startOrStopSourceUpdateThread();
         }
@@ -808,8 +815,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
             double offset, axisOffset;
             if (mNumberOfSources == 1){
                 setSourceRT(0, FPoint(0, 0));
-                mOldSrcLocRT[0] = FPoint(0, 0);
-            } else if(mNumberOfSources%2 == 0) {//if the number of speakers is even we will assign them as stereo pairs
+//                mOldSrcLocRT[0] = FPoint(0, 0);
+                m_pMover->storeDownPosition(0, FPoint(0,0));
+                storeCurrentLocations();
+            } else if(mNumberOfSources%2 == 0) {//if the number of sources is even we will assign them as stereo pairs
                 axisOffset = anglePerSource / 2;
                 for (int i = 0; i < mNumberOfSources; i++) {
                     if(i%2 == 0) {
@@ -822,7 +831,8 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
                     else if (offset > 360) offset -= 360;
                     
                     setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
-                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
+//                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
+                    m_pMover->storeDownPosition(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
                 }
             } else {    //odd number of speakers, assign in circular fashion
 
@@ -832,7 +842,8 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
                     else if (offset > 360) offset -= 360;
                     
                     setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
-                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
+//                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
+                    m_pMover->storeDownPosition(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
                     offset += anglePerSource;
                 }
             }
@@ -1808,6 +1819,7 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 //==============================================================================
 
 void SpatGrisAudioProcessor::storeCurrentLocations(){
+    JUCE_COMPILER_WARNING("should we store down locations here??")
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
         mBufferSrcLocX[i] = mParameters[getParamForSourceX(i)];
         mBufferSrcLocY[i] = mParameters[getParamForSourceY(i)];
@@ -1991,7 +2003,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mParameters.set(kFilterFar,     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
             m_iOscSpat1stSrcId  = xmlState->getIntAttribute("m_iOscSpat1stSrcId",   m_iOscSpat1stSrcId);
             m_iOscSpatPort      = xmlState->getIntAttribute("m_iOscSpatPort",       m_iOscSpatPort);
-            for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i){
+//            int iMax = JucePlugin_MaxNumInputChannels;
+            int iMax = getTotalNumInputChannels();
+            for (int i = 0; i < iMax; ++i){
                 String srcX = "src" + to_string(i) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));
                 mParameters.set(getParamForSourceX(i), fX01);
@@ -1999,7 +2013,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
                 mParameters.set(getParamForSourceY(i), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
-                mOldSrcLocRT[i] = convertXy012Rt(curPoint);
+//                mOldSrcLocRT[i] = convertXy012Rt(curPoint);
+                m_pMover->storeDownPosition(i, convertXy012Rt(curPoint));
                 String srcD = "src" + to_string(i) + "d";
                 mParameters.set(getParamForSourceD(i), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
                 String srcAS = "src" + to_string(i) + "AS";

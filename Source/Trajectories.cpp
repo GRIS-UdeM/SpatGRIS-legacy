@@ -580,8 +580,9 @@ protected:
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
                     
                     mFilter->setSourceXY01(iCurSrc, p);
-                    mFilter->setOldSrcLocRT(iCurSrc, mFilter->convertXy012Rt(p));
-                } 
+                    JUCE_COMPILER_WARNING("not too sure this is required")
+//                    mFilter->setOldSrcLocRT(iCurSrc, mFilter->convertXy012Rt(p));
+                }
             }
         } else {
             //reset position at every new cycle
@@ -664,7 +665,7 @@ protected:
                 bool bWriteAutomation = (bWriteAutomationForAllSources || iSelectedSrc == i);
                 if (bWriteAutomationForAllSources){
                     mFilter->setSourceXY(i, p, bWriteAutomation);
-                    mFilter->setOldSrcLocRT(i, mFilter->convertXy012Rt(p));
+//                    mFilter->setOldSrcLocRT(i, mFilter->convertXy012Rt(p));
                 } else {
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);

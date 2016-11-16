@@ -1280,7 +1280,7 @@ void SpatGrisAudioProcessorEditor::resized()
     mSpeakersBox->setBounds(x, y + lh, kRightColumnWidth, h - (kMargin + kParamBoxHeight + kMargin + y + lh + iExtraSpace));
 }
 
-
+JUCE_COMPILER_WARNING("what is this??? calls like this should come from the processor")
 void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     //if we're not in constructor, clear source and movement constraint combos, and ensure movement constraint is valid

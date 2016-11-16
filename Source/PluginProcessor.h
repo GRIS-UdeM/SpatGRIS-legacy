@@ -743,8 +743,9 @@ public:
     
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
     
-    FPoint  getOldSrcLocRT(int id){return mOldSrcLocRT[id];}
-    void    setOldSrcLocRT(int id, FPoint pointRT){ mOldSrcLocRT[id] = pointRT; }
+//    FPoint  getOldSrcLocRT(int id){return mOldSrcLocRT[id];}
+//    void    setOldSrcLocRT(int id, FPoint pointRT){ mOldSrcLocRT[id] = pointRT; }
+    void    setDownPosition(int id, FPoint pointRT);
     
     bool isPlaying(){ return m_bIsPlaying;}
     void threadUpdateNonSelectedSourcePositions();
@@ -755,7 +756,7 @@ private:
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
 
-    FPoint mOldSrcLocRT[JucePlugin_MaxNumInputChannels];
+//    FPoint mOldSrcLocRT[JucePlugin_MaxNumInputChannels];
     
 	Array<float> mParameters;
 	
