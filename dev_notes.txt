@@ -827,4 +827,4 @@ ok, so my edits to editor::timercallback created a bunch of issues
 
 ----------------2016-11-16--------------------
 #105
-
+see onenote
