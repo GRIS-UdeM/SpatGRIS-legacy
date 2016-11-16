@@ -177,7 +177,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_OwnedThreads.add(m_pSourceUpdateThread);
     
     //SET PARAMETERS
-	mParameters.ensureStorageAllocated(kNumberOfParameters);
+	mParameters.resize(kNumberOfParameters);
     for (int i = 0; i < kNumberOfParameters; i++){
         mParameters.add(0);
     }
@@ -194,7 +194,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
 
 	mSmoothedParametersInited = false;
-	mSmoothedParameters.ensureStorageAllocated(kNumberOfParameters);
+	mSmoothedParameters.resize(kNumberOfParameters);
     
 	for (int i = 0; i < kNumberOfParameters; i++) 
 		mSmoothedParameters.add(0);
@@ -218,7 +218,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	} else {
 		m_bAllowInputOutputModeSelection = false;
 	}
-    
+
     std::unique_ptr<SourceMover> pMover(new SourceMover(this));
     m_pMover = std::move(pMover);
     
@@ -227,6 +227,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     int iSpeakers = getTotalNumOutputChannels();
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
+    
+
+
     
 	mCalculateLevels = 0;
 	mApplyFilter = true;
@@ -239,8 +242,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mShowGridLines  = false;
     m_bOscActive    = true;
 	mTrSeparateAutomationMode = false;
-    mIsNumberSourcesChanged = false;
-    mIsNumberSpeakersChanged = false;
     mGuiWidth = kDefaultWidth,
     mGuiHeight = kDefaultHeight,
 	mHostChangedParameterProcessor = 0;
@@ -788,8 +789,6 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     //if new number of sources is same as before, return
     if (p_iNewNumberOfSources == mNumberOfSources){
         return;
-    } else {
-        mIsNumberSourcesChanged = true;
     }
     
     //prevents audio process thread from running
@@ -802,13 +801,8 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         
         mFilters.clear();
         mFilters.resize(mNumberOfSources);
-        
-//        mLockedThetas.ensureStorageAllocated(mNumberOfSources);
-//        for (int i = 0; i < mNumberOfSources; i++){
-//            mLockedThetas.add(0);
-//            mPrevRs.add(0);
-//        }
         mInputsCopy.resize(mNumberOfSources);
+        m_pMover->updateNumberOfSources();
         
         if (bUseDefaultValues){
             double anglePerSource = 360 / mNumberOfSources;
@@ -867,8 +861,6 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     //if new number of speakers is same as before, return
     if (p_iNewNumberOfSpeakers == mNumberOfSpeakers){
         return;
-    } else {
-        mIsNumberSpeakersChanged = true;
     }
     
     //prevents audio process thread from running
@@ -883,7 +875,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
             updateRoutingTempAudioBuffer();
         }
 #if USE_DB_METERS
-        mLevels.ensureStorageAllocated(mNumberOfSpeakers);
+        mLevels.resize(mNumberOfSpeakers);
         for (int i = 0; i < mNumberOfSpeakers; i++){
             mLevels.add(0);
         }

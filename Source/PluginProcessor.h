@@ -696,12 +696,7 @@ public:
 	Trajectory::Ptr getTrajectory() { return mTrajectory; }
 	void setTrajectory(Trajectory::Ptr t) { mTrajectory = t; }
     
-    bool getIsSourcesChanged(){ return mIsNumberSourcesChanged;}
-    bool getIsSpeakersChanged(){ return mIsNumberSpeakersChanged;}
-    
-    void setIsSourcesChanged(bool pIsNumberSourcesChanged){ mIsNumberSourcesChanged = pIsNumberSourcesChanged;}
-    void setIsSpeakersChanged(bool pIsNumberSpeakersChanged){ mIsNumberSpeakersChanged = pIsNumberSpeakersChanged;}
-    
+        
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
         startOrStopSourceUpdateThread();
@@ -815,9 +810,6 @@ private:
 	int mProcessMode;
 	int mRoutingMode;
 	AudioSampleBuffer mRoutingTempAudioBuffer;
-    
-    bool mIsNumberSourcesChanged;
-    bool mIsNumberSpeakersChanged;
 	
 	bool mSmoothedParametersInited;
 	Array<float> mSmoothedParameters;

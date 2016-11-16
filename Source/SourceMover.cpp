@@ -33,15 +33,15 @@ SourceMover::SourceMover(SpatGrisAudioProcessor *filter)
  ,mMoverType(kVacant)
  ,mSelectedSrc(0)
 {
-    JUCE_COMPILER_WARNING("at this point, mFilter is not constructed, so we can't call updateNumnerOfSources");
-//    updateNumberOfSources();
-    
-    int iNbrSrc = mFilter->getTotalNumInputChannels();
-    for (int j = 0; j < iNbrSrc; j++) {
-        mSourcesDownXY.add(FPoint(0,0));
-        mSourcesDownRT.add(FPoint(0,0));
-        mSourcesAngularOrder.add(0);
-    }
+//    JUCE_COMPILER_WARNING("at this point, mFilter is not constructed, so we can't call updateNumnerOfSources");
+////    updateNumberOfSources();
+//    
+//    int iNbrSrc = mFilter->getTotalNumInputChannels();
+//    for (int j = 0; j < iNbrSrc; j++) {
+//        mSourcesDownXY.add(FPoint(0,0));
+//        mSourcesDownRT.add(FPoint(0,0));
+//        mSourcesAngularOrder.add(0);
+//    }
 }
 
 void SourceMover::begin(int s, MoverType mt) {
@@ -199,21 +199,28 @@ void SourceMover::end(MoverType mt) {
 }
 
 void SourceMover::updateNumberOfSources(){
-//    mSourcesDownXY.clear();
-//    mSourcesDownRT.clear();
-//    mSourcesAngularOrder.clear();
+
+    mSourcesDownXY.clear();
+    mSourcesDownRT.clear();
+    mSourcesAngularOrder.clear();
+    
+//    mSourcesDownXY.resize(mFilter->getNumberOfSources());
+//    mSourcesDownRT.resize(mFilter->getNumberOfSources());
+//    mSourcesAngularOrder.resize(mFilter->getNumberOfSources());
 //    
-//    mSourcesDownXY.ensureStorageAllocated(mFilter->getNumberOfSources());
-//    mSourcesDownRT.ensureStorageAllocated(mFilter->getNumberOfSources());
-//    mSourcesAngularOrder.ensureStorageAllocated(mFilter->getNumberOfSources());
+//    for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+//        mSourcesDownXY.setUnchecked(i, FPoint(0,0));
+//        mSourcesDownRT.setUnchecked(i, FPoint(0,0));
+//        mSourcesAngularOrder.setUnchecked(i, 0);
+//    }
     
     for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-        mSourcesDownXY.setUnchecked(i, FPoint(0,0));
-        mSourcesDownRT.setUnchecked(i, FPoint(0,0));
-        mSourcesAngularOrder.setUnchecked(i, 0);
+        mSourcesDownXY.add(FPoint(0,0));
+        mSourcesDownRT.add(FPoint(0,0));
+        mSourcesAngularOrder.add(0);
     }
     
-    storeAllDownPositions();
+//    storeAllDownPositions();
     
 }
 
