@@ -2006,7 +2006,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 mParameters.set(getParamForSourceY(i), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
 //                mOldSrcLocRT[i] = convertXy012Rt(curPoint);
-                m_pMover->storeDownPosition(i, convertXy012Rt(curPoint));
+                if (m_pMover){
+                    m_pMover->storeDownPosition(i, convertXy012Rt(curPoint));
+                }
                 String srcD = "src" + to_string(i) + "d";
                 mParameters.set(getParamForSourceD(i), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
                 String srcAS = "src" + to_string(i) + "AS";

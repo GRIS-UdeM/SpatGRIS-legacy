@@ -36,12 +36,12 @@ SourceMover::SourceMover(SpatGrisAudioProcessor *filter)
 //    JUCE_COMPILER_WARNING("at this point, mFilter is not constructed, so we can't call updateNumnerOfSources");
 ////    updateNumberOfSources();
 //    
-//    int iNbrSrc = mFilter->getTotalNumInputChannels();
-//    for (int j = 0; j < iNbrSrc; j++) {
-//        mSourcesDownXY.add(FPoint(0,0));
-//        mSourcesDownRT.add(FPoint(0,0));
-//        mSourcesAngularOrder.add(0);
-//    }
+    int iNbrSrc = JucePlugin_MaxNumInputChannels;
+    for (int j = 0; j < iNbrSrc; j++) {
+        mSourcesDownXY.add(FPoint(0,0));
+        mSourcesDownRT.add(FPoint(0,0));
+        mSourcesAngularOrder.add(0);
+    }
 }
 
 void SourceMover::begin(int s, MoverType mt) {
@@ -73,8 +73,11 @@ void SourceMover::storeAllDownPositions(){
 }
 
 void SourceMover::storeDownPosition(int id, FPoint pointRT){
-    mSourcesDownRT.setUnchecked(id, pointRT);
-    mSourcesDownXY.setUnchecked(id, mFilter->convertRt2Xy(pointRT));
+    if (id < mSourcesDownRT.size()){
+        mSourcesDownRT.setUnchecked(id, pointRT);
+        mSourcesDownXY.setUnchecked(id, mFilter->convertRt2Xy(pointRT));
+        
+    }
 }
 
 
