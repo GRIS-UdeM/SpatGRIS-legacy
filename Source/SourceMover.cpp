@@ -61,6 +61,7 @@ void SourceMover::begin(int s, MoverType mt) {
 }
 
 void SourceMover::storeAllDownPositions(){
+    cout << "store ALL down positions\n";
 //    //if we are not in independent mode and have more than 1 source, we store the initial position of all sources
 //    if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
         int iNbrSrc = mFilter->getNumberOfSources();
@@ -72,11 +73,13 @@ void SourceMover::storeAllDownPositions(){
 }
 
 void SourceMover::storeDownPosition(int id, FPoint pointRT){
-    if (id < mSourcesDownRT.size()){
-        mSourcesDownRT.setUnchecked(id, pointRT);
-        mSourcesDownXY.setUnchecked(id, mFilter->convertRt2Xy(pointRT));
-        
+    if (!(id < mSourcesDownRT.size())){
+        JUCE_COMPILER_WARNING("need to figure this out")
+//        jassertfalse;
+        return;
     }
+    mSourcesDownRT.setUnchecked(id, pointRT);
+    mSourcesDownXY.setUnchecked(id, mFilter->convertRt2Xy(pointRT));
 }
 
 

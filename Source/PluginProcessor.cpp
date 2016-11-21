@@ -525,7 +525,10 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
             break;
         default:
             break;
-    }    
+    }
+    if (index == kMovementMode && m_pMover){
+        m_pMover->storeAllDownPositions();
+    }
     sendParamChangeMessageToListeners(index, newValue);
 }
 
