@@ -1943,19 +1943,19 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         mFilter->setMovementMode(iSelectedMode);
         if(mFilter->getNumberOfSources() > 1){
             switch (iSelectedMode) {
-                case 2:
+                case CircularFixedRadius:
                     m_pMover->setEqualRadius();
                     break;
-                case 3:
+                case CircularFixedAngle:
                     m_pMover->setEqualAngles();
                     break;
-                case 4:
+                case CircularFullyFixed:
                     m_pMover->setEqualRadiusAndAngles();
                     break;
-                case 6:
+                case SymmetricX:
                     m_pMover->setSymmetricX();
                     break;
-                case 7:
+                case SymmetricY:
                     m_pMover->setSymmetricY();
                     break;
                 default:

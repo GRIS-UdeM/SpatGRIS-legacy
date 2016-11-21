@@ -64,7 +64,6 @@ void SourceMover::storeAllDownPositions(){
 //    //if we are not in independent mode and have more than 1 source, we store the initial position of all sources
 //    if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
         int iNbrSrc = mFilter->getNumberOfSources();
-    int iFuckYou = mSourcesDownRT.size();
         for (int j = 0; j < iNbrSrc; j++) {
             mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
             mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
@@ -103,8 +102,6 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
         //in normal, non-source-thread mode, we calculate delta for selected source compared to its starting point
 //        FPoint oldSelSrcPosRT = (mMoverType != kSourceThread) ? mSourcesDownRT[mSelectedSrc] : mFilter->getOldSrcLocRT(mSelectedSrc);
         FPoint oldSelSrcPosRT = mSourcesDownRT[mSelectedSrc];
-        
-        
         FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
         
