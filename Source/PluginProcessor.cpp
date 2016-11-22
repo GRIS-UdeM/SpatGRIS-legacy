@@ -2011,7 +2011,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             m_iOscSpat1stSrcId  = xmlState->getIntAttribute("m_iOscSpat1stSrcId",   m_iOscSpat1stSrcId);
             m_iOscSpatPort      = xmlState->getIntAttribute("m_iOscSpatPort",       m_iOscSpatPort);
 //            int iMax = JucePlugin_MaxNumInputChannels;
-            int iMax = getTotalNumInputChannels();
+//            int iMax = getTotalNumInputChannels();
+            int iMax = getNumberOfSources();
             for (int i = 0; i < iMax; ++i){
                 String srcX = "src" + to_string(i) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));
