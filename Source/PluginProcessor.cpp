@@ -311,7 +311,7 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
         setTrajectory(nullptr);
     }
 }
-
+JUCE_COMPILER_WARNING("the only object calling this is the mover, so delete")
 void SpatGrisAudioProcessor::setDownPosition(int id, FPoint pointRT){
     m_pMover->storeDownPosition(id, pointRT);
 //    mOldSrcLocRT[id] = pointRT;
@@ -470,6 +470,18 @@ float SpatGrisAudioProcessor::getParameter (int index) {
     return mParameters[index];
 }
 
+bool SpatGrisAudioProcessor::isMovementMode(float m_fNewValue){
+    for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
+        JUCE_COMPILER_WARNING("for the life of me I can't figure out where this .1666 is from")
+        float fCurMode = iCurMode * .16666666;
+//        float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
+        if (areSame(m_fNewValue, fCurMode)){
+            return true;
+        }
+    }
+    return false;
+}
+
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     float fOldValue = mParameters.getUnchecked(index);
     if (!areSame(fOldValue, newValue)){
@@ -480,10 +492,10 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         
         mParameters.set(index, newValue);
         
-        if (index == kMovementMode){
-            if (m_pMover){
-                m_pMover->storeAllDownPositions();
-            }
+        if (index == kMovementMode && m_pMover && isMovementMode(newValue)){
+            JUCE_COMPILER_WARNING("add an if only different movement mode")
+            m_pMover->storeAllDownPositions();
+            JUCE_COMPILER_WARNING("WE CAN'T CALL THIS BLOCKING STUFF IN HERE")
             startOrStopSourceUpdateThread();
         }
 
@@ -526,7 +538,7 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         default:
             break;
     }
-    if (index == kMovementMode && m_pMover){
+    if (index == kMovementMode && m_pMover && isMovementMode(newValue)){
         m_pMover->storeAllDownPositions();
     }
     sendParamChangeMessageToListeners(index, newValue);

@@ -248,6 +248,8 @@ static inline float linearToDb(float linear)
 	return log10f(linear) * 20.f;
 }
 
+
+//isequal() equals()
 static bool areSame(double a, double b)
 {
     return fabs(a - b) < .0001;
@@ -878,6 +880,8 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    bool isMovementMode(float v);
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
