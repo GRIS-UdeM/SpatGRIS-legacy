@@ -62,7 +62,7 @@ void SourceMover::begin(int s, MoverType mt) {
 
 void SourceMover::storeAllDownPositions(){
 //    //if we are not in independent mode and have more than 1 source, we store the initial position of all sources
-//    if (mFilter->getMovementMode() != 0 && mFilter->getNumberOfSources() > 1) {
+
         int iNbrSrc = mFilter->getNumberOfSources();
         for (int j = 0; j < iNbrSrc; j++) {
             mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
@@ -72,11 +72,8 @@ void SourceMover::storeAllDownPositions(){
 }
 
 void SourceMover::storeDownPosition(int id, FPoint pointRT){
-    if (!(id < mSourcesDownRT.size())){
-        JUCE_COMPILER_WARNING("need to figure this out")
-        jassertfalse;
-        return;
-    }
+    jassert (id < mSourcesDownRT.size());
+    
     mSourcesDownRT.setUnchecked(id, pointRT);
     mSourcesDownXY.setUnchecked(id, mFilter->convertRt2Xy(pointRT));
 }
@@ -269,7 +266,7 @@ void SourceMover::setEqualRadius(){
         mFilter->setPreventSourceLocationUpdate(true);
         mFilter->setSourceRT(iCurSrc, curSrcRT, false);
 //        mFilter->setOldSrcLocRT(iCurSrc, curSrcRT);
-        mFilter->setDownPosition(iCurSrc, curSrcRT);
+        storeDownPosition(iCurSrc, curSrcRT);
         mFilter->setPreventSourceLocationUpdate(false);
     }
 }
@@ -294,7 +291,7 @@ void SourceMover::setEqualAngles(){
         mFilter->setPreventSourceLocationUpdate(true);
         mFilter->setSourceRT(iCurSrc, curSrcRT, false);
 //        mFilter->setOldSrcLocRT(iCurSrc, curSrcRT);
-        mFilter->setDownPosition(iCurSrc, curSrcRT);
+        storeDownPosition(iCurSrc, curSrcRT);
         mFilter->setPreventSourceLocationUpdate(false);
 
     }
@@ -319,7 +316,7 @@ void SourceMover::setEqualRadiusAndAngles(){
         mFilter->setPreventSourceLocationUpdate(true);
         mFilter->setSourceRT(iCurSrc, curSrcRT, false);
 //        mFilter->setOldSrcLocRT(iCurSrc, curSrcRT);
-        mFilter->setDownPosition(iCurSrc, curSrcRT);
+        storeDownPosition(iCurSrc, curSrcRT);
         mFilter->setPreventSourceLocationUpdate(false);
     }
 

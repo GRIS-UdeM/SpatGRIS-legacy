@@ -309,11 +309,6 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
         setTrajectory(nullptr);
     }
 }
-JUCE_COMPILER_WARNING("the only object calling this is the mover, so delete")
-void SpatGrisAudioProcessor::setDownPosition(int id, FPoint pointRT){
-    m_pMover->storeDownPosition(id, pointRT);
-//    mOldSrcLocRT[id] = pointRT;
-}
 
 void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
     //we don't want the thread to run when we only have 1 source, when we're recording automation (because then the regular move
@@ -1842,9 +1837,9 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 void SpatGrisAudioProcessor::storeCurrentLocations(){
     JUCE_COMPILER_WARNING("should we store down locations here??")
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
-        mBufferSrcLocX[i] = mParameters[getParamForSourceX(i)];
-        mBufferSrcLocY[i] = mParameters[getParamForSourceY(i)];
-        mBufferSrcLocD[i] = mParameters[getParamForSourceD(i)];
+        mBufferSrcLocX[i]  = mParameters[getParamForSourceX(i)];
+        mBufferSrcLocY[i]  = mParameters[getParamForSourceY(i)];
+        mBufferSrcLocD[i]  = mParameters[getParamForSourceD(i)];
         mBufferSrcLocAS[i] = mParameters[getParamForSourceAzimSpan(i)];
         mBufferSrcLocES[i] = mParameters[getParamForSourceElevSpan(i)];
 

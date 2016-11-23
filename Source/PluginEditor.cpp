@@ -1374,18 +1374,16 @@ void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor)
 }
 
 void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
-    JUCE_COMPILER_WARNING("this needs to be redone using the movement mode enum")
-    int index = 1;
-    mMovementModeCombo->addItem("Independent", index++);
+    mMovementModeCombo->addItem("Independent", Independent+1);
     if (mFilter->getNumberOfSources() > 1){
-        mMovementModeCombo->addItem("Circular", index++);
-        mMovementModeCombo->addItem("Circular Fixed Radius", index++);
-        mMovementModeCombo->addItem("Circular Fixed Angle", index++);
-        mMovementModeCombo->addItem("Circular Fully Fixed", index++);
-        mMovementModeCombo->addItem("Delta Lock", index++);
+        mMovementModeCombo->addItem("Circular",                 Circular+1);
+        mMovementModeCombo->addItem("Circular Fixed Radius",    CircularFixedRadius+1);
+        mMovementModeCombo->addItem("Circular Fixed Angle",     CircularFixedAngle+1);
+        mMovementModeCombo->addItem("Circular Fully Fixed",     CircularFullyFixed+1);
+        mMovementModeCombo->addItem("Delta Lock",               DeltaLock+1);
         if (mFilter->getNumberOfSources() == 2){
-            mMovementModeCombo->addItem("Symmetric X", index++);
-            mMovementModeCombo->addItem("Symmetric Y", index++);
+            mMovementModeCombo->addItem("Symmetric X",          SymmetricX+1);
+            mMovementModeCombo->addItem("Symmetric Y",          SymmetricY+1);
         }
     }
     int iCurMode = mFilter->getMovementMode() + 1;
