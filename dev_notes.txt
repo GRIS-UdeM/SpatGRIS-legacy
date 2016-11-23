@@ -827,4 +827,8 @@ ok, so my edits to editor::timercallback created a bunch of issues
 
 ----------------2016-11-16--------------------
 #105
+see onenote
 
+--------------- 2016-11-22-------------------
+the down positions in the mover are initialized with JucePlugin_MaxNumInputChannels, which is 2
+the preset function uses getTotalNumInputChannels, which is 8

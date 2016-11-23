@@ -248,6 +248,8 @@ static inline float linearToDb(float linear)
 	return log10f(linear) * 20.f;
 }
 
+
+//isequal() equals()
 static bool areSame(double a, double b)
 {
     return fabs(a - b) < .0001;
@@ -696,12 +698,7 @@ public:
 	Trajectory::Ptr getTrajectory() { return mTrajectory; }
 	void setTrajectory(Trajectory::Ptr t) { mTrajectory = t; }
     
-    bool getIsSourcesChanged(){ return mIsNumberSourcesChanged;}
-    bool getIsSpeakersChanged(){ return mIsNumberSpeakersChanged;}
-    
-    void setIsSourcesChanged(bool pIsNumberSourcesChanged){ mIsNumberSourcesChanged = pIsNumberSourcesChanged;}
-    void setIsSpeakersChanged(bool pIsNumberSpeakersChanged){ mIsNumberSpeakersChanged = pIsNumberSpeakersChanged;}
-    
+        
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
         startOrStopSourceUpdateThread();
@@ -743,8 +740,9 @@ public:
     
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
     
-    FPoint  getOldSrcLocRT(int id){return mOldSrcLocRT[id];}
-    void    setOldSrcLocRT(int id, FPoint pointRT){ mOldSrcLocRT[id] = pointRT; }
+//    FPoint  getOldSrcLocRT(int id){return mOldSrcLocRT[id];}
+//    void    setOldSrcLocRT(int id, FPoint pointRT){ mOldSrcLocRT[id] = pointRT; }
+    void    setDownPosition(int id, FPoint pointRT);
     
     bool isPlaying(){ return m_bIsPlaying;}
     void threadUpdateNonSelectedSourcePositions();
@@ -755,7 +753,7 @@ private:
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
 
-    FPoint mOldSrcLocRT[JucePlugin_MaxNumInputChannels];
+//    FPoint mOldSrcLocRT[JucePlugin_MaxNumInputChannels];
     
 	Array<float> mParameters;
 	
@@ -814,9 +812,6 @@ private:
 	int mProcessMode;
 	int mRoutingMode;
 	AudioSampleBuffer mRoutingTempAudioBuffer;
-    
-    bool mIsNumberSourcesChanged;
-    bool mIsNumberSpeakersChanged;
 	
 	bool mSmoothedParametersInited;
 	Array<float> mSmoothedParameters;
@@ -885,6 +880,8 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    bool isMovementMode(float v);
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
