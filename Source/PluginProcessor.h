@@ -760,8 +760,6 @@ private:
 
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
-
-//    FPoint mOldSrcLocRT[JucePlugin_MaxNumInputChannels];
     
 	Array<float> mParameters;
 	

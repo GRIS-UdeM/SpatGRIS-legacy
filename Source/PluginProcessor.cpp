@@ -496,7 +496,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     
     if (!areSameParameterValues(fOldValue, newValue)){
         if (newValue == 0){
-            DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
+            DBG("#54: TRYING TO SET PARAMETER " << getParameterName(index) << " TO ZERO");
             //return;
         }
         
@@ -833,7 +833,6 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
             double offset, axisOffset;
             if (mNumberOfSources == 1){
                 setSourceRT(0, FPoint(0, 0));
-//                mOldSrcLocRT[0] = FPoint(0, 0);
                 m_pMover->storeDownPosition(0, FPoint(0,0));
                 storeCurrentLocations();
             } else if(mNumberOfSources%2 == 0) {//if the number of sources is even we will assign them as stereo pairs
@@ -849,7 +848,6 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
                     else if (offset > 360) offset -= 360;
                     
                     setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
-//                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
                     m_pMover->storeDownPosition(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
                 }
             } else {    //odd number of speakers, assign in circular fashion
@@ -860,7 +858,6 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
                     else if (offset > 360) offset -= 360;
                     
                     setSourceRT(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
-//                    mOldSrcLocRT[i] = FPoint(kSourceDefaultRadius, offset/360*kThetaMax);
                     m_pMover->storeDownPosition(i, FPoint(kSourceDefaultRadius, offset/360*kThetaMax));
                     offset += anglePerSource;
                 }
@@ -2030,7 +2027,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
                 mParameters.set(getParamForSourceY(i), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
-//                mOldSrcLocRT[i] = convertXy012Rt(curPoint);
                 if (m_pMover){
                     m_pMover->storeDownPosition(i, convertXy012Rt(curPoint));
                 }
