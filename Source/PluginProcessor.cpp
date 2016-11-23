@@ -202,7 +202,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mNumberOfSources = -1;
     mNumberOfSpeakers = -1;
 
-	PluginHostType host;
 	bool bIsWindows;
 
 #if WIN32
@@ -469,21 +468,38 @@ float SpatGrisAudioProcessor::getParameter (int index) {
     return mParameters[index];
 }
 
-bool SpatGrisAudioProcessor::isMovementMode(float m_fNewValue){
+
+
+bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
-        JUCE_COMPILER_WARNING("for the life of me I can't figure out where this .1666 is from")
-        float fCurMode = iCurMode * .16666666;
-//        float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
-        if (areSame(m_fNewValue, fCurMode)){
-            return true;
+        float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
+        if (areSameParameterValues(m_fNewValue, fCurMode)){
+//            cout << fCurMode << " and " << m_fNewValue << " are the same";
+            //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
+            float fCurSelectedMode = getParameter(kMovementMode);
+            if (areSameParameterValues(fCurMode, fCurSelectedMode)){
+//                cout << " and are same as " << fCurSelectedMode << "\n";
+                return false;
+            } else {
+//                cout << " and are different from " << fCurSelectedMode << "\n";
+                return true;
+            }
         }
+//        cout << fCurMode << " and " << m_fNewValue << " are NOT the same\n";
     }
     return false;
 }
 
+
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
+    
     float fOldValue = mParameters.getUnchecked(index);
-    if (!areSame(fOldValue, newValue)){
+    
+    if (index == kMovementMode && !isNewMovementMode(newValue)){
+        return;
+    }
+    
+    if (!areSameParameterValues(fOldValue, newValue)){
         if (newValue == 0){
             DBG("#54: TRYING TO SET PARAMETER " << index << " TO ZERO");
             //return;
@@ -491,8 +507,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         
         mParameters.set(index, newValue);
         
-        if (index == kMovementMode && m_pMover && isMovementMode(newValue)){
-            JUCE_COMPILER_WARNING("add an if only different movement mode")
+        if (index == kMovementMode && m_pMover){
             m_pMover->storeAllDownPositions();
             JUCE_COMPILER_WARNING("WE CAN'T CALL THIS BLOCKING STUFF IN HERE! this was done by 5e825264a25941831ae80762845702cbf53dc023")
             startOrStopSourceUpdateThread();
@@ -537,7 +552,7 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         default:
             break;
     }
-    if (index == kMovementMode && m_pMover && isMovementMode(newValue)){
+    if (index == kMovementMode && m_pMover){
         m_pMover->storeAllDownPositions();
     }
     sendParamChangeMessageToListeners(index, newValue);

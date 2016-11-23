@@ -64,6 +64,8 @@ using namespace std;
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
 static const bool s_bUseNewGui = true;
 
+static PluginHostType host;
+
 // x, y, distance
 enum sourceParameters{
     kSourceX = 0,
@@ -206,8 +208,8 @@ static const float kRoutingVolumeMin = -120;
 static const float kRoutingVolumeMax = 6;
 static const float kRoutingVolumeDefault = 0;
 
-static const float kMovementModeMin = 0;
-static const float kMovementModeMax = 6;
+static const float kMovementModeMin = Independent;
+static const float kMovementModeMax = SymmetricY;
 static const float kMovementModeDefault = 0;
 
 static const float kSpanMin = 0;
@@ -254,6 +256,16 @@ static bool areSame(double a, double b)
 {
     return fabs(a - b) < .0001;
 }
+
+static bool areSameParameterValues(double a, double b)
+{
+    if (host.isLogic()){
+        return fabs(a - b) < .01;
+    } else {
+        return fabs(a - b) < .0001;
+    }
+}
+
 
 typedef Point<float> FPoint;
 
@@ -880,8 +892,8 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
-    
-    bool isMovementMode(float v);
+
+    bool isNewMovementMode(float v);
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;

@@ -390,7 +390,7 @@ protected:
         int src = mFilter->getSrcSelected();
         mStartPointXy01 = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         //calculate slope, offset and initial length, which represents only the length over the dependent variable
-        if (!areSame(mEndPointXy01.x, mStartPointXy01.x)){
+        if (!areSameParameterValues(mEndPointXy01.x, mStartPointXy01.x)){
             m_bYisDependent = true;
             m_fM = (mEndPointXy01.y - mStartPointXy01.y) / (mEndPointXy01.x - mStartPointXy01.x);
             m_fB = mStartPointXy01.y - m_fM * mStartPointXy01.x;
