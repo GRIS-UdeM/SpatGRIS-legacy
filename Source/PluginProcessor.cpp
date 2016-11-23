@@ -72,7 +72,6 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 
 #endif
 
-JUCE_COMPILER_WARNING("threads should probably all be in their own file?")
 //==================================== SourceUpdateThread ===================================================================
 class SourceUpdateThread : public Thread
 {
@@ -495,7 +494,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         if (index == kMovementMode && m_pMover && isMovementMode(newValue)){
             JUCE_COMPILER_WARNING("add an if only different movement mode")
             m_pMover->storeAllDownPositions();
-            JUCE_COMPILER_WARNING("WE CAN'T CALL THIS BLOCKING STUFF IN HERE")
+            JUCE_COMPILER_WARNING("WE CAN'T CALL THIS BLOCKING STUFF IN HERE! this was done by 5e825264a25941831ae80762845702cbf53dc023")
             startOrStopSourceUpdateThread();
         }
 
