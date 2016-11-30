@@ -1389,7 +1389,7 @@ void SpatGrisAudioProcessorEditor::updateMovementModeCombo(){
     int iCurMode = mFilter->getMovementMode() + 1;
     if (mMovementModeCombo->getItemText(iCurMode-1) == ""){
         mMovementModeCombo->setSelectedId(1);
-        mFilter->setMovementMode(Independent);    //0 is independent
+        mFilter->setMovementMode(Independent);
     } else {
         mMovementModeCombo->setSelectedId(iCurMode);
     }
