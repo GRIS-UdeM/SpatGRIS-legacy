@@ -1575,7 +1575,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
         if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
             mFilter->setOscSpat1stSrcId(i1stSrcId);
-            mNeedRepaint = true;
+            mFieldNeedRepaint = true;
         }
         mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
     }
@@ -2128,7 +2128,6 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 //    clock_t timeProperty = clock();
 //    oss << "property\t" << timeProperty - timeTraj << "\t";
 //#endif
-
 
     hcpProcessor = mFilter->getHostChangedParameter();
     if (hcpProcessor != mHostChangedParameterEditor) {
