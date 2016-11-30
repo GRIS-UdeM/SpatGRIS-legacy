@@ -150,7 +150,7 @@ public:
             mViewport->setSize(getWidth(), getHeight());
     }
     
-    void setBackgroundColor(Colour pColour) {
+    void setBackgroundColour(Colour pColour) {
         mBgColour = pColour;
     }
     
@@ -243,7 +243,7 @@ AudioProcessorEditor (ownerFilter)
     // param box
     Colour tabBg;
     if (s_bUseNewGui){
-        tabBg = mGrisFeel.getBackgroundColor();
+        tabBg = mGrisFeel.getBackgroundColour();
     } else {
         tabBg = Colour::fromRGB(200,200,200);
     }
@@ -267,7 +267,7 @@ AudioProcessorEditor (ownerFilter)
         int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
         //SOURCE PARAMETER BOX
         mSourcesBox = new Box(true, &mGrisFeel);
-        mSourcesBox->setBackgroundColor(tabBg);
+        mSourcesBox->setBackgroundColour(tabBg);
         addAndMakeVisible(mSourcesBox);
         mComponents.add(mSourcesBox);
         Component *boxContent = mSourcesBox->getContent();
@@ -329,7 +329,7 @@ AudioProcessorEditor (ownerFilter)
     // speakers
     {
         mSpeakersBox = new Box(true, &mGrisFeel);
-        mSpeakersBox->setBackgroundColor(tabBg);
+        mSpeakersBox->setBackgroundColour(tabBg);
         addAndMakeVisible(mSpeakersBox);
         mComponents.add(mSpeakersBox);
         

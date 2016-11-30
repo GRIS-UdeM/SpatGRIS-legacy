@@ -95,38 +95,28 @@ void FieldComponent::paint (Graphics& g)
 	int fieldHeight = getHeight();
 	int processMode = mFilter->getProcessMode();
 	
-//	uint8 grey = 80;
-//	g.setColour(Colour(grey, grey, grey));
-    g.setColour(mGrisFeel.getFieldColor());
+    g.setColour(mGrisFeel.getFieldColour());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
 	
     // - - - - - - - - - - - -
 	// draw big background circles
 	// - - - - - - - - - - - -
-	g.setColour(Colours::white);
+	g.setColour(mGrisFeel.getLightColour());
     int iCurRadius = (processMode == kOscSpatMode) ? kRadiusMax : 1;
 	for (; iCurRadius <= kRadiusMax; ++iCurRadius) {
 		float w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
 		float x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 	}
-    //draw cross if in kOscSpatMode
-    if(processMode == kOscSpatMode){
-        g.setColour(Colours::white);
-        g.drawLine(fieldWidth/2, kSourceRadius, fieldWidth/2, fieldHeight-kSourceRadius);
-        g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
-    }
     
-	if (processMode != kFreeVolumeMode) {
-		g.setColour(Colour::fromFloatRGBA(0.5f, 0.5f, 0.5f, 1));
-		float w = (kThetaLockRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
+    // - - - - - - - - - - - -
+    // draw small, center background circles
+    // - - - - - - - - - - - -
+	if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
+		float w = (kThetaLockRampRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
 		float x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 		
-		g.setColour(Colour::fromFloatRGBA(0.3f, 0.3f, 0.3f, 1));
-		w = (kThetaLockRampRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
-		x = (fieldWidth - w) / 2;
-		g.drawEllipse(x, x, w, w, 1);
 	}
 	// - - - - - - - - - - - -
 	// draw the grid
@@ -139,11 +129,20 @@ void FieldComponent::paint (Graphics& g)
 			g.drawLine(0, fieldHeight * i / gridCount, fieldWidth, fieldHeight * i / gridCount);
 		}
 	}
-	const float adj_factor = 1 / sqrtf(2);
-	
+    
+    // - - - - - - - - - - - -
+    //draw cross if in kOscSpatMode
+    // - - - - - - - - - - - -
+    if(processMode == kOscSpatMode){
+        g.setColour(Colours::white);
+        g.drawLine(fieldWidth/2, kSourceRadius, fieldWidth/2, fieldHeight-kSourceRadius);
+        g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
+    }
+    
 	// - - - - - - - - - - - -
 	// draw translucid circles
 	// - - - - - - - - - - - -
+    const float adj_factor = 1 / sqrtf(2);
     if (processMode == kFreeVolumeMode){
         for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
             float sourceDist = mFilter->getDenormedSourceD(i);
@@ -210,12 +209,8 @@ void FieldComponent::paint (Graphics& g)
             if (hue > 1){
                 hue -= 1;
             }
-
-//            float HRElevSpan = 90* mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,90]
-//            float HRAzimSpan = 360*mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,360]
             float HRAzimSpan = 360*mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,360]
             float HRElevSpan = 90 *mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,90]
-            
             
             //get current azim+elev in angles
             FPoint azimElev = mFilter->getSourceAzimElev(i, true);  //azim is [-1,1],  elevation is [0,.5]
