@@ -148,15 +148,15 @@ private:
     uint64_t mHostChangedParameterEditor;
 	uint64_t mHostChangedPropertyEditor;
     
-    Slider          *mSurfaceOrPanSlider;
+    ParamSliderGRIS          *mSurfaceOrPanSlider;
     ToggleButton    *mSurfaceOrPanLinkButton;
     Component       *mSurfaceOrPanLabel;
    
-    Slider          *mAzimSpanSlider;
+    ParamSliderGRIS          *mAzimSpanSlider;
     ToggleButton    *mAzimSpanLinkButton;
     Component       *mAzimSpanLabel;
     
-    Slider          *mElevSpanSlider;
+    ParamSliderGRIS          *mElevSpanSlider;
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
 
@@ -285,7 +285,7 @@ private:
 	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
 	TextButton* addButton(const String &s, int x, int y, int w, int h, Component *into);
     TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
-	Slider* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
+	ParamSliderGRIS* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
     
 //    JoystickUpdateThread*   m_pJoystickUpdateThread;
     
@@ -302,8 +302,9 @@ private:
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
 
-    
     std::vector<string> mTimingVector;
+    
+    int m_iSelectedSrcEditor;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

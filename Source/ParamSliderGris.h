@@ -126,8 +126,6 @@ public:
     }
     
     void valueChanged() {
-        cout << "value " << getValue() << " for parameter " << mFilter->getParameterName(mParamIndex) << newLine;
-        
         //begin the automation if it wasn't already begun
         if (mMouseDown && !mBeganGesture) {
             //fprintf(stderr, "paremslider :: beginParameter\n");

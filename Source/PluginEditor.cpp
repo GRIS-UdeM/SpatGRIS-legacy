@@ -276,7 +276,7 @@ AudioProcessorEditor (ownerFilter)
         mSourcesBoxLabel->setColour(Label::textColourId, Colours::black);
 
         y += 5;
-        int iSelSrc = mFilter->getSelectedSrc();
+        m_iSelectedSrcEditor = mFilter->getSelectedSrc();
         
         //--------------------- surface/pan -----------------------
         //add surface/pan label
@@ -288,8 +288,8 @@ AudioProcessorEditor (ownerFilter)
         //add surface/pan link button
         mSurfaceOrPanLinkButton = addCheckbox("Link", mFilter->getLinkDistance(), x, y, w*3/12, dh, boxContent);
         //add surface/pan slider
-        float fCurDistance = mFilter->getSourceD(iSelSrc);
-        mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
+        float fCurDistance = mFilter->getSourceD(m_iSelectedSrcEditor);
+        mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, m_iSelectedSrcEditor, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
 //        if (mFilter->getProcessMode() == kPanVolumeMode){
 //            mSurfaceOrPanLabel->setEnabled(false);
 //            mSurfaceOrPanSlider->setEnabled(false);
@@ -303,8 +303,8 @@ AudioProcessorEditor (ownerFilter)
         //add azimSpan link button
         mAzimSpanLinkButton = addCheckbox("Link", mFilter->getLinkAzimSpan(), x, y, w*3/12, dh, boxContent);
         //add azimSpan slider
-        float fCurAzimSpan = mFilter->getSourceAzimSpan01(iSelSrc);
-        mAzimSpanSlider = addParamSliderGRIS(kParamAzimSpan, iSelSrc, fCurAzimSpan, x + w*3/12, y, w*9/12, dh, boxContent);
+        float fCurAzimSpan = mFilter->getSourceAzimSpan01(m_iSelectedSrcEditor);
+        mAzimSpanSlider = addParamSliderGRIS(kParamAzimSpan, m_iSelectedSrcEditor, fCurAzimSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
         //--------------------- elev span -----------------------
         //add elevSpan label
@@ -313,8 +313,8 @@ AudioProcessorEditor (ownerFilter)
         //add elevSpan link button
         mElevSpanLinkButton = addCheckbox("Link", mFilter->getLinkElevSpan(), x, y, w*3/12, dh, boxContent);
         //add elevSpan slider
-        float fCurElevSpan = mFilter->getSourceElevSpan01(iSelSrc);
-        mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, iSelSrc, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
+        float fCurElevSpan = mFilter->getSourceElevSpan01(m_iSelectedSrcEditor);
+        mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, m_iSelectedSrcEditor, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
         
         boxContent->setSize(w, y);
@@ -759,7 +759,7 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
         
         addLabel("Set RA position:", x, y, w - selectw, dh, box);
-        mSrcSelectCombo->setSelectedId(mFilter->getSelectedSrc()+1);
+        mSrcSelectCombo->setSelectedId(m_iSelectedSrcEditor+1);
         mSrcSelectCombo->setSize(selectw, dh);
         mSrcSelectCombo->setTopLeftPosition(x + w - selectw, y);
         mSrcSelectCombo->setExplicitFocusOrder(5);
@@ -1305,7 +1305,7 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
         String s; s << i+1;
         mSrcSelectCombo->addItem(s, index++);
     }
-    mSrcSelectCombo->setSelectedId(mFilter->getSelectedSrc()+1);
+    mSrcSelectCombo->setSelectedId(m_iSelectedSrcEditor+1);
 }
 
 
@@ -1466,7 +1466,7 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
     return te;
 }
 
-Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
+ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
 {
     int index ;
     //if we're adding a slider for a paramType == kParamSource, this slider will control the SourceD.
@@ -1918,8 +1918,7 @@ void SpatGrisAudioProcessorEditor::applyCurrentSpkPlacement(){
 }
 
 void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
-    int iSelectedSrc    = mFilter->getSelectedSrc();
-    FPoint pointRT      = mFilter->getSourceRT(iSelectedSrc);
+    FPoint pointRT      = mFilter->getSourceRT(m_iSelectedSrcEditor);
     pointRT.y += M_PI;
     JUCE_COMPILER_WARNING("throughout the code, need to check conversions, especially pertaining to the end location of trajectories. Also need to make the y consistent so that we don't revert it in only some cases")
     FPoint pointXY = mFilter->convertRt2Xy01(pointRT.x, pointRT.y);
@@ -2201,7 +2200,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     
     mProcessModeCombo-> setSelectedId(mFilter->getProcessMode() + 1);
     mOscLeapSourceCb->  setSelectedId(mFilter->getOscLeapSource() + 1);
-    mSrcSelectCombo->   setSelectedId(mFilter->getSelectedSrc()+1);
+    mSrcSelectCombo->   setSelectedId(m_iSelectedSrcEditor+1);
     mSpSelectCombo->    setSelectedId(mFilter->getSpSelected());
     mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
     mSpPlacementCombo-> setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
@@ -2262,6 +2261,12 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     
     //update sliders and mute, these could be automated
     int iSelSrc = mFilter->getSelectedSrc();
+    if (iSelSrc != m_iSelectedSrcEditor){
+        m_iSelectedSrcEditor = iSelSrc;
+        mSurfaceOrPanSlider->setParamIndex(mFilter->getParamForSourceD(m_iSelectedSrcEditor));
+        mAzimSpanSlider->    setParamIndex(mFilter->getParamForSourceAzimSpan(m_iSelectedSrcEditor));
+        mElevSpanSlider->    setParamIndex(mFilter->getParamForSourceElevSpan(m_iSelectedSrcEditor));
+    }
     mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
     mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
