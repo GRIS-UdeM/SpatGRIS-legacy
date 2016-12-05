@@ -48,7 +48,7 @@ Trajectory::Trajectory(const TrajectoryProperties& properties)
 
 void Trajectory::start() {
     //tell mover to start the automation, etc
-    m_pMover->begin(mFilter->getSrcSelected(), kTrajectory);
+    m_pMover->begin(mFilter->getSelectedSrc(), kTrajectory);
     //store initial position of sources
     for (int i = 0; i < mFilter->getNumberOfSources(); i++){
         mSourcesInitialPositionRT.add(mFilter->getSourceRT(i));
@@ -199,7 +199,7 @@ protected:
         fDeltaTheta = fDeltaTheta * 2 * M_PI;
     
         //move to initial position + delta theta
-        FPoint startPointRT  = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+        FPoint startPointRT  = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
         FPoint newPointXY01  = mFilter->convertRt2Xy01(startPointRT.x, startPointRT.y+fDeltaTheta);
         m_pMover->move(newPointXY01, kTrajectory);
     }
@@ -224,7 +224,7 @@ private:
 //
 //protected:
 //    void childInit() {
-//        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+//        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
 //        mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
 //        //if start ray is bigger than end ray, we are going in
 //        m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
@@ -310,7 +310,7 @@ public:
     
 protected:
     void childInit() {
-        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
         mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.x, m_fEndPairXY01.y));
         //if start ray is bigger than end ray, we are going in
         m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
@@ -387,7 +387,7 @@ public:
 protected:
     void childInit() {
         //get XY01 start point
-        int src = mFilter->getSrcSelected();
+        int src = mFilter->getSelectedSrc();
         mStartPointXy01 = mFilter->convertRt2Xy01(mSourcesInitialPositionRT[src].x, mSourcesInitialPositionRT[src].y);
         //calculate slope, offset and initial length, which represents only the length over the dependent variable
         if (!areSameParameterValues(mEndPointXy01.x, mStartPointXy01.x)){
@@ -459,7 +459,7 @@ public:
 	
 protected:
     void childInit(){
-        mStartPointRT = mSourcesInitialPositionRT.getUnchecked(mFilter->getSrcSelected());
+        mStartPointRT = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
     }
     
 	void childProcess(float duration, float seconds) {
@@ -585,7 +585,7 @@ protected:
         } else {
             //reset position at every new cycle
             if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
-                mFilter->restoreCurrentLocations(mFilter->getSrcSelected());
+                mFilter->restoreCurrentLocations(mFilter->getSelectedSrc());
             }
             mClock += seconds;
             while(mClock > 0.01){
@@ -594,7 +594,7 @@ protected:
                 float rand1 = mRNG.rand_uint32() / (float)0xFFFFFFFF;
                 float rand2 = mRNG.rand_uint32() / (float)0xFFFFFFFF;
                 
-                FPoint p = mFilter->getSourceXY(mFilter->getSrcSelected());
+                FPoint p = mFilter->getSourceXY(mFilter->getSelectedSrc());
                 
                 p.x += (rand1 - 0.5) * mSpeed;
                 p.y += (rand2 - 0.5) * mSpeed;
@@ -633,7 +633,7 @@ protected:
         bool bWriteAutomationForAllSources = mFilter->getIndependentMode();
         
         float p = m_fSpeed * m_fTimeDone / m_fDurationSingleTraj;
-        int iSelectedSrc = mFilter->getSrcSelected();
+        int iSelectedSrc = mFilter->getSelectedSrc();
         JUCE_COMPILER_WARNING("couldn't we simply do that for a lot of other trajectories when we need to know the cycle count?")
 		int cycle = (int)p;
 
@@ -704,7 +704,7 @@ protected:
     
     void resetIfRandomTarget(){
         bool bUsingSourceUnique = false;
-        int iSrc = bUsingSourceUnique ? mFilter->getSrcSelected() : -1;
+        int iSrc = bUsingSourceUnique ? mFilter->getSelectedSrc() : -1;
         mFilter->restoreCurrentLocations(iSrc);
     }
 	

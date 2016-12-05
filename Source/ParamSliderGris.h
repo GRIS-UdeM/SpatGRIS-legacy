@@ -36,12 +36,12 @@ public:
     :
     mParamIndex(paramIndex),
     mParamType(paramType),
-    mLink(link),
+    mLinkButton(link),
     mFilter(filter),
     mBeganGesture(false),
     mMouseDown(false)
     {
-        jassert(mLink || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
+        jassert(mLinkButton || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
         
     }
     
@@ -68,14 +68,14 @@ public:
                 case kParamElevSpan:        newVal = 0; break;
             }
             
-            if (mParamType == kParamSource && mLink->getToggleState()) {
+            if (mParamType == kParamSource && mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
                     }
                 }
-            } else if (mParamType == kParamAzimSpan && mLink->getToggleState()) {
+            } else if (mParamType == kParamAzimSpan && mLinkButton->getToggleState()) {
                 mFilter->setPreventSourceAzimElevSpanUpdate(true);
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceAzimSpan(i);
@@ -85,7 +85,7 @@ public:
                     }
                 }
                 mFilter->setPreventSourceAzimElevSpanUpdate(false);
-            } else if (mParamType == kParamElevSpan && mLink->getToggleState()) {
+            } else if (mParamType == kParamElevSpan && mLinkButton->getToggleState()) {
                 mFilter->setPreventSourceAzimElevSpanUpdate(true);
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceElevSpan(i);
@@ -111,21 +111,11 @@ public:
         
         if (mBeganGesture){
             //fprintf(stderr, "paremslider :: endParameter\n");
-            if (mParamType == kParamSource && mLink->getToggleState()) {
+            if (mParamType == kParamSource && mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++){
                     int paramIndex = mFilter->getParamForSourceD(i);
                     mFilter->endParameterChangeGesture(paramIndex);
                 }
-//            } else if (mParamType == kParamAzimSpan && mLink->getToggleState()) {
-//                for (int i = 0; i < mFilter->getNumberOfSources(); i++){
-//                    int paramIndex = mFilter->getParamForSourceAzimSpan(i);
-//                    mFilter->endParameterChangeGesture(paramIndex);
-//                }
-//            } else if (mParamType == kParamElevSpan && mLink->getToggleState()) {
-//                for (int i = 0; i < mFilter->getNumberOfSources(); i++){
-//                    int paramIndex = mFilter->getParamForSourceElevSpan(i);
-//                    mFilter->endParameterChangeGesture(paramIndex);
-//                }
             } else {
                 mFilter->endParameterChangeGesture(mParamIndex);
             }
@@ -136,23 +126,16 @@ public:
     }
     
     void valueChanged() {
+        cout << "value " << getValue() << " for parameter " << mFilter->getParameterName(mParamIndex) << newLine;
+        
+        //begin the automation if it wasn't already begun
         if (mMouseDown && !mBeganGesture) {
             //fprintf(stderr, "paremslider :: beginParameter\n");
-            if (mParamType == kParamSource && mLink->getToggleState()) {
+            if (mParamType == kParamSource && mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
                     mFilter->beginParameterChangeGesture(paramIndex);
                 }
-//            } else if (mParamType == kParamAzimSpan && mLink->getToggleState()) {
-//                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-//                    int paramIndex = mFilter->getParamForSourceAzimSpan(i);
-//                    mFilter->beginParameterChangeGesture(paramIndex);
-//                }
-//            } else if (mParamType == kParamElevSpan && mLink->getToggleState()) {
-//                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-//                    int paramIndex = mFilter->getParamForSourceElevSpan(i);
-//                    mFilter->beginParameterChangeGesture(paramIndex);
-//                }
             } else {
                 mFilter->beginParameterChangeGesture(mParamIndex);
             }
@@ -162,7 +145,7 @@ public:
         
         if (mParamType == kParamSource) {
             const float newVal = 1.f - (float)getValue();
-            if (mLink->getToggleState()) {
+            if (mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
                     if (mFilter->getParameter(paramIndex) != newVal)
@@ -175,7 +158,7 @@ public:
             }
         } else if (mParamType == kParamAzimSpan) {
             const float newVal = (float)getValue();
-            if (mLink->getToggleState()) {
+            if (mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceAzimSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal)
@@ -188,7 +171,7 @@ public:
             }
         } else if (mParamType == kParamElevSpan) {
             const float newVal = (float)getValue();
-            if (mLink->getToggleState()) {
+            if (mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceElevSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal)
@@ -204,6 +187,11 @@ public:
             if (mFilter->getParameter(mParamIndex) != newVal)
                 mFilter->setParameterNotifyingHost(mParamIndex, newVal);
         }
+    }
+    
+    void setParamIndex(int p_iParamIndex){
+    
+        mParamIndex = p_iParamIndex;
     }
     
     String getTextFromValue (double value)
@@ -250,7 +238,7 @@ public:
 private:
     //examples the paramIndex is the number used for processor->getparameter() and the type is something like source or speaker
     int mParamIndex, mParamType;
-    ToggleButton *mLink;
+    ToggleButton *mLinkButton;
     SpatGrisAudioProcessor *mFilter;
     bool mBeganGesture, mMouseDown;
     

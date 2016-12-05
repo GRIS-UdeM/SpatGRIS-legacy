@@ -727,11 +727,11 @@ public:
     int  getSourceElevSpanChanged()         { return m_iSourceElevSpanChanged;  }
     
     
-    int getSrcSelected() const {return mSrcSelected;}
+    int getSelectedSrc() const {return mSelectedSrc;}
     int getSpSelected() const  {return mSpSelected;}
     
-    void setSrcSelected(int p_i){
-    	mSrcSelected = p_i;
+    void setSelectedSrc(int p_i){
+    	mSelectedSrc = p_i;
         mHostChangedParameterProcessor++;
 	}
 
@@ -779,7 +779,7 @@ private:
     int mGuiHeight;
     int mInputOutputMode;
     int mSrcPlacementMode;
-    int mSrcSelected;
+    int mSelectedSrc;
     int mSpPlacementMode;
     int mSpSelected;
     int m_iTrType;

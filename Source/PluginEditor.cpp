@@ -276,7 +276,7 @@ AudioProcessorEditor (ownerFilter)
         mSourcesBoxLabel->setColour(Label::textColourId, Colours::black);
 
         y += 5;
-        int iSelSrc = mFilter->getSrcSelected();
+        int iSelSrc = mFilter->getSelectedSrc();
         
         //--------------------- surface/pan -----------------------
         //add surface/pan label
@@ -290,11 +290,11 @@ AudioProcessorEditor (ownerFilter)
         //add surface/pan slider
         float fCurDistance = mFilter->getSourceD(iSelSrc);
         mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, iSelSrc, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
-        if (mFilter->getProcessMode() == kPanVolumeMode){
-            mSurfaceOrPanLabel->setEnabled(false);
-            mSurfaceOrPanSlider->setEnabled(false);
-            mSurfaceOrPanLinkButton->setEnabled(false);
-        }
+//        if (mFilter->getProcessMode() == kPanVolumeMode){
+//            mSurfaceOrPanLabel->setEnabled(false);
+//            mSurfaceOrPanSlider->setEnabled(false);
+//            mSurfaceOrPanLinkButton->setEnabled(false);
+//        }
         y += dh + 10;
         //--------------------- azim span -----------------------
         //add azimSpan label
@@ -759,7 +759,7 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
         
         addLabel("Set RA position:", x, y, w - selectw, dh, box);
-        mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
+        mSrcSelectCombo->setSelectedId(mFilter->getSelectedSrc()+1);
         mSrcSelectCombo->setSize(selectw, dh);
         mSrcSelectCombo->setTopLeftPosition(x + w - selectw, y);
         mSrcSelectCombo->setExplicitFocusOrder(5);
@@ -1305,7 +1305,7 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
         String s; s << i+1;
         mSrcSelectCombo->addItem(s, index++);
     }
-    mSrcSelectCombo->setSelectedId(mFilter->getSrcSelected()+1);
+    mSrcSelectCombo->setSelectedId(mFilter->getSelectedSrc()+1);
 }
 
 
@@ -1918,7 +1918,7 @@ void SpatGrisAudioProcessorEditor::applyCurrentSpkPlacement(){
 }
 
 void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
-    int iSelectedSrc    = mFilter->getSrcSelected();
+    int iSelectedSrc    = mFilter->getSelectedSrc();
     FPoint pointRT      = mFilter->getSourceRT(iSelectedSrc);
     pointRT.y += M_PI;
     JUCE_COMPILER_WARNING("throughout the code, need to check conversions, especially pertaining to the end location of trajectories. Also need to make the y consistent so that we don't revert it in only some cases")
@@ -2013,7 +2013,7 @@ void SpatGrisAudioProcessorEditor::updateSourceLocationTextEditor(bool p_bUpdate
     int iSelectedSrc = mSrcSelectCombo->getSelectedId();
     iSelectedSrc = (iSelectedSrc <= 0) ? 1: iSelectedSrc;
     if (p_bUpdateFilter){
-        mFilter->setSrcSelected(iSelectedSrc-1);
+        mFilter->setSelectedSrc(iSelectedSrc-1);
     }
     FPoint curPosition = mFilter->getSourceRT(iSelectedSrc-1);
     mSrcR->setText(String(curPosition.x));
@@ -2201,7 +2201,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     
     mProcessModeCombo-> setSelectedId(mFilter->getProcessMode() + 1);
     mOscLeapSourceCb->  setSelectedId(mFilter->getOscLeapSource() + 1);
-    mSrcSelectCombo->   setSelectedId(mFilter->getSrcSelected()+1);
+    mSrcSelectCombo->   setSelectedId(mFilter->getSelectedSrc()+1);
     mSpSelectCombo->    setSelectedId(mFilter->getSpSelected());
     mSrcPlacementCombo->setSelectedId(mFilter->getSrcPlacementMode(), dontSendNotification);
     mSpPlacementCombo-> setSelectedId(mFilter->getSpPlacementMode(), dontSendNotification);
@@ -2248,6 +2248,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     //        clock_t timeValues = clock();
     //        oss << "Values\t" << timeValues - timeGuiTab << "\t";
     //#endif
+    
     //so these text editors will update only when we're not playing and moving stuff around
     if (!mFilter->isPlaying()){
         updateSourceLocationTextEditor(false);
@@ -2258,8 +2259,9 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     //        clock_t timeTextEd = clock();
     //        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
     //#endif
+    
     //update sliders and mute, these could be automated
-    int iSelSrc = mFilter->getSrcSelected();
+    int iSelSrc = mFilter->getSelectedSrc();
     mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
     mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);

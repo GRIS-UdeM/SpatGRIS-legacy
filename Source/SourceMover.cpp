@@ -48,7 +48,7 @@ void SourceMover::begin(int s, MoverType mt) {
 	if (mMoverType != kVacant) return;
 	mMoverType = mt;
 	mSelectedSrc = s;
-    mFilter->setSrcSelected(s);
+    mFilter->setSelectedSrc(s);
 	
     if (mMoverType != kSourceThread){
         mFilter->setIsRecordingAutomation(true);
