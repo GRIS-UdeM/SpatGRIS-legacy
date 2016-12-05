@@ -304,6 +304,7 @@ public:
     const String getName() const;
 
     void setParameter (int index, float newValue);
+    void setParameterInternal (int index, float newValue);
     void setParameterNotifyingHost (int index, float newValue);
 
     
@@ -664,8 +665,8 @@ public:
             setParameterNotifyingHost(getParamForSourceX(i), p.x);
             setParameterNotifyingHost(getParamForSourceY(i), p.y);
         } else {
-            setParameter(getParamForSourceX(i), p.x);
-            setParameter(getParamForSourceY(i), p.y);
+            setParameterInternal(getParamForSourceX(i), p.x);
+            setParameterInternal(getParamForSourceY(i), p.y);
         }
 	}
 
@@ -683,8 +684,8 @@ public:
             setParameterNotifyingHost(getParamForSourceX(i), p.x);
             setParameterNotifyingHost(getParamForSourceY(i), p.y);
         } else {
-            setParameter(getParamForSourceX(i), p.x);
-            setParameter(getParamForSourceY(i), p.y);
+            setParameterInternal(getParamForSourceX(i), p.x);
+            setParameterInternal(getParamForSourceY(i), p.y);
         }
 	}
 
@@ -696,15 +697,15 @@ public:
  
 	void setSpeakerXY01(int i, FPoint p) {
 		p = clampRadius01(p);
-        setParameter(getParamForSpeakerX(i), p.x);
-        setParameter(getParamForSpeakerY(i), p.y);
+        setParameterInternal(getParamForSpeakerX(i), p.x);
+        setParameterInternal(getParamForSpeakerY(i), p.y);
 	}
 
 	void setSpeakerRT(int i, FPoint p) {
 		float x = p.x * cosf(p.y);
 		float y = p.x * sinf(p.y);
-        setParameter(getParamForSpeakerX(i), (x + kRadiusMax) / (kRadiusMax*2));
-        setParameter(getParamForSpeakerY(i), (y + kRadiusMax) / (kRadiusMax*2));
+        setParameterInternal(getParamForSpeakerX(i), (x + kRadiusMax) / (kRadiusMax*2));
+        setParameterInternal(getParamForSpeakerY(i), (y + kRadiusMax) / (kRadiusMax*2));
     }
 	
 	Trajectory::Ptr getTrajectory() { return mTrajectory; }

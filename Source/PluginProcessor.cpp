@@ -481,8 +481,25 @@ bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     return false;
 }
 
-
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
+    
+    //return if mode is non-indedent and DAW is attempting to set position or azim/elev span for non-selected source
+    if (getMovementMode() != Independent){
+        for (int iCurSource = 0; iCurSource < getNumberOfSources(); ++iCurSource){
+            if (iCurSource != getSelectedSrc()){
+                if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource) ||
+                    index == getParamForSourceAzimSpan(iCurSource) || index == getParamForSourceElevSpan(iCurSource)) {
+                    return;
+                }
+            }
+        }
+    }
+    
+    setParameterInternal (index, newValue);
+}
+
+
+void SpatGrisAudioProcessor::setParameterInternal (int index, float newValue){
     
     float fOldValue = mParameters.getUnchecked(index);
     
@@ -593,7 +610,7 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
     if (p_bNotifyHost){
         setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
     } else {
-        setParameter(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
+        setParameterInternal(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
     }
 }
 

@@ -832,3 +832,7 @@ see onenote
 --------------- 2016-11-22-------------------
 the down positions in the mover are initialized with JucePlugin_MaxNumInputChannels, which is 2
 the preset function uses getTotalNumInputChannels, which is 8
+
+--------------- 2016-12-05--------------------
+
+return si en mode non-independent et on tente de setter une source non selectionne

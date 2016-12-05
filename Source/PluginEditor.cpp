@@ -1620,12 +1620,12 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     
     if (button == mTrWriteButton) {
-#if TIME_THINGS
-        for(auto line : mTimingVector){
-            cout << line << newLine;
-            mTimingVector.clear();
-        }
-#endif
+//#if TIME_THINGS
+//        for(auto line : mTimingVector){
+//            cout << line << newLine;
+//            mTimingVector.clear();
+//        }
+//#endif
         Trajectory::Ptr t = mFilter->getTrajectory();
         //if a trajectory exists
         if (t) {
