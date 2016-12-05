@@ -469,18 +469,14 @@ bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
         if (areSameParameterValues(m_fNewValue, fCurMode)){
-//            cout << fCurMode << " and " << m_fNewValue << " are the same";
             //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
             float fCurSelectedMode = getParameter(kMovementMode);
             if (areSameParameterValues(fCurMode, fCurSelectedMode)){
-//                cout << " and are same as " << fCurSelectedMode << "\n";
                 return false;
             } else {
-//                cout << " and are different from " << fCurSelectedMode << "\n";
                 return true;
             }
         }
-//        cout << fCurMode << " and " << m_fNewValue << " are NOT the same\n";
     }
     return false;
 }

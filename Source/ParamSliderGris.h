@@ -81,7 +81,6 @@ public:
                     int paramIndex = mFilter->getParamForSourceAzimSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
-//                        mFilter->setParameter(paramIndex, newVal);
                     }
                 }
                 mFilter->setPreventSourceAzimElevSpanUpdate(false);
@@ -91,7 +90,6 @@ public:
                     int paramIndex = mFilter->getParamForSourceElevSpan(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
-//                        mFilter->setParameter(paramIndex, newVal);
                     }
                 }
                 mFilter->setPreventSourceAzimElevSpanUpdate(false);
