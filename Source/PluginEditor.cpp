@@ -286,7 +286,7 @@ AudioProcessorEditor (ownerFilter)
         }
         y += dh;
         //add surface/pan link button
-        mSurfaceOrPanLinkButton = addCheckbox("Link", mFilter->getLinkDistance(), x, y, w*3/12, dh, boxContent);
+        mSurfaceOrPanLinkButton = addCheckbox("Link", mFilter->getLinkSurfaceOrPan(), x, y, w*3/12, dh, boxContent);
         //add surface/pan slider
         float fCurDistance = mFilter->getSourceD(m_iSelectedSrcEditor);
         mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, m_iSelectedSrcEditor, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
@@ -1725,7 +1725,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         mFilter->setIndependentMode(button->getToggleState());
     }
     else if (button == mSurfaceOrPanLinkButton) {
-        mFilter->setLinkDistance(button->getToggleState());
+        mFilter->setLinkSurfaceOrPan(button->getToggleState());
     }
     else if (button == mAzimSpanLinkButton) {
         mFilter->setLinkAzimSpan(button->getToggleState());
@@ -2223,7 +2223,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mShowGridLines->setToggleState(mFilter->getShowGridLines(),             dontSendNotification);
     mOscActiveButton->setToggleState(mFilter->getOscActive(),               dontSendNotification);
     mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(),dontSendNotification);
-    mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkDistance(),     dontSendNotification);
+    mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkSurfaceOrPan(),     dontSendNotification);
     mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
     mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
     mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);

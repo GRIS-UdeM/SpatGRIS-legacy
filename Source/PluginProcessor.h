@@ -372,8 +372,8 @@ public:
 	}
     void setMovementMode(int i, bool p_bNotifyHost = true);
     
-	bool getLinkDistance() const { return mLinkSurfaceOrPan; }
-	void setLinkDistance(bool s) { mLinkSurfaceOrPan = s; }
+	bool getLinkSurfaceOrPan() const { return mLinkSurfaceOrPan; }
+	void setLinkSurfaceOrPan(bool s) { mLinkSurfaceOrPan = s; }
 
     bool getLinkAzimSpan() const { return mLinkAzimSpan; }
     void setLinkAzimSpan(bool s) { mLinkAzimSpan = s; }
