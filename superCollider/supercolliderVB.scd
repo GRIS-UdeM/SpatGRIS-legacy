@@ -6,7 +6,7 @@ var numChannels = 16;
 Server.local.options.numOutputBusChannels = numChannels;
 s.boot;
 
-~configVBAP = VBAPSpeakerArray.new(2, [ -22.5, 22.5, 67.5, 112.5, 157.5, -157.5, -112.5, -67.5 ]);
+// ~configVBAP = VBAPSpeakerArray.new(2, [ -22.5, 22.5, 67.5, 112.5, 157.5, -157.5, -112.5, -67.5 ]);
 
 ~configVBAP = VBAPSpeakerArray.new(3, [ [-22.5, 0], [22.5, 0], [-67.5, 0], [67.5, 0], [-112.5, 0], [112.5, 0], [-157.5, 0], [157.5, 0], [-60, 45], [60, 45], [-120, 45], [120, 45], [0, 45], [-180, 45], [-90, 85], [90, 85] ]);
 
