@@ -33,7 +33,9 @@ x = {
 	spread = 0;
 
 	//arguments are numChans, in, bufnum, azimuth = 0.0, elevation = 1.0, spread = 0.0;
+	// "before ar".postln;
 	VBAP.ar(numChannels, source, ~configVBAPBuffers.bufnum, azim, elev, spread);
+	// "after ar".postln;
 
 }.play;
 )
