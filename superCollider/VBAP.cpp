@@ -74,16 +74,16 @@ use or for distribution:
 #include <stdio.h>
 
 #ifdef NOVA_SIMD
-#include "simd_memory.hpp"
-#include "simd_binary_arithmetic.hpp"
+    #include "simd_memory.hpp"
+    #include "simd_binary_arithmetic.hpp"
 
-using nova::wrap_argument;
+    using nova::wrap_argument;
 
-#ifdef __GNUC__
-#define inline_functions __attribute__ ((flatten))
-#else
-#define inline_functions
-#endif
+    #ifdef __GNUC__
+        #define inline_functions __attribute__ ((flatten))
+    #else
+        #define inline_functions
+    #endif
 
 #endif
 
@@ -576,30 +576,30 @@ static void VBAP_next(VBAP *unit, int inNumSamples)
 }
 
 #ifdef NOVA_SIMD
-static inline_functions void VBAP_next_simd(VBAP *unit, int inNumSamples)
-{
-	VBAP_calc_gain_factors(unit);
+    static inline_functions void VBAP_next_simd(VBAP *unit, int inNumSamples)
+    {
+        VBAP_calc_gain_factors(unit);
 
-	float *in = IN(0);
-	float *final_gs = unit->final_gs;
+        float *in = IN(0);
+        float *final_gs = unit->final_gs;
 
-	// now scale the outputs
-	for (int i=0; i<(unit->mNumOutputs); ++i) {
-		float *out = OUT(i);
-		float chanamp = unit->m_chanamp[i];
-		float nextchanamp = final_gs[i];
-		if (nextchanamp == chanamp) {
-			if (nextchanamp == 0.f)
-				nova::zerovec_simd(out, inNumSamples);
-			else
-				nova::times_vec_simd(out, in, nextchanamp, inNumSamples);
-		} else {
-			float chanampslope = CALCSLOPE(nextchanamp, chanamp);
-			nova::times_vec_simd(out, in, nextchanamp, inNumSamples);
-			unit->m_chanamp[i] = nextchanamp;
-		}
-	}
-}
+        // now scale the outputs
+        for (int i=0; i<(unit->mNumOutputs); ++i) {
+            float *out = OUT(i);
+            float chanamp = unit->m_chanamp[i];
+            float nextchanamp = final_gs[i];
+            if (nextchanamp == chanamp) {
+                if (nextchanamp == 0.f)
+                    nova::zerovec_simd(out, inNumSamples);
+                else
+                    nova::times_vec_simd(out, in, nextchanamp, inNumSamples);
+            } else {
+                float chanampslope = CALCSLOPE(nextchanamp, chanamp);
+                nova::times_vec_simd(out, in, nextchanamp, inNumSamples);
+                unit->m_chanamp[i] = nextchanamp;
+            }
+        }
+    }
 #endif
 
 static void VBAP_Ctor(VBAP* unit)

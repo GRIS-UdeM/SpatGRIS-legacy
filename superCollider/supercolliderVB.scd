@@ -10,6 +10,7 @@ s.boot;
 
 ~configVBAP = VBAPSpeakerArray.new(3, [ [-22.5, 0], [22.5, 0], [-67.5, 0], [67.5, 0], [-112.5, 0], [112.5, 0], [-157.5, 0], [157.5, 0], [-60, 45], [60, 45], [-120, 45], [120, 45], [0, 45], [-180, 45], [-90, 85], [90, 85] ]);
 
+//buffers are floats stored on the server. Often used for audio but could be anything
 ~configVBAPBuffers = ~configVBAP.loadToBuffer;
 
 

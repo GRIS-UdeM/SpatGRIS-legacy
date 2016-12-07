@@ -71,13 +71,14 @@ VBAPSpeakerArray {
 	}
 
 
-	     /* Selects the loudspeaker triplets, and
-      calculates the inversion matrices for each selected triplet.
+	 /* Selects the loudspeaker triplets, and
+     calculates the inversion matrices for each selected triplet.
      A line (connection) is drawn between each loudspeaker. The lines
      denote the sides of the triangles. The triangles should not be
      intersecting. All crossing connections are searched and the
      longer connection is erased. This yields non-intesecting triangles,
      which can be used in panning.
+
      See theory in paper Pulkki, V. Lokki, T. "Creating Auditory Displays
      with Multiple Loudspeakers Using VBAP: A Case Study with
      DIVA Project" in International Conference on
@@ -569,6 +570,7 @@ VBAPSpeakerSet { // triplet or pair
 VBAP : MultiOutUGen {
 	// spread 0 - 100
 	*ar { arg numChans, in, bufnum, azimuth = 0.0, elevation = 1.0, spread = 0.0;
+		"VBAP.AR".postln;
 		^this.multiNew('audio', numChans, in, bufnum, azimuth, elevation, spread )
 	}
 	*kr { arg numChans, in, bufnum, azimuth = 0.0, elevation = 1.0, spread = 0.0;
