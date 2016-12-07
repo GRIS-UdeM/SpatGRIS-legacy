@@ -1676,13 +1676,13 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             float s = input[f];
             float x = input_x[f];
             float y = input_y[f];
-            float d = 1-input_d[f];
+            float d = input_d[f];
             
             if (d > 1){
                d = normalize(kSourceMinDistance, kSourceMaxDistance, d);
             }
             
-            float tv = dbToLinear(d * params[kMaxSpanVolume]);
+            float tv = dbToLinear(d * (1-params[kMaxSpanVolume]));
             
             // could use the Accelerate framework on mac for these
             float r = hypotf(x, y);
