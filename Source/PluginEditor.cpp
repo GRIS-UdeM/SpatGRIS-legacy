@@ -290,11 +290,6 @@ AudioProcessorEditor (ownerFilter)
         //add surface/pan slider
         float fCurDistance = mFilter->getSourceD(m_iSelectedSrcEditor);
         mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, m_iSelectedSrcEditor, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
-//        if (mFilter->getProcessMode() == kPanVolumeMode){
-//            mSurfaceOrPanLabel->setEnabled(false);
-//            mSurfaceOrPanSlider->setEnabled(false);
-//            mSurfaceOrPanLinkButton->setEnabled(false);
-//        }
         y += dh + 10;
         //--------------------- azim span -----------------------
         //add azimSpan label
@@ -2267,7 +2262,11 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         mAzimSpanSlider->    setParamIndex(mFilter->getParamForSourceAzimSpan(m_iSelectedSrcEditor));
         mElevSpanSlider->    setParamIndex(mFilter->getParamForSourceElevSpan(m_iSelectedSrcEditor));
     }
-    mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
+    if (mFilter->getProcessMode() == kFreeVolumeMode){
+        mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
+    } else {
+        mSurfaceOrPanSlider->setValue(mFilter->getSourceD(iSelSrc), dontSendNotification);
+    }
     mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){

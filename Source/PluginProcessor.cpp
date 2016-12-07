@@ -1217,8 +1217,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		inputs[iCurSource] = buffer.getWritePointer(iCurSource);
         //denormalize current position
         if (mProcessMode == kFreeVolumeMode){
-            float fValue = denormalize(kSourceMinDistance, kSourceMaxDistance, params[getParamForSourceD(iCurSource)]);
-            params[getParamForSourceD(iCurSource)] = fValue;
+            params[getParamForSourceD(iCurSource)] = denormalize(kSourceMinDistance, kSourceMaxDistance, params[getParamForSourceD(iCurSource)]);
         }
 		params[getParamForSourceX(iCurSource)] = params[getParamForSourceX(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
 		params[getParamForSourceY(iCurSource)] = params[getParamForSourceY(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
@@ -1306,7 +1305,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	}
 #if USE_DB_METERS
 	if (mCalculateLevels) {
-		const float attack = kLevelAttackDefault; //params[kLevelAttackParam]; // milliseconds
+		const float attack = kLevelAttackDefault;   //params[kLevelAttackParam];  // milliseconds
 		const float release = kLevelReleaseDefault; //params[kLevelReleaseParam]; // milliseconds
 		const float ag = powf(0.01f, 1000.f / (attack * sampleRate));
 		const float rg = powf(0.01f, 1000.f / (release * sampleRate));
@@ -1677,7 +1676,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
             float s = input[f];
             float x = input_x[f];
             float y = input_y[f];
-            float d = input_d[f];
+            float d = 1-input_d[f];
             
             if (d > 1){
                d = normalize(kSourceMinDistance, kSourceMaxDistance, d);

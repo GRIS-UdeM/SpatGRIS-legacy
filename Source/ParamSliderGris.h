@@ -140,7 +140,7 @@ public:
         }
         
         if (mParamType == kParamSource) {
-            const float newVal = 1.f - (float)getValue();
+            const float newVal = (mFilter->getProcessMode() == kFreeVolumeMode) ? 1.f - (float)getValue() : (float)getValue();
             if (mLinkButton->getToggleState()) {
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceD(i);
