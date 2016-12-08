@@ -4,7 +4,7 @@
  
  Copyright (C) 2015  GRIS-UdeM
  
- LevelComponent.cpp
+ HIDDelegate.cpp
  Created: 23 Jan 2014 8:09:25am
  
  Developers: Antoine Landrieux, Vincent Berthiaume

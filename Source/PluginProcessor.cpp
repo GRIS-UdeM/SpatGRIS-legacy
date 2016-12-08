@@ -1207,11 +1207,9 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
         jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
 	
-    //for each source, get pointer (**inputs) to content of buffer, and denormalize x and y.
+    //for each source, get pointer to content of buffer, and denormalize x and y.
     //Interestingly, because we only have one buffer going in and out of this function, we initially always have the same number of inputs and outputs.
-    JUCE_COMPILER_WARNING("no mem allocation in realtime thread. Need to use an array of vectors or whatever AudioBuffer buffer can give us")
-	float **inputs = new float* [mNumberOfSources];
-//    vector<float> inputs [mNumberOfSources];
+    vector<float*> inputs(mNumberOfSources);
     for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
         //get the inputs
 		inputs[iCurSource] = buffer.getWritePointer(iCurSource);
@@ -1224,9 +1222,8 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	}
 	
     //get output pointer (**outputs) from same buffer that we got the inputs from
-	float **outputs = new float*[mNumberOfSpeakers];
-    JUCE_COMPILER_WARNING("no mem allocation in realtime thread. Need to use an array of vectors or whatever AudioBuffer buffer can give us")
-	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
+    vector<float*> outputs(mNumberOfSpeakers);
+    for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
         //if we're in internal write, get write buffer from mRoutingTempAudioBuffer, otherwise get it from the main buffer function argument
 		outputs[iCurOutput] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(iCurOutput) : buffer.getWritePointer(iCurOutput);
         
@@ -1262,13 +1259,12 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		if (mRoutingMode == kInternalWrite) {
             ProcessData(inputs, outputs, params, sampleRate, numFramesToDo);
         } else {
-			float **inputsCopy = new float* [mNumberOfSources];
+			vector<float*> inputsCopy(mNumberOfSources);
 			for (int i = 0; i < mNumberOfSources; i++) {
 				memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
 				inputsCopy[i] = mInputsCopy.getReference(i).b;
 			}
 			ProcessData(inputsCopy, outputs, params, sampleRate, numFramesToDo);
-			delete[] inputsCopy;
         }
 		
 		inFramesToProcess -= numFramesToDo;
@@ -1329,13 +1325,11 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 		buffer.clear();
 	}
 	
-	delete[] inputs;
-	delete[] outputs;
-    JUCE_COMPILER_WARNING("everything related to mProcessCounter should be in #if USE_DB_METERS")
+    //this is only used for the level components, ie the db meters
 	mProcessCounter++;
 }
 
-void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessData(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
 	switch(mProcessMode) {
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
 		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params, sampleRate, frames);	break;
@@ -1419,7 +1413,7 @@ void SpatGrisAudioProcessor::setSpeakerVolume(int source, float targetVolume, fl
     }
 }
 
-void SpatGrisAudioProcessor::addToOutputs(int source, float sample, float **outputs, int f) {
+void SpatGrisAudioProcessor::addToOutputs(int source, float sample, vector<float*> outputs, int f) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
@@ -1472,7 +1466,7 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
 
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float **p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs, vector<float*> p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
     float fOldValuesPortion = rampParameters(p_pfParams, p_fSampleRate, p_iTotalSamples);
     
 	// clear outputs[]
@@ -1615,7 +1609,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float **p_ppfInputs, float
 	}
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessDataPanSpanMode(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
     
     float fOldValuesPortion = rampParameters(params, sampleRate, frames);
     
@@ -1777,7 +1771,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float **inputs, float **outp
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
 	// ramp all non constant parameters
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * sampleRate));

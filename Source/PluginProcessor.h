@@ -856,14 +856,14 @@ private:
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
     inline void setSpeakerVolume(int source, float volume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse);
-    void addToOutputs(int source, float sample, float **outputs, int f);
+    void addToOutputs(int source, float sample, vector<float*> outputs, int f);
 
     float rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples);
 	
-    void ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataFreeVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanVolumeMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanSpanMode(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames);
+    void ProcessData                (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataFreeVolumeMode  (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataPanVolumeMode   (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataPanSpanMode     (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
     
     int mNumberOfSources;
     int mNumberOfSpeakers;
