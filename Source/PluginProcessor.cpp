@@ -83,18 +83,26 @@ public:
     { }
     
     ~SourceUpdateThread() {
-        stopThread (500);
+        // allow the thread 2 seconds to stop cleanly - should be plenty of time.
+        stopThread (2000);
     }
     
     void run() override {
-        while (! threadShouldExit()) {
+        while (! threadShouldExit() && !m_bBypass) {
             m_pProcessor->threadUpdateNonSelectedSourcePositions();
             wait (m_iInterval);
         }
     }
+    void setBypass(bool p_bBypass){
+        m_bBypass = p_bBypass;
+    }
+    bool getBypass(){
+        return m_bBypass;
+    }
     
 private:
     int m_iInterval;
+    bool m_bBypass;
     SpatGrisAudioProcessor* m_pProcessor;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceUpdateThread)
@@ -111,8 +119,8 @@ public:
     }
     
     ~OscSpatThread() {
-        // allow the thread .5 second to stop cleanly - should be plenty of time.
-        stopThread (500);
+        // allow the thread 2 seconds to stop cleanly - should be plenty of time.
+        stopThread (2000);
     }
     
     void run() override {
@@ -174,6 +182,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_pSourceUpdateThread   = new SourceUpdateThread(this);
     m_OwnedThreads.add(m_pOscSpatThread);
     m_OwnedThreads.add(m_pSourceUpdateThread);
+    
+    m_pSourceUpdateThread->startThread();
     
     //SET PARAMETERS
 	mParameters.resize(kNumberOfParameters);
@@ -314,9 +324,9 @@ void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
     //we don't want the thread to run when we only have 1 source, when we're recording automation (because then the regular move
     //will already move all sources according to movement constraints, and when we're in independent mode.
     if (mNumberOfSources == 1 || m_bIsRecordingAutomation /*|| getMovementMode() == 0*/) {
-        m_pSourceUpdateThread->stopThread(500);
+        m_pSourceUpdateThread->setBypass(false);
     } else if (!m_pSourceUpdateThread->isThreadRunning()){
-        m_pSourceUpdateThread->startThread();
+        m_pSourceUpdateThread->setBypass(true);
     }
 }
 
@@ -411,7 +421,7 @@ void SpatGrisAudioProcessor::disconnectOscSpat(){
         jassertfalse;
     }
     if (m_pOscSpatThread->isThreadRunning()){
-        m_pOscSpatThread->stopThread(500);
+        m_pOscSpatThread->stopThread(2000);
     }
 }
 
@@ -517,7 +527,6 @@ void SpatGrisAudioProcessor::setParameterInternal (int index, float newValue){
         
         if (index == kMovementMode && m_pMover){
             m_pMover->storeAllDownPositions();
-            JUCE_COMPILER_WARNING("WE CAN'T CALL THIS BLOCKING STUFF IN HERE! this was done by 5e825264a25941831ae80762845702cbf53dc023")
             startOrStopSourceUpdateThread();
         }
 
