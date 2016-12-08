@@ -1412,17 +1412,17 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
     }
 }
 
-void SpatGrisAudioProcessor::setSpeakerVolume(int source, float targetVolume, float sm_o, int o, vector<bool> &p_pvSpeakersCurrentlyInUse) {
+inline void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> &p_pvSpeakersCurrentlyInUse) {
     float oldVolume = mSpeakerVolumes[source][o];
     float currentVolume = sm_o * oldVolume + (1-sm_o) * targetVolume;
-    mSpeakerVolumes.getReference(source).set(o, currentVolume);	// with exp. smoothing on volume
-    //mSpeakerVolumes.getReference(source).set(o, targetVolume);		// no exp. smoothing on volume
+    mSpeakerVolumes.getReference(source).set(o, currentVolume);     // with exp. smoothing on volume
+    //mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
     if (!p_pvSpeakersCurrentlyInUse.empty()){
         p_pvSpeakersCurrentlyInUse[o] = true;
     }
 }
 
-void SpatGrisAudioProcessor::addToOutputs(int source, float sample, vector<float*> outputs, int f) {
+inline void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
