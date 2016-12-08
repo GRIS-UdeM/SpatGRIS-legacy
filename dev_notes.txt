@@ -845,6 +845,9 @@ return si en mode non-independent et on tente de setter une source non selection
 --------------- 2016-12-08--------------------
 TODO
     * #116: cpu problems
+        
     * remove problematic code in process thread
-        * new and delet
+        X new and delete
+        X thread start/stop
+            
         * starting thread
