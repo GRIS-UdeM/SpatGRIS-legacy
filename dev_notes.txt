@@ -845,7 +845,14 @@ return si en mode non-independent et on tente de setter une source non selection
 --------------- 2016-12-08--------------------
 TODO
     * #116: cpu problems
-        
+        * so using the time profiler in instruments, i see that most of the
+        cpu is used by setSpeakerVolume and addToOutputs
+        * some minor improvement by using reference parameters
+        * setSpeaker volume is called 2 times per sample when source is 
+        outside main spatgris circle, and 4 times when it is inside. keeping
+        sources outside i can play 8x8 on gris, but inside I can't.
+        * processor line 1610, we do an extra round of setspeaker volume. 
+        commenting this doesn't seem to do much, what is it for?
     * remove problematic code in process thread
         X new and delete
         X thread start/stop
