@@ -1413,12 +1413,9 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 }
 
 void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
-    float oldVolume = mSpeakerVolumes[source][o];
-    float currentVolume = sm_o * oldVolume + (1-sm_o) * targetVolume;
-    mSpeakerVolumes.getReference(source).set(o, currentVolume);     // with exp. smoothing on volume
+    mSpeakerVolumes.getReference(source).set(o, sm_o * mSpeakerVolumes[source][o] + (1-sm_o) * targetVolume);     // with exp. smoothing on volume
     //mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
     if (p_pvSpeakersCurrentlyInUse){
-//        p_pvSpeakersCurrentlyInUse->insert(o, true);
         p_pvSpeakersCurrentlyInUse->at(o) = true;
     }
 }
