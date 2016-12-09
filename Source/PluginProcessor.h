@@ -855,7 +855,7 @@ private:
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
-    inline void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> &p_pvSpeakersCurrentlyInUse);
+    void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
 
     float rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples);

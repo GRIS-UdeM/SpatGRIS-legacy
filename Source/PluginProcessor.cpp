@@ -1412,13 +1412,14 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
     }
 }
 
-void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> &p_pvSpeakersCurrentlyInUse) {
+void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
     float oldVolume = mSpeakerVolumes[source][o];
     float currentVolume = sm_o * oldVolume + (1-sm_o) * targetVolume;
     mSpeakerVolumes.getReference(source).set(o, currentVolume);     // with exp. smoothing on volume
     //mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
-    if (!p_pvSpeakersCurrentlyInUse.empty()){
-        p_pvSpeakersCurrentlyInUse[o] = true;
+    if (p_pvSpeakersCurrentlyInUse){
+//        p_pvSpeakersCurrentlyInUse->insert(o, true);
+        p_pvSpeakersCurrentlyInUse->at(o) = true;
     }
 }
 
@@ -1546,14 +1547,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
 					float vLeft = 1 - dLeft / dTotal;
 					float vRight = 1 - dRight / dTotal;
 					
-                    setSpeakerVolume(iCurSource, vLeft,  fOldValuesPortion, left,  vSpeakersCurrentlyInUse);
-                    setSpeakerVolume(iCurSource, vRight, fOldValuesPortion, right, vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vLeft,  fOldValuesPortion, left,  &vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vRight, fOldValuesPortion, right, &vSpeakersCurrentlyInUse);
 				} else {
 					// one side is empty!
 					int o = (left >= 0) ? left : right;
 					jassert(o >= 0);
 					
-					setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
+					setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
 				}
 			}
             //if we're inside the main circle, 4 speakers will play
@@ -1581,14 +1582,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
 					float vLeft = 1 - dFrontLeft / dTotal;
 					float vRight = 1 - dFrontRight / dTotal;
 					
-                    setSpeakerVolume(iCurSource, vLeft * front, fOldValuesPortion, frontLeft, vSpeakersCurrentlyInUse);
-                    setSpeakerVolume(iCurSource, vRight * front, fOldValuesPortion, frontRight, vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vLeft * front, fOldValuesPortion, frontLeft, &vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vRight * front, fOldValuesPortion, frontRight, &vSpeakersCurrentlyInUse);
 				} else {
 					// one side is empty!
 					int o = (frontLeft >= 0) ? frontLeft : frontRight;
 					jassert(o >= 0);
 					
-					setSpeakerVolume(iCurSource, front, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
+					setSpeakerVolume(iCurSource, front, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
 				}
 				
 				// add to back output
@@ -1597,20 +1598,20 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
 					float vLeft  = 1 - dBackLeft / dTotal;
 					float vRight = 1 - dBackRight / dTotal;
 					
-                    setSpeakerVolume(iCurSource, vLeft * back, fOldValuesPortion, backLeft, vSpeakersCurrentlyInUse);
-                    setSpeakerVolume(iCurSource, vRight * back, fOldValuesPortion, backRight, vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vLeft * back, fOldValuesPortion, backLeft, &vSpeakersCurrentlyInUse);
+                    setSpeakerVolume(iCurSource, vRight * back, fOldValuesPortion, backRight, &vSpeakersCurrentlyInUse);
 				} else {
 					// one side is empty!
 					int o = (backLeft >= 0) ? backLeft : backRight;
 					jassert(o >= 0);
 					
-					setSpeakerVolume(iCurSource, back, fOldValuesPortion, o, vSpeakersCurrentlyInUse);
+					setSpeakerVolume(iCurSource, back, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
 				}
 			}
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
-                    vector<bool> empty;
-                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, empty);
+//                    vector<bool> empty;
+                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
                 }
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
@@ -1770,8 +1771,8 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(vector<float*> inputs, vecto
             
             float adj = tv / total;
             for (int o = 0; o < mNumberOfSpeakers; o++){
-                vector<bool> empty;
-                setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, empty);
+//                vector<bool> empty;
+                setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, NULL);
             }
             addToOutputs(i, s, outputs, f);
             int i = 23;
