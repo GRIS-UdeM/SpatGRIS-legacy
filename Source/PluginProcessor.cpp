@@ -1529,91 +1529,94 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
                 dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
             }
             fCurSampleValue *= dbToLinear(dbSource);
-            
-			//if we're outside the main, first circle, only 2 speakers will play
-			if (fCurSampleR >= 1) {
-				// find left and right speakers
-				int left, right;
-				float dLeft, dRight;
-                
-                findLeftAndRightSpeakers(fCurSampleT, p_pfParams, left, right, dLeft, dRight);
-                
-				// add to output
-				if (left >= 0 && right >= 0) {
-					float dTotal = dLeft + dRight;
-					float vLeft = 1 - dLeft / dTotal;
-					float vRight = 1 - dRight / dTotal;
-					
-                    setSpeakerVolume(iCurSource, vLeft,  fOldValuesPortion, left,  &vSpeakersCurrentlyInUse);
-                    setSpeakerVolume(iCurSource, vRight, fOldValuesPortion, right, &vSpeakersCurrentlyInUse);
-				} else {
-					// one side is empty!
-					int o = (left >= 0) ? left : right;
-					jassert(o >= 0);
-					
-					setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
-				}
-			}
-            //if we're inside the main circle, 4 speakers will play
-            else {
-				// find front left, right
-				int frontLeft, frontRight;
-				float dFrontLeft, dFrontRight;
 
-                findLeftAndRightSpeakers(fCurSampleT, p_pfParams, frontLeft, frontRight, dFrontLeft, dFrontRight);
+            spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
 
-                float bt = fCurSampleT + kHalfCircle;
-				if (bt > kThetaMax) bt -= kThetaMax;
-				
-				// find back left, right
-				int backLeft, backRight;
-				float dBackLeft, dBackRight;
-                findLeftAndRightSpeakers(bt, p_pfParams, backLeft, backRight, dBackLeft, dBackRight);
-			
-				float front = fCurSampleR * 0.5f + 0.5f;
-				float back = 1 - front;
-				
-				// add to front output
-				if (frontLeft >= 0 && frontRight >= 0) {
-					float dTotal = dFrontLeft + dFrontRight;
-					float vLeft = 1 - dFrontLeft / dTotal;
-					float vRight = 1 - dFrontRight / dTotal;
-					
-                    setSpeakerVolume(iCurSource, vLeft * front, fOldValuesPortion, frontLeft, &vSpeakersCurrentlyInUse);
-                    setSpeakerVolume(iCurSource, vRight * front, fOldValuesPortion, frontRight, &vSpeakersCurrentlyInUse);
-				} else {
-					// one side is empty!
-					int o = (frontLeft >= 0) ? frontLeft : frontRight;
-					jassert(o >= 0);
-					
-					setSpeakerVolume(iCurSource, front, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
-				}
-				
-				// add to back output
-				if (backLeft >= 0 && backRight >= 0) {
-					float dTotal = dBackLeft + dBackRight;
-					float vLeft  = 1 - dBackLeft / dTotal;
-					float vRight = 1 - dBackRight / dTotal;
-					
-                    setSpeakerVolume(iCurSource, vLeft * back, fOldValuesPortion, backLeft, &vSpeakersCurrentlyInUse);
-                    setSpeakerVolume(iCurSource, vRight * back, fOldValuesPortion, backRight, &vSpeakersCurrentlyInUse);
-				} else {
-					// one side is empty!
-					int o = (backLeft >= 0) ? backLeft : backRight;
-					jassert(o >= 0);
-					
-					setSpeakerVolume(iCurSource, back, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
-				}
-			}
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
-//                    vector<bool> empty;
                     setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
                 }
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
 		}
 	}
+}
+
+void SpatGrisAudioProcessor::spatializeSample(int iCurSource, float fCurSampleT, float fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, float fOldValuesPortion){
+    //if we're outside the main, first circle, only 2 speakers will play
+    if (fCurSampleR >= 1) {
+        // find left and right speakers
+        int left, right;
+        float dLeft, dRight;
+        
+        findLeftAndRightSpeakers(fCurSampleT, *p_pfParams, left, right, dLeft, dRight);
+        
+        // add to output
+        if (left >= 0 && right >= 0) {
+            float dTotal = dLeft + dRight;
+            float vLeft = 1 - dLeft / dTotal;
+            float vRight = 1 - dRight / dTotal;
+            
+            setSpeakerVolume(iCurSource, vLeft,  fOldValuesPortion, left,  &vSpeakersCurrentlyInUse);
+            setSpeakerVolume(iCurSource, vRight, fOldValuesPortion, right, &vSpeakersCurrentlyInUse);
+        } else {
+            // one side is empty!
+            int o = (left >= 0) ? left : right;
+            jassert(o >= 0);
+            
+            setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+        }
+    }
+    //if we're inside the main circle, 4 speakers will play
+    else {
+        // find front left and right speakers and angles
+        int iFrontLeftSpID, iFrontRightSpId;
+        float fFrontLeftSpAngle, fFrontRightSpAngle;
+        findLeftAndRightSpeakers(fCurSampleT, *p_pfParams, iFrontLeftSpID, iFrontRightSpId, fFrontLeftSpAngle, fFrontRightSpAngle);
+        
+        //find back left and right speakers and angles
+        float fCurSampleBackTheta = fCurSampleT + kHalfCircle;
+        if (fCurSampleBackTheta > kThetaMax) fCurSampleBackTheta -= kThetaMax;
+        // find back left, right
+        int iBackLeftSpID, iBackRightSpId;
+        float dBackLeft, dBackRight;
+        findLeftAndRightSpeakers(fCurSampleBackTheta, *p_pfParams, iBackLeftSpID, iBackRightSpId, dBackLeft, dBackRight);
+        
+        float fFrontVol = fCurSampleR * 0.5f + 0.5f;
+        float fBackVol = 1 - fFrontVol;
+        
+        // add to front output
+        if (iFrontLeftSpID >= 0 && iFrontRightSpId >= 0) {
+            float dTotal = fFrontLeftSpAngle + fFrontRightSpAngle;
+            float vLeft = 1 - fFrontLeftSpAngle / dTotal;
+            float vRight = 1 - fFrontRightSpAngle / dTotal;
+            //const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
+            setSpeakerVolume(iCurSource, vLeft * fFrontVol, fOldValuesPortion, iFrontLeftSpID, &vSpeakersCurrentlyInUse);
+            setSpeakerVolume(iCurSource, vRight * fFrontVol, fOldValuesPortion, iFrontRightSpId, &vSpeakersCurrentlyInUse);
+        } else {
+            // one side is empty!
+            int o = (iFrontLeftSpID >= 0) ? iFrontLeftSpID : iFrontRightSpId;
+            jassert(o >= 0);
+            
+            setSpeakerVolume(iCurSource, fFrontVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+        }
+        
+        // add to back output
+        if (iBackLeftSpID >= 0 && iBackRightSpId >= 0) {
+            float dTotal = dBackLeft + dBackRight;
+            float vLeft  = 1 - dBackLeft / dTotal;
+            float vRight = 1 - dBackRight / dTotal;
+            
+            setSpeakerVolume(iCurSource, vLeft * fBackVol, fOldValuesPortion, iBackLeftSpID, &vSpeakersCurrentlyInUse);
+            setSpeakerVolume(iCurSource, vRight * fBackVol, fOldValuesPortion, iBackRightSpId, &vSpeakersCurrentlyInUse);
+        } else {
+            // one side is empty!
+            int o = (iBackLeftSpID >= 0) ? iBackLeftSpID : iBackRightSpId;
+            jassert(o >= 0);
+            
+            setSpeakerVolume(iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+        }
+    }
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanSpanMode(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
