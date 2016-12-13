@@ -1144,8 +1144,8 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	}
     
     //set various variables
-    const double sampleRate               = getSampleRate();
-	const unsigned int oriFramesToProcess = pBuffer.getNumSamples();   //ori stands for output routing input
+    const double sampleRate      = getSampleRate();
+	const int oriFramesToProcess = pBuffer.getNumSamples();   //ori stands for output routing input
 	
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
 	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
@@ -1230,67 +1230,41 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 			paramCopy[getParamForSpeakerX(iCurOutput)] = t;
 		}
 	}
-	
-	// process data
-    unsigned int inFramesToProcess = oriFramesToProcess;        //we need a copy of this because inFramesToProcess will be modified below
-    unsigned int numFramesToDo;
+
     
-	while(1) {
+
+    
+    JUCE_COMPILER_WARNING(")this weird variable and loop organization is only to allow the use of numFramesToDo by the db meters below")
+    int numFramesToDo;
+    for(int inFramesToProcess = oriFramesToProcess; true; ) {
         //we process either kChunkSize frames or whatever is left in inFramesToProcess
-		numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
-		
+        numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
+        
         //if we're in internal write, we don't need to make a copy of the input samples
-		if (mRoutingMode == kInternalWrite) {
+        if (mRoutingMode == kInternalWrite) {
             ProcessData(inputs, outputs, paramCopy, sampleRate, numFramesToDo);
         } else {
-			vector<float*> inputsCopy(mNumberOfSources);
-			for (int i = 0; i < mNumberOfSources; ++i) {
-				memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
-				inputsCopy[i] = mInputsCopy.getReference(i).b;
-			}
-			ProcessData(inputsCopy, outputs, paramCopy, sampleRate, numFramesToDo);
+            //for all sources, make a copy of all input samples
+            vector<float*> inputsCopy(mNumberOfSources);
+            for (int i = 0; i < mNumberOfSources; ++i) {
+                memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
+                inputsCopy[i] = mInputsCopy.getReference(i).b;
+            }
+            //and process them
+            ProcessData(inputsCopy, outputs, paramCopy, sampleRate, numFramesToDo);
         }
-		
-		inFramesToProcess -= numFramesToDo;
+        inFramesToProcess -= numFramesToDo;
         if (inFramesToProcess == 0) {
             break;
         }
+        //move forward buffer pointers for all inputs and outputs. we don't do this the last time, because we will use the output[] for the db meter section below
         for (int i = 0; i < mNumberOfSources; i++){
-			inputs[i] += numFramesToDo;
+            inputs[i] += numFramesToDo;
         }
         for (int o = 0; o < mNumberOfSpeakers; o++){
             outputs[o] += numFramesToDo;
         }
-	}
-//
-//    while(1) {
-//        //we process either kChunkSize frames or whatever is left in inFramesToProcess
-//        numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
-//        
-//        //if we're in internal write, we don't need to make a copy of the input samples
-//        if (mRoutingMode == kInternalWrite) {
-//            ProcessData(inputs, outputs, paramCopy, sampleRate, numFramesToDo);
-//        } else {
-//            vector<float*> inputsCopy(mNumberOfSources);
-//            for (int i = 0; i < mNumberOfSources; ++i) {
-//                memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
-//                inputsCopy[i] = mInputsCopy.getReference(i).b;
-//            }
-//            ProcessData(inputsCopy, outputs, paramCopy, sampleRate, numFramesToDo);
-//        }
-//        
-//        inFramesToProcess -= numFramesToDo;
-//        if (inFramesToProcess == 0) {
-//            break;
-//        }
-//        for (int i = 0; i < mNumberOfSources; i++){
-//            inputs[i] += numFramesToDo;
-//        }
-//        for (int o = 0; o < mNumberOfSpeakers; o++){
-//            outputs[o] += numFramesToDo;
-//        }
-//    }
-    
+    }
     
     if (mRoutingMode == kInternalWrite){
 		// apply routing volume
@@ -1312,18 +1286,23 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             }
 		}
 	}
+    
 #if USE_DB_METERS
 	if (mCalculateLevels) {
-		const float attack = kLevelAttackDefault;   //params[kLevelAttackParam];  // milliseconds
-		const float release = kLevelReleaseDefault; //params[kLevelReleaseParam]; // milliseconds
-		const float ag = powf(0.01f, 1000.f / (attack * sampleRate));
-		const float rg = powf(0.01f, 1000.f / (release * sampleRate));
-		
+        //envelope constants
+		const float attack  = kLevelAttackDefault;
+		const float release = kLevelReleaseDefault;
+		const float ag      = powf(0.01f, 1000.f / (attack * sampleRate));
+		const float rg      = powf(0.01f, 1000.f / (release * sampleRate));
+		//for each speaker
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
+            //get pointer to current spot in output buffer
 			float *output = outputs[o];
 			float env = mLevels[o];
-			
+            
+			//for each frame that are left to process
 			for (unsigned int f = 0; f < numFramesToDo; f++) {
+                //figure out enveloppe level
 				float s = fabsf(output[f]);
 				float g = (s > env) ? ag : rg;
 				env = g * env + (1.f - g) * s;
