@@ -1269,7 +1269,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
             ProcessData(inputs, outputs, params, sampleRate, numFramesToDo);
         } else {
 			vector<float*> inputsCopy(mNumberOfSources);
-			for (int i = 0; i < mNumberOfSources; i++) {
+			for (int i = 0; i < mNumberOfSources; ++i) {
 				memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
 				inputsCopy[i] = mInputsCopy.getReference(i).b;
 			}
@@ -1338,7 +1338,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	mProcessCounter++;
 }
 
-void SpatGrisAudioProcessor::ProcessData(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessData(vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
 	switch(mProcessMode) {
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
 		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params, sampleRate, frames);	break;
@@ -1425,11 +1425,6 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
-        //debug for #72
-//        if (mSpeakerVolumes[source][o] > previouslyLoudestVolume){
-//            previouslyLoudestVolume = mSpeakerVolumes[source][o];
-//            loudestSpeaker = o;
-//        }
     }
 }
 
@@ -1473,7 +1468,7 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
 
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs, vector<float*> p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
     float fOldValuesPortion = rampParameters(p_pfParams, p_fSampleRate, p_iTotalSamples);
     
 	// clear outputs[]
@@ -1496,16 +1491,15 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
-			float fCurSampleValue = allSamplesCurSource[iSampleId]; //current sample
-			float fCurSampleX = xCurSource[iSampleId];              //x position of current sample
-			float fCurSampleY = yCurSource[iSampleId];              //y position of current sample
-			
-			//convert xy position of sample to rt
+            //figure out current sample value and its Ray and Theta coordinates
+			float fCurSampleValue   = allSamplesCurSource[iSampleId];   //current sample
+			float fCurSampleX       = xCurSource[iSampleId];            //x position of current sample
+			float fCurSampleY       = yCurSource[iSampleId];            //y position of current sample
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
             if (fCurSampleR > kRadiusMax) {
                 fCurSampleR = kRadiusMax;
             }
-			float fCurSampleT = atan2f(fCurSampleY, fCurSampleX);    //atan2f is the arctangent with 2 variables
+			float fCurSampleT = atan2f(fCurSampleY, fCurSampleX);       //atan2f is the arctangent with 2 variables
             if (fCurSampleT < 0){
                 fCurSampleT += kThetaMax;
             }
@@ -1531,7 +1525,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
             fCurSampleValue *= dbToLinear(dbSource);
 
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
-
+            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
                     setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
@@ -1542,7 +1536,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(vector<float*> p_ppfInputs
 	}
 }
 
-void SpatGrisAudioProcessor::spatializeSample(int iCurSource, float fCurSampleT, float fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, float fOldValuesPortion){
+void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
     //if we're outside the main, first circle, only 2 speakers will play
     if (fCurSampleR >= 1) {
         // find left and right speakers
@@ -1577,7 +1571,6 @@ void SpatGrisAudioProcessor::spatializeSample(int iCurSource, float fCurSampleT,
         //find back left and right speakers and angles
         float fCurSampleBackTheta = fCurSampleT + kHalfCircle;
         if (fCurSampleBackTheta > kThetaMax) fCurSampleBackTheta -= kThetaMax;
-        // find back left, right
         int iBackLeftSpID, iBackRightSpId;
         float dBackLeft, dBackRight;
         findLeftAndRightSpeakers(fCurSampleBackTheta, *p_pfParams, iBackLeftSpID, iBackRightSpId, dBackLeft, dBackRight);
@@ -1613,13 +1606,12 @@ void SpatGrisAudioProcessor::spatializeSample(int iCurSource, float fCurSampleT,
             // one side is empty!
             int o = (iBackLeftSpID >= 0) ? iBackLeftSpID : iBackRightSpId;
             jassert(o >= 0);
-            
             setSpeakerVolume(iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
         }
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanSpanMode(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessDataPanSpanMode(vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
     
     float fOldValuesPortion = rampParameters(params, sampleRate, frames);
     
@@ -1781,7 +1773,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(vector<float*> inputs, vecto
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
 	// ramp all non constant parameters
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * sampleRate));

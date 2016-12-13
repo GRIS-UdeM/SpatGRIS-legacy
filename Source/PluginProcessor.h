@@ -835,7 +835,8 @@ private:
     
     bool bThetasPrinted = false;
 	
-	#define kChunkSize (256)
+//	#define kChunkSize (256)
+    #define kChunkSize (1024)
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
@@ -857,14 +858,14 @@ private:
     
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
-    void spatializeSample(int iCurSource, float fCurSampleT, float fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, float fOldValuesPortion);
+    void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
     float rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples);
 	
-    void ProcessData                (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataFreeVolumeMode  (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanVolumeMode   (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanSpanMode     (vector<float*> inputs, vector<float*> outputs, float *params, float sampleRate, unsigned int frames);
+    void ProcessData                (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataFreeVolumeMode  (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataPanVolumeMode   (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataPanSpanMode     (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
     
     int mNumberOfSources;
     int mNumberOfSpeakers;
