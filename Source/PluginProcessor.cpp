@@ -1511,24 +1511,24 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             }
 			
             //apply filter to fCurSampleValue if needed
-			if (mApplyFilter) {
-				float distance;
-                if (fCurSampleR >= 1) {
-                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (fCurSampleR - 1));
-                } else {
-                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], fCurSampleR);
-                }
-				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
-			}
-			
-			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
-			float dbSource;
-            if (fCurSampleR >= 1) {
-                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
-            } else {
-                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
-            }
-            fCurSampleValue *= dbToLinear(dbSource);
+//			if (mApplyFilter) {
+//				float distance;
+//                if (fCurSampleR >= 1) {
+//                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (fCurSampleR - 1));
+//                } else {
+//                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], fCurSampleR);
+//                }
+//				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
+//			}
+//			
+//			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
+//			float dbSource;
+//            if (fCurSampleR >= 1) {
+//                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
+//            } else {
+//                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
+//            }
+//            fCurSampleValue *= dbToLinear(dbSource);
 
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
             
