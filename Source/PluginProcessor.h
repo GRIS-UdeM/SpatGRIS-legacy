@@ -863,11 +863,11 @@ private:
     
     float rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples);
 	
-    void ProcessData                (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataFreeVolumeMode  (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanVolumeMode   (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanSpanMode     (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-    void processTrajectory(unsigned int &oriFramesToProcess, double &sampleRate);
+    void ProcessData                (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+	void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+    void processTrajectory(const unsigned int &oriFramesToProcess, const double &sampleRate);
     
     
     int mNumberOfSources;
