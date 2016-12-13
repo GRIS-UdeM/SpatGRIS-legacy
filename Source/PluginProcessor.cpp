@@ -1129,30 +1129,23 @@ void SpatGrisAudioProcessor::releaseResources()
 
 }
 
-void SpatGrisAudioProcessor::processBlockBypassed (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages)
 {
 	//fprintf(stderr, "pb bypass\n");
 	//for (int c = mNumberOfSources; c < mNumberOfSpeakers; c++)
 	//	buffer.clear(c, 0, buffer.getNumSamples());
 }
 
-void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
-{
+void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &buffer, MidiBuffer& midiMessages) {
 	// sanity check for auval
 	if (buffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
 		printf("unexpected channel count %d vs %dx%d rmode: %d\n", buffer.getNumChannels(), mNumberOfSources, mNumberOfSpeakers, mRoutingMode);
 		return;
 	}
     
-    //check whether we're currently playing
-    AudioPlayHead::CurrentPositionInfo cpi;
-    getPlayHead()->getCurrentPosition(cpi);
-    m_bIsPlaying = cpi.isPlaying;
-    
     //set various variables
-    double sampleRate = getSampleRate();
+    double sampleRate               = getSampleRate();
 	unsigned int oriFramesToProcess = buffer.getNumSamples();   //ori stands for output routing input
-    unsigned int inFramesToProcess = oriFramesToProcess;        //we need a copy of this because inFramesToProcess will be modified below
 	
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
 	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
@@ -1164,27 +1157,14 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
         //for every output channel
 		for (int c = 0; c < outChannels; c++) {
             //copy oriFramesToProcess samples from the router's channel (offset+c) into buffer channel c, starting at sample 0
+            JUCE_COMPILER_WARNING("could use move semantics here?")
 			buffer.copyFrom(c, 0, Router::instance().outputBuffers(oriFramesToProcess)[offset + c], oriFramesToProcess);
 			Router::instance().clear(offset + c);
 		}
 		return;
 	}
-	
-	// process trajectory if there is one going on
-	Trajectory::Ptr trajectory = mTrajectory;
-	if (trajectory) {
-        if (m_bIsPlaying) {
-			// we're playing!
-			//mLastTimeInSamples = cpi.timeInSamples;
-	
-			double bps = cpi.bpm / 60;
-			float seconds = oriFramesToProcess / sampleRate;
-			float beats = seconds * bps;
-			
-			bool done = trajectory->process(seconds, beats);
-            if (done) mTrajectory = NULL;
-		}
-	}
+
+    processTrajectory(oriFramesToProcess, sampleRate);
     
     //if we're in osc spat mode, return and don't process any audio
     if (mProcessMode == kOscSpatMode) {
@@ -1192,11 +1172,9 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
     }
 	
 	// cache parameter values, probably in case they change while we're doing stuff
-    JUCE_COMPILER_WARNING("why not use memcopy here?")
 	float params[kNumberOfParameters];
-    for (int i = 0; i < kNumberOfParameters; i++){
-		params[i] = mParameters[i];
-    }
+    memcpy (params, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
+    
 		
     //depending on what mode we are, denormalize parameters we will need
 	if (mProcessMode != kFreeVolumeMode) {
@@ -1259,6 +1237,7 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	}
 	
 	// process data
+    unsigned int inFramesToProcess = oriFramesToProcess;        //we need a copy of this because inFramesToProcess will be modified below
     unsigned int numFramesToDo;
 	while(1) {
         //we process either kChunkSize frames or whatever is left in inFramesToProcess
@@ -1336,6 +1315,26 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	
     //this is only used for the level components, ie the db meters
 	mProcessCounter++;
+}
+
+void SpatGrisAudioProcessor::processTrajectory(unsigned int &oriFramesToProcess, double &sampleRate){
+    //check whether we're currently playing
+    AudioPlayHead::CurrentPositionInfo cpi;
+    getPlayHead()->getCurrentPosition(cpi);
+    m_bIsPlaying = cpi.isPlaying;
+    
+    // process trajectory if there is one going on
+    Trajectory::Ptr trajectory = mTrajectory;
+    if (trajectory) {
+        if (m_bIsPlaying) {
+            double bps = cpi.bpm / 60;
+            float seconds = oriFramesToProcess / sampleRate;
+            float beats = seconds * bps;
+            
+            bool done = trajectory->process(seconds, beats);
+            if (done) mTrajectory = NULL;
+        }
+    }
 }
 
 void SpatGrisAudioProcessor::ProcessData(vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {

@@ -293,8 +293,8 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     void releaseResources();
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
-	void processBlockBypassed (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
+    void processBlock (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
+	void processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
 
     //==============================================================================
     AudioProcessorEditor* createEditor();
@@ -867,6 +867,8 @@ private:
 	void ProcessDataFreeVolumeMode  (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanVolumeMode   (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataPanSpanMode     (vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
+    void processTrajectory(unsigned int &oriFramesToProcess, double &sampleRate);
+    
     
     int mNumberOfSources;
     int mNumberOfSpeakers;
