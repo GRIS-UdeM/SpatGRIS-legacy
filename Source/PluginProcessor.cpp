@@ -927,10 +927,11 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
             updateSpeakerLocation(true, false, false);
         }
         mSpeakerVolumes.clear();
+        JUCE_COMPILER_WARNING("this could be significantly simplified by using vectors")
         for (int i = 0; i < mNumberOfSources; i++) {
             mSpeakerVolumes.add(Array<float>());
             for (int j = 0; j < mNumberOfSpeakers; j++){
-            			mSpeakerVolumes[j].add(0);
+                mSpeakerVolumes[j].add(0);
             }
         }
         mHostChangedParameterProcessor++;
@@ -1244,7 +1245,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         if (mRoutingMode == kInternalWrite) {
             ProcessData(inputs, outputs, paramCopy, sampleRate, numFramesToDo);
         } else {
-            //for all sources, make a copy of all input samples
+            //for all sources, make a copy of all input samples, because we will clear outputs[] in processData(), and outputs and inputs point to the same thing
             vector<float*> inputsCopy(mNumberOfSources);
             for (int i = 0; i < mNumberOfSources; ++i) {
                 memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
@@ -1433,11 +1434,11 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
 
 float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples){
     // ramp all parameters using param smoothing parameter, except constant ones and speaker positions
-    const int kiTotalSourceParameters  = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
-    const int kiTotalSpeakerParameters = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    const float fCurSmoothing = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]);
-    const float fOldValuesPortion = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
-    const float fNewValuePortion = 1 - fOldValuesPortion;
+    const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
+    const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]);
+    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
+    const float fNewValuePortion        = 1 - fOldValuesPortion;
     
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
@@ -1454,7 +1455,7 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
         //the actual parameters we will ramp are, for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
         //get current and target values, as well as a reference to the current ramp position
         float currentParam = mSmoothedParameters[iCurParam];
-        float targetParam = p_pfParams[iCurParam];
+        float targetParam  = p_pfParams[iCurParam];
         float *pSmoothedParametersRamps = mSmoothedParametersRamps.getReference(iCurParam).b;
         
         //for each sample
@@ -1472,6 +1473,7 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
+    
     float fOldValuesPortion = rampParameters(p_pfParams, p_fSampleRate, p_iTotalSamples);
     
 	// clear outputs[]
@@ -1492,6 +1494,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
+            //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
             //figure out current sample value and its Ray and Theta coordinates
@@ -1528,6 +1531,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             fCurSampleValue *= dbToLinear(dbSource);
 
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
+            
             JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
