@@ -1424,6 +1424,16 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
     }
 }
 
+void SpatGrisAudioProcessor::addToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &f, const int &bufferSize) {
+    for (int o = 0; o < mNumberOfSpeakers; ++o) {
+        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
+        float m = 1 - output_m[f];
+        for (int iCurSampleOffset = 0; iCurSampleOffset < bufferSize; ++iCurSampleOffset){
+            outputs[o][f+iCurSampleOffset] += sample[f+iCurSampleOffset] * mSpeakerVolumes[source][o] * m;
+        }
+    }
+}
+
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
@@ -1493,12 +1503,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 		float *yCurSource = mSmoothedParametersRamps.getReference(getParamForSourceY(iCurSource)).b;
 	
         //for each sample
-		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
+        const int bufferSize = 1024;
+		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; iSampleId += bufferSize) {
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
             //figure out current sample value and its Ray and Theta coordinates
-			float fCurSampleValue   = allSamplesCurSource[iSampleId];   //current sample
+//			float fCurSampleValues   = allSamplesCurSource[iSampleId];   //current sample
+            
 			float fCurSampleX       = xCurSource[iSampleId];            //x position of current sample
 			float fCurSampleY       = yCurSource[iSampleId];            //y position of current sample
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
@@ -1532,13 +1544,13 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
             
-            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
-            for (int o = 0; o < mNumberOfSpeakers; o++){
-                if (!vSpeakersCurrentlyInUse[o]){
-                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
-                }
-            }
-            addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
+//            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
+//            for (int o = 0; o < mNumberOfSpeakers; o++){
+//                if (!vSpeakersCurrentlyInUse[o]){
+//                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
+//                }
+//            }
+            addToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, iSampleId, bufferSize);
 		}
 	}
 }
