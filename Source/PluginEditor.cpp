@@ -228,7 +228,8 @@ AudioProcessorEditor (ownerFilter)
     m_VersionLabel = new Label();
     String version = STRING(JUCE_APP_VERSION);
 #ifdef JUCE_DEBUG
-    version += " ";
+//    version += " ";
+    version += " BUFFER ";
     version += STRING(__TIME__);
 #endif
     
