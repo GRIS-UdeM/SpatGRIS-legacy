@@ -859,4 +859,17 @@ TODO
           doesn't seem to do much, what is it for?
         * TRYING TO BUFFER THE SPATIALIZATION
             * what is kChunkSize used for?. Ok, going to onenote for this.
-   
+--------------- 2016-12-14 ------------------
+#116 still. In hexa. 
+
+* release is faster than debug
+* octogris is faster than spatgris
+* reaper can use several parallel threads to do its stuff, that's why instruments shows different
+  worker threads calling processBlock(). At least I think!
+* QUESTIONS OR THINGS TO TRY
+    * my buffered version
+    * using std arrays instead of juce arrays
+    * size of chunk size
+    * have some other implementation of the mute button. certainly doesn't need to be sample accurate!
+    * maybe I should be working on the octogris project instead of spatgris... 
+    * look at other instruments and tutorials on instruments
