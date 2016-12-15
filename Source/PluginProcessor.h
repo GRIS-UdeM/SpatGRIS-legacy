@@ -842,6 +842,8 @@ private:
 	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
     
+    float mAvgTime = 0;
+    
     float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocD[JucePlugin_MaxNumInputChannels];
