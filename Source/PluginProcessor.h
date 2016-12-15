@@ -834,6 +834,8 @@ private:
     vector<float> allSampleValues;
     
     bool bThetasPrinted = false;
+    
+    float mAvgTime = 0.f;
 	
     JUCE_COMPILER_WARNING("re #116: does the size of kChunkSize change anything?")
 //	#define kChunkSize (256)
