@@ -239,7 +239,7 @@ AudioProcessorEditor (ownerFilter)
     // param box
     Colour tabBg;
     if (s_bUseNewGui){
-        tabBg = mGrisFeel.getBackgroundColor();
+        tabBg = mGrisFeel.getBackgroundColour();
     } else {
         tabBg = Colour::fromRGB(200,200,200);
     }
