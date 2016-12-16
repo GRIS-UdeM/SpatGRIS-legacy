@@ -38,6 +38,10 @@ using namespace std;
 #define USE_DB_METERS 1
 #endif
 
+#ifndef TIME_PROCESS
+#define TIME_PROCESS 1
+#endif
+
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
 #endif

@@ -1138,8 +1138,9 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, M
 }
 
 void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuffer& midiMessages) {
-    
+#if TIME_PROCESS
     Time beginTime = Time::getCurrentTime();
+#endif
     
 	// sanity check for auval
 	if (pBuffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
@@ -1323,7 +1324,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	
     //this is only used for the level components, ie the db meters
 	mProcessCounter++;
-    
+#if TIME_PROCESS
     Time endTime = Time::getCurrentTime();
     int n = 50;
     mAvgTime += (endTime - beginTime).inMilliseconds()/(float)n;
@@ -1331,6 +1332,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         cout << "processBlock: " << mAvgTime << newLine;
         mAvgTime = 0;
     }
+#endif
 }
 
 void SpatGrisAudioProcessor::processTrajectory(const unsigned int &oriFramesToProcess, const double &sampleRate){
