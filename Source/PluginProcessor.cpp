@@ -1171,6 +1171,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 
     processTrajectory(oriFramesToProcess, sampleRate);
     
+#if TIME_PROCESS
+    Time time1Trajectories = Time::getCurrentTime();
+#endif
+    
     //if we're in osc spat mode, return and don't process any audio
     if (mProcessMode == kOscSpatMode) {
         return;
@@ -1202,6 +1206,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
         jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
+    
+#if TIME_PROCESS
+    Time time2ParamProcess = Time::getCurrentTime();
+#endif
 	
     //for each source, get pointer to content of buffer, and denormalize x and y.
     vector<float*> inputs(mNumberOfSources);
@@ -1236,6 +1244,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		}
 	}
 
+#if TIME_PROCESS
+    Time time3SourceSpeakers = Time::getCurrentTime();
+#endif
+    
     
 
     
@@ -1270,6 +1282,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             outputs[o] += numFramesToDo;
         }
     }
+    
+#if TIME_PROCESS
+    Time time4ProcessData = Time::getCurrentTime();
+#endif
     
     if (mRoutingMode == kInternalWrite){
 		// apply routing volume
@@ -1327,10 +1343,17 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #if TIME_PROCESS
     Time endTime = Time::getCurrentTime();
     int n = 50;
-    mAvgTime += (endTime - beginTime).inMilliseconds()/(float)n;
+    mAvgTime[0] += (time1Trajectories     - beginTime).inMilliseconds()/(float)n;
+    mAvgTime[1] += (time2ParamProcess     - time1Trajectories).inMilliseconds()/(float)n;
+    mAvgTime[2] += (time3SourceSpeakers   - time2ParamProcess).inMilliseconds()/(float)n;
+    mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
+    mAvgTime[4] += (endTime               - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
-        cout << "processBlock: " << mAvgTime << newLine;
-        mAvgTime = 0;
+        for (int i = 0; i < 5; ++i){
+            cout << "time " << i << ": " << mAvgTime[i] << "\t";
+            mAvgTime[i] = 0;
+        }
+        cout << newLine;
     }
 #endif
 }
