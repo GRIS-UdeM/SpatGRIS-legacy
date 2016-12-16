@@ -499,7 +499,7 @@ AudioProcessorEditor (ownerFilter)
     // param box
     Colour tabBg;
     if (s_bUseNewGui){
-        tabBg = mGrisFeel.getBackgroundColor();
+        tabBg = mGrisFeel.getBackgroundColour();
     } else {
         tabBg = Colour::fromRGB(200,200,200);
     }
@@ -1731,7 +1731,7 @@ Slider* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, 
     ds->setSize(w, h);
     ds->setTopLeftPosition(x, y);
     ds->setLookAndFeel(&mGrisFeel);
-    ds->setColour(ParamSliderGRIS::ColourIds::rotarySliderFillColourId, mGrisFeel.getSliderColour());
+//    ds->setColour(ParamSliderGRIS::ColourIds::rotarySliderFillColourId, mGrisFeel.getSliderColour());
     into->addAndMakeVisible(ds);
     mComponents.add(ds);
     return ds;

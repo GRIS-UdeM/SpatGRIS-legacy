@@ -865,6 +865,8 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioSampleBuffer& buffer, Mi
 
 void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
+    Time beginTime = Time::getCurrentTime();
+    
 	// sanity check for auval
 	if (buffer.getNumChannels() < ((mRoutingMode == 1) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
 		printf("unexpected channel count %d vs %dx%d rmode: %d\n", buffer.getNumChannels(), mNumberOfSources, mNumberOfSpeakers, mRoutingMode);
@@ -1067,6 +1069,14 @@ void SpatGrisAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 	delete[] inputs;
 	delete[] outputs;
 	mProcessCounter++;
+    
+    Time endTime = Time::getCurrentTime();
+    int n = 50;
+    mAvgTime += (endTime - beginTime).inMilliseconds()/(float)n;
+    if (mProcessCounter % n == 0){
+        cout << "processBlock: " << mAvgTime << newLine;
+        mAvgTime = 0;
+    }
 }
 
 void SpatGrisAudioProcessor::ProcessData(float **inputs, float **outputs, float *params, float sampleRate, unsigned int frames) {

@@ -720,6 +720,8 @@ private:
 	int mOscSendEnabled;
 	int mOscSendPort;
     String mOscSendIp;
+    
+    float mAvgTime = 0.f;
 
 	uint64_t mHostChangedParameter;
 	uint64_t mHostChangedProperty;
