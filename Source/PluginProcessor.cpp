@@ -1349,7 +1349,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
     mAvgTime[4] += (endTime               - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
-        for (int i = 0; i < 5; ++i){
+        for (int i = 3; i < 5; ++i){
             cout << "time " << i << ": " << mAvgTime[i] << "\t";
             mAvgTime[i] = 0;
         }
