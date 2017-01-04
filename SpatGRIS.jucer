@@ -96,7 +96,7 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" postbuildCommand=""
                externalLibraries="Leap" aaxFolder="~/Documents/sdks/AAX_SDK_2p1p1/"
-               vst3Folder="~/Documents/sdks/steinberg/VST3 SDK">
+               vst3Folder="/Users/gris/Documents/sdks/VST3.6.5 SDK">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="Native"
                        isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="~/Documents/sdks/LeapSDK/include"

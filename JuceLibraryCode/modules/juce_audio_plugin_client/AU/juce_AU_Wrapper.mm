@@ -381,10 +381,10 @@ public:
                     outWritable = true;
                     return noErr;
 
-                case kAudioUnitProperty_SupportsMPE:
-                    outDataSize = sizeof (UInt32);
-                    outWritable = false;
-                    return noErr;
+//                case kAudioUnitProperty_SupportsMPE:
+//                    outDataSize = sizeof (UInt32);
+//                    outWritable = false;
+//                    return noErr;
 
                 default: break;
             }
@@ -419,9 +419,9 @@ public:
                     *(UInt32*) outData = isBypassed ? 1 : 0;
                     return noErr;
 
-                case kAudioUnitProperty_SupportsMPE:
-                    *(UInt32*) outData = (juceFilter != nullptr && juceFilter->supportsMPE()) ? 1 : 0;
-                    return noErr;
+//                case kAudioUnitProperty_SupportsMPE:
+//                    *(UInt32*) outData = (juceFilter != nullptr && juceFilter->supportsMPE()) ? 1 : 0;
+//                    return noErr;
 
                 case kAudioUnitProperty_CocoaUI:
                     {
