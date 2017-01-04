@@ -846,7 +846,7 @@ private:
 	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
 #if TIME_PROCESS
-#define kTimeSlots (6)
+#define kTimeSlots (10)
     float mAvgTime [kTimeSlots] = {0};
 #endif
     
@@ -908,7 +908,14 @@ private:
 //    int loudestSpeaker = -1;
     
 #if TIME_PROCESS
-    float timeAvgSample = 0.f;
+    
+    float timeAvgInit       = 0.f;
+    float timeAvgFilter     = 0.f;
+    float timeAvgVolume     = 0.f;
+    float timeAvgSpatial    = 0.f;
+    float timeAvgOutputs    = 0.f;
+    
+    
 #endif
     
     //==============================================================================

@@ -1347,9 +1347,20 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     mAvgTime[1] += (time2ParamProcess     - time1Trajectories).inMilliseconds()/(float)n;
     mAvgTime[2] += (time3SourceSpeakers   - time2ParamProcess).inMilliseconds()/(float)n;
     mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
-    mAvgTime[4] += timeAvgSample/(float)n;
-    timeAvgSample = 0.f;
-    mAvgTime[5] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
+    
+    //from processData
+    mAvgTime[4] += timeAvgInit/(float)n;
+    mAvgTime[5] += timeAvgFilter/(float)n;
+    mAvgTime[6] += timeAvgVolume/(float)n;
+    mAvgTime[7] += timeAvgSpatial/(float)n;
+    mAvgTime[8] += timeAvgOutputs/(float)n;
+    timeAvgInit     = 0.f;
+    timeAvgFilter   = 0.f;
+    timeAvgVolume   = 0.f;
+    timeAvgSpatial  = 0.f;
+    timeAvgOutputs  = 0.f;
+    
+    mAvgTime[9] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
         for (int i = 3; i < kTimeSlots; ++i){
             cout << "time " << i << ": " << mAvgTime[i] << "\t";
@@ -1532,8 +1543,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
-            
+            #if TIME_PROCESS
             Time timeBeginSample = Time::getCurrentTime();
+            #endif
             
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
@@ -1550,6 +1562,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             if (fCurSampleT < 0){
                 fCurSampleT += kThetaMax;
             }
+            
+            #if TIME_PROCESS
+            Time timeInit = Time::getCurrentTime();
+            #endif
 			
             //apply filter to fCurSampleValue if needed
 			if (mApplyFilter) {
@@ -1561,6 +1577,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 }
 				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
 			}
+            
+            #if TIME_PROCESS
+            Time timeFilter = Time::getCurrentTime();
+            #endif
 			
 			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
 			float dbSource;
@@ -1570,8 +1590,16 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
             }
             fCurSampleValue *= dbToLinear(dbSource);
+            
+            #if TIME_PROCESS
+            Time timeVolume = Time::getCurrentTime();
+            #endif
 
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
+            
+            #if TIME_PROCESS
+            Time timeSpatial = Time::getCurrentTime();
+            #endif
             
             JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
             for (int o = 0; o < mNumberOfSpeakers; o++){
@@ -1580,8 +1608,13 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 }
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
+            
 #if TIME_PROCESS
-            timeAvgSample += (Time::getCurrentTime() - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgInit     += (timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgFilter   += (timeFilter  - timeInit).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgVolume   += (timeVolume  - timeFilter).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgSpatial  += (timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgOutputs  += (Time::getCurrentTime() - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
 #endif
 		}
 	}
