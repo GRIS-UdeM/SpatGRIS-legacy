@@ -1347,9 +1347,11 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     mAvgTime[1] += (time2ParamProcess     - time1Trajectories).inMilliseconds()/(float)n;
     mAvgTime[2] += (time3SourceSpeakers   - time2ParamProcess).inMilliseconds()/(float)n;
     mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
-    mAvgTime[4] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
+    mAvgTime[4] += timeAvgSample/(float)n;
+    timeAvgSample = 0.f;
+    mAvgTime[5] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
-        for (int i = 3; i < 5; ++i){
+        for (int i = 3; i < kTimeSlots; ++i){
             cout << "time " << i << ": " << mAvgTime[i] << "\t";
             mAvgTime[i] = 0;
         }
@@ -1530,6 +1532,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 	
         //for each sample
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
+            
+            Time timeBeginSample = Time::getCurrentTime();
+            
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
@@ -1575,6 +1580,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 }
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
+#if TIME_PROCESS
+            timeAvgSample += (Time::getCurrentTime() - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
+#endif
 		}
 	}
 }

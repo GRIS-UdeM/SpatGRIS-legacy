@@ -845,8 +845,10 @@ private:
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
-    
-    float mAvgTime[5] = {0};
+#if TIME_PROCESS
+#define kTimeSlots (6)
+    float mAvgTime [kTimeSlots] = {0};
+#endif
     
     float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
@@ -904,6 +906,10 @@ private:
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
 //    int loudestSpeaker = -1;
+    
+#if TIME_PROCESS
+    float timeAvgSample = 0.f;
+#endif
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
