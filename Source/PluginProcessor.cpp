@@ -1341,13 +1341,13 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     //this is only used for the level components, ie the db meters
 	mProcessCounter++;
 #if TIME_PROCESS
-    Time endTime = Time::getCurrentTime();
+    Time time5DbMeters = Time::getCurrentTime();
     int n = 50;
     mAvgTime[0] += (time1Trajectories     - beginTime).inMilliseconds()/(float)n;
     mAvgTime[1] += (time2ParamProcess     - time1Trajectories).inMilliseconds()/(float)n;
     mAvgTime[2] += (time3SourceSpeakers   - time2ParamProcess).inMilliseconds()/(float)n;
     mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
-    mAvgTime[4] += (endTime               - time4ProcessData).inMilliseconds()/(float)n;
+    mAvgTime[4] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
         for (int i = 3; i < 5; ++i){
             cout << "time " << i << ": " << mAvgTime[i] << "\t";
