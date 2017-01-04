@@ -1467,10 +1467,11 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 
 void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
     mSpeakerVolumes.getReference(source).set(o, sm_o * mSpeakerVolumes[source][o] + (1-sm_o) * targetVolume);     // with exp. smoothing on volume
-    //mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
     if (p_pvSpeakersCurrentlyInUse){
         p_pvSpeakersCurrentlyInUse->at(o) = true;
     }
+    
+//    mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
 }
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
@@ -1478,6 +1479,9 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
+        
+//        outputs[o][f] += sample * mSpeakerVolumes[source][o];
+        
     }
 }
 
@@ -1601,7 +1605,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             Time timeSpatial = Time::getCurrentTime();
             #endif
             
-            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
+            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
                     setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
@@ -1609,12 +1613,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
             
+            Time timeOutput = Time::getCurrentTime();
+            
 #if TIME_PROCESS
-            timeAvgInit     += (timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgFilter   += (timeFilter  - timeInit).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgVolume   += (timeVolume  - timeFilter).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgSpatial  += (timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgOutputs  += (Time::getCurrentTime() - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgFilter   += 1000*(timeFilter  - timeInit).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgVolume   += 1000*(timeVolume  - timeFilter).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgSpatial  += 1000*(timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
 #endif
 		}
 	}
