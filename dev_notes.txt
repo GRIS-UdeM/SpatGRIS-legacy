@@ -877,3 +877,15 @@ TODO
     * maybe I should be working on the octogris project instead of spatgris... 
     * look at other instruments and tutorials on instruments
     * turning off db meters?
+
+--------------- 2017-01-04 ------------------
+getting back to this. All branches are:
+0.1.0:  before #47 fix
+0.1.1:  right after #47 fix
+auv3:   auv3 version, with new xcode. could probably delete
+buffer: buffered spatialization. terrible delay in spatialization but much more efficient
+down:   something about storing locations in mover... i think this was merged, but would need to check
+master: master
+o12:    attempt at fix #72
+
+so only down branch is kinda unknown. 
