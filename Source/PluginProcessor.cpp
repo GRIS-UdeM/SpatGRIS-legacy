@@ -1613,9 +1613,8 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             }
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
             
-            Time timeOutput = Time::getCurrentTime();
-            
 #if TIME_PROCESS
+            Time timeOutput = Time::getCurrentTime();
             timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
             timeAvgFilter   += 1000*(timeFilter  - timeInit).inMilliseconds()/(float)p_iTotalSamples;
             timeAvgVolume   += 1000*(timeVolume  - timeFilter).inMilliseconds()/(float)p_iTotalSamples;
