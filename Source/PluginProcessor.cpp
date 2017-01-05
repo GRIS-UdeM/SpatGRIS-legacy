@@ -927,7 +927,6 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
             updateSpeakerLocation(true, false, false);
         }
         mSpeakerVolumes.clear();
-        JUCE_COMPILER_WARNING("this could be significantly simplified by using vectors")
         for (int i = 0; i < mNumberOfSources; i++) {
             mSpeakerVolumes.add(Array<float>());
             for (int j = 0; j < mNumberOfSpeakers; j++){
@@ -1466,12 +1465,15 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 }
 
 void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
+#if FIX_116
     mSpeakerVolumes.getReference(source).set(o, sm_o * mSpeakerVolumes[source][o] + (1-sm_o) * targetVolume);     // with exp. smoothing on volume
     if (p_pvSpeakersCurrentlyInUse){
         p_pvSpeakersCurrentlyInUse->at(o) = true;
     }
+#else
+    mSpeakerVolumes.getReference(source).set(o, targetVolume);                                                    // no exp. smoothing on volume
+#endif
     
-//    mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
 }
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
@@ -1480,7 +1482,7 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         float m = 1 - output_m[f];
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
         
-//        outputs[o][f] += sample * mSpeakerVolumes[source][o];
+//        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
         
     }
 }
@@ -1605,12 +1607,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             Time timeSpatial = Time::getCurrentTime();
             #endif
             
+#if FIX_116
             JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (!vSpeakersCurrentlyInUse[o]){
                     setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
                 }
             }
+#endif
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
             
 #if TIME_PROCESS
@@ -1626,6 +1630,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 }
 
 void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
+#if USE_ACTIVE_SPEAKERS
+    mActiveSpeakers.clear();
+#endif
     //if we're outside the main, first circle, only 2 speakers will play
     if (fCurSampleR >= 1) {
         // find left and right speakers
@@ -1633,6 +1640,11 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         float dLeft, dRight;
         
         findLeftAndRightSpeakers(fCurSampleT, *p_pfParams, left, right, dLeft, dRight);
+        
+#if USE_ACTIVE_SPEAKERS
+        mActiveSpeakers.push_back(left);
+        mActiveSpeakers.push_back(right);
+#endif
         
         // add to output
         if (left >= 0 && right >= 0) {
@@ -1663,6 +1675,13 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         int iBackLeftSpID, iBackRightSpId;
         float dBackLeft, dBackRight;
         findLeftAndRightSpeakers(fCurSampleBackTheta, *p_pfParams, iBackLeftSpID, iBackRightSpId, dBackLeft, dBackRight);
+        
+#if USE_ACTIVE_SPEAKERS
+        mActiveSpeakers.push_back(iFrontLeftSpID);
+        mActiveSpeakers.push_back(iFrontRightSpId);
+        mActiveSpeakers.push_back(iBackLeftSpID);
+        mActiveSpeakers.push_back(iBackRightSpId);
+#endif
         
         float fFrontVol = fCurSampleR * 0.5f + 0.5f;
         float fBackVol = 1 - fFrontVol;

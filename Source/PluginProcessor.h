@@ -39,8 +39,18 @@ using namespace std;
 #endif
 
 #ifndef TIME_PROCESS
-#define TIME_PROCESS 0
+#define TIME_PROCESS 1
 #endif
+
+#ifndef FIX_116
+#define FIX_116 1
+#endif
+
+#ifndef USE_ACTIVE_SPEAKERS
+#define USE_ACTIVE_SPEAKERS 1
+#endif
+
+
 
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
@@ -828,7 +838,7 @@ private:
 	Array<float> mSmoothedParameters;
     
 	Array<float> mLockedThetas;
-    Array<Array<float> > mSpeakerVolumes;
+    Array<Array<float>> mSpeakerVolumes;
     Array<float> mPrevRs;
     Array<float> mPrevTs;
     
@@ -902,6 +912,10 @@ private:
     bool m_bIsPlaying;
 
     bool isNewMovementMode(float v);
+
+#if USE_ACTIVE_SPEAKERS
+    vector<int> mActiveSpeakers;
+#endif
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
