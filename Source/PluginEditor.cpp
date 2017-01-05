@@ -229,6 +229,7 @@ AudioProcessorEditor (ownerFilter)
     String version = STRING(JUCE_APP_VERSION);
 #ifdef JUCE_DEBUG
 //    version += " ";
+
     version += " BUFFER ";
     version += STRING(__TIME__);
 #endif

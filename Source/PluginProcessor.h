@@ -38,6 +38,20 @@ using namespace std;
 #define USE_DB_METERS 1
 #endif
 
+#ifndef TIME_PROCESS
+#define TIME_PROCESS 1
+#endif
+
+#ifndef FIX_116
+#define FIX_116 1
+#endif
+
+#ifndef USE_ACTIVE_SPEAKERS
+#define USE_ACTIVE_SPEAKERS 0
+#endif
+
+
+
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
 #endif
@@ -824,7 +838,7 @@ private:
 	Array<float> mSmoothedParameters;
     
 	Array<float> mLockedThetas;
-    Array<Array<float> > mSpeakerVolumes;
+    Array<Array<float>> mSpeakerVolumes;
     Array<float> mPrevRs;
     Array<float> mPrevTs;
     
@@ -835,7 +849,6 @@ private:
     
     bool bThetasPrinted = false;
     
-    float mAvgTime = 0.f;
 	
     JUCE_COMPILER_WARNING("re #116: does the size of kChunkSize change anything?")
 //	#define kChunkSize (256)
@@ -843,6 +856,10 @@ private:
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
+#if TIME_PROCESS
+#define kTimeSlots (10)
+    float mAvgTime [kTimeSlots] = {0};
+#endif
     
     float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
@@ -897,10 +914,25 @@ private:
     bool m_bIsPlaying;
 
     bool isNewMovementMode(float v);
+
+#if USE_ACTIVE_SPEAKERS
+    vector<int> mActiveSpeakers;
+#endif
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
 //    int loudestSpeaker = -1;
+    
+#if TIME_PROCESS
+    
+    float timeAvgInit       = 0.f;
+    float timeAvgFilter     = 0.f;
+    float timeAvgVolume     = 0.f;
+    float timeAvgSpatial    = 0.f;
+    float timeAvgOutputs    = 0.f;
+    
+    
+#endif
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)

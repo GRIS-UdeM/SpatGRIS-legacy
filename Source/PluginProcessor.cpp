@@ -927,7 +927,6 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
             updateSpeakerLocation(true, false, false);
         }
         mSpeakerVolumes.clear();
-        JUCE_COMPILER_WARNING("this could be significantly simplified by using vectors")
         for (int i = 0; i < mNumberOfSources; i++) {
             mSpeakerVolumes.add(Array<float>());
             for (int j = 0; j < mNumberOfSpeakers; j++){
@@ -1138,8 +1137,9 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, M
 }
 
 void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuffer& midiMessages) {
-    
+#if TIME_PROCESS
     Time beginTime = Time::getCurrentTime();
+#endif
     
 	// sanity check for auval
 	if (pBuffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
@@ -1169,6 +1169,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	}
 
     processTrajectory(oriFramesToProcess, sampleRate);
+    
+#if TIME_PROCESS
+    Time time1Trajectories = Time::getCurrentTime();
+#endif
     
     //if we're in osc spat mode, return and don't process any audio
     if (mProcessMode == kOscSpatMode) {
@@ -1201,6 +1205,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
         jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
+    
+#if TIME_PROCESS
+    Time time2ParamProcess = Time::getCurrentTime();
+#endif
 	
     //for each source, get pointer to content of buffer, and denormalize x and y.
     vector<float*> inputs(mNumberOfSources);
@@ -1235,6 +1243,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		}
 	}
 
+#if TIME_PROCESS
+    Time time3SourceSpeakers = Time::getCurrentTime();
+#endif
+    
     
 
     
@@ -1269,6 +1281,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             outputs[o] += numFramesToDo;
         }
     }
+    
+#if TIME_PROCESS
+    Time time4ProcessData = Time::getCurrentTime();
+#endif
     
     if (mRoutingMode == kInternalWrite){
 		// apply routing volume
@@ -1323,14 +1339,37 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	
     //this is only used for the level components, ie the db meters
 	mProcessCounter++;
-    
-    Time endTime = Time::getCurrentTime();
+
+#if TIME_PROCESS
+    Time time5DbMeters = Time::getCurrentTime();
     int n = 50;
-    mAvgTime += (endTime - beginTime).inMilliseconds()/(float)n;
+    mAvgTime[0] += (time1Trajectories     - beginTime).inMilliseconds()/(float)n;
+    mAvgTime[1] += (time2ParamProcess     - time1Trajectories).inMilliseconds()/(float)n;
+    mAvgTime[2] += (time3SourceSpeakers   - time2ParamProcess).inMilliseconds()/(float)n;
+    mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
+    
+    //from processData
+    mAvgTime[4] += timeAvgInit/(float)n;
+    mAvgTime[5] += timeAvgFilter/(float)n;
+    mAvgTime[6] += timeAvgVolume/(float)n;
+    mAvgTime[7] += timeAvgSpatial/(float)n;
+    mAvgTime[8] += timeAvgOutputs/(float)n;
+    timeAvgInit     = 0.f;
+    timeAvgFilter   = 0.f;
+    timeAvgVolume   = 0.f;
+    timeAvgSpatial  = 0.f;
+    timeAvgOutputs  = 0.f;
+    
+    mAvgTime[9] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
-        cout << "processBlock: " << mAvgTime << newLine;
-        mAvgTime = 0;
+        for (int i = 3; i < kTimeSlots; ++i){
+            cout << "time " << i << ": " << mAvgTime[i] << "\t";
+            mAvgTime[i] = 0;
+        }
+        cout << newLine;
     }
+#endif
+
 }
 
 void SpatGrisAudioProcessor::processTrajectory(const unsigned int &oriFramesToProcess, const double &sampleRate){
@@ -1428,11 +1467,15 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 }
 
 void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
+#if FIX_116
     mSpeakerVolumes.getReference(source).set(o, sm_o * mSpeakerVolumes[source][o] + (1-sm_o) * targetVolume);     // with exp. smoothing on volume
-    //mSpeakerVolumes.getReference(source).set(o, targetVolume);	// no exp. smoothing on volume
     if (p_pvSpeakersCurrentlyInUse){
         p_pvSpeakersCurrentlyInUse->at(o) = true;
     }
+#else
+    mSpeakerVolumes.getReference(source).set(o, targetVolume);                                                    // no exp. smoothing on volume
+#endif
+    
 }
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &f, const int &bufferSize) {
@@ -1446,11 +1489,27 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float *sample
 }
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
+#if USE_ACTIVE_SPEAKERS
+    for (auto curActiveSpeakerId : mActiveSpeakers) {
+        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(curActiveSpeakerId)).b;
+        float m = 1 - output_m[f];
+        outputs[curActiveSpeakerId][f] += sample * mSpeakerVolumes[source][curActiveSpeakerId] * m;
+        
+        //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
+        
+    }
+#else
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
+        
+//        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
+        
     }
+#endif
+    
+    
 }
 
 float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples){
@@ -1516,6 +1575,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
         //for each sample
         const int bufferSize = 1024;
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; iSampleId += bufferSize) {
+            #if TIME_PROCESS
+            Time timeBeginSample = Time::getCurrentTime();
+            #endif
+
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
@@ -1532,6 +1595,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             if (fCurSampleT < 0){
                 fCurSampleT += kThetaMax;
             }
+            
+            #if TIME_PROCESS
+            Time timeInit = Time::getCurrentTime();
+            #endif
 			
             //apply filter to fCurSampleValue if needed
 //			if (mApplyFilter) {
@@ -1543,8 +1610,12 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 //                }
 //				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
 //			}
-//			
-//			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
+            
+            #if TIME_PROCESS
+            Time timeFilter = Time::getCurrentTime();
+            #endif
+			
+			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
 //			float dbSource;
 //            if (fCurSampleR >= 1) {
 //                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
@@ -1552,21 +1623,43 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 //                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
 //            }
 //            fCurSampleValue *= dbToLinear(dbSource);
+            
+            #if TIME_PROCESS
+            Time timeVolume = Time::getCurrentTime();
+            #endif
 
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
             
-//            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, but needs to be tested in hexa")
-//            for (int o = 0; o < mNumberOfSpeakers; o++){
-//                if (!vSpeakersCurrentlyInUse[o]){
-//                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
-//                }
-//            }
+            #if TIME_PROCESS
+            Time timeSpatial = Time::getCurrentTime();
+            #endif
+            
+#if FIX_116
+            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
+            for (int o = 0; o < mNumberOfSpeakers; o++){
+                if (!vSpeakersCurrentlyInUse[o]){
+                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
+                }
+            }
+#endif
             addToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, iSampleId, bufferSize);
+            
+#if TIME_PROCESS
+            Time timeOutput = Time::getCurrentTime();
+            timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgFilter   += 1000*(timeFilter  - timeInit).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgVolume   += 1000*(timeVolume  - timeFilter).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgSpatial  += 1000*(timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
+#endif
 		}
 	}
 }
 
 void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
+#if USE_ACTIVE_SPEAKERS
+    mActiveSpeakers.clear();
+#endif
     //if we're outside the main, first circle, only 2 speakers will play
     if (fCurSampleR >= 1) {
         // find left and right speakers
@@ -1574,6 +1667,11 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         float dLeft, dRight;
         
         findLeftAndRightSpeakers(fCurSampleT, *p_pfParams, left, right, dLeft, dRight);
+        
+#if USE_ACTIVE_SPEAKERS
+        mActiveSpeakers.push_back(left);
+        mActiveSpeakers.push_back(right);
+#endif
         
         // add to output
         if (left >= 0 && right >= 0) {
@@ -1604,6 +1702,13 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         int iBackLeftSpID, iBackRightSpId;
         float dBackLeft, dBackRight;
         findLeftAndRightSpeakers(fCurSampleBackTheta, *p_pfParams, iBackLeftSpID, iBackRightSpId, dBackLeft, dBackRight);
+        
+#if USE_ACTIVE_SPEAKERS
+        mActiveSpeakers.push_back(iFrontLeftSpID);
+        mActiveSpeakers.push_back(iFrontRightSpId);
+        mActiveSpeakers.push_back(iBackLeftSpID);
+        mActiveSpeakers.push_back(iBackRightSpId);
+#endif
         
         float fFrontVol = fCurSampleR * 0.5f + 0.5f;
         float fBackVol = 1 - fFrontVol;
@@ -1787,18 +1892,16 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
                 else break;
             }
             
+            JUCE_COMPILER_WARNING("we probably cannot afford to run through the speaker list twice")
             float total = 0;
             for (int o = 0; o < mNumberOfSpeakers; o++) total += outFactors[o];
             jassert(total > 0);
             
             float adj = tv / total;
             for (int o = 0; o < mNumberOfSpeakers; o++){
-//                vector<bool> empty;
                 setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, NULL);
             }
             addToOutputs(i, s, outputs, f);
-            int i = 23;
-            i++;
         }
     }
 }
