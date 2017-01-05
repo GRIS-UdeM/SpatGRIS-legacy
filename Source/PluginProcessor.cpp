@@ -1477,6 +1477,16 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 }
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
+#if USE_ACTIVE_SPEAKERS
+    for (auto curActiveSpeakerId : mActiveSpeakers) {
+        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(curActiveSpeakerId)).b;
+        float m = 1 - output_m[f];
+        outputs[curActiveSpeakerId][f] += sample * mSpeakerVolumes[source][curActiveSpeakerId] * m;
+        
+        //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
+        
+    }
+#else
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
@@ -1485,6 +1495,9 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
 //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
         
     }
+#endif
+    
+    
 }
 
 float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples){
@@ -1865,18 +1878,16 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
                 else break;
             }
             
+            JUCE_COMPILER_WARNING("we probably cannot afford to run through the speaker list twice")
             float total = 0;
             for (int o = 0; o < mNumberOfSpeakers; o++) total += outFactors[o];
             jassert(total > 0);
             
             float adj = tv / total;
             for (int o = 0; o < mNumberOfSpeakers; o++){
-//                vector<bool> empty;
                 setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, NULL);
             }
             addToOutputs(i, s, outputs, f);
-            int i = 23;
-            i++;
         }
     }
 }
