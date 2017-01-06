@@ -1237,7 +1237,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             if (t < 0) t += kThetaMax;
             paramCopy[getParamForSpeakerX(iCurChannel)] = t;
         }
-    }    
+    }
     
 
 #if TIME_PROCESS
@@ -1245,6 +1245,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PROCESS EACH FRAME ===========================================
+#if PROCESS_IN_CHUNK_SIZE
     JUCE_COMPILER_WARNING("this weird variable and loop organization is only to allow the use of numFramesToDo by the db meters below")
     int numFramesToDo;
     for(int inFramesToProcess = iDawBufferSize; true; ) {
@@ -1276,11 +1277,40 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             outputs[o] += numFramesToDo;
         }
     }
+
+#else
+    
+    //if we're in internal write, we don't need to make a copy of the input samples
+    if (mRoutingMode == kInternalWrite) {
+        ProcessData(inputs, outputs, paramCopy, sampleRate, iDawBufferSize);
+    } else {
+        //for all sources, make a copy of all input samples, because we will clear outputs[] in processData(), and outputs and inputs point to the same thing
+        vector<float*> inputsCopy(mNumberOfSources);
+        for (int i = 0; i < mNumberOfSources; ++i) {
+            memcpy(mInputsCopy.getReference(i).b, inputs[i], iDawBufferSize * sizeof(float));
+            inputsCopy[i] = mInputsCopy.getReference(i).b;
+        }
+        //and process them. here inputsCopy, outputs
+        ProcessData(inputsCopy, outputs, paramCopy, sampleRate, iDawBufferSize);
+    }
+
+    
+#endif
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 #if TIME_PROCESS
     Time time4ProcessData = Time::getCurrentTime();
 #endif
     
+    //==================================== INTERNAL WRITE STUFF ===========================================
     if (mRoutingMode == kInternalWrite){
 		// apply routing volume
 		float currentParam  = mSmoothedParameters[kRoutingVolume];
@@ -1303,6 +1333,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	}
     
 #if USE_DB_METERS
+    //==================================== DB METER STUFF ===========================================
 	if (mCalculateLevels) {
         //envelope constants
 		const float attack  = kLevelAttackDefault;
@@ -1316,7 +1347,11 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 			float env = mLevels[o];
             
 			//for each frame that are left to process
+#if PROCESS_IN_CHUNK_SIZE
 			for (unsigned int f = 0; f < numFramesToDo; f++) {
+#else
+                for (unsigned int f = 0; f < iDawBufferSize; f++) {
+#endif
                 //figure out enveloppe level
 				float s = fabsf(output[f]);
 				float g = (s > env) ? ag : rg;

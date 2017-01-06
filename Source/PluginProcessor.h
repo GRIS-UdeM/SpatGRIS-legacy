@@ -38,6 +38,10 @@ using namespace std;
 #define USE_DB_METERS 1
 #endif
 
+#ifndef PROCESS_IN_CHUNK_SIZE
+#define PROCESS_IN_CHUNK_SIZE 0
+#endif
+
 #ifndef BUFFER_PROCESS_DATA
 #define BUFFER_PROCESS_DATA 0
 #endif
@@ -856,7 +860,7 @@ private:
 	
     JUCE_COMPILER_WARNING("re #116: does the size of kChunkSize change anything?")
 //	#define kChunkSize (256)
-    #define kChunkSize (512)
+    #define kChunkSize (1024)
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
