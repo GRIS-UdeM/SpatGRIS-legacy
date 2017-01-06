@@ -1212,40 +1212,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
-    //for each source, store pointers to audio data and denormalize position
-//    vector<float*> inputs(mNumberOfSources);
-//    for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
-//        //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
-//		inputs[iCurSource] = pBuffer.getWritePointer(iCurSource);
-//        //denormalize current position
-//        if (mProcessMode == kFreeVolumeMode){
-//            paramCopy[getParamForSourceD(iCurSource)] = denormalize(kSourceMinDistance, kSourceMaxDistance, paramCopy[getParamForSourceD(iCurSource)]);
-//        }
-//		paramCopy[getParamForSourceX(iCurSource)] = paramCopy[getParamForSourceX(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
-//		paramCopy[getParamForSourceY(iCurSource)] = paramCopy[getParamForSourceY(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
-//	}
-//    //for each speaker, store pointers to audio data and denormalize position
-//    vector<float*> outputs(mNumberOfSpeakers);
-//    for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
-//        //if we're in internal write, get write buffer from mRoutingTempAudioBuffer, otherwise get it from the main buffer function argument
-//		outputs[iCurOutput] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(iCurOutput) : pBuffer.getWritePointer(iCurOutput);
-//        
-//		if (mProcessMode == kFreeVolumeMode) {
-//            //in free volume, speakers can be anywhere, so we have an x and a y
-//			paramCopy[getParamForSpeakerX(iCurOutput)] = paramCopy[getParamForSpeakerX(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
-//			paramCopy[getParamForSpeakerY(iCurOutput)] = paramCopy[getParamForSpeakerY(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
-//		} else {
-//            //in non-free volume, speakers are bounded to the unit circle, so we only need their angle on that circle, which we store in params[getParamForSpeakerX(iCurOutput)]
-//			float x = paramCopy[getParamForSpeakerX(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
-//			float y = paramCopy[getParamForSpeakerY(iCurOutput)] * (2*kRadiusMax) - kRadiusMax;
-//			float t = atan2f(y, x);
-//			if (t < 0) t += kThetaMax;
-//			paramCopy[getParamForSpeakerX(iCurOutput)] = t;
-//		}
-//	}
-    
-    
-    
     vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers);
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
@@ -1255,7 +1221,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             paramCopy[getParamForSourceY(iCurChannel)] = paramCopy[getParamForSourceY(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
         }
         
-        //if we're in internal write, get write buffer from mRoutingTempAudioBuffer, otherwise get it from the main buffer function argument
+        //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
         outputs[iCurChannel] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(iCurChannel) : pBuffer.getWritePointer(iCurChannel);
 
         if (mProcessMode == kFreeVolumeMode) {
@@ -1271,13 +1237,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             if (t < 0) t += kThetaMax;
             paramCopy[getParamForSpeakerX(iCurChannel)] = t;
         }
-    }
-    
-    
-    
-    
-    
-    
+    }    
     
 
 #if TIME_PROCESS
