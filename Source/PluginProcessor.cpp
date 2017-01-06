@@ -846,6 +846,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         mNumberOfSources = p_iNewNumberOfSources;
         
         mFilters.clear();
+
         mFilters.resize(mNumberOfSources);
         mInputsCopy.resize(mNumberOfSources);
         m_pMover->updateNumberOfSources();
@@ -1212,12 +1213,13 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
-    vector<float*> inputs(mNumberOfSources), inputsCopy(mNumberOfSources), outputs(mNumberOfSpeakers);
+    vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources], and copy actual data in inputsCopy
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
             if (mRoutingMode != kInternalWrite) {
+                JUCE_COMPILER_WARNING("the sole purpose of mInputsCopy is to have memory slots for this very memcopy. Could use vectors instead of this complicated thing")
                 memcpy(mInputsCopy.getReference(iCurChannel).b, inputs[iCurChannel], iDawBufferSize * sizeof(float));
                 inputsCopy[iCurChannel] = mInputsCopy.getReference(iCurChannel).b;
             }
@@ -1293,13 +1295,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         ProcessData(inputsCopy, outputs, paramCopy, sampleRate, iDawBufferSize);
     }
 #endif
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -1535,21 +1530,19 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         
     }
 #endif
-    
-    
 }
 
-float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples){
-    // ramp all parameters using param smoothing parameter, except constant ones and speaker positions
+float SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples){  //here p_iTotalSamples == iDawBufferSize
+    //figure out proportion of old vs new values
     const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
     const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParams[kSmooth]);
+    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]);
     const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
     const float fNewValuePortion        = 1 - fOldValuesPortion;
     
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
-        //do not ramp parameters kSpeakerX, kSpeakerY, kSpeakerUnused1 and kSpeakerUnused2 for each of 16 speakers
+        //skip all parametes but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
         if (iCurParam >= kiTotalSourceParameters &&
             iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
             ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
@@ -1558,11 +1551,10 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
             ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
                 continue;
             }
-        
-        //the actual parameters we will ramp are, for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
+
         //get current and target values, as well as a reference to the current ramp position
         float currentParam = mSmoothedParameters[iCurParam];
-        float targetParam  = p_pfParams[iCurParam];
+        float targetParam  = p_pfParamCopy[iCurParam];
         float *pSmoothedParametersRamps = mSmoothedParametersRamps.getReference(iCurParam).b;
         
         //for each sample
@@ -1579,9 +1571,9 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParams, float p_fSampleR
 
 
 //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples) {
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples) {
     
-    float fOldValuesPortion = rampParameters(p_pfParams, p_fSampleRate, p_iTotalSamples);
+    float fOldValuesPortion = rampParameters(p_pfParamCopy, p_fSampleRate, p_iTotalSamples);
     
 	// clear outputs[]
 	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
@@ -1636,9 +1628,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			if (mApplyFilter) {
 				float distance;
                 if (fCurSampleR >= 1) {
-                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (fCurSampleR - 1));
+                    distance = denormalize(p_pfParamCopy[kFilterMid], p_pfParamCopy[kFilterFar], (fCurSampleR - 1));
                 } else {
-                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], fCurSampleR);
+                    distance = denormalize(p_pfParamCopy[kFilterNear], p_pfParamCopy[kFilterMid], fCurSampleR);
                 }
 				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
 			}
@@ -1651,9 +1643,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
 			float dbSource;
             if (fCurSampleR >= 1) {
-                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
+                dbSource = denormalize(p_pfParamCopy[kVolumeMid], p_pfParamCopy[kVolumeFar], (fCurSampleR - 1));
             } else {
-                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
+                dbSource = denormalize(p_pfParamCopy[kVolumeNear], p_pfParamCopy[kVolumeMid], fCurSampleR);
             }
             fCurSampleValue *= dbToLinear(dbSource);
 #endif
@@ -1661,7 +1653,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             Time timeVolume = Time::getCurrentTime();
             #endif
 
-            spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParams, vSpeakersCurrentlyInUse, fOldValuesPortion);
+            spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
             
             #if TIME_PROCESS
             Time timeSpatial = Time::getCurrentTime();

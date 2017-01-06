@@ -862,8 +862,9 @@ private:
 //	#define kChunkSize (256)
     #define kChunkSize (1024)
 	struct IOBuf { float b[kChunkSize]; };
-	Array<IOBuf> mInputsCopy;
 	Array<IOBuf> mSmoothedParametersRamps;
+	Array<IOBuf> mInputsCopy;
+
 #if TIME_PROCESS
 #define kTimeSlots (10)
     float mAvgTime [kTimeSlots] = {0};
