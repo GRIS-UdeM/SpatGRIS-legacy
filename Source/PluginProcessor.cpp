@@ -1531,7 +1531,8 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     }
 #endif
 }
-
+    
+    
 float SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples){  //here p_iTotalSamples == iDawBufferSize
     //figure out proportion of old vs new values
     const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
@@ -1541,36 +1542,34 @@ float SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, float p_fSamp
     const float fNewValuePortion        = 1 - fOldValuesPortion;
     
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
-    for (int iCurParam = 0; iCurParam < kNonConstantParameters; ++iCurParam) {
+    for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
         //skip all parametes but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
-        if (iCurParam >= kiTotalSourceParameters &&
-            iCurParam < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
-            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
-            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
-            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused1 ||
-            ((iCurParam - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
+        if (iCurParamId >= kiTotalSourceParameters &&
+            iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
+            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
+            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
+            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused1 ||
+            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
                 continue;
             }
-
-        //get current and target values, as well as a reference to the current ramp position
-        float currentParam = mSmoothedParameters[iCurParam];
-        float targetParam  = p_pfParamCopy[iCurParam];
-        float *pSmoothedParametersRamps = mSmoothedParametersRamps.getReference(iCurParam).b;
         
-        //for each sample
+        //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
+        float currentParamValue = mSmoothedParameters[iCurParamId];
+        float targetParamValue  = p_pfParamCopy[iCurParamId];
+        
         for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
-            //interpolate param value between the current (previous) and target value
-            currentParam = currentParam * fOldValuesPortion + targetParam * fNewValuePortion;
-            //update ramp positions
-            pSmoothedParametersRamps[iCurSampleId] = currentParam;
+            //mSmoothedParametersRamps contains the interpolation between the current and target values, ramped over all iDawBufferSize values
+            currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+            mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
         }
-        mSmoothedParameters.setUnchecked(iCurParam, currentParam);
+        mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
     }
     return fOldValuesPortion;
 }
-
-
-//sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
+    
+    
+    
+    //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples) {
     
     float fOldValuesPortion = rampParameters(p_pfParamCopy, p_fSampleRate, p_iTotalSamples);
