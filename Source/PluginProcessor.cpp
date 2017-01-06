@@ -1212,11 +1212,16 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
-    vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers);
+    vector<float*> inputs(mNumberOfSources), inputsCopy(mNumberOfSources), outputs(mNumberOfSpeakers);
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
-        //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
         if (iCurChannel < mNumberOfSources){
+            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources], and copy actual data in inputsCopy
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+            if (mRoutingMode != kInternalWrite) {
+                memcpy(mInputsCopy.getReference(iCurChannel).b, inputs[iCurChannel], iDawBufferSize * sizeof(float));
+                inputsCopy[iCurChannel] = mInputsCopy.getReference(iCurChannel).b;
+            }
+            //denormalize source position
             paramCopy[getParamForSourceX(iCurChannel)] = paramCopy[getParamForSourceX(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
             paramCopy[getParamForSourceY(iCurChannel)] = paramCopy[getParamForSourceY(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
         }
@@ -1284,17 +1289,9 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     if (mRoutingMode == kInternalWrite) {
         ProcessData(inputs, outputs, paramCopy, sampleRate, iDawBufferSize);
     } else {
-        //for all sources, make a copy of all input samples, because we will clear outputs[] in processData(), and outputs and inputs point to the same thing
-        vector<float*> inputsCopy(mNumberOfSources);
-        for (int i = 0; i < mNumberOfSources; ++i) {
-            memcpy(mInputsCopy.getReference(i).b, inputs[i], iDawBufferSize * sizeof(float));
-            inputsCopy[i] = mInputsCopy.getReference(i).b;
-        }
         //and process them. here inputsCopy, outputs
         ProcessData(inputsCopy, outputs, paramCopy, sampleRate, iDawBufferSize);
     }
-
-    
 #endif
     
     
