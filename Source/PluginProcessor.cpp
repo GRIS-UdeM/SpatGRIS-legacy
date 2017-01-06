@@ -1179,7 +1179,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         return;
     }
 	
-	// cache parameter values, because we will transform them
+	// copy mParameters into paramCopy, because we will transform those
 	float paramCopy[kNumberOfParameters];
     memcpy (paramCopy, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
     // initialize mSmoothedParameters if it isn't
@@ -1213,7 +1213,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     //for each source, get pointer to content of buffer, and denormalize x and y.
     vector<float*> inputs(mNumberOfSources);
     for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
-        //get the input buffers
+        //get the input buffers into inputs[mNumberOfSources][DAW buffer size]
 		inputs[iCurSource] = pBuffer.getWritePointer(iCurSource);
         //denormalize current position
         if (mProcessMode == kFreeVolumeMode){
@@ -1266,7 +1266,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
                 memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
                 inputsCopy[i] = mInputsCopy.getReference(i).b;
             }
-            //and process them
+            //and process them. here inputsCopy, outputs
             ProcessData(inputsCopy, outputs, paramCopy, sampleRate, numFramesToDo);
         }
         inFramesToProcess -= numFramesToDo;
