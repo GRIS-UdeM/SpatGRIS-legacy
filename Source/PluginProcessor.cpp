@@ -1141,16 +1141,15 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     Time beginTime = Time::getCurrentTime();
 #endif
     
+    const double sampleRate  = getSampleRate();
+    const int iDawBufferSize = pBuffer.getNumSamples();   //ori stands for output routing input
+    
+    //==================================== CHECK SOME STUFF ===========================================
 	// sanity check for auval
 	if (pBuffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
 		printf("unexpected channel count %d vs %dx%d rmode: %d\n", pBuffer.getNumChannels(), mNumberOfSources, mNumberOfSpeakers, mRoutingMode);
 		return;
 	}
-    
-    //set various variables
-    const double sampleRate      = getSampleRate();
-	const int oriFramesToProcess = pBuffer.getNumSamples();   //ori stands for output routing input
-	
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
 	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
 		pBuffer.clear();
@@ -1162,14 +1161,15 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		for (int c = 0; c < outChannels; c++) {
             //copy oriFramesToProcess samples from the router's channel (offset+c) into buffer channel c, starting at sample 0
             JUCE_COMPILER_WARNING("could use move semantics here?")
-			pBuffer.copyFrom(c, 0, Router::instance().outputBuffers(oriFramesToProcess)[offset + c], oriFramesToProcess);
+			pBuffer.copyFrom(c, 0, Router::instance().outputBuffers(iDawBufferSize)[offset + c], iDawBufferSize);
 			Router::instance().clear(offset + c);
 		}
 		return;
 	}
 
-    processTrajectory(oriFramesToProcess, sampleRate);
-    
+    //==================================== PROCESS TRAJECTORIES ===========================================
+    processTrajectory(iDawBufferSize, sampleRate);
+
 #if TIME_PROCESS
     Time time1Trajectories = Time::getCurrentTime();
 #endif
@@ -1179,6 +1179,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         return;
     }
 	
+    //==================================== PREPARE GENERAL PARAMETERS ===========================================
 	// copy mParameters into paramCopy, because we will transform those
 	float paramCopy[kNumberOfParameters];
     memcpy (paramCopy, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
@@ -1202,18 +1203,19 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	}
 	if (mRoutingMode == kInternalWrite) {
 		paramCopy[kRoutingVolume] = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, paramCopy[kRoutingVolume]);
-        jassert(mRoutingTempAudioBuffer.getNumSamples() >= oriFramesToProcess);
+        jassert(mRoutingTempAudioBuffer.getNumSamples() >= iDawBufferSize);
         jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
     
 #if TIME_PROCESS
     Time time2ParamProcess = Time::getCurrentTime();
 #endif
-	
-    //for each source, get pointer to content of buffer, and denormalize x and y.
+    
+    //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
+    //for each source, store pointers to audio data and denormalize position
     vector<float*> inputs(mNumberOfSources);
     for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
-        //get the input buffers into inputs[mNumberOfSources][DAW buffer size]
+        //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
 		inputs[iCurSource] = pBuffer.getWritePointer(iCurSource);
         //denormalize current position
         if (mProcessMode == kFreeVolumeMode){
@@ -1222,8 +1224,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		paramCopy[getParamForSourceX(iCurSource)] = paramCopy[getParamForSourceX(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
 		paramCopy[getParamForSourceY(iCurSource)] = paramCopy[getParamForSourceY(iCurSource)] * (2*kRadiusMax) - kRadiusMax;
 	}
-	
-    //get output pointer (**outputs) from same buffer that we got the inputs from
+    //for each speaker, store pointers to audio data and denormalize position
     vector<float*> outputs(mNumberOfSpeakers);
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
         //if we're in internal write, get write buffer from mRoutingTempAudioBuffer, otherwise get it from the main buffer function argument
@@ -1247,12 +1248,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     Time time3SourceSpeakers = Time::getCurrentTime();
 #endif
     
-    
-
-    
-    JUCE_COMPILER_WARNING(")this weird variable and loop organization is only to allow the use of numFramesToDo by the db meters below")
+    //==================================== PROCESS EACH FRAME ===========================================
+    JUCE_COMPILER_WARNING("this weird variable and loop organization is only to allow the use of numFramesToDo by the db meters below")
     int numFramesToDo;
-    for(int inFramesToProcess = oriFramesToProcess; true; ) {
+    for(int inFramesToProcess = iDawBufferSize; true; ) {
         //we process either kChunkSize frames or whatever is left in inFramesToProcess (which is the DAW buffer size)
         numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
         
@@ -1294,14 +1293,14 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		const float smooth  = denormalize(kSmoothMin, kSmoothMax, paramCopy[kSmooth]); // milliseconds
 		const float sm_o    = powf(0.01f, 1000.f / (smooth * sampleRate));
 		const float sm_n    = 1 - sm_o;
-		for (unsigned int f = 0; f < oriFramesToProcess; f++) {
+		for (unsigned int f = 0; f < iDawBufferSize; f++) {
 			currentParam  = currentParam * sm_o + targetParam * sm_n;
 			ramp[f]       = dbToLinear(currentParam);
 		}
 		mSmoothedParameters.setUnchecked(kRoutingVolume, currentParam);
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
 			float *output = mRoutingTempAudioBuffer.getWritePointer(o);
-            for (unsigned int f = 0; f < oriFramesToProcess; f++){
+            for (unsigned int f = 0; f < iDawBufferSize; f++){
 				output[f] *= ramp[f];
             }
 		}
@@ -1333,7 +1332,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
 	if (mRoutingMode == kInternalWrite) {
-		Router::instance().accumulate(mNumberOfSpeakers, oriFramesToProcess, mRoutingTempAudioBuffer);
+		Router::instance().accumulate(mNumberOfSpeakers, iDawBufferSize, mRoutingTempAudioBuffer);
 		pBuffer.clear();
 	}
 	

@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
-#define BUFFER_PROCESS_DATA 1
+#define BUFFER_PROCESS_DATA 0
 #endif
 
 #ifndef TIME_PROCESS
