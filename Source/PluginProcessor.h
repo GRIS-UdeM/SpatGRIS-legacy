@@ -38,6 +38,10 @@ using namespace std;
 #define USE_DB_METERS 1
 #endif
 
+#ifndef BUFFER_PROCESS_DATA
+#define BUFFER_PROCESS_DATA 1
+#endif
+
 #ifndef TIME_PROCESS
 #define TIME_PROCESS 1
 #endif
@@ -877,7 +881,7 @@ private:
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
-    void addToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize);
+    void addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize);
     void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     

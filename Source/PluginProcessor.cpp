@@ -1478,7 +1478,7 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
     
 }
 
-void SpatGrisAudioProcessor::addToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
+void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[0];
@@ -1571,10 +1571,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
         //for each source, we have 256 (kChunkSize) values for x and y. mSmoothedParametersRamps was updated a few lines above using pSmoothedParametersRamps
 		float *xCurSource = mSmoothedParametersRamps.getReference(getParamForSourceX(iCurSource)).b;
 		float *yCurSource = mSmoothedParametersRamps.getReference(getParamForSourceY(iCurSource)).b;
-	
-        //for each bufferSize number of samples
-//        const int bufferSize = kChunkSize;
-//		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; iSampleId += bufferSize) {
+#if !BUFFER_PROCESS_DATA
+        //for each samples
+		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
+#endif
             #if TIME_PROCESS
             Time timeBeginSample = Time::getCurrentTime();
             #endif
@@ -1583,9 +1583,14 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
             //figure out current sample value and its Ray and Theta coordinates
-			float fCurSampleValues   = allSamplesCurSource[0];   //current sample
+#if !BUFFER_PROCESS_DATA
+            float fCurSampleValue   = allSamplesCurSource[iSampleId];   //current sample
+            float fCurSampleX        = xCurSource[iSampleId];            //x position of current sample
+            float fCurSampleY        = yCurSource[iSampleId];            //y position of current sample
+#else
 			float fCurSampleX        = xCurSource[0];            //x position of current sample
 			float fCurSampleY        = yCurSource[0];            //y position of current sample
+#endif
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
             if (fCurSampleR > kRadiusMax) {
                 fCurSampleR = kRadiusMax;
@@ -1598,31 +1603,33 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             #if TIME_PROCESS
             Time timeInit = Time::getCurrentTime();
             #endif
-			
+
+#if !BUFFER_PROCESS_DATA
             //apply filter to fCurSampleValue if needed
-//			if (mApplyFilter) {
-//				float distance;
-//                if (fCurSampleR >= 1) {
-//                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (fCurSampleR - 1));
-//                } else {
-//                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], fCurSampleR);
-//                }
-//				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
-//			}
+			if (mApplyFilter) {
+				float distance;
+                if (fCurSampleR >= 1) {
+                    distance = denormalize(p_pfParams[kFilterMid], p_pfParams[kFilterFar], (fCurSampleR - 1));
+                } else {
+                    distance = denormalize(p_pfParams[kFilterNear], p_pfParams[kFilterMid], fCurSampleR);
+                }
+				fCurSampleValue = mFilters[iCurSource].process(fCurSampleValue, distance);
+			}
+#endif
             
             #if TIME_PROCESS
             Time timeFilter = Time::getCurrentTime();
             #endif
-			
+#if !BUFFER_PROCESS_DATA
 			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
-//			float dbSource;
-//            if (fCurSampleR >= 1) {
-//                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
-//            } else {
-//                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
-//            }
-//            fCurSampleValue *= dbToLinear(dbSource);
-            
+			float dbSource;
+            if (fCurSampleR >= 1) {
+                dbSource = denormalize(p_pfParams[kVolumeMid], p_pfParams[kVolumeFar], (fCurSampleR - 1));
+            } else {
+                dbSource = denormalize(p_pfParams[kVolumeNear], p_pfParams[kVolumeMid], fCurSampleR);
+            }
+            fCurSampleValue *= dbToLinear(dbSource);
+#endif
             #if TIME_PROCESS
             Time timeVolume = Time::getCurrentTime();
             #endif
@@ -1641,8 +1648,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 }
             }
 #endif
-            addToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, p_iTotalSamples);
-            
+#if !BUFFER_PROCESS_DATA
+            addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
+#else
+            addBufferToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, p_iTotalSamples);
+#endif
 #if TIME_PROCESS
             Time timeOutput = Time::getCurrentTime();
             timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
@@ -1651,7 +1661,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             timeAvgSpatial  += 1000*(timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
             timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
 #endif
-//		}
+#if !BUFFER_PROCESS_DATA
+		}
+#endif
 	}
 }
 
