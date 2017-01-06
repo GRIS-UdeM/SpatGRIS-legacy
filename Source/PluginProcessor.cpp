@@ -1253,7 +1253,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     JUCE_COMPILER_WARNING(")this weird variable and loop organization is only to allow the use of numFramesToDo by the db meters below")
     int numFramesToDo;
     for(int inFramesToProcess = oriFramesToProcess; true; ) {
-        //we process either kChunkSize frames or whatever is left in inFramesToProcess
+        //we process either kChunkSize frames or whatever is left in inFramesToProcess (which is the DAW buffer size)
         numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
         
         //if we're in internal write, we don't need to make a copy of the input samples
@@ -1478,12 +1478,12 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
     
 }
 
-void SpatGrisAudioProcessor::addToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &f, const int &bufferSize) {
+void SpatGrisAudioProcessor::addToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-        float m = 1 - output_m[f];
-        for (int iCurSampleOffset = 0; iCurSampleOffset < bufferSize; ++iCurSampleOffset){
-            outputs[o][f+iCurSampleOffset] += sample[f+iCurSampleOffset] * mSpeakerVolumes[source][o] * m;
+        float m = 1 - output_m[0];
+        for (int iCurSample = 0; iCurSample < bufferSize; ++iCurSample){
+            outputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
         }
     }
 }
@@ -1572,9 +1572,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 		float *xCurSource = mSmoothedParametersRamps.getReference(getParamForSourceX(iCurSource)).b;
 		float *yCurSource = mSmoothedParametersRamps.getReference(getParamForSourceY(iCurSource)).b;
 	
-        //for each sample
-        const int bufferSize = 1024;
-		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; iSampleId += bufferSize) {
+        //for each bufferSize number of samples
+//        const int bufferSize = kChunkSize;
+//		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; iSampleId += bufferSize) {
             #if TIME_PROCESS
             Time timeBeginSample = Time::getCurrentTime();
             #endif
@@ -1583,10 +1583,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
             //figure out current sample value and its Ray and Theta coordinates
-//			float fCurSampleValues   = allSamplesCurSource[iSampleId];   //current sample
-            
-			float fCurSampleX       = xCurSource[iSampleId];            //x position of current sample
-			float fCurSampleY       = yCurSource[iSampleId];            //y position of current sample
+			float fCurSampleValues   = allSamplesCurSource[0];   //current sample
+			float fCurSampleX        = xCurSource[0];            //x position of current sample
+			float fCurSampleY        = yCurSource[0];            //y position of current sample
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
             if (fCurSampleR > kRadiusMax) {
                 fCurSampleR = kRadiusMax;
@@ -1642,7 +1641,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 }
             }
 #endif
-            addToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, iSampleId, bufferSize);
+            addToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, p_iTotalSamples);
             
 #if TIME_PROCESS
             Time timeOutput = Time::getCurrentTime();
@@ -1652,7 +1651,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             timeAvgSpatial  += 1000*(timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
             timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
 #endif
-		}
+//		}
 	}
 }
 
