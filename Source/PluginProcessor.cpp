@@ -1552,13 +1552,15 @@ void SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, const float &f
         //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
         float currentParamValue = mSmoothedParameters[iCurParamId];
         float targetParamValue  = p_pfParamCopy[iCurParamId];
-            
-        for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
-            //mSmoothedParametersRamps contains the interpolation between the current and target values, ramped over all iDawBufferSize values
-            currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
-            mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
+        
+        if (!areSame(currentParamValue, targetParamValue)){
+            for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
+                //mSmoothedParametersRamps contains an asymptotic interpolation between the current and target values, ramped over all iDawBufferSize values
+                currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+                mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
+            }
+            mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
         }
-        mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
     }
 }
     
@@ -1567,8 +1569,7 @@ void SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, const float &f
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples) {
     
-    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]);
-    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
+    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * p_fSampleRate));
     rampParameters(p_pfParamCopy, fOldValuesPortion, p_iTotalSamples);
     
 	// clear outputs[]
@@ -1774,8 +1775,7 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
 
 void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
     
-    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]);
-    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * sampleRate));
+    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * sampleRate));
     rampParameters(params, fOldValuesPortion, frames);
     
     // clear outputs

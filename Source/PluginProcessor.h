@@ -51,7 +51,7 @@ using namespace std;
 #endif
 
 #ifndef FIX_116
-#define FIX_116 1
+#define FIX_116 0
 #endif
 
 #ifndef USE_ACTIVE_SPEAKERS
