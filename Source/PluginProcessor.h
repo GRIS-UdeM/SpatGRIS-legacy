@@ -890,7 +890,7 @@ private:
     void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
-    float rampParameters(float *p_pfParams, float p_fSampleRate, unsigned int p_iTotalSamples);
+    void rampParameters(float *p_pfParams, const float &fOldValuesPortion, const int &p_iTotalSamples);
 	
     void ProcessData                (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
 	void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);

@@ -1527,52 +1527,84 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
         
 //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
-        
     }
 #endif
 }
     
     
-float SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples){  //here p_iTotalSamples == iDawBufferSize
-    //figure out proportion of old vs new values
-    const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
-    const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
-    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]);
-    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
-    const float fNewValuePortion        = 1 - fOldValuesPortion;
+//float SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples){  //here p_iTotalSamples == iDawBufferSize
+//    //figure out proportion of old vs new values
+//    const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
+//    const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+//    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]);
+//    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
+//    const float fNewValuePortion        = 1 - fOldValuesPortion;
+//    
+//    //for each kNonConstantParameters parameter, ie, IDs 0 to 120
+//    for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
+//        //skip all parametes but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
+//        if (iCurParamId >= kiTotalSourceParameters &&
+//            iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
+//            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
+//            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
+//            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused1 ||
+//            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
+//                continue;
+//            }
+//        
+//        //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
+//        float currentParamValue = mSmoothedParameters[iCurParamId];
+//        float targetParamValue  = p_pfParamCopy[iCurParamId];
+//        
+//        for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
+//            //mSmoothedParametersRamps contains the interpolation between the current and target values, ramped over all iDawBufferSize values
+//            currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+//            mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
+//        }
+//        mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
+//    }
+//    return fOldValuesPortion;
+//}
     
-    //for each kNonConstantParameters parameter, ie, IDs 0 to 120
-    for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
-        //skip all parametes but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
-        if (iCurParamId >= kiTotalSourceParameters &&
-            iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
-            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
-            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
-            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused1 ||
-            ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
-                continue;
+    void SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, const float &fOldValuesPortion, const int &p_iTotalSamples){  //here p_iTotalSamples == iDawBufferSize
+        //figure out proportion of old vs new values
+        const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
+        const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
+        const float fNewValuePortion        = 1 - fOldValuesPortion;
+        
+        //for each kNonConstantParameters parameter, ie, IDs 0 to 120
+        for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
+            //skip all parametes but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
+            if (iCurParamId >= kiTotalSourceParameters &&
+                iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
+                ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
+                ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
+                ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused1 ||
+                ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
+                    continue;
+                }
+            
+            //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
+            float currentParamValue = mSmoothedParameters[iCurParamId];
+            float targetParamValue  = p_pfParamCopy[iCurParamId];
+            
+            for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
+                //mSmoothedParametersRamps contains the interpolation between the current and target values, ramped over all iDawBufferSize values
+                currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+                mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
             }
-        
-        //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
-        float currentParamValue = mSmoothedParameters[iCurParamId];
-        float targetParamValue  = p_pfParamCopy[iCurParamId];
-        
-        for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
-            //mSmoothedParametersRamps contains the interpolation between the current and target values, ramped over all iDawBufferSize values
-            currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
-            mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
+            mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
         }
-        mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
     }
-    return fOldValuesPortion;
-}
     
     
     
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples) {
     
-    float fOldValuesPortion = rampParameters(p_pfParamCopy, p_fSampleRate, p_iTotalSamples);
+    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]);
+    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * p_fSampleRate));
+    rampParameters(p_pfParamCopy, fOldValuesPortion, p_iTotalSamples);
     
 	// clear outputs[]
 	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
@@ -1777,7 +1809,9 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
 
 void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
     
-    float fOldValuesPortion = rampParameters(params, sampleRate, frames);
+    const float fCurSmoothing           = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]);
+    const float fOldValuesPortion       = powf(0.01f, 1000.f / (fCurSmoothing * sampleRate));
+    rampParameters(params, fOldValuesPortion, frames);
     
     // clear outputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
