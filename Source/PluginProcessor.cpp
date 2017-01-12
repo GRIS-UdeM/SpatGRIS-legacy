@@ -1497,6 +1497,10 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 #else
     mSpeakerVolumes.getReference(source).set(o, targetVolume);                                                    // no exp. smoothing on volume
 #endif
+
+//    if (source == 0 && o == 0 && targetVolume!= 0.f){
+//        cout << mSpeakerVolumes[0][0] << "\t" << targetVolume << "\n";
+//    }
     
 }
 
@@ -1521,11 +1525,15 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         
     }
 #else
+    
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
-        
+
+//        if (o == 0 && mSpeakerVolumes[0][0] != 0.f){
+//            cout << mSpeakerVolumes[0][0] << "\n";
+//        }
 //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
     }
 #endif
@@ -1553,14 +1561,15 @@ void SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, const float &f
         float currentParamValue = mSmoothedParameters[iCurParamId];
         float targetParamValue  = p_pfParamCopy[iCurParamId];
         
-        if (!areSame(currentParamValue, targetParamValue)){
+        JUCE_COMPILER_WARNING("this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
+//        if (!areSame(currentParamValue, targetParamValue)){
             for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
                 //mSmoothedParametersRamps contains an asymptotic interpolation between the current and target values, ramped over all iDawBufferSize values
                 currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
                 mSmoothedParametersRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
             }
             mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
-        }
+//        }
     }
 }
     
@@ -1608,6 +1617,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			float fCurSampleY        = yCurSource[0];            //y position of current sample
 #endif
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
+//            
+//            if (iCurSource){
+//                cout << fCurSampleR << "\n";
+//            }
+            
             if (fCurSampleR > kRadiusMax) {
                 fCurSampleR = kRadiusMax;
             }
@@ -1769,6 +1783,12 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
             int o = (iBackLeftSpID >= 0) ? iBackLeftSpID : iBackRightSpId;
             jassert(o >= 0);
             setSpeakerVolume(iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+        }
+        
+        if (iCurSource == 0){
+//            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
+            JUCE_COMPILER_WARNING("plotting this gives very weird results.... position seems to be constantly oscillating, at least when sources are right on speakers")
+//            cout << fFrontLeftSpAngle << "\n";
         }
     }
 }

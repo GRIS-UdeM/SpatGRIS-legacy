@@ -889,3 +889,43 @@ master: master
 o12:    attempt at fix #72
 
 so only down branch is kinda unknown. 
+
+------------- 2017-01-12 -------------------
+
+ok. when fix #116 is deactivated, and the sources are right on the speakers,
+we have no sound. What is special about the combination of this fix and the
+location of the speaker, in spatgris specifically? 
+
+ADD TO OUTPUT
+* WITH THE FIX, source 0 directly on speaker 0, mSpeeakerVolumes[0][0] is
+  around .5.
+
+  WITHOUT THE FIX, it is around 0!
+
+SET SPEAKER VOLUME
+* with fix: around .5
+* witout:   oscillates between 0 and 1!
+
+
+
+------------------
+in setSpeakeVolume, target volume oscillates between 1 and 0
+this happens whether or not fix_116 is activated
+and doesn't happen in octogris. so there is the problem.
+
+
+in spatgris, having sources on the speakers makes the ray slighly under 1, 
+while with octogris it is spot on ==1. Constantly?
+
+i think the problem may be that when sources are right on speaker, the 
+weird oscillation that i'm observing is making the algorithm change between
+inner and outer circle algorithms, thus constantly changing speaker sets
+and this is why we don't hear anything.
+
+goddammit, the oscillation was my performance fix in ramp. removing it doesn't fix the volume problem. With fix_116 deactivated, we still have no sound if sources are right on speakerrrs.
+
+do we observe this position oscillation in octogris?
+
+
+
+
