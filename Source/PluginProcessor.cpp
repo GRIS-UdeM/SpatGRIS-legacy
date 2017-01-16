@@ -1533,14 +1533,21 @@ void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *
     
     
 void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const float &fOldValuesPortion, const int &p_iTotalSamples){  //here p_iTotalSamples == iDawBufferSize
-    //figure out proportion of old vs new values
+    
+    //init stuff
     const int kiTotalSourceParameters   = JucePlugin_MaxNumInputChannels  * kParamsPerSource;
     const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
     const float fNewValuePortion        = 1 - fOldValuesPortion;
-        
+    
+    
+    
+    
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
-        //skip all parametes but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
+        
+        
+        
+        //skip all parameters but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
         if (iCurParamId >= kiTotalSourceParameters && iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
           ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
           ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
@@ -1549,19 +1556,37 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
             continue;
         }
             
+        
+        
         //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
         float currentParamValue = mSmoothedParameters[iCurParamId];
         float targetParamValue  = p_pfParamCopy[iCurParamId];
         
+        
+//        if (iCurParamId == getParamForSourceX(0) ){
+//            cout << "x source 0 " << currentParamValue << "\n";
+//            
+//            if (targetParamValue > currentParamValue){
+//                int i = 3;
+//                ++i;
+//            }
+//        }
+        
+        
+        
+        
         JUCE_COMPILER_WARNING("#124: this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
-//        if (!areSame(currentParamValue, targetParamValue)){
+        
+        if (!areSame(currentParamValue, targetParamValue)){
             for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
                 //mParameterRamps contains an asymptotic interpolation between the current and target values, ramped over all iDawBufferSize values
                 currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
                 mParameterRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
             }
             mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
-//        }
+        }
+        
+        
     }
 }
     
@@ -1570,25 +1595,22 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples) {
     
+
+    // clear outputs[]
+    for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
+        float *output = p_ppfOutputs[iCurOutput];
+        memset(output, 0, p_iTotalSamples * sizeof(float));
+    }
+    //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
+    vector<bool> vSpeakersCurrentlyInUse;
+    
+    
     
     
     
     //------------------------------- DISTRIBUTE PARAMETER CHANGE OVER SAMPLES IN THE BUFFER ------------------------------------------
     const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * p_fSampleRate));
     createParameterRamps(p_pfParamCopy, fOldValuesPortion, p_iTotalSamples);
-    
-    
-    
-    
-    
-	// clear outputs[]
-	for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
-		float *output = p_ppfOutputs[iCurOutput];
-		memset(output, 0, p_iTotalSamples * sizeof(float));
-	}
-    
-    //if a given speaker is currently in use, we flag it here, so that we know which speakers are not in use and can set their output to 0
-    vector<bool> vSpeakersCurrentlyInUse;
     
     
     
@@ -1607,8 +1629,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
         
         
         
-        
-        
 #if !BUFFER_PROCESS_DATA
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
 		for (unsigned int iSampleId = 0; iSampleId < p_iTotalSamples; ++iSampleId) {
@@ -1623,11 +1643,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             //figure out current sample value and its Ray and Theta coordinates
 #if !BUFFER_PROCESS_DATA
             float fCurSampleValue   = allSamplesCurSource[iSampleId];   //current sample
-            float fCurSampleX        = xCurSource[iSampleId];            //x position of current sample
-            float fCurSampleY        = yCurSource[iSampleId];            //y position of current sample
+            float fCurSampleX        = xCurSource[iSampleId];           //x position of current sample
+            float fCurSampleY        = yCurSource[iSampleId];           //y position of current sample
 #else
-			float fCurSampleX        = xCurSource[0];            //x position of current sample
-			float fCurSampleY        = yCurSource[0];            //y position of current sample
+			float fCurSampleX        = xCurSource[0];                   //x position of current sample
+			float fCurSampleY        = yCurSource[0];                   //y position of current sample
 #endif
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
             
