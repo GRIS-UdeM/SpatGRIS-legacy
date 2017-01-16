@@ -892,27 +892,24 @@ so only down branch is kinda unknown.
 
 ------------- 2017-01-12 -------------------
 
-ok. when fix #116 is deactivated, and the sources are right on the speakers,
+#112: ok. when fix #116 is deactivated, and the sources are right on the speakers,
 we have no sound. What is special about the combination of this fix and the
 location of the speaker, in spatgris specifically? 
 
 ADD TO OUTPUT
-* WITH THE FIX, source 0 directly on speaker 0, mSpeeakerVolumes[0][0] is
-  around .5.
+* WITH THE FIX, source 0 directly on speaker 0, mSpeakerVolumes[0][0] is around .5.
 
-  WITHOUT THE FIX, it is around 0!
+* WITHOUT THE FIX, it is around 0!
 
 SET SPEAKER VOLUME
 * with fix: around .5
-* witout:   oscillates between 0 and 1!
-
-
+* without:   oscillates between 0 and 1!
+    * that's probably because r < 1 so setVolume called 2 times (front + back)
 
 ------------------
 in setSpeakeVolume, target volume oscillates between 1 and 0
 this happens whether or not fix_116 is activated
 and doesn't happen in octogris. so there is the problem.
-
 
 in spatgris, having sources on the speakers makes the ray slighly under 1, 
 while with octogris it is spot on ==1. Constantly?
@@ -922,9 +919,36 @@ weird oscillation that i'm observing is making the algorithm change between
 inner and outer circle algorithms, thus constantly changing speaker sets
 and this is why we don't hear anything.
 
-goddammit, the oscillation was my performance fix in ramp. removing it doesn't fix the volume problem. With fix_116 deactivated, we still have no sound if sources are right on speakerrrs.
+goddammit, the oscillation was my performance fix in ramp. removing it doesn't fix the volume problem. 
 
-do we observe this position oscillation in octogris?
+With fix_116 deactivated, we still have no sound if sources are right on speakerrrs.
+
+------------------ 2017-01-16 ----------------
+#112: without fix_116, no sound when sources on speakers. only for spatgris
+    * without fix_116 AND with fix_116 sources on speakers, r < 1
+        *  on octogris it is == 1
+            * but i guess it doesn't matter because with or without fix_116, thus with or 
+              without sound, r is < 1 on spatgris. so this is not the problem per se.
+    * the problem is that when r is just < 1, volume is set to close to 0. This doesn't
+      just happen when source in right on speaker, but in the whole area right under r ==1. 
+      THIS IS THE PROBLEM.
+    * with fix_116, setSpeakerVolume outputs .5 and an alternance of 0 and 1
+    * without, it does the same, but there's no average between the 2 extremes
+    * octogris does the exact same thing! the alternance comes from speaker 0 being either 
+      the front or the back speaker... and ALSO doesn't work when r < 1. OKKKK 
+
+RECAPPING THE PROBLEM
+Both spatgris and octogris, without the fix_116, don't output any sound when r is just < 1. My
+understanding is that this is because when we only have 2 speakers, the front and back speakers
+are reversed and cancel each other out, if we don't average the volume (ie, fix_116). This was
+hard to track because when sources are right on speakers, r is == 1 in octogris, and < 1 in
+spatgris. The problem should not happen without fix_116, but with more than 2 speakers, and it
+doesn't. Preventing the use of 4 speakers when we only have 2 fixes the problem!
+    * so potentially the fix is to bypass this 
+
+#124: small position wobble when not ramping when parameters are "equal". 
+    * turned that off
+
 
 
 

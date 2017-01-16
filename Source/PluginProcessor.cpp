@@ -1501,17 +1501,6 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 //    if (source == 0 && o == 0 && targetVolume!= 0.f){
 //        cout << mSpeakerVolumes[0][0] << "\t" << targetVolume << "\n";
 //    }
-    
-}
-
-void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
-    for (int o = 0; o < mNumberOfSpeakers; ++o) {
-        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
-        float m = 1 - output_m[0];
-        for (int iCurSample = 0; iCurSample < bufferSize; ++iCurSample){
-            outputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
-        }
-    }
 }
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
@@ -1534,9 +1523,20 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
 //        if (o == 0 && mSpeakerVolumes[0][0] != 0.f){
 //            cout << mSpeakerVolumes[0][0] << "\n";
 //        }
+        
 //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
     }
 #endif
+}
+    
+void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
+    for (int o = 0; o < mNumberOfSpeakers; ++o) {
+        float *output_m = mSmoothedParametersRamps.getReference(getParamForSpeakerM(o)).b;
+        float m = 1 - output_m[0];
+        for (int iCurSample = 0; iCurSample < bufferSize; ++iCurSample){
+            outputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
+        }
+    }
 }
     
     
@@ -1561,7 +1561,7 @@ void SpatGrisAudioProcessor::rampParameters(float *p_pfParamCopy, const float &f
         float currentParamValue = mSmoothedParameters[iCurParamId];
         float targetParamValue  = p_pfParamCopy[iCurParamId];
         
-        JUCE_COMPILER_WARNING("this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
+        JUCE_COMPILER_WARNING("#124: this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
 //        if (!areSame(currentParamValue, targetParamValue)){
             for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
                 //mSmoothedParametersRamps contains an asymptotic interpolation between the current and target values, ramped over all iDawBufferSize values
@@ -1617,8 +1617,8 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			float fCurSampleY        = yCurSource[0];            //y position of current sample
 #endif
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
-//            
-//            if (iCurSource){
+            
+//            if (iCurSource == 0){
 //                cout << fCurSampleR << "\n";
 //            }
             
@@ -1702,7 +1702,7 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
     mActiveSpeakers.clear();
 #endif
     //if we're outside the main, first circle, only 2 speakers will play
-    if (fCurSampleR >= 1) {
+    if (fCurSampleR >= 1 || mNumberOfSpeakers == 2) {
         // find left and right speakers
         int left, right;
         float dLeft, dRight;
