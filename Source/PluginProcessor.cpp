@@ -1575,17 +1575,18 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
         
         
         
-        JUCE_COMPILER_WARNING("#124: this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
-        
-        if (!areSame(currentParamValue, targetParamValue)){
+//        JUCE_COMPILER_WARNING("#124: this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
+//        if (!areSame(currentParamValue, targetParamValue)){
             for (unsigned int iCurSampleId = 0; iCurSampleId < p_iTotalSamples; ++iCurSampleId) {
                 //mParameterRamps contains an asymptotic interpolation between the current and target values, ramped over all iDawBufferSize values
                 currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
                 mParameterRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
             }
             mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
-        }
-        
+//        } else {
+//            memset(mParameterRamps.getReference(iCurParamId).b, currentParamValue, kChunkSize * sizeof(float));
+//        }
+    
         
     }
 }
