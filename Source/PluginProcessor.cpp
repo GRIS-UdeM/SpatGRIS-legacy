@@ -1177,7 +1177,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         return;
     }
 	
-    //==================================== PREPARE GENERAL PARAMETERS ===========================================
+    //==================================== PREPARE PARAMCOPY ===========================================
 	// copy mParameters into paramCopy, because we will transform those
 	float paramCopy[kNumberOfParameters];
     memcpy (paramCopy, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
@@ -1251,18 +1251,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         //we process either kChunkSize frames or whatever is left in inFramesToProcess (which is the DAW buffer size)
         numFramesToDo = (inFramesToProcess > kChunkSize) ? kChunkSize : inFramesToProcess;
         
-        //if we're in internal write, we don't need to make a copy of the input samples
         if (mRoutingMode == kInternalWrite) {
-            ProcessData(inputs, outputs, paramCopy, numFramesToDo);
+            ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
         } else {
-            //for all sources, make a copy of all input samples, because we will clear outputs[] in processData(), and outputs and inputs point to the same thing
-            vector<float*> inputsCopy(mNumberOfSources);
-            for (int i = 0; i < mNumberOfSources; ++i) {
-                memcpy(mInputsCopy.getReference(i).b, inputs[i], numFramesToDo * sizeof(float));
-                inputsCopy[i] = mInputsCopy.getReference(i).b;
-            }
-            //and process them. here inputsCopy, outputs
-            ProcessData(inputsCopy, outputs, paramCopy, numFramesToDo);
+            ProcessData(inputsCopy, outputs, paramCopy);
         }
         inFramesToProcess -= numFramesToDo;
         if (inFramesToProcess == 0) {
@@ -1279,11 +1271,9 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 
 #else
     
-    //if we're in internal write, we don't need to make a copy of the input samples
     if (mRoutingMode == kInternalWrite) {
-        ProcessData(inputs, outputs, paramCopy);
+        ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
     } else {
-        //and process them. here inputsCopy, outputs
         ProcessData(inputsCopy, outputs, paramCopy);
     }
 #endif
