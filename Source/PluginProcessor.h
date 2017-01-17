@@ -891,11 +891,11 @@ private:
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion, const int &p_iTotalSamples);
 	
-    void ProcessData                (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-	void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames);
-    void processTrajectory(const unsigned int &oriFramesToProcess, const double &sampleRate);
+    void ProcessData                (const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames);
+	void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames);
+	void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames);
+	void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames);
+    void processTrajectory(const unsigned int &oriFramesToProcess);
     
     
     int mNumberOfSources;
@@ -910,6 +910,8 @@ private:
     bool m_bPreventSourceAzimElevSpanUpdate;
     bool m_bIsSettingEndPoint;
     FPoint m_fEndLocationXY01;
+    
+    double mSampleRate;
 
     OSCSender mOscSpatSender;
     bool m_bOscSpatSenderIsConnected;

@@ -203,8 +203,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
 
 	mSmoothedParameters.resize(kNumberOfParameters);
-    for (int i = 0; i < kNumberOfParameters; i++)
+    for (int i = 0; i < kNumberOfParameters; ++i){
 		mSmoothedParameters.add(0);
+    }
     
     mNumberOfSources = -1;
     mNumberOfSpeakers = -1;
@@ -1076,6 +1077,8 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 
 //==============================================================================
 void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
+    mSampleRate = sampleRate;
+    
     if (m_bAllowInputOutputModeSelection) {
         //insure that mNumberOfSources and mNumberOfSpeakers are valid. if not, we will change mInputOutputMode.
         int iTotalSources = getTotalNumInputChannels();
@@ -1095,12 +1098,11 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
     
     for (int i = 0; i < mNumberOfSources; i++) {
-        mFilters[i].setSampleRate(static_cast<int>(sampleRate));
+        mFilters[i].setSampleRate(static_cast<int>(mSampleRate));
     }
     
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
     
-//        cout << "prepare to play " << sampleRate << " " << samplesPerBlock << " " << getNumberOfSources() << "x" << getNumberOfSpeakers() << "\n";
 }
 
 void SpatGrisAudioProcessor::reset() {
@@ -1139,7 +1141,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     Time beginTime = Time::getCurrentTime();
 #endif
     
-    const double sampleRate  = getSampleRate();
     const int iDawBufferSize = pBuffer.getNumSamples();   //ori stands for output routing input
     
     //==================================== CHECK SOME STUFF ===========================================
@@ -1166,7 +1167,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	}
 
     //==================================== PROCESS TRAJECTORIES ===========================================
-    processTrajectory(iDawBufferSize, sampleRate);
+    processTrajectory(iDawBufferSize);
 
 #if TIME_PROCESS
     Time time1Trajectories = Time::getCurrentTime();
@@ -1253,7 +1254,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         
         //if we're in internal write, we don't need to make a copy of the input samples
         if (mRoutingMode == kInternalWrite) {
-            ProcessData(inputs, outputs, paramCopy, sampleRate, numFramesToDo);
+            ProcessData(inputs, outputs, paramCopy, numFramesToDo);
         } else {
             //for all sources, make a copy of all input samples, because we will clear outputs[] in processData(), and outputs and inputs point to the same thing
             vector<float*> inputsCopy(mNumberOfSources);
@@ -1262,7 +1263,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
                 inputsCopy[i] = mInputsCopy.getReference(i).b;
             }
             //and process them. here inputsCopy, outputs
-            ProcessData(inputsCopy, outputs, paramCopy, sampleRate, numFramesToDo);
+            ProcessData(inputsCopy, outputs, paramCopy, numFramesToDo);
         }
         inFramesToProcess -= numFramesToDo;
         if (inFramesToProcess == 0) {
@@ -1281,10 +1282,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     
     //if we're in internal write, we don't need to make a copy of the input samples
     if (mRoutingMode == kInternalWrite) {
-        ProcessData(inputs, outputs, paramCopy, sampleRate, iDawBufferSize);
+        ProcessData(inputs, outputs, paramCopy, iDawBufferSize);
     } else {
         //and process them. here inputsCopy, outputs
-        ProcessData(inputsCopy, outputs, paramCopy, sampleRate, iDawBufferSize);
+        ProcessData(inputsCopy, outputs, paramCopy, iDawBufferSize);
     }
 #endif
     
@@ -1301,7 +1302,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		float targetParam   = paramCopy[kRoutingVolume];
 		float *ramp         = mParameterRamps.getReference(kRoutingVolume).b;
 		const float smooth  = denormalize(kSmoothMin, kSmoothMax, paramCopy[kSmooth]); // milliseconds
-		const float sm_o    = powf(0.01f, 1000.f / (smooth * sampleRate));
+		const float sm_o    = powf(0.01f, 1000.f / (smooth * mSampleRate));
 		const float sm_n    = 1 - sm_o;
 		for (unsigned int f = 0; f < iDawBufferSize; f++) {
 			currentParam  = currentParam * sm_o + targetParam * sm_n;
@@ -1322,8 +1323,8 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         //envelope constants
 		const float attack  = kLevelAttackDefault;
 		const float release = kLevelReleaseDefault;
-		const float ag      = powf(0.01f, 1000.f / (attack * sampleRate));
-		const float rg      = powf(0.01f, 1000.f / (release * sampleRate));
+		const float ag      = powf(0.01f, 1000.f / (attack * mSampleRate));
+		const float rg      = powf(0.01f, 1000.f / (release * mSampleRate));
 		//for each speaker
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
             //get pointer to current spot in output buffer
@@ -1386,7 +1387,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 
 }
 
-void SpatGrisAudioProcessor::processTrajectory(const unsigned int &oriFramesToProcess, const double &sampleRate){
+void SpatGrisAudioProcessor::processTrajectory(const unsigned int &oriFramesToProcess){
     //check whether we're currently playing
     AudioPlayHead::CurrentPositionInfo cpi;
     getPlayHead()->getCurrentPosition(cpi);
@@ -1397,7 +1398,7 @@ void SpatGrisAudioProcessor::processTrajectory(const unsigned int &oriFramesToPr
     if (trajectory) {
         if (m_bIsPlaying) {
             double bps = cpi.bpm / 60;
-            float seconds = oriFramesToProcess / sampleRate;
+            float seconds = oriFramesToProcess / mSampleRate;
             float beats = seconds * bps;
             
             bool done = trajectory->process(seconds, beats);
@@ -1406,11 +1407,11 @@ void SpatGrisAudioProcessor::processTrajectory(const unsigned int &oriFramesToPr
     }
 }
 
-void SpatGrisAudioProcessor::ProcessData(const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessData(const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames) {
 	switch(mProcessMode) {
-		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, sampleRate, frames);	break;
-		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params, sampleRate, frames);	break;
-		case kPanSpanMode:		ProcessDataPanSpanMode   (inputs, outputs, params, sampleRate, frames);	break;
+		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params, frames);	break;
+		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params, frames);	break;
+		case kPanSpanMode:		ProcessDataPanSpanMode   (inputs, outputs, params, frames);	break;
 	}
 }
 
@@ -1586,7 +1587,7 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     
     
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, float p_fSampleRate, unsigned int p_iTotalSamples) {
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy, unsigned int p_iTotalSamples) {
     
 
     // clear outputs[]
@@ -1602,7 +1603,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
     
     
     //------------------------------- DISTRIBUTE PARAMETER CHANGE OVER SAMPLES IN THE BUFFER ------------------------------------------
-    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * p_fSampleRate));
+    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * mSampleRate));
     createParameterRamps(p_pfParamCopy, fOldValuesPortion, p_iTotalSamples);
     
     
@@ -1819,9 +1820,9 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames) {
     
-    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * sampleRate));
+    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * mSampleRate));
     createParameterRamps(params, fOldValuesPortion, frames);
     
     // clear outputs
@@ -1980,10 +1981,10 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(const vector<float*> &inputs, vector<float*> &outputs, float *params, float sampleRate, unsigned int frames) {
+void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(const vector<float*> &inputs, vector<float*> &outputs, float *params, unsigned int frames) {
 	// ramp all non constant parameters
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
-	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * sampleRate));
+	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * mSampleRate));
 	const float sm_n = 1 - fOldValuesPortion;
 	for (int i = 0; i < kNonConstantParameters; i++) {
 		float currentParam = mSmoothedParameters[i];
