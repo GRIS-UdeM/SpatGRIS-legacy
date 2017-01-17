@@ -202,12 +202,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mParameters.set(kRoutingVolume, normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
     mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
 
-	mSmoothedParametersInited = false;
 	mSmoothedParameters.resize(kNumberOfParameters);
-    
-	for (int i = 0; i < kNumberOfParameters; i++) 
+    for (int i = 0; i < kNumberOfParameters; i++)
 		mSmoothedParameters.add(0);
-
     
     mNumberOfSources = -1;
     mNumberOfSpeakers = -1;
@@ -1101,6 +1098,8 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         mFilters[i].setSampleRate(static_cast<int>(sampleRate));
     }
     
+    memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
+    
 //        cout << "prepare to play " << sampleRate << " " << samplesPerBlock << " " << getNumberOfSources() << "x" << getNumberOfSpeakers() << "\n";
 }
 
@@ -1112,8 +1111,6 @@ void SpatGrisAudioProcessor::reset() {
         }
     }
 #endif
-    
-    mSmoothedParametersInited = false;
     
     for (int i = 0; i < mNumberOfSources; ++i) {
         mFilters[i].reset();
@@ -1184,11 +1181,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	// copy mParameters into paramCopy, because we will transform those
 	float paramCopy[kNumberOfParameters];
     memcpy (paramCopy, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
-    // initialize mSmoothedParameters if it isn't
-    if (!mSmoothedParametersInited) {
-        memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
-        mSmoothedParametersInited = true;
-    }
     
     //depending on what mode we are, denormalize parameters we will need
 	if (mProcessMode != kFreeVolumeMode) {

@@ -842,7 +842,6 @@ private:
 	int mRoutingMode;
 	AudioSampleBuffer mRoutingTempAudioBuffer;
 	
-	bool mSmoothedParametersInited;
 	Array<float> mSmoothedParameters;
     
 	Array<float> mLockedThetas;
