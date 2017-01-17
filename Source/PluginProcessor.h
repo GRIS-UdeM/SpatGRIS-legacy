@@ -856,17 +856,20 @@ private:
     
     bool bThetasPrinted = false;
     
-	
+#if PROCESS_IN_CHUNK_SIZE
+
     JUCE_COMPILER_WARNING("re #116: does the size of kChunkSize change anything?")
 //	#define kChunkSize (256)
     #define kChunkSize (1024)
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mParameterRamps;
-    
-#if PROCESS_IN_CHUNK_SIZE
 	Array<IOBuf> mInputsCopy;
+
 #else
+    
+    vector<vector<float>> mParameterRamps;
     vector<vector<float>> mInputsCopy;
+
 #endif
 
     

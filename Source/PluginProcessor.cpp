@@ -1104,6 +1104,12 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
     
+#if !PROCESS_IN_CHUNK_SIZE
+    for (auto &curOutputBuffer : mParameterRamps){
+        curOutputBuffer.resize(m_iDawBufferSize);
+    }
+#endif
+    
 }
 
 void SpatGrisAudioProcessor::reset() {
@@ -1298,7 +1304,11 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		// apply routing volume
 		float currentParam  = mSmoothedParameters[kRoutingVolume];
 		float targetParam   = paramCopy[kRoutingVolume];
+#if PROCESS_IN_CHUNK_SIZE
 		float *ramp         = mParameterRamps.getReference(kRoutingVolume).b;
+#else
+        float *ramp         = mParameterRamps[kRoutingVolume].data();
+#endif
 		const float smooth  = denormalize(kSmoothMin, kSmoothMax, paramCopy[kSmooth]); // milliseconds
 		const float sm_o    = powf(0.01f, 1000.f / (smooth * m_dSampleRate));
 		const float sm_n    = 1 - sm_o;
@@ -1504,8 +1514,12 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
 #else
     
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
+#if PROCESS_IN_CHUNK_SIZE
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
+#else
+        float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
+#endif
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
 
 //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
@@ -1515,8 +1529,14 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     
 void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
+        
+#if PROCESS_IN_CHUNK_SIZE
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(o)).b;
-        float m = 1 - output_m[0];
+        float m = 1 - output_m[f];
+#else
+        float m = 1 - mParameterRamps[getParamForSpeakerM(o)][0];
+#endif
+        
         for (int iCurSample = 0; iCurSample < bufferSize; ++iCurSample){
             outputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
         }
@@ -1572,7 +1592,13 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
             for (unsigned int iCurSampleId = 0; iCurSampleId < m_iDawBufferSize; ++iCurSampleId) {
                 //mParameterRamps contains an asymptotic interpolation between the current and target values, ramped over all m_iDawBufferSize values
                 currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+                
+#if PROCESS_IN_CHUNK_SIZE
                 mParameterRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
+#else
+                mParameterRamps[iCurParamId][iCurSampleId] = currentParamValue;
+#endif
+                
             }
             mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
 //        } else {
@@ -1614,10 +1640,15 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 	//------------------------------- FOR EACH SOUND SOURCE ------------------------------------------
 	for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
 		float *allSamplesCurSource = p_ppfInputs[iCurSource];
+        
+#if PROCESS_IN_CHUNK_SIZE
         //for each source, we have 256 (kChunkSize) values for x and y. mParameterRamps was updated a few lines above using pSmoothedParametersRamps
 		float *xCurSource = mParameterRamps.getReference(getParamForSourceX(iCurSource)).b;
 		float *yCurSource = mParameterRamps.getReference(getParamForSourceY(iCurSource)).b;
-
+#else
+        float *xCurSource = mParameterRamps[getParamForSourceX(iCurSource)].data();
+        float *yCurSource = mParameterRamps[getParamForSourceY(iCurSource)].data();
+#endif
         
         
         
@@ -1871,9 +1902,17 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
     // in this context: source T, R are actually source X, Y
     for (int i = 0; i < mNumberOfSources; i++) {
         float *input = inputs[i];
+        
+#if PROCESS_IN_CHUNK_SIZE
         float *input_x = mParameterRamps.getReference(getParamForSourceX(i)).b;
         float *input_y = mParameterRamps.getReference(getParamForSourceY(i)).b;
         float *input_d = mParameterRamps.getReference(getParamForSourceD(i)).b;
+#else
+        float *input_x = mParameterRamps[getParamForSourceX(i)].data();
+        float *input_y = mParameterRamps[getParamForSourceY(i)].data();
+        float *input_d = mParameterRamps[getParamForSourceD(i)].data();
+        
+#endif
         
         for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
@@ -1988,7 +2027,13 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(const vector<float*> &inp
 	for (int i = 0; i < kNonConstantParameters; i++) {
 		float currentParam = mSmoothedParameters[i];
 		float targetParam = params[i];
-		float *ramp = mParameterRamps.getReference(i).b;
+        
+#if PROCESS_IN_CHUNK_SIZE
+        float *ramp         = mParameterRamps.getReference(i).b;
+#else
+        float *ramp         = mParameterRamps[i].data();
+#endif
+        
 		for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
 			currentParam = currentParam * fOldValuesPortion + targetParam * sm_n;
 			ramp[f] = currentParam;
@@ -1999,19 +2044,38 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(const vector<float*> &inp
 	const float adj_factor = 1 / sqrtf(2);
 	for (int o = 0; o < mNumberOfSpeakers; o++) {
 		float *output = outputs[o];
+        
+#if PROCESS_IN_CHUNK_SIZE
 		float *output_x = mParameterRamps.getReference(getParamForSpeakerX(o)).b;
 		float *output_y = mParameterRamps.getReference(getParamForSpeakerY(o)).b;
-		float output_adj[kChunkSize]; {
-			float *output_m = mParameterRamps.getReference(getParamForSpeakerM(o)).b;
-			for (unsigned int f = 0; f < m_iDawBufferSize; f++){
-				output_adj[f] = 1 - output_m[f];
-			}
-		}
+		float output_adj[kChunkSize];
+        float *output_m = mParameterRamps.getReference(getParamForSpeakerM(o)).b;
+        for (unsigned int f = 0; f < m_iDawBufferSize; f++){
+            output_adj[f] = 1 - output_m[f];
+        }
+		
+#else
+        float *output_x = mParameterRamps[getParamForSpeakerX(o)].data();
+        float *output_y = mParameterRamps[getParamForSpeakerY(o)].data();
+        vector<float> output_adj(m_iDawBufferSize, 0);
+        float *output_m = mParameterRamps[getParamForSpeakerM(o)].data();
+        for (unsigned int f = 0; f < m_iDawBufferSize; f++){
+            output_adj[f] = 1 - output_m[f];
+        }
+#endif
+        
+        
         for (int i = 0; i < mNumberOfSources; i++) {
             float *input = inputs[i];
+#if PROCESS_IN_CHUNK_SIZE
             float *input_x = mParameterRamps.getReference(getParamForSourceX(i)).b;
             float *input_y = mParameterRamps.getReference(getParamForSourceY(i)).b;
             float *input_d = mParameterRamps.getReference(getParamForSourceD(i)).b;
+#else
+            float *input_x = mParameterRamps[getParamForSourceX(i)].data();
+            float *input_y = mParameterRamps[getParamForSourceY(i)].data();
+            float *input_d = mParameterRamps[getParamForSourceD(i)].data();
+#endif
             
             for (unsigned int f = 0; f < m_iDawBufferSize; f++){
                 float dx = input_x[f] - output_x[f];
