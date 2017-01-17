@@ -862,7 +862,11 @@ private:
     #define kChunkSize (1024)
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mParameterRamps;
+#if PROCESS_IN_CHUNK_SIZE
 	Array<IOBuf> mInputsCopy;
+#else
+    vector<vector<float>> mInputsCopy;
+#endif
 
 #if TIME_PROCESS
 #define kTimeSlots (10)

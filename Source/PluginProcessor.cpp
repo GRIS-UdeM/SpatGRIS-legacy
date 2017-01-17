@@ -1211,9 +1211,18 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources], and copy actual data in inputsCopy
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
             if (mRoutingMode != kInternalWrite) {
-                JUCE_COMPILER_WARNING("the sole purpose of mInputsCopy is to have memory slots for this very memcopy. Could use vectors instead of this complicated thing")
+                
+#if PROCESS_IN_CHUNK_SIZE
+                JUCE_COMPILER_WARNING("mInputsCopy[].b does not necessarily have room for m_iDawBufferSize. It only has kChunkSize floats. ")
                 memcpy(mInputsCopy.getReference(iCurChannel).b, inputs[iCurChannel], m_iDawBufferSize * sizeof(float));
                 inputsCopy[iCurChannel] = mInputsCopy.getReference(iCurChannel).b;
+#else
+//                mInputsCopy[iCurChannel] = *new vector<float> (inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
+//                inputsCopy[iCurChannel] = mInputsCopy[iCurChannel].data();
+                vector<float> curBuffer(inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
+                mInputsCopy[iCurChannel] = curBuffer;
+                inputsCopy[iCurChannel] = mInputsCopy[iCurChannel].data();
+#endif
             }
             //denormalize source position
             paramCopy[getParamForSourceX(iCurChannel)] = paramCopy[getParamForSourceX(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
