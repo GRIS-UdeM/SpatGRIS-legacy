@@ -296,7 +296,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mLeapEnabled = 0;
     mJoystickEnabled = 0;
     m_bOscSpatSenderIsConnected = false;
-	mParameterRamps.resize(kNumberOfParameters);
 	
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
@@ -1103,10 +1102,11 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
     
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
+    mParameterRamps.resize(kNumberOfParameters);
     
 #if !PROCESS_IN_CHUNK_SIZE
-    for (auto &curOutputBuffer : mParameterRamps){
-        curOutputBuffer.resize(m_iDawBufferSize);
+    for (auto &curParameterRamp : mParameterRamps){
+        curParameterRamp.resize(m_iDawBufferSize);
     }
 #endif
     
@@ -1133,14 +1133,13 @@ void SpatGrisAudioProcessor::reset() {
 
 void SpatGrisAudioProcessor::releaseResources()
 {
-    
+#if !PROCESS_IN_CHUNK_SIZE
+    mParameterRamps.clear();
+#endif
 }
 
 void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages)
 {
-    //fprintf(stderr, "pb bypass\n");
-    //for (int c = mNumberOfSources; c < mNumberOfSpeakers; c++)
-    //	buffer.clear(c, 0, buffer.getNumSamples());
 }
 
 void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuffer& midiMessages) {
@@ -1620,7 +1619,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
         float *output = p_ppfOutputs[iCurOutput];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
     }
+    
     //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
+    JUCE_COMPILER_WARNING("everything related to vSpeakersCurrentlyInUse can be removed if !FIX_116")
     vector<bool> vSpeakersCurrentlyInUse;
     
     
