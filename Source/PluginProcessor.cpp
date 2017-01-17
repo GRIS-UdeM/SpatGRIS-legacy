@@ -1220,7 +1220,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 //                mInputsCopy[iCurChannel] = *new vector<float> (inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
 //                inputsCopy[iCurChannel] = mInputsCopy[iCurChannel].data();
                 vector<float> curBuffer(inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
-                mInputsCopy[iCurChannel] = curBuffer;
+                mInputsCopy[iCurChannel] = move(curBuffer);
                 inputsCopy[iCurChannel] = mInputsCopy[iCurChannel].data();
 #endif
             }
@@ -1375,7 +1375,8 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     
     mAvgTime[9] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
-        for (int i = 3; i < kTimeSlots; ++i){
+//        for (int i = 3; i < kTimeSlots; ++i){
+        for (int i = 2; i < 3; ++i){
             cout << "time " << i << ": " << mAvgTime[i] << "\t";
             mAvgTime[i] = 0;
         }
@@ -1710,11 +1711,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 #endif
 #if TIME_PROCESS
             Time timeOutput = Time::getCurrentTime();
-            timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgFilter   += 1000*(timeFilter  - timeInit).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgVolume   += 1000*(timeVolume  - timeFilter).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgSpatial  += 1000*(timeSpatial - timeVolume).inMilliseconds()/(float)p_iTotalSamples;
-            timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).inMilliseconds()/(float)p_iTotalSamples;
+            timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgFilter   += 1000*(timeFilter  - timeInit).       inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgVolume   += 1000*(timeVolume  - timeFilter).     inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgSpatial  += 1000*(timeSpatial - timeVolume).     inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).    inMilliseconds()/(float)m_iDawBufferSize;
 #endif
 #if !BUFFER_PROCESS_DATA
 		}
