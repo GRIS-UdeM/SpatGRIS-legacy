@@ -1619,9 +1619,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
     }
     
     //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
-    JUCE_COMPILER_WARNING("everything related to vSpeakersCurrentlyInUse can be removed if !FIX_116")
+#if FIX_116
     vector<bool> vSpeakersCurrentlyInUse;
-    
+#endif
     
     //------------------------------- DISTRIBUTE PARAMETER CHANGE OVER SAMPLES IN THE BUFFER ------------------------------------------
     //kSmooth is in ms. when multiplied by sampling rate (samples/s), fSmoothingSamples is a number of samples over which we will smooth. it is only an approximation since the curve is exponential
@@ -1650,8 +1650,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             Time timeBeginSample = Time::getCurrentTime();
 #endif
 
+#if FIX_116
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
+#endif
             
             //figure out current sample value and its Ray and Theta coordinates
 #if !BUFFER_PROCESS_DATA
@@ -1704,8 +1706,12 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 #if TIME_PROCESS_DETAILED
             Time timeVolume = Time::getCurrentTime();
 #endif
-            
+#if FIX_116
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
+#else
+            vector<bool> empty;
+            spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
+#endif
             
 #if TIME_PROCESS_DETAILED
             Time timeSpatial = Time::getCurrentTime();
@@ -1847,8 +1853,9 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
     
     vector<Area> areas;
     areas.resize(mNumberOfSpeakers * s_iMaxAreas);
-    
+#if FIX_116
     vector<bool> vSpeakersCurrentlyInUse;
+#endif
 
     int areaCount = 0;
     
@@ -1899,7 +1906,9 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
 #endif
         
         for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
+#if FIX_116
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
+#endif
             
             float s = input[f];
             float x = input_x[f];
