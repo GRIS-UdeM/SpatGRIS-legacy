@@ -1213,20 +1213,22 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
-            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources], and copy actual data in inputsCopy
+            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+            
+            //if not in kInternalWrite, copy actual data in inputsCopy
             if (mRoutingMode != kInternalWrite) {
-                
 #if PROCESS_IN_CHUNK_SIZE
                 JUCE_COMPILER_WARNING("mInputsCopy[].b does not necessarily have room for m_iDawBufferSize. It only has kChunkSize floats. ")
                 memcpy(mInputsCopy.getReference(iCurChannel).b, inputs[iCurChannel], m_iDawBufferSize * sizeof(float));
                 inputsCopy[iCurChannel] = mInputsCopy.getReference(iCurChannel).b;
 #else
-//                mInputsCopy[iCurChannel] = *new vector<float> (inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
-//                inputsCopy[iCurChannel] = mInputsCopy[iCurChannel].data();
-                vector<float> curBuffer(inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
-                mInputsCopy[iCurChannel] = move(curBuffer);
-                inputsCopy[iCurChannel] = mInputsCopy[iCurChannel].data();
+                //copy input data for each iCurChannel into a new vector of floats
+                vector<float> curChannelData(inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
+                //move this data into the member variable mIntputsCopy, so that it is not destroyed at the end of this block
+                mInputsCopy[iCurChannel] = move(curChannelData);
+                JUCE_COMPILER_WARNING("have inputsCopy point to the member variable. if we keep this code, we should replace inputsCopy by mInputsCopy completely")
+                inputsCopy[iCurChannel]  = mInputsCopy[iCurChannel].data();
 #endif
             }
             //denormalize source position
@@ -1420,6 +1422,7 @@ void SpatGrisAudioProcessor::ProcessData(const vector<float*> &inputs, vector<fl
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params);	break;
 		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params);	break;
 		case kPanSpanMode:		ProcessDataPanSpanMode   (inputs, outputs, params);	break;
+        default: jassertfalse;
 	}
 }
 
@@ -1550,14 +1553,8 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     const int kiTotalSpeakerParameters  = JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers;
     const float fNewValuePortion        = 1 - fOldValuesPortion;
     
-    
-    
-    
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
-        
-        
-        
         //skip all parameters but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
         if (iCurParamId >= kiTotalSourceParameters && iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
           ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
@@ -1566,25 +1563,20 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
           ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerUnused2)){
             continue;
         }
-            
-        
         
         //mSmoothedParameters contains the old parameter value, p_pfParamCopy contains the target value
         float currentParamValue = mSmoothedParameters[iCurParamId];
         float targetParamValue  = p_pfParamCopy[iCurParamId];
         
         
-//        if (iCurParamId == getParamForSourceX(0) ){
-//            cout << "x source 0 " << currentParamValue << "\n";
-//            
-//            if (targetParamValue > currentParamValue){
-//                int i = 3;
-//                ++i;
-//            }
-//        }
-        
-        
-        
+        if (iCurParamId == getParamForSourceX(0) ){
+            cout << "x source 0 " << currentParamValue << "\n";
+            
+            if (targetParamValue > currentParamValue){
+                int i = 3;
+                ++i;
+            }
+        }
         
 //        JUCE_COMPILER_WARNING("#124: this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
 //        if (!areSame(currentParamValue, targetParamValue)){
@@ -1613,7 +1605,6 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy) {
     
-
     // clear outputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
         float *output = p_ppfOutputs[iCurOutput];
@@ -1627,9 +1618,10 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
     
     
     
-    
     //------------------------------- DISTRIBUTE PARAMETER CHANGE OVER SAMPLES IN THE BUFFER ------------------------------------------
-    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * m_dSampleRate));
+    //kSmooth is in ms. when multiplied by sampling rate (samples/s), fSmoothingSamples is a number of samples over which we will smooth. it is only an approximation since the curve is exponential
+    float fSmoothingSamples = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * m_dSampleRate;
+    const float fOldValuesPortion = powf(0.01f, 1000.f / fSmoothingSamples);
     createParameterRamps(p_pfParamCopy, fOldValuesPortion);
     
     
