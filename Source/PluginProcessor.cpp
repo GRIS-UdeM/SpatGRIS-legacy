@@ -1569,8 +1569,6 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
         float targetParamValue  = p_pfParamCopy[iCurParamId];
         
         for (unsigned int iCurSampleId = 0; iCurSampleId < m_iDawBufferSize; ++iCurSampleId) {
-
-            
 #if PROCESS_IN_CHUNK_SIZE
             currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
             mParameterRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
@@ -1583,7 +1581,6 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
             }
             mParameterRamps[iCurParamId][iCurSampleId] = currentParamValue;
 #endif
-            
         }
         mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
     }
@@ -1605,8 +1602,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
     vector<bool> vSpeakersCurrentlyInUse;
     
     
-    
-    
     //------------------------------- DISTRIBUTE PARAMETER CHANGE OVER SAMPLES IN THE BUFFER ------------------------------------------
     //kSmooth is in ms. when multiplied by sampling rate (samples/s), fSmoothingSamples is a number of samples over which we will smooth. it is only an approximation since the curve is exponential
     float fSmoothingSamples = denormalize(kSmoothMin, kSmoothMax, p_pfParamCopy[kSmooth]) * m_dSampleRate;
@@ -1614,14 +1609,8 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
     createParameterRamps(p_pfParamCopy, fOldValuesPortion);
     
     
-    
-    
-    
-    
-    
 	//------------------------------- FOR EACH SOUND SOURCE ------------------------------------------
 	for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
-		float *allSamplesCurSource = p_ppfInputs[iCurSource];
         
 #if PROCESS_IN_CHUNK_SIZE
         //for each source, we have 256 (kChunkSize) values for x and y. mParameterRamps was updated a few lines above using pSmoothedParametersRamps
@@ -1631,24 +1620,21 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
         float *xCurSource = mParameterRamps[getParamForSourceX(iCurSource)].data();
         float *yCurSource = mParameterRamps[getParamForSourceY(iCurSource)].data();
 #endif
-        
-        
-        
-        
+
 #if !BUFFER_PROCESS_DATA
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
 		for (unsigned int iSampleId = 0; iSampleId < m_iDawBufferSize; ++iSampleId) {
 #endif
-            #if TIME_PROCESS
+#if TIME_PROCESS
             Time timeBeginSample = Time::getCurrentTime();
-            #endif
+#endif
 
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
             
             //figure out current sample value and its Ray and Theta coordinates
 #if !BUFFER_PROCESS_DATA
-            float fCurSampleValue   = allSamplesCurSource[iSampleId];   //current sample
+            float fCurSampleValue    = p_ppfInputs[iCurSource][iSampleId];   //current sample
             float fCurSampleX        = xCurSource[iSampleId];           //x position of current sample
             float fCurSampleY        = yCurSource[iSampleId];           //y position of current sample
 #else
@@ -1656,11 +1642,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			float fCurSampleY        = yCurSource[0];                   //y position of current sample
 #endif
 			float fCurSampleR = hypotf(fCurSampleX, fCurSampleY);
-            
-//            if (iCurSource == 0){
-//                cout << fCurSampleR << "\t" << fCurSampleX << "\t" << fCurSampleY << "\n";
-//            }
-            
             if (fCurSampleR > kRadiusMax) {
                 fCurSampleR = kRadiusMax;
             }
@@ -1669,9 +1650,9 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 fCurSampleT += kThetaMax;
             }
             
-            #if TIME_PROCESS
+#if TIME_PROCESS
             Time timeInit = Time::getCurrentTime();
-            #endif
+#endif
 
 #if !BUFFER_PROCESS_DATA
             //apply filter to fCurSampleValue if needed
@@ -1686,12 +1667,12 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			}
 #endif
             
-            #if TIME_PROCESS
+#if TIME_PROCESS
             Time timeFilter = Time::getCurrentTime();
-            #endif
+#endif
 #if !BUFFER_PROCESS_DATA
-			// adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
-			float dbSource;
+            // adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
+            float dbSource;
             if (fCurSampleR >= 1) {
                 dbSource = denormalize(p_pfParamCopy[kVolumeMid], p_pfParamCopy[kVolumeFar], (fCurSampleR - 1));
             } else {
@@ -1699,15 +1680,15 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             }
             fCurSampleValue *= dbToLinear(dbSource);
 #endif
-            #if TIME_PROCESS
+#if TIME_PROCESS
             Time timeVolume = Time::getCurrentTime();
-            #endif
-
+#endif
+            
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
             
-            #if TIME_PROCESS
+#if TIME_PROCESS
             Time timeSpatial = Time::getCurrentTime();
-            #endif
+#endif
             
 #if FIX_116
             JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
@@ -1720,7 +1701,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 #if !BUFFER_PROCESS_DATA
             addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
 #else
-            addBufferToOutputs(iCurSource, allSamplesCurSource, p_ppfOutputs, p_iTotalSamples);
+            addBufferToOutputs(iCurSource, p_ppfInputs[iCurSource], p_ppfOutputs, p_iTotalSamples);
 #endif
 #if TIME_PROCESS
             Time timeOutput = Time::getCurrentTime();
