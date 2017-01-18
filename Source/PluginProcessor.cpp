@@ -1143,12 +1143,8 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, M
 }
 
 void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuffer& midiMessages) {
-#if TIME_PROCESS
+#if TIME_PROCESS || TIME_PROCESS_LIKE_OCTOGRIS
     Time beginTime = Time::getCurrentTime();
-#endif
-
-#if TIME_PROCESS_LIKE_OCTOGRIS
-    Time beginTimeOcto = Time::getCurrentTime();
 #endif
     
     //==================================== CHECK SOME STUFF ===========================================
@@ -1405,19 +1401,15 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         cout << "=====================================================\n";
         
         for (int i = 0; i < kTimeSlots; ++i){
-//            cout << "time " << i << ": " << mAvgTime[i] << "\t";
             mAvgTime[i] = 0;
         }
-//        cout << newLine;
-        
-        
     }
 #endif
         
 #if TIME_PROCESS_LIKE_OCTOGRIS
         Time endTime = Time::getCurrentTime();
         int n = 50;
-        mAvgTimeLikeOcto += (endTime - beginTimeOcto).inMilliseconds()/(float)n;
+        mAvgTimeLikeOcto += (endTime - beginTime).inMilliseconds()/(float)n;
         if (mProcessCounter % n == 0){
             cout << "SPATgris processblock total: " << mAvgTimeLikeOcto << newLine;
             mAvgTimeLikeOcto = 0;
