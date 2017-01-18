@@ -949,7 +949,10 @@ doesn't. Preventing the use of 4 speakers when we only have 2 fixes the problem!
 #124: small position wobble when not ramping when parameters are "equal". 
     * turned that off
 
-
+----------------- 2017-01-18 ----------------
+done with reformatting whole process data algorithm. also printing detailed timing tests
+in octogris. need to compare the two more closely, but it seems everything is slower in
+spatgris, potentially because something else (like Gui?) is taking cpu time... very unclear.
 
 
 
