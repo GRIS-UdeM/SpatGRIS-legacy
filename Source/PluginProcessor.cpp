@@ -1387,7 +1387,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     mAvgTime[9] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
 
-        
+        cout << "SPATgris\n";
         cout << "trajectories:  " << mAvgTime[0] << "\n";
         cout << "paramCopy:     " << mAvgTime[1] << "\n";
         cout << "prepareSrcSpk: " << mAvgTime[2] << "\n";
