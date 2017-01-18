@@ -1182,7 +1182,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         return;
     }
 	
-    //==================================== PREPARE PARAMCOPY ===========================================
+    //==================================== COPY ALL PARAMETERS INTO PARAMCOPY ===========================================
 	// copy mParameters into paramCopy, because we will transform those
 	float paramCopy[kNumberOfParameters];
     memcpy (paramCopy, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
