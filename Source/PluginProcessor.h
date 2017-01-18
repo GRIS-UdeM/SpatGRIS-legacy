@@ -50,6 +50,10 @@ using namespace std;
 #define TIME_PROCESS 0
 #endif
 
+#ifndef TIME_PROCESS_LIKE_OCTOGRIS
+#define TIME_PROCESS_LIKE_OCTOGRIS 1
+#endif
+
 #ifndef FIX_116
 #define FIX_116 0
 #endif
@@ -57,8 +61,6 @@ using namespace std;
 #ifndef USE_ACTIVE_SPEAKERS
 #define USE_ACTIVE_SPEAKERS 0
 #endif
-
-
 
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
@@ -878,6 +880,11 @@ private:
     float mAvgTime [kTimeSlots] = {0};
 #endif
     
+#if TIME_PROCESS_LIKE_OCTOGRIS
+    float mAvgTimeLikeOcto = 0;
+#endif
+    
+    
     float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocD[JucePlugin_MaxNumInputChannels];
@@ -945,7 +952,7 @@ private:
     
 #if TIME_PROCESS
     
-    float timeAvgInit       = 0.f;
+    float timeAvgParamRamp  = 0.f;
     float timeAvgFilter     = 0.f;
     float timeAvgVolume     = 0.f;
     float timeAvgSpatial    = 0.f;

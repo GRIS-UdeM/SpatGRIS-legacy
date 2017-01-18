@@ -1146,6 +1146,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #if TIME_PROCESS
     Time beginTime = Time::getCurrentTime();
 #endif
+
+#if TIME_PROCESS_LIKE_OCTOGRIS
+    Time beginTimeOcto = Time::getCurrentTime();
+#endif
     
     //==================================== CHECK SOME STUFF ===========================================
 	// sanity check for auval
@@ -1206,7 +1210,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 	}
     
 #if TIME_PROCESS
-    Time time2ParamProcess = Time::getCurrentTime();
+    Time time2ParamCopy = Time::getCurrentTime();
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
@@ -1366,19 +1370,19 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 
 #if TIME_PROCESS
     Time time5DbMeters = Time::getCurrentTime();
-    int n = 50;
+    int n = 250;
     mAvgTime[0] += (time1Trajectories     - beginTime).inMilliseconds()/(float)n;
-    mAvgTime[1] += (time2ParamProcess     - time1Trajectories).inMilliseconds()/(float)n;
-    mAvgTime[2] += (time3SourceSpeakers   - time2ParamProcess).inMilliseconds()/(float)n;
+    mAvgTime[1] += (time2ParamCopy        - time1Trajectories).inMilliseconds()/(float)n;
+    mAvgTime[2] += (time3SourceSpeakers   - time2ParamCopy).inMilliseconds()/(float)n;
     mAvgTime[3] += (time4ProcessData      - time3SourceSpeakers).inMilliseconds()/(float)n;
     
     //from processData
-    mAvgTime[4] += timeAvgInit/(float)n;
+    mAvgTime[4] += timeAvgParamRamp/(float)n;
     mAvgTime[5] += timeAvgFilter/(float)n;
     mAvgTime[6] += timeAvgVolume/(float)n;
     mAvgTime[7] += timeAvgSpatial/(float)n;
     mAvgTime[8] += timeAvgOutputs/(float)n;
-    timeAvgInit     = 0.f;
+    timeAvgParamRamp     = 0.f;
     timeAvgFilter   = 0.f;
     timeAvgVolume   = 0.f;
     timeAvgSpatial  = 0.f;
@@ -1386,13 +1390,38 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     
     mAvgTime[9] += (time5DbMeters         - time4ProcessData).inMilliseconds()/(float)n;
     if (mProcessCounter % n == 0){
-//        for (int i = 3; i < kTimeSlots; ++i){
-        for (int i = 2; i < 3; ++i){
-            cout << "time " << i << ": " << mAvgTime[i] << "\t";
+
+        
+        cout << "trajectories:  " << mAvgTime[0] << "\n";
+        cout << "paramCopy:     " << mAvgTime[1] << "\n";
+        cout << "prepareSrcSpk: " << mAvgTime[2] << "\n";
+        cout << "totProcesData: " << mAvgTime[3] << "\n";
+        cout << "AvgParamRamp:  " << mAvgTime[4] << "\n";
+        cout << "AvgFilter:     " << mAvgTime[5] << "\n";
+        cout << "AvgVolume:     " << mAvgTime[6] << "\n";
+        cout << "AvgSpatial:    " << mAvgTime[7] << "\n";
+        cout << "AvgAddOutputs: " << mAvgTime[8] << "\n";
+        cout << "DbMeters:      " << mAvgTime[9] << "\n";
+        cout << "=====================================================\n";
+        
+        for (int i = 0; i < kTimeSlots; ++i){
+//            cout << "time " << i << ": " << mAvgTime[i] << "\t";
             mAvgTime[i] = 0;
         }
-        cout << newLine;
+//        cout << newLine;
+        
+        
     }
+#endif
+        
+#if TIME_PROCESS_LIKE_OCTOGRIS
+        Time endTime = Time::getCurrentTime();
+        int n = 50;
+        mAvgTimeLikeOcto += (endTime - beginTimeOcto).inMilliseconds()/(float)n;
+        if (mProcessCounter % n == 0){
+            cout << "SPATgris processblock total: " << mAvgTimeLikeOcto << newLine;
+            mAvgTimeLikeOcto = 0;
+        }
 #endif
 
 }
@@ -1651,7 +1680,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             }
             
 #if TIME_PROCESS
-            Time timeInit = Time::getCurrentTime();
+            Time timeParameterRamps = Time::getCurrentTime();
 #endif
 
 #if !BUFFER_PROCESS_DATA
@@ -1705,11 +1734,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 #endif
 #if TIME_PROCESS
             Time timeOutput = Time::getCurrentTime();
-            timeAvgInit     += 1000*(timeInit    - timeBeginSample).inMilliseconds()/(float)m_iDawBufferSize;
-            timeAvgFilter   += 1000*(timeFilter  - timeInit).       inMilliseconds()/(float)m_iDawBufferSize;
-            timeAvgVolume   += 1000*(timeVolume  - timeFilter).     inMilliseconds()/(float)m_iDawBufferSize;
-            timeAvgSpatial  += 1000*(timeSpatial - timeVolume).     inMilliseconds()/(float)m_iDawBufferSize;
-            timeAvgOutputs  += 1000*(timeOutput  - timeSpatial).    inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgParamRamp+= 1000*(timeParameterRamps - timeBeginSample).     inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgFilter   += 1000*(timeFilter         - timeParameterRamps).  inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgVolume   += 1000*(timeVolume         - timeFilter).          inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgSpatial  += 1000*(timeSpatial        - timeVolume).          inMilliseconds()/(float)m_iDawBufferSize;
+            timeAvgOutputs  += 1000*(timeOutput         - timeSpatial).         inMilliseconds()/(float)m_iDawBufferSize;
 #endif
 #if !BUFFER_PROCESS_DATA
 		}
