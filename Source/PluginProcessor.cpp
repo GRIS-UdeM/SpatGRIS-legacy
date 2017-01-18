@@ -1534,7 +1534,7 @@ void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *
         
 #if PROCESS_IN_CHUNK_SIZE
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(o)).b;
-        float m = 1 - output_m[f];
+        float m = 1 - output_m[0];
 #else
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][0];
 #endif
@@ -1568,35 +1568,24 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
         float currentParamValue = mSmoothedParameters[iCurParamId];
         float targetParamValue  = p_pfParamCopy[iCurParamId];
         
-        
-        if (iCurParamId == getParamForSourceX(0) ){
-            cout << "x source 0 " << currentParamValue << "\n";
+        for (unsigned int iCurSampleId = 0; iCurSampleId < m_iDawBufferSize; ++iCurSampleId) {
+
             
-            if (targetParamValue > currentParamValue){
-                int i = 3;
-                ++i;
-            }
-        }
-        
-//        JUCE_COMPILER_WARNING("#124: this areSame may be more efficient, but induces a small position wobble. Check if worth it and or if we can fix the wobble.")
-//        if (!areSame(currentParamValue, targetParamValue)){
-            for (unsigned int iCurSampleId = 0; iCurSampleId < m_iDawBufferSize; ++iCurSampleId) {
-                //mParameterRamps contains an asymptotic interpolation between the current and target values, ramped over all m_iDawBufferSize values
-                currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
-                
 #if PROCESS_IN_CHUNK_SIZE
-                mParameterRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
+            currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+            mParameterRamps.getReference(iCurParamId).b[iCurSampleId] = currentParamValue;
 #else
-                mParameterRamps[iCurParamId][iCurSampleId] = currentParamValue;
-#endif
-                
+            //mParameterRamps contains an asymptotic interpolation between the current and target values, ramped over all m_iDawBufferSize values
+            if (!areSame(currentParamValue, targetParamValue)){
+                currentParamValue = currentParamValue * fOldValuesPortion + targetParamValue * fNewValuePortion;
+            } else {
+                currentParamValue = targetParamValue;
             }
-            mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
-//        } else {
-//            memset(mParameterRamps.getReference(iCurParamId).b, currentParamValue, kChunkSize * sizeof(float));
-//        }
-    
-        
+            mParameterRamps[iCurParamId][iCurSampleId] = currentParamValue;
+#endif
+            
+        }
+        mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
     }
 }
     
