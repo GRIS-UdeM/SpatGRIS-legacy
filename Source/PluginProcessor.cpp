@@ -1143,7 +1143,7 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, M
 }
 
 void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuffer& midiMessages) {
-#if TIME_PROCESS || TIME_PROCESS_LIKE_OCTOGRIS
+#if TIME_PROCESS_DETAILED || TIME_PROCESS_TOTAL
     Time beginTime = Time::getCurrentTime();
 #endif
     
@@ -1173,7 +1173,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     //==================================== PROCESS TRAJECTORIES ===========================================
     processTrajectory();
 
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
     Time time1Trajectories = Time::getCurrentTime();
 #endif
     
@@ -1205,7 +1205,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
     
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
     Time time2ParamCopy = Time::getCurrentTime();
 #endif
     
@@ -1255,7 +1255,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     }
     
 
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
     Time time3SourceSpeakers = Time::getCurrentTime();
 #endif
     
@@ -1296,7 +1296,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     
     
     
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
     Time time4ProcessData = Time::getCurrentTime();
 #endif
     
@@ -1364,7 +1364,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     //this is only used for the level components, ie the db meters
 	mProcessCounter++;
 
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
     Time time5DbMeters = Time::getCurrentTime();
     int n = 250;
     mAvgTime[0] += (time1Trajectories     - beginTime).inMilliseconds()/(float)n;
@@ -1406,13 +1406,13 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     }
 #endif
         
-#if TIME_PROCESS_LIKE_OCTOGRIS
+#if TIME_PROCESS_TOTAL
         Time endTime = Time::getCurrentTime();
         int n = 50;
-        mAvgTimeLikeOcto += (endTime - beginTime).inMilliseconds()/(float)n;
+        mAvgTimeTotal += (endTime - beginTime).inMilliseconds()/(float)n;
         if (mProcessCounter % n == 0){
-            cout << "SPATgris processblock total: " << mAvgTimeLikeOcto << newLine;
-            mAvgTimeLikeOcto = 0;
+            cout << "SPATgris processblock total: " << mAvgTimeTotal << newLine;
+            mAvgTimeTotal = 0;
         }
 #endif
 
@@ -1646,7 +1646,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
 		for (unsigned int iSampleId = 0; iSampleId < m_iDawBufferSize; ++iSampleId) {
 #endif
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
             Time timeBeginSample = Time::getCurrentTime();
 #endif
 
@@ -1671,7 +1671,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
                 fCurSampleT += kThetaMax;
             }
             
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
             Time timeParameterRamps = Time::getCurrentTime();
 #endif
 
@@ -1688,7 +1688,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 			}
 #endif
             
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
             Time timeFilter = Time::getCurrentTime();
 #endif
 #if !BUFFER_PROCESS_DATA
@@ -1701,13 +1701,13 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             }
             fCurSampleValue *= dbToLinear(dbSource);
 #endif
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
             Time timeVolume = Time::getCurrentTime();
 #endif
             
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
             
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
             Time timeSpatial = Time::getCurrentTime();
 #endif
             
@@ -1724,7 +1724,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 #else
             addBufferToOutputs(iCurSource, p_ppfInputs[iCurSource], p_ppfOutputs, p_iTotalSamples);
 #endif
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
             Time timeOutput = Time::getCurrentTime();
             timeAvgParamRamp+= 1000*(timeParameterRamps - timeBeginSample).     inMilliseconds()/(float)m_iDawBufferSize;
             timeAvgFilter   += 1000*(timeFilter         - timeParameterRamps).  inMilliseconds()/(float)m_iDawBufferSize;

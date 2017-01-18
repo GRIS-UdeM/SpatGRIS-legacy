@@ -46,12 +46,12 @@ using namespace std;
 #define BUFFER_PROCESS_DATA 0
 #endif
 
-#ifndef TIME_PROCESS
-#define TIME_PROCESS 0
+#ifndef TIME_PROCESS_DETAILED
+#define TIME_PROCESS_DETAILED 1
 #endif
 
-#ifndef TIME_PROCESS_LIKE_OCTOGRIS
-#define TIME_PROCESS_LIKE_OCTOGRIS 1
+#ifndef TIME_PROCESS_TOTAL
+#define TIME_PROCESS_TOTAL 0
 #endif
 
 #ifndef FIX_116
@@ -875,13 +875,18 @@ private:
 #endif
 
     
-#if TIME_PROCESS
+#if TIME_PROCESS_DETAILED
 #define kTimeSlots (10)
     float mAvgTime [kTimeSlots] = {0};
+    float timeAvgParamRamp  = 0.f;
+    float timeAvgFilter     = 0.f;
+    float timeAvgVolume     = 0.f;
+    float timeAvgSpatial    = 0.f;
+    float timeAvgOutputs    = 0.f;
 #endif
     
-#if TIME_PROCESS_LIKE_OCTOGRIS
-    float mAvgTimeLikeOcto = 0;
+#if TIME_PROCESS_TOTAL
+    float mAvgTimeTotal = 0;
 #endif
     
     
@@ -950,16 +955,6 @@ private:
 //    float previouslyLoudestVolume = -1.f;
 //    int loudestSpeaker = -1;
     
-#if TIME_PROCESS
-    
-    float timeAvgParamRamp  = 0.f;
-    float timeAvgFilter     = 0.f;
-    float timeAvgVolume     = 0.f;
-    float timeAvgSpatial    = 0.f;
-    float timeAvgOutputs    = 0.f;
-    
-    
-#endif
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
