@@ -1507,29 +1507,33 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
 #if USE_ACTIVE_SPEAKERS
-    for (auto curActiveSpeakerId : mActiveSpeakers) {
+    for (auto &curActiveSpeakerId : mActiveSpeakers) {
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(curActiveSpeakerId)).b;
         float m = 1 - output_m[f];
         outputs[curActiveSpeakerId][f] += sample * mSpeakerVolumes[source][curActiveSpeakerId] * m;
-       
-        //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
         
+        //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
+            
     }
 #else
-    
-    for (int o = 0; o < mNumberOfSpeakers; ++o) {
+
 #if PROCESS_IN_CHUNK_SIZE
+    for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(o)).b;
         float m = 1 - output_m[f];
-#else
-        float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
-#endif
         outputs[o][f] += sample * mSpeakerVolumes[source][o] * m;
-
-//        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
+    }
+#else
+    const Array<float> &volumes = mSpeakerVolumes[source];
+    for (int o = 0; o < mNumberOfSpeakers; ++o) {
+        float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
+        outputs[o][f] += sample * volumes[o] * m;
     }
 #endif
+#endif
 }
+
+    
     
 void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
