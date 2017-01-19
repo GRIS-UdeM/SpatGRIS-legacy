@@ -50,10 +50,6 @@ using namespace std;
 #define TIME_PROCESS_DETAILED 1
 #endif
 
-#ifndef TIME_PROCESS_TOTAL
-#define TIME_PROCESS_TOTAL 0
-#endif
-
 #ifndef FIX_116
 #define FIX_116 0
 #endif
@@ -884,11 +880,6 @@ private:
     float timeAvgSpatial    = 0.f;
     float timeAvgOutputs    = 0.f;
 #endif
-    
-#if TIME_PROCESS_TOTAL
-    float mAvgTimeTotal = 0;
-#endif
-    
     
     float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
