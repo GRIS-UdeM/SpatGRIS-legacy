@@ -956,3 +956,10 @@ spatgris, potentially because something else (like Gui?) is taking cpu time... v
 
 
 
+----------------- 2017-01-23 --------------------
+in processBlock
+inputs[numSources], outputs[numSpeakers] and inputsCopy[numSources] are vector<float*>
+
+mParameterRamps[] and mInputsCopy[] are vector<vector<float>>
+
+
