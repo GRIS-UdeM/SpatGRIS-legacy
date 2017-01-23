@@ -845,7 +845,9 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         mFilters.clear();
 
         mFilters.resize(mNumberOfSources);
+#if USE_VECTORS
         mInputsCopy.resize(mNumberOfSources);
+#endif
         m_pMover->updateNumberOfSources();
         
         if (bUseDefaultValues){
@@ -1136,9 +1138,9 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 #endif
     
 #if !USE_VECTORS
-    mInputsCopy = new [mNumberOfSources];
+    mInputsCopy = new float* [mNumberOfSources];
     for (int i = 0; i < mNumberOfSources; ++i){
-        mInputsCopy[i] = new [samplesPerBlock];
+        mInputsCopy[i] = new float[samplesPerBlock];
     }
 #endif
     
@@ -1236,7 +1238,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #if USE_VECTORS
     vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
 #else
-    float* inputs[mNumberOfSources], outputs[mNumberOfSpeakers], inputsCopy[mNumberOfSources];
+    float* inputs[mNumberOfSources], *outputs[mNumberOfSpeakers], *inputsCopy[mNumberOfSources];
 #endif
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
@@ -1447,8 +1449,11 @@ void SpatGrisAudioProcessor::processTrajectory(){
         }
     }
 }
-
+#if USE_VECTORS
 void SpatGrisAudioProcessor::ProcessData(const vector<float*> &inputs, vector<float*> &outputs, float *params) {
+#else 
+    void SpatGrisAudioProcessor::ProcessData(const float** &inputs, vector<float*> &outputs, float *params) {
+#endif
 	switch(mProcessMode) {
 		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params);	break;
 		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params);	break;

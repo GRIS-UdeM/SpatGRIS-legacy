@@ -867,8 +867,9 @@ private:
 
 #endif
     
-#if USE_VECTORS
     vector<vector<float>> mParameterRamps;
+    
+#if USE_VECTORS
     vector<vector<float>> mInputsCopy;
 #else
     float ** mInputsCopy;
@@ -907,11 +908,17 @@ private:
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
-	
+#if USE_VECTORS
     void ProcessData                (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-	void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-	void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-	void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params);
+    void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params);
+    void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params);
+    void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params);
+#else
+    void ProcessData                (const float** &inputs, float** &outputs, float *params);
+    void ProcessDataFreeVolumeMode  (const float** &inputs, float** &outputs, float *params);
+    void ProcessDataPanVolumeMode   (const float** &inputs, float** &outputs, float *params);
+    void ProcessDataPanSpanMode     (const float** &inputs, float** &outputs, float *params);
+#endif
     void processTrajectory();
     
     
