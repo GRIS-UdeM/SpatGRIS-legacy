@@ -38,6 +38,11 @@ using namespace std;
 #define USE_DB_METERS 1
 #endif
 
+#ifndef USE_VECTORS
+#define USE_VECTORS 1
+#endif
+
+
 #ifndef PROCESS_IN_CHUNK_SIZE
 #define PROCESS_IN_CHUNK_SIZE 0
 #endif
@@ -855,18 +860,19 @@ private:
     bool bThetasPrinted = false;
     
 #if PROCESS_IN_CHUNK_SIZE
-
-    JUCE_COMPILER_WARNING("re #116: does the size of kChunkSize change anything?")
-//	#define kChunkSize (256)
-    #define kChunkSize (1024)
+    
+    #define kChunkSize (256)
 	struct IOBuf { float b[kChunkSize]; };
 	Array<IOBuf> mParameterRamps;
 	Array<IOBuf> mInputsCopy;
 
 #else
-    
-    vector<vector<float>> mParameterRamps;
-    vector<vector<float>> mInputsCopy;
+    #if USE_VECTORS
+        vector<vector<float>> mParameterRamps;
+        vector<vector<float>> mInputsCopy;
+    #else
+        float ** mInputs, mOutputs, mInputsCopy;
+    #endif
 
 #endif
 
@@ -941,6 +947,8 @@ private:
 #if USE_ACTIVE_SPEAKERS
     vector<int> mActiveSpeakers;
 #endif
+    
+
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;

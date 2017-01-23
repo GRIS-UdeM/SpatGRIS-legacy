@@ -1074,6 +1074,25 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 {
 }
 
+void SpatGrisAudioProcessor::reset() {
+#if USE_DB_METERS
+    if (mCalculateLevels){
+        for (int i = 0; i < mNumberOfSpeakers; i++){
+            mLevels.setUnchecked(i, 0);
+        }
+    }
+#endif
+    
+    for (int i = 0; i < mNumberOfSources; ++i) {
+        mFilters[i].reset();
+        for (int j = 0; j < mNumberOfSpeakers; ++j){
+            mSpeakerVolumes.getReference(i).set(j, 0);
+        }
+    }
+    
+    Router::instance().reset();
+}
+
 //==============================================================================
 void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     m_dSampleRate    = sampleRate;
@@ -1100,7 +1119,16 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     for (int i = 0; i < mNumberOfSources; i++) {
         mFilters[i].setSampleRate(static_cast<int>(m_dSampleRate));
     }
+
+#if TIME_PROCESS_DETAILED
+    cout << "SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters\n";
+#endif
     
+    
+    
+    
+    
+    //---------- INIT MEMORY STUFF -------
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
     mParameterRamps.resize(kNumberOfParameters);
     
@@ -1110,30 +1138,15 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
 #endif
     
-#if TIME_PROCESS_DETAILED
-    cout << "SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters\n";
+#if !USE_VECTORS
+    mInputs     = new [mNumberOfSources];
+    mOutputs    = new [mNumberOfSpeakers];
+    mInputsCopy = new [mNumberOfSources];
 #endif
+    
     
 }
 
-void SpatGrisAudioProcessor::reset() {
-#if USE_DB_METERS
-    if (mCalculateLevels){
-        for (int i = 0; i < mNumberOfSpeakers; i++){
-            mLevels.setUnchecked(i, 0);
-        }
-    }
-#endif
-    
-    for (int i = 0; i < mNumberOfSources; ++i) {
-        mFilters[i].reset();
-        for (int j = 0; j < mNumberOfSpeakers; ++j){
-            mSpeakerVolumes.getReference(i).set(j, 0);
-        }
-    }
-    
-    Router::instance().reset();
-}
 
 void SpatGrisAudioProcessor::releaseResources()
 {
@@ -1214,7 +1227,10 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
+#if USE_VECTORS
     vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
+#endif
+    
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
