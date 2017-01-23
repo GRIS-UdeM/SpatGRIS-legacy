@@ -39,9 +39,8 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 1
+#define USE_VECTORS 0
 #endif
-
 
 #ifndef PROCESS_IN_CHUNK_SIZE
 #define PROCESS_IN_CHUNK_SIZE 0
@@ -866,16 +865,16 @@ private:
 	Array<IOBuf> mParameterRamps;
 	Array<IOBuf> mInputsCopy;
 
-#else
-    #if USE_VECTORS
-        vector<vector<float>> mParameterRamps;
-        vector<vector<float>> mInputsCopy;
-    #else
-        float ** mInputs, mOutputs, mInputsCopy;
-    #endif
-
 #endif
-
+    
+#if USE_VECTORS
+    vector<vector<float>> mParameterRamps;
+    vector<vector<float>> mInputsCopy;
+#else
+    float ** mInputsCopy;
+#endif
+    
+    
     
 #if TIME_PROCESS_DETAILED
 #define kTimeSlots (10)

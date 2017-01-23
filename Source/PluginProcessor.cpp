@@ -1125,9 +1125,6 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 #endif
     
     
-    
-    
-    
     //---------- INIT MEMORY STUFF -------
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
     mParameterRamps.resize(kNumberOfParameters);
@@ -1139,9 +1136,10 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 #endif
     
 #if !USE_VECTORS
-    mInputs     = new [mNumberOfSources];
-    mOutputs    = new [mNumberOfSpeakers];
     mInputsCopy = new [mNumberOfSources];
+    for (int i = 0; i < mNumberOfSources; ++i){
+        mInputsCopy[i] = new [samplesPerBlock];
+    }
 #endif
     
     
@@ -1153,6 +1151,14 @@ void SpatGrisAudioProcessor::releaseResources()
 #if !PROCESS_IN_CHUNK_SIZE
     mParameterRamps.clear();
 #endif
+    
+#if !USE_VECTORS
+    for (int i = 0; i < mNumberOfSources; ++i){
+        delete[] mInputsCopy[i];
+    }
+    delete[] mInputsCopy;
+#endif
+    
 }
 
 void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages)
@@ -1229,6 +1235,8 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
 #if USE_VECTORS
     vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
+#else
+    float* inputs[mNumberOfSources], outputs[mNumberOfSpeakers], inputsCopy[mNumberOfSources];
 #endif
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
@@ -1238,17 +1246,22 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             
             //if not in kInternalWrite, copy actual data in inputsCopy
             if (mRoutingMode != kInternalWrite) {
-#if PROCESS_IN_CHUNK_SIZE
-                JUCE_COMPILER_WARNING("mInputsCopy[].b does not necessarily have room for m_iDawBufferSize. It only has kChunkSize floats. ")
-                memcpy(mInputsCopy.getReference(iCurChannel).b, inputs[iCurChannel], m_iDawBufferSize * sizeof(float));
-                inputsCopy[iCurChannel] = mInputsCopy.getReference(iCurChannel).b;
-#else
+#if USE_VECTORS
                 //copy input data for each iCurChannel into a new vector of floats
                 vector<float> curChannelData(inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
                 //move this data into the member variable mIntputsCopy, so that it is not destroyed at the end of this block
                 mInputsCopy[iCurChannel] = move(curChannelData);
-                JUCE_COMPILER_WARNING("have inputsCopy point to the member variable. if we keep this code, we should replace inputsCopy by mInputsCopy completely")
                 inputsCopy[iCurChannel]  = mInputsCopy[iCurChannel].data();
+#else 
+    #if PROCESS_IN_CHUNK_SIZE
+                JUCE_COMPILER_WARNING("mInputsCopy[].b does not necessarily have room for m_iDawBufferSize. It only has kChunkSize floats. ")
+                memcpy(mInputsCopy.getReference(iCurChannel).b, inputs[iCurChannel], m_iDawBufferSize * sizeof(float));
+                inputsCopy[iCurChannel] = mInputsCopy.getReference(iCurChannel).b;
+    #else
+                memcpy(mInputsCopy, inputs[iCurChannel], m_iDawBufferSize * sizeof(float));
+                inputsCopy[iCurChannel] = mInputsCopy[iCurChannel];
+
+    #endif
 #endif
             }
             //denormalize source position
