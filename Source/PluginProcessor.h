@@ -51,7 +51,7 @@ using namespace std;
 #endif
 
 #ifndef TIME_PROCESS_DETAILED
-#define TIME_PROCESS_DETAILED 1
+#define TIME_PROCESS_DETAILED 0
 #endif
 
 #ifndef FIX_116
@@ -872,7 +872,13 @@ private:
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
 #else
-    float ** mInputsCopy;
+    
+    unique_ptr< unique_ptr<float[]>[] > inputs;
+    unique_ptr< unique_ptr<float[]>[] > outputs;
+    
+//    float** inputs;
+//    float** outputs;
+    
 #endif
     
     
@@ -904,7 +910,11 @@ private:
     
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize);
+#if USE_VECTORS
     void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
+#else
+    void addToOutputs(const int &source, const float &sample, float** &outputs, const int &f);
+#endif
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
@@ -914,10 +924,10 @@ private:
     void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params);
     void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params);
 #else
-    void ProcessData                (const float** &inputs, float** &outputs, float *params);
-    void ProcessDataFreeVolumeMode  (const float** &inputs, float** &outputs, float *params);
-    void ProcessDataPanVolumeMode   (const float** &inputs, float** &outputs, float *params);
-    void ProcessDataPanSpanMode     (const float** &inputs, float** &outputs, float *params);
+    void ProcessData                (float** &inputs, float** &outputs, float *params);
+    void ProcessDataFreeVolumeMode  (float** &inputs, float** &outputs, float *params);
+    void ProcessDataPanVolumeMode   (float** &inputs, float** &outputs, float *params);
+    void ProcessDataPanSpanMode     (float** &inputs, float** &outputs, float *params);
 #endif
     void processTrajectory();
     
@@ -954,7 +964,8 @@ private:
     vector<int> mActiveSpeakers;
 #endif
     
-
+    
+    bool bArraysAllocated;
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
