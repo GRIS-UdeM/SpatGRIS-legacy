@@ -1190,10 +1190,6 @@ void SpatGrisAudioProcessor::releaseResources() {
 //        delete[] outputs;
 //        bArraysAllocated = false;
 //    }
-
-    
-    
-    
 #endif
     
 }
@@ -1272,8 +1268,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
 #if USE_VECTORS
     vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
-//#else
-//    float* inputs[mNumberOfSources], *outputs[mNumberOfSpeakers], *inputsCopy[mNumberOfSources];
 #endif
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
@@ -1318,12 +1312,14 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
         
         //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
 //        outputs[iCurChannel] = (mRoutingMode == kInternalWrite) ? mRoutingTempAudioBuffer.getWritePointer(iCurChannel) : pBuffer.getWritePointer(iCurChannel);
-        JUCE_COMPILER_WARNING("INTERNAL WRITE IS BROKEN")
-//        if (mRoutingMode == kInternalWrite){
-//            outputs[iCurChannel] = mRoutingTempAudioBuffer.getWritePointer(iCurChannel);
-//        } else {
-//            outputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
-//        }
+        JUCE_COMPILER_WARNING("INTERNAL WRITE IS BROKEN WHEN NOT USE_VECTORS")
+#if USE_VECTORS
+        if (mRoutingMode == kInternalWrite){
+            outputs[iCurChannel] = mRoutingTempAudioBuffer.getWritePointer(iCurChannel);
+        } else {
+            outputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+        }
+#endif
         
         
 
@@ -1436,7 +1432,11 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 		//for each speaker
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
             //get pointer to current spot in output buffer
-			float *output = outputs[o].get();
+#if USE_VECTORS
+			float *output = outputs[o];
+#else
+            float *output = outputs[o].get();
+#endif
 			float env = mLevels[o];
             
 			//for each frame that are left to process

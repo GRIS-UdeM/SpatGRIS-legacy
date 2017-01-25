@@ -876,9 +876,6 @@ private:
     unique_ptr< unique_ptr<float[]>[] > inputs;
     unique_ptr< unique_ptr<float[]>[] > outputs;
     
-//    float** inputs;
-//    float** outputs;
-    
 #endif
     
     
