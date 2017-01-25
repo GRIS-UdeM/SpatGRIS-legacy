@@ -913,7 +913,7 @@ private:
 #if USE_VECTORS
     void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
 #else
-    void addToOutputs(const int &source, const float &sample, float** &outputs, const int &f);
+    void addToOutputs(const int &source, const float &sample, const int &f);
 #endif
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
@@ -924,10 +924,10 @@ private:
     void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params);
     void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params);
 #else
-    void ProcessData                (float** &inputs, float** &outputs, float *params);
-    void ProcessDataFreeVolumeMode  (float** &inputs, float** &outputs, float *params);
-    void ProcessDataPanVolumeMode   (float** &inputs, float** &outputs, float *params);
-    void ProcessDataPanSpanMode     (float** &inputs, float** &outputs, float *params);
+    void ProcessData                (float *params);
+    void ProcessDataFreeVolumeMode  (float *params);
+    void ProcessDataPanVolumeMode   (float *params);
+    void ProcessDataPanSpanMode     (float *params);
 #endif
     void processTrajectory();
     
