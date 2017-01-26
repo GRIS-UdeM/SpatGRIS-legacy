@@ -1824,11 +1824,11 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             
 #if FIX_116
             JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
-            for (int o = 0; o < mNumberOfSpeakers; o++){
-                if (!vSpeakersCurrentlyInUse[o]){
-                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
-                }
-            }
+//            for (int o = 0; o < mNumberOfSpeakers; o++){
+//                if (!vSpeakersCurrentlyInUse[o]){
+//                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
+//                }
+//            }
 #endif
 #if !BUFFER_PROCESS_DATA
 #if USE_VECTORS

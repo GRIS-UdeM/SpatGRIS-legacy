@@ -965,5 +965,9 @@ mParameterRamps[] and mInputsCopy[] are vector<vector<float>>
 ----------------- 2017-01-26 --------------------
 Hexa. 
 
-Vector or not, same performance
-no need for fix 116 apparently
+no vector + no chunk: 10-17: NO SPATIAL, NEED TO FIX
+vector + no chunk: 13-18. Needs Fix 116 to not click. OR JUST INCREASE SMOOTHING LIMIT TO 500 OR WHATEVER
+    we don't appear to need vSpeakersCurrentlyInUse, ADD A MACRO FOR THAT 
+vector + chunk: weird problems. DELETE CHUNK CASE
+
+

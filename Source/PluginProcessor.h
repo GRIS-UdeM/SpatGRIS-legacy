@@ -43,7 +43,7 @@ using namespace std;
 #endif
 
 #ifndef PROCESS_IN_CHUNK_SIZE
-#define PROCESS_IN_CHUNK_SIZE 1
+#define PROCESS_IN_CHUNK_SIZE 0
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
@@ -195,7 +195,7 @@ static const float kSourceMaxDistance = 20 * 0.5;
 static const float kSourceDefaultDistance = 5 * 0.5;
 
 static const float kSmoothMin = 1;
-static const float kSmoothMax = 200;
+static const float kSmoothMax = 500;
 static const float kSmoothDefault = 50;
 
 static const float kVolumeNearMin = -10;
