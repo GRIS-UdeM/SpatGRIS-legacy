@@ -39,11 +39,11 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 0
+#define USE_VECTORS 1
 #endif
 
 #ifndef PROCESS_IN_CHUNK_SIZE
-#define PROCESS_IN_CHUNK_SIZE 0
+#define PROCESS_IN_CHUNK_SIZE 1
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
@@ -860,12 +860,12 @@ private:
     
 #if PROCESS_IN_CHUNK_SIZE
     
-    #define kChunkSize (256)
-	struct IOBuf { float b[kChunkSize]; };
-	Array<IOBuf> mParameterRamps;
-	Array<IOBuf> mInputsCopy;
-
-#endif
+#define kChunkSize (256)
+    struct IOBuf { float b[kChunkSize]; };
+    Array<IOBuf> mParameterRamps;
+    Array<IOBuf> mInputsCopy;
+    
+#else
     
     vector<vector<float>> mParameterRamps;
     
@@ -875,6 +875,8 @@ private:
     
     unique_ptr< unique_ptr<float[]>[] > inputs;
     unique_ptr< unique_ptr<float[]>[] > outputs;
+    
+#endif
     
 #endif
     

@@ -962,4 +962,8 @@ inputs[numSources], outputs[numSpeakers] and inputsCopy[numSources] are vector<f
 
 mParameterRamps[] and mInputsCopy[] are vector<vector<float>>
 
+----------------- 2017-01-26 --------------------
+Hexa. 
 
+Vector or not, same performance
+no need for fix 116 apparently
