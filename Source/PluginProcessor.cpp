@@ -1600,7 +1600,7 @@ void SpatGrisAudioProcessor::findLeftAndRightSpeakers(float p_fTargetAngle, floa
 }
 
 void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
-#if FIX_116
+#if OUTPUT_RAMPING
     mSpeakerVolumes.getReference(source).set(o, sm_o * mSpeakerVolumes[source][o] + (1-sm_o) * targetVolume);     // with exp. smoothing on volume
     if (p_pvSpeakersCurrentlyInUse){
         p_pvSpeakersCurrentlyInUse->at(o) = true;
@@ -1720,7 +1720,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
     }
     
     //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
-#if FIX_116
+#if OUTPUT_RAMPING
     vector<bool> vSpeakersCurrentlyInUse;
 #endif
     
@@ -1751,7 +1751,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             Time timeBeginSample = Time::getCurrentTime();
 #endif
 
-#if FIX_116
+#if OUTPUT_RAMPING
             //reset vSpeakersCurrentlyInUse
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
 #endif
@@ -1811,7 +1811,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 #if TIME_PROCESS_DETAILED
             Time timeVolume = Time::getCurrentTime();
 #endif
-#if FIX_116
+#if OUTPUT_RAMPING
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
 #else
             vector<bool> empty;
@@ -1822,7 +1822,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             Time timeSpatial = Time::getCurrentTime();
 #endif
             
-#if FIX_116
+#if OUTPUT_RAMPING
             JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
 //            for (int o = 0; o < mNumberOfSpeakers; o++){
 //                if (!vSpeakersCurrentlyInUse[o]){
@@ -1969,7 +1969,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
     
     vector<Area> areas;
     areas.resize(mNumberOfSpeakers * s_iMaxAreas);
-#if FIX_116
+#if OUTPUT_RAMPING
     vector<bool> vSpeakersCurrentlyInUse;
 #endif
 
@@ -2026,7 +2026,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
 #endif
         
         for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
-#if FIX_116
+#if OUTPUT_RAMPING
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
 #endif
             

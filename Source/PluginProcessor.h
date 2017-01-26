@@ -54,8 +54,8 @@ using namespace std;
 #define TIME_PROCESS_DETAILED 0
 #endif
 
-#ifndef FIX_116
-#define FIX_116 0
+#ifndef OUTPUT_RAMPING
+#define OUTPUT_RAMPING 0
 #endif
 
 #ifndef USE_ACTIVE_SPEAKERS
