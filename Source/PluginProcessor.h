@@ -42,10 +42,6 @@ using namespace std;
 #define USE_VECTORS 1
 #endif
 
-#ifndef PROCESS_IN_CHUNK_SIZE
-#define PROCESS_IN_CHUNK_SIZE 0
-#endif
-
 #ifndef BUFFER_PROCESS_DATA
 #define BUFFER_PROCESS_DATA 0
 #endif
@@ -858,15 +854,7 @@ private:
     
     bool bThetasPrinted = false;
     
-#if PROCESS_IN_CHUNK_SIZE
-    
-#define kChunkSize (256)
-    struct IOBuf { float b[kChunkSize]; };
-    Array<IOBuf> mParameterRamps;
-    Array<IOBuf> mInputsCopy;
-    
-#else
-    
+    JUCE_COMPILER_WARNING("mParameterRamps should probably NOT be a vector")
     vector<vector<float>> mParameterRamps;
     
 #if USE_VECTORS
@@ -878,7 +866,6 @@ private:
     
 #endif
     
-#endif
     
     
     
