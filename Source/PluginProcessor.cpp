@@ -1304,19 +1304,17 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     Time time3SourceSpeakers = Time::getCurrentTime();
 #endif
     
-#if USE_VECTORS
-    if (mRoutingMode == kInternalWrite) {
-        ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
-    } else {
-        ProcessData(inputsCopy, outputs, paramCopy);
-    }
-#else
-    if (mRoutingMode == kInternalWrite) {
-        ProcessData(paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
-    } else {
-        ProcessData(paramCopy);
-    }
-#endif
+//#if USE_VECTORS
+//    if (mRoutingMode == kInternalWrite) {
+//        ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
+//    } else {
+//        ProcessData(inputsCopy, outputs, paramCopy);
+//    }
+//#else
+    
+    ProcessData(paramCopy);
+    
+//#endif
     
     
     
@@ -1436,22 +1434,11 @@ void SpatGrisAudioProcessor::processTrajectory(){
         }
     }
 }
-#if USE_VECTORS
-void SpatGrisAudioProcessor::ProcessData(const vector<float*> &inputs, vector<float*> &outputs, float *params) {
-#else 
-    void SpatGrisAudioProcessor::ProcessData(float *params) {
-#endif
+void SpatGrisAudioProcessor::ProcessData(float *params) {
 	switch(mProcessMode) {
-#if USE_VECTORS
-		case kFreeVolumeMode:	ProcessDataFreeVolumeMode(inputs, outputs, params);	break;
-		case kPanVolumeMode:	ProcessDataPanVolumeMode (inputs, outputs, params);	break;
-		case kPanSpanMode:		ProcessDataPanSpanMode   (inputs, outputs, params);	break;
-#else
         case kFreeVolumeMode:	ProcessDataFreeVolumeMode(params);	break;
         case kPanVolumeMode:	ProcessDataPanVolumeMode (params);	break;
         case kPanSpanMode:		ProcessDataPanSpanMode   (params);	break;
-            
-#endif
         default: jassertfalse;
 	}
 }
@@ -1533,11 +1520,7 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 #endif
 }
     
-#if USE_VECTORS
-void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
-#else
-    void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, const int &f) {
-#endif
+void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, const int &f) {
 #if USE_ACTIVE_SPEAKERS
     for (auto &curActiveSpeakerId : mActiveSpeakers) {
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(curActiveSpeakerId)).b;
@@ -1604,16 +1587,12 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     
     
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-#if USE_VECTORS
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_ppfInputs, vector<float*> &p_ppfOutputs, float *p_pfParamCopy) {
-#else
-    void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
-#endif
+void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
     
     // clear outputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
 #if USE_VECTORS
-        float *output = p_ppfOutputs[iCurOutput];
+        float *output = outputs[iCurOutput];
 #else
         float *output = outputs[iCurOutput].get();
 #endif
@@ -1652,11 +1631,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
             
             //figure out current sample value and its Ray and Theta coordinates
 #if !BUFFER_PROCESS_DATA
-#if USE_VECTORS
-            float fCurSampleValue    = p_ppfInputs[iCurSource][iSampleId];   //current sample
-#else
             float fCurSampleValue    = inputs[iCurSource][iSampleId];   //current sample
-#endif
             float fCurSampleX        = xCurSource[iSampleId];           //x position of current sample
             float fCurSampleY        = yCurSource[iSampleId];           //y position of current sample
 #else
@@ -1725,11 +1700,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(const vector<float*> &p_pp
 //            }
 #endif
 #if !BUFFER_PROCESS_DATA
-#if USE_VECTORS
-            addToOutputs(iCurSource, fCurSampleValue, p_ppfOutputs, iSampleId);
-#else
             addToOutputs(iCurSource, fCurSampleValue, iSampleId);
-#endif
 #else
             addBufferToOutputs(iCurSource, p_ppfInputs[iCurSource], p_ppfOutputs, p_iTotalSamples);
 #endif
@@ -1842,11 +1813,8 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         }
     }
 }
-#if USE_VECTORS
-void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs, vector<float*> &outputs, float *params) {
-#else
-    void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
-#endif
+
+void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     
     const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * m_dSampleRate));
     createParameterRamps(params, fOldValuesPortion);
@@ -2014,19 +1982,12 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(const vector<float*> &inputs
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, NULL);
             }
-#if USE_VECTORS
-            addToOutputs(i, s, outputs, f);
-#else
             addToOutputs(i, s, f);
-#endif
         }
     }
 }
-#if USE_VECTORS
-void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(const vector<float*> &inputs, vector<float*> &outputs, float *params) {
-#else
-    void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
-#endif
+
+void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
 	// ramp all non constant parameters
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * m_dSampleRate));
