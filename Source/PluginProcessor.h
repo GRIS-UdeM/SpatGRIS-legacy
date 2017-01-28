@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 1
+#define USE_VECTORS 0
 #endif
 
 #ifndef BUFFER_PROCESS_DATA

@@ -1247,14 +1247,12 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
-//#if USE_VECTORS
+#if USE_VECTORS
 //    vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
-//#endif
+#endif
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
-
-            
 #if USE_VECTORS
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
@@ -1533,6 +1531,9 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         outputs[o][f] += sample * volumes[o] * m;
+        if (outputs[o][f] > 0.1){
+            cout << outputs[o][f] << "\n";
+        }
     }
 #endif
 }
@@ -1806,11 +1807,9 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
             setSpeakerVolume(iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
         }
         
-        if (iCurSource == 0){
+//        if (iCurSource == 0){
 //            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
-            JUCE_COMPILER_WARNING("plotting this gives very weird results.... position seems to be constantly oscillating, at least when sources are right on speakers")
-//            cout << fFrontLeftSpAngle << "\n";
-        }
+//        }
     }
 }
 
