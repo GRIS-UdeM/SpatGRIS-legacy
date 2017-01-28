@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 0
+#define USE_VECTORS 1
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
@@ -860,6 +860,7 @@ private:
     
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
+    vector<float*> inputs, outputs, inputsCopy;
 #else
     
     unique_ptr< unique_ptr<float[]>[] > inputs;

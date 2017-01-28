@@ -1136,7 +1136,11 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         curParameterRamp.resize(m_iDawBufferSize);
     }
     
-#if !USE_VECTORS
+#if USE_VECTORS
+    inputs.resize(mNumberOfSources);
+    outputs.resize(mNumberOfSpeakers);
+    inputsCopy.resize(mNumberOfSources);
+#else
     
 //    inputs = new float* [8];
 //    for (int i = 0; i < 8; ++i){
@@ -1243,9 +1247,9 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
-#if USE_VECTORS
-    vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
-#endif
+//#if USE_VECTORS
+//    vector<float*> inputs(mNumberOfSources), outputs(mNumberOfSpeakers), inputsCopy(mNumberOfSources);
+//#endif
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
