@@ -843,7 +843,7 @@ private:
 	Array<float> mSmoothedParameters;
     
 	Array<float> mLockedThetas;
-    Array<Array<float>> mSpeakerVolumes;
+    
     Array<float> mPrevRs;
     Array<float> mPrevTs;
     
@@ -854,8 +854,9 @@ private:
     
     bool bThetasPrinted = false;
     
-    JUCE_COMPILER_WARNING("mParameterRamps should probably NOT be a vector")
+    JUCE_COMPILER_WARNING("mSpeakerVolumes and mParameterRamps should probably NOT be a vector")
     vector<vector<float>> mParameterRamps;
+    Array<Array<float>> mSpeakerVolumes;
     
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;

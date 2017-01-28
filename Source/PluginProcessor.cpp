@@ -1528,6 +1528,7 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
     mSpeakerVolumes.getReference(source).set(o, targetVolume);                                                    // no exp. smoothing on volume
 #endif
 }
+    
 #if USE_VECTORS
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f) {
 #else
@@ -1538,9 +1539,6 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         float *output_m = mParameterRamps.getReference(getParamForSpeakerM(curActiveSpeakerId)).b;
         float m = 1 - output_m[f];
         outputs[curActiveSpeakerId][f] += sample * mSpeakerVolumes[source][curActiveSpeakerId] * m;
-        
-        //        outputs[o][f] += sample * mSpeakerVolumes[source][o];     //ignoring mute
-            
     }
 #else
 
