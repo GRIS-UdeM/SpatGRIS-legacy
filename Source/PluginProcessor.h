@@ -47,7 +47,7 @@ using namespace std;
 #endif
 
 #ifndef TIME_PROCESS
-#define TIME_PROCESS 1
+#define TIME_PROCESS 0
 #endif
 
 #ifndef OUTPUT_RAMPING

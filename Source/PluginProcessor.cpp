@@ -1256,7 +1256,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
             //if not in kInternalWrite, copy actual data in inputsCopy
             if (mRoutingMode != kInternalWrite) {
-                
                 //copy input data for each iCurChannel into a new vector of floats
                 vector<float> curChannelData(inputs[iCurChannel], inputs[iCurChannel] + m_iDawBufferSize);
                 //move this data into the member variable mIntputsCopy, so that it is not destroyed at the end of this block
@@ -1281,9 +1280,6 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
             outputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
         }
 #endif
-        
-        
-
         if (mProcessMode == kFreeVolumeMode) {
             if (iCurChannel < mNumberOfSources) {paramCopy[getParamForSourceD(iCurChannel)] = denormalize(kSourceMinDistance, kSourceMaxDistance, paramCopy[getParamForSourceD(iCurChannel)]);}
             //in free volume, speakers can be anywhere, so we have an x and a y
@@ -1304,23 +1300,21 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     Time time3SourceSpeakers = Time::getCurrentTime();
 #endif
     
-    
+#if USE_VECTORS
     if (mRoutingMode == kInternalWrite) {
-#if !USE_VECTORS
-        ProcessData(paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
-#else
-          ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
-#endif
+        ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
     } else {
-#if !USE_VECTORS
-        ProcessData(paramCopy);
-#else
         ProcessData(inputsCopy, outputs, paramCopy);
-#endif
-        
-        
-        
     }
+#else
+    if (mRoutingMode == kInternalWrite) {
+        ProcessData(paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
+    } else {
+        ProcessData(paramCopy);
+    }
+#endif
+    
+    
     
     
     
