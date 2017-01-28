@@ -39,15 +39,15 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 1
+#define USE_VECTORS 0
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
 #define BUFFER_PROCESS_DATA 0
 #endif
 
-#ifndef TIME_PROCESS_DETAILED
-#define TIME_PROCESS_DETAILED 0
+#ifndef TIME_PROCESS
+#define TIME_PROCESS 1
 #endif
 
 #ifndef OUTPUT_RAMPING
@@ -869,7 +869,7 @@ private:
     
     
     
-#if TIME_PROCESS_DETAILED
+#if TIME_PROCESS
 #define kTimeSlots (10)
     float mAvgTime [kTimeSlots] = {0};
     float timeAvgParamRamp  = 0.f;
