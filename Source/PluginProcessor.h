@@ -859,8 +859,9 @@ private:
     Array<Array<float>> mSpeakerVolumes;
     
 #if USE_VECTORS
-    vector<vector<float>> mInputsCopy;
-    vector<float*> inputs, outputs, inputsCopy;
+    vector<float*> inputs;  //inputs will point to original pBuffer data
+    vector<vector<float>> outputs;
+//    vector<float*> inputs, outputs, inputsCopy;
 #else
     
     unique_ptr< unique_ptr<float[]>[] > inputs;
