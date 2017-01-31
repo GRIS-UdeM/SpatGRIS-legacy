@@ -976,4 +976,13 @@ vector + no chunk: 13-18.
 
 vector + chunk: weird problems. DELETE CHUNK CASE
 
+----------------- 2017-01-31 --------------------
+NO VECTOR
+    pas de spatalisation
 
+VECTOR
+    pas de son.outputs[o][f] is always 0. volumes[o] is not 0. 
+    sample is 0 
+    THE PROBLEM IS that we're not copying data from input buffer to
+    inputs member variable. rather we're relying on crazy inputsCopy 
+    bullshit.

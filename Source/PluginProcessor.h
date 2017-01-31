@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 1
+#define USE_VECTORS 0
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
@@ -778,6 +778,7 @@ public:
     void startOrStopSourceUpdateThread();
 	
 private:
+    void updateInputOutputSizes();
 
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
@@ -859,16 +860,12 @@ private:
     Array<Array<float>> mSpeakerVolumes;
     
 #if USE_VECTORS
-    vector<vector<float>> mInputsCopy;
-    vector<float*> inputs, outputs, inputsCopy;
+    vector<vector<float>> inputs;
+    vector<float*> outputs;
 #else
-    
     unique_ptr< unique_ptr<float[]>[] > inputs;
-    unique_ptr< unique_ptr<float[]>[] > outputs;
-    
+    unique_ptr<float *[]> outputs;
 #endif
-    
-    
     
     
 #if TIME_PROCESS
@@ -898,25 +895,14 @@ private:
     
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize);
-#if USE_VECTORS
-    void addToOutputs(const int &source, const float &sample, vector<float*> &outputs, const int &f);
-#else
     void addToOutputs(const int &source, const float &sample, const int &f);
-#endif
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
-#if USE_VECTORS
-    void ProcessData                (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-    void ProcessDataFreeVolumeMode  (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-    void ProcessDataPanVolumeMode   (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-    void ProcessDataPanSpanMode     (const vector<float*> &inputs, vector<float*> &outputs, float *params);
-#else
     void ProcessData                (float *params);
     void ProcessDataFreeVolumeMode  (float *params);
     void ProcessDataPanVolumeMode   (float *params);
     void ProcessDataPanSpanMode     (float *params);
-#endif
     void processTrajectory();
     
     
