@@ -1138,30 +1138,30 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
 void SpatGrisAudioProcessor::updateInputOutputSizes(){
 #if USE_VECTORS
-    inputs.resize(mNumberOfSources);
-    for (auto &curInput : inputs){
+    mInputsCopy.resize(mNumberOfSources);
+    for (auto &curInput : mInputsCopy){
         curInput.resize(m_iDawBufferSize);
     }
-    outputs.resize(mNumberOfSpeakers);
+    mOutputs.resize(mNumberOfSpeakers);
 #else
     
-    //    inputs = new float* [8];
+    //    mInputsCopy = new float* [8];
     //    for (int i = 0; i < 8; ++i){
-    //        inputs[i] = new float[samplesPerBlock];
+    //        mInputsCopy[i] = new float[samplesPerBlock];
     //    }
     //
-    //    outputs = new float* [16];
+    //    mOutputs = new float* [16];
     //    for (int i = 0; i < 16; ++i){
-    //        outputs[i] = new float[samplesPerBlock];
+    //        mOutputs[i] = new float[samplesPerBlock];
     //    }
     //    bArraysAllocated = true;
     
     
-    inputs  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
+    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
     for (int i = 0; i < mNumberOfSources; ++i) {
-        inputs[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
+        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
     }
-//    outputs = unique_ptr<float *[]>(new float* [mNumberOfSpeakers]);
+//    mOutputs = unique_ptr<float *[]>(new float* [mNumberOfSpeakers]);
 #endif
 }
 
@@ -1188,7 +1188,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
 	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
 		pBuffer.clear();
-        //maximum number of output channels when writing to internal is 2. Higher outputs will be ignored
+        //maximum number of output channels when writing to internal is 2. Higher mOutputs will be ignored
 		int outChannels = (mNumberOfSpeakers > 2) ? 2 : mNumberOfSpeakers;
         //here, e.g., internalRead12 = 2, so offset = 0, internalRead34 = 3, so offset = 2; internalRead45 = 4 so offset = 4
 		int offset = (mRoutingMode - 2) * 2;
@@ -1249,17 +1249,17 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
-            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into outputs[mNumberOfSources]
-            outputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
+            mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
             
 #if USE_VECTORS
             JUCE_COMPILER_WARNING("protentially faster ways of doing this. do a test!")
-            vector<float> &curInput = inputs[iCurChannel];
+            vector<float> &curInput = mInputsCopy[iCurChannel];
             for (int iCurSample = 0; iCurSample < m_iDawBufferSize; ++iCurSample){
                 curInput[iCurSample] = pBuffer.getSample(iCurChannel, iCurSample);
             }
 #else
-            memcpy(inputs[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
+            memcpy(mInputsCopy[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
 #endif
             //denormalize source position
             paramCopy[getParamForSourceX(iCurChannel)] = paramCopy[getParamForSourceX(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
@@ -1270,7 +1270,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 #if USE_VECTORS
         if (mRoutingMode == kInternalWrite){
 JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likely redone")
-//            for (auto &curOutput : outputs){
+//            for (auto &curOutput : mOutputs){
 //                memcpy(curOutput.data(, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
 //            }
         }
@@ -1297,9 +1297,9 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
     
 //#if USE_VECTORS
 //    if (mRoutingMode == kInternalWrite) {
-//        ProcessData(inputs, outputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
+//        ProcessData(mInputsCopy, mOutputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
 //    } else {
-//        ProcessData(inputsCopy, outputs, paramCopy);
+//        ProcessData(inputsCopy, mOutputs, paramCopy);
 //    }
 //#else
     
@@ -1348,7 +1348,7 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
 		//for each speaker
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
             //get pointer to current spot in output buffer
-			float *output = outputs[o];
+			float *output = mOutputs[o];
 			float env = mLevels[o];
             
 			//for each frame that are left to process
@@ -1512,7 +1512,7 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     const Array<float> &volumes = mSpeakerVolumes[source];
     for (auto &curActiveSpeakerId : mActiveSpeakers){
         float m = 1 - mParameterRamps[getParamForSpeakerM(curActiveSpeakerId)][f];
-        outputs[curActiveSpeakerId][f] += sample * volumes[curActiveSpeakerId] * m;
+        mOutputs[curActiveSpeakerId][f] += sample * volumes[curActiveSpeakerId] * m;
     }
     
 #else
@@ -1520,18 +1520,18 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     const Array<float> &volumes = mSpeakerVolumes[source];
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
-        outputs[o][f] += sample * volumes[o] * m;
+        mOutputs[o][f] += sample * volumes[o] * m;
     }
 #endif
 }
 
     
     
-void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &outputs, const int &bufferSize) {
+void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &mOutputs, const int &bufferSize) {
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][0];
         for (int iCurSample = 0; iCurSample < bufferSize; ++iCurSample){
-            outputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
+            mOutputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
         }
     }
 }
@@ -1577,9 +1577,9 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
     
-    // clear outputs[]
+    // clear mOutputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
-        float *output = outputs[iCurOutput];
+        float *output = mOutputs[iCurOutput];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
     }
     
@@ -1615,7 +1615,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
             
             //figure out current sample value and its Ray and Theta coordinates
 #if !BUFFER_PROCESS_DATA
-            float fCurSampleValue    = inputs[iCurSource][iSampleId];   //current sample
+            float fCurSampleValue    = mInputsCopy[iCurSource][iSampleId];   //current sample
             float fCurSampleX        = xCurSource[iSampleId];           //x position of current sample
             float fCurSampleY        = yCurSource[iSampleId];           //y position of current sample
 #else
@@ -1799,9 +1799,9 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * m_dSampleRate));
     createParameterRamps(params, fOldValuesPortion);
     
-    // clear outputs
+    // clear mOutputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
-        float *output = outputs[o];
+        float *output = mOutputs[o];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
     }
     
@@ -1847,9 +1847,9 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     // in this context: source T, R are actually source X, Y
     for (int i = 0; i < mNumberOfSources; i++) {
 #if USE_VECTORS
-        float *input = inputs[i].data();
+        float *input = mInputsCopy[i].data();
 #else
-        float *input = inputs[i].get();
+        float *input = mInputsCopy[i].get();
 #endif
         
         float *input_x = mParameterRamps[getParamForSourceX(i)].data();
@@ -1983,7 +1983,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
 	// in this context: T, R are actually X, Y
 	const float adj_factor = 1 / sqrtf(2);
 	for (int o = 0; o < mNumberOfSpeakers; o++) {
-		float *output = outputs[o];
+		float *output = mOutputs[o];
         
         float *output_x = mParameterRamps[getParamForSpeakerX(o)].data();
         float *output_y = mParameterRamps[getParamForSpeakerY(o)].data();
@@ -1996,9 +1996,9 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
         
         for (int i = 0; i < mNumberOfSources; i++) {
 #if USE_VECTORS
-            float *input = inputs[i].data();
+            float *input = mInputsCopy[i].data();
 #else
-            float *input = inputs[i].get();
+            float *input = mInputsCopy[i].get();
 #endif
             float *input_x = mParameterRamps[getParamForSourceX(i)].data();
             float *input_y = mParameterRamps[getParamForSourceY(i)].data();
