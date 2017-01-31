@@ -855,15 +855,17 @@ private:
     
     bool bThetasPrinted = false;
     
-
-    vector<vector<float>> mParameterRamps;    
     
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
     vector<float*> mOutputs;
     Array<Array<float>> mSpeakerVolumes;
+    vector<vector<float>> mParameterRamps;
 #else
+    JUCE_COMPILER_WARNING("the first dimension of mInputsCopy could be constant of 8")
     unique_ptr< unique_ptr<float[]>[] > mInputsCopy;
+//    unique_ptr< unique_ptr<float[]>[] > mParameterRamps;
+    unique_ptr<float[]> mParameterRamps[kNumberOfParameters];
     float* mOutputs[16];
     float mSpeakerVolumes[8][16];
 #endif
