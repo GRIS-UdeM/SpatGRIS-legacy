@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 1
+#define USE_VECTORS 0
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
@@ -47,7 +47,7 @@ using namespace std;
 #endif
 
 #ifndef TIME_PROCESS
-#define TIME_PROCESS 0
+#define TIME_PROCESS 1
 #endif
 
 #ifndef OUTPUT_RAMPING
