@@ -1133,6 +1133,10 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
         curParameterRamp.resize(m_iDawBufferSize);
     }
     
+    updateInputOutputSizes();
+}
+
+void SpatGrisAudioProcessor::updateInputOutputSizes(){
 #if USE_VECTORS
     inputs.resize(mNumberOfSources);
     for (auto &curInput : inputs){
@@ -1141,21 +1145,21 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     outputs.resize(mNumberOfSpeakers);
 #else
     
-//    inputs = new float* [8];
-//    for (int i = 0; i < 8; ++i){
-//        inputs[i] = new float[samplesPerBlock];
-//    }
-//    
-//    outputs = new float* [16];
-//    for (int i = 0; i < 16; ++i){
-//        outputs[i] = new float[samplesPerBlock];
-//    }
-//    bArraysAllocated = true;
+    //    inputs = new float* [8];
+    //    for (int i = 0; i < 8; ++i){
+    //        inputs[i] = new float[samplesPerBlock];
+    //    }
+    //
+    //    outputs = new float* [16];
+    //    for (int i = 0; i < 16; ++i){
+    //        outputs[i] = new float[samplesPerBlock];
+    //    }
+    //    bArraysAllocated = true;
     
     
     inputs  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
     for (int i = 0; i < mNumberOfSources; ++i) {
-            inputs[i] = unique_ptr<float[]>(new float[samplesPerBlock]);
+        inputs[i] = unique_ptr<float[]>(new float[samplesPerBlock]);
     }
     outputs = unique_ptr<float *[]>(new float* [mNumberOfSpeakers]);
 #endif
@@ -1238,6 +1242,11 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 #endif
     
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
+    if (m_iDawBufferSize != pBuffer.getNumSamples()){
+        m_iDawBufferSize = pBuffer.getNumSamples();
+        updateInputOutputSizes();
+    }
+    
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into outputs[mNumberOfSources]

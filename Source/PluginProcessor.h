@@ -778,6 +778,7 @@ public:
     void startOrStopSourceUpdateThread();
 	
 private:
+    void updateInputOutputSizes();
 
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
