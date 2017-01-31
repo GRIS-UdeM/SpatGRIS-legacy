@@ -1683,7 +1683,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
 #endif
             
 #if OUTPUT_RAMPING
-            JUCE_COMPILER_WARNING("Re #116: this doesn't appear to be necessary, and takes very long. Needs to be tested in hexa")
 //            for (int o = 0; o < mNumberOfSpeakers; o++){
 //                if (!vSpeakersCurrentlyInUse[o]){
 //                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
@@ -1796,10 +1795,9 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
             jassert(o >= 0);
             setSpeakerVolume(iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
         }
-        
-        if (iCurSource == 0){
-            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
-        }
+//        if (iCurSource == 0){
+//            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
+//        }
     }
 }
 
