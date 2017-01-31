@@ -1254,6 +1254,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
 #if USE_VECTORS
+            
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
             //if not in kInternalWrite, copy actual data in inputsCopy
@@ -1264,6 +1265,11 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
                 mInputsCopy[iCurChannel] = move(curChannelData);
                 inputsCopy[iCurChannel]  = mInputsCopy[iCurChannel].data();
             }
+            
+            
+            
+            
+            
 #else
                 memcpy(inputs[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
 #endif
@@ -1531,8 +1537,9 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         outputs[o][f] += sample * volumes[o] * m;
-        if (outputs[o][f] > 0.1){
-            cout << outputs[o][f] << "\n";
+//        if (outputs[o][f] > 0.1){
+        if (volumes[o] > 0.1){
+            cout << outputs[o][f] << "\t" << sample << "\t" << volumes[o] << "\t" << m  << "\n";
         }
     }
 #endif
