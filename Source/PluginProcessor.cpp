@@ -924,6 +924,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
         if (bUseDefaultValues){
             updateSpeakerLocation(true, false, false);
         }
+#if USE_VECTORS
         mSpeakerVolumes.clear();
         for (int i = 0; i < mNumberOfSources; i++) {
             mSpeakerVolumes.add(Array<float>());
@@ -931,6 +932,14 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
                 mSpeakerVolumes[j].add(0);
             }
         }
+#else
+        for (int i = 0; i < mNumberOfSources; i++) {
+            for (int j = 0; j < mNumberOfSpeakers; j++){
+                mSpeakerVolumes[i][j] = 0.f;
+            }
+        }
+        
+#endif
         mHostChangedParameterProcessor++;
     }
     //starts audio processing again
@@ -1086,7 +1095,11 @@ void SpatGrisAudioProcessor::reset() {
     for (int i = 0; i < mNumberOfSources; ++i) {
         mFilters[i].reset();
         for (int j = 0; j < mNumberOfSpeakers; ++j){
+#if USE_VECTORS
             mSpeakerVolumes.getReference(i).set(j, 0);
+#else
+            mSpeakerVolumes[i][j] = 0.f;
+#endif
         }
     }
     
@@ -1503,7 +1516,11 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
         p_pvSpeakersCurrentlyInUse->at(o) = true;
     }
 #else
+#if USE_VECTORS
     mSpeakerVolumes.getReference(source).set(o, targetVolume);                                                    // no exp. smoothing on volume
+#else
+    mSpeakerVolumes[source][o] =  targetVolume;
+#endif
 #endif
 }
     
@@ -1516,12 +1533,19 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     }
     
 #else
-
+#if USE_VECTORS
     const Array<float> &volumes = mSpeakerVolumes[source];
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         mOutputs[o][f] += sample * volumes[o] * m;
     }
+#else
+    const float* volumes = mSpeakerVolumes[source];
+    for (int o = 0; o < mNumberOfSpeakers; ++o) {
+        float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
+        mOutputs[o][f] += sample * volumes[o] * m;
+    }
+#endif
 #endif
 }
 

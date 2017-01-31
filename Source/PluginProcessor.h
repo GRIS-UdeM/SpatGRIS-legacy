@@ -857,14 +857,16 @@ private:
     
     JUCE_COMPILER_WARNING("mSpeakerVolumes and mParameterRamps should probably NOT be a vector")
     vector<vector<float>> mParameterRamps;
-    Array<Array<float>> mSpeakerVolumes;
+    
     
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
     vector<float*> mOutputs;
+    Array<Array<float>> mSpeakerVolumes;
 #else
     unique_ptr< unique_ptr<float[]>[] > mInputsCopy;
     float* mOutputs[16];
+    float mSpeakerVolumes[8][16];
 #endif
     
     
