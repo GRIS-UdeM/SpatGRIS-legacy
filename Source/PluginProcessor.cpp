@@ -1521,10 +1521,9 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         outputs[o][f] += sample * volumes[o] * m;
-//        if (outputs[o][f] > 0.1){
-        if (volumes[o] > 0.1){
-            cout << outputs[o][f] << "\t" << sample << "\t" << volumes[o] << "\t" << m  << "\n";
-        }
+//        if (volumes[o] > 0.1){
+//            cout << outputs[o][f] << "\t" << sample << "\t" << volumes[o] << "\t" << m  << "\n";
+//        }
     }
 #endif
 }
@@ -1798,9 +1797,9 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
             setSpeakerVolume(iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
         }
         
-//        if (iCurSource == 0){
-//            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
-//        }
+        if (iCurSource == 0){
+            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
+        }
     }
 }
 
