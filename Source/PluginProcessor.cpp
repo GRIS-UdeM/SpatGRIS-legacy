@@ -1136,9 +1136,6 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 #if USE_VECTORS
     inputs.resize(mNumberOfSources);
     outputs.resize(mNumberOfSpeakers);
-    for (auto &curOutput : outputs){
-        curOutput.resize(m_iDawBufferSize);
-    }
 #else
     
 //    inputs = new float* [8];
@@ -1255,6 +1252,7 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #if USE_VECTORS
             //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
             inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+            outputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
 #else
                 memcpy(inputs[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
 #endif
@@ -1267,9 +1265,9 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
 #if USE_VECTORS
         if (mRoutingMode == kInternalWrite){
 JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likely redone")
-            for (auto &curOutput : outputs){
-                memcpy(curOutput.data(), mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
-            }
+//            for (auto &curOutput : outputs){
+//                memcpy(curOutput.data(, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
+//            }
         }
 #endif
         if (mProcessMode == kFreeVolumeMode) {
@@ -1346,7 +1344,7 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
 		for (int o = 0; o < mNumberOfSpeakers; o++) {
             //get pointer to current spot in output buffer
 #if USE_VECTORS
-			float *output = outputs[o].data();
+			float *output = outputs[o];
 #else
             float *output = outputs[o].get();
 #endif
@@ -1583,7 +1581,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
     // clear outputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
 #if USE_VECTORS
-        float *output = outputs[iCurOutput].data();
+        float *output = outputs[iCurOutput];
 #else
         float *output = outputs[iCurOutput].get();
 #endif
@@ -1809,8 +1807,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     // clear outputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
 #if USE_VECTORS
-        float *output = outputs[o].data();
-//        vector<float> &output = outputs[o].;
+        float *output = outputs[o];
 #else
         float *output = outputs[o].get();
 #endif
@@ -1996,7 +1993,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
 	const float adj_factor = 1 / sqrtf(2);
 	for (int o = 0; o < mNumberOfSpeakers; o++) {
         #if USE_VECTORS
-		float *output = outputs[o].data();
+		float *output = outputs[o];
 #else
         float *output = outputs[o].get();
 #endif
