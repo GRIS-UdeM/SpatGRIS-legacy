@@ -1135,6 +1135,9 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     
 #if USE_VECTORS
     inputs.resize(mNumberOfSources);
+    for (auto &curInput : inputs){
+        curInput.resize(m_iDawBufferSize);
+    }
     outputs.resize(mNumberOfSpeakers);
 #else
     
@@ -1250,11 +1253,15 @@ void SpatGrisAudioProcessor::processBlock (AudioBuffer<float> &pBuffer, MidiBuff
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
 #if USE_VECTORS
-            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into inputs[mNumberOfSources]
-            inputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into outputs[mNumberOfSources]
             outputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+            JUCE_COMPILER_WARNING("protentially faster ways of doing this. do a test!")
+            vector<float> &curInput = inputs[iCurChannel];
+            for (int iCurSample = 0; iCurSample < m_iDawBufferSize; ++iCurSample){
+                curInput[iCurSample] = pBuffer.getSample(iCurChannel, iCurSample);
+            }
 #else
-                memcpy(inputs[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
+            memcpy(inputs[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
 #endif
             //denormalize source position
             paramCopy[getParamForSourceX(iCurChannel)] = paramCopy[getParamForSourceX(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
@@ -1856,7 +1863,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     // in this context: source T, R are actually source X, Y
     for (int i = 0; i < mNumberOfSources; i++) {
 #if USE_VECTORS
-        float *input = inputs[i];
+        float *input = inputs[i].data();
 #else
         float *input = inputs[i].get();
 #endif
@@ -2009,7 +2016,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
         
         for (int i = 0; i < mNumberOfSources; i++) {
 #if USE_VECTORS
-            float *input = inputs[i];
+            float *input = inputs[i].data();
 #else
             float *input = inputs[i].get();
 #endif

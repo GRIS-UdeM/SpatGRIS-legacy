@@ -859,10 +859,9 @@ private:
     Array<Array<float>> mSpeakerVolumes;
     
 #if USE_VECTORS
-    vector<float*> inputs, outputs;
-//    vector<float*> inputs, outputs, inputsCopy;
+    vector<vector<float>> inputs;
+    vector<float*> outputs;
 #else
-    
     unique_ptr< unique_ptr<float[]>[] > inputs;
     unique_ptr< unique_ptr<float[]>[] > outputs;
     
