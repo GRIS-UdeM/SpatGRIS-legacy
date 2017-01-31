@@ -1509,20 +1509,18 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
     
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, const int &f) {
 #if USE_ACTIVE_SPEAKERS
-    for (auto &curActiveSpeakerId : mActiveSpeakers) {
-        float *output_m = mParameterRamps.getReference(getParamForSpeakerM(curActiveSpeakerId)).b;
-        float m = 1 - output_m[f];
-        outputs[curActiveSpeakerId][f] += sample * mSpeakerVolumes[source][curActiveSpeakerId] * m;
+    const Array<float> &volumes = mSpeakerVolumes[source];
+    for (auto &curActiveSpeakerId : mActiveSpeakers){
+        float m = 1 - mParameterRamps[getParamForSpeakerM(curActiveSpeakerId)][f];
+        outputs[curActiveSpeakerId][f] += sample * volumes[curActiveSpeakerId] * m;
     }
+    
 #else
 
     const Array<float> &volumes = mSpeakerVolumes[source];
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         outputs[o][f] += sample * volumes[o] * m;
-//        if (volumes[o] > 0.1){
-//            cout << outputs[o][f] << "\t" << sample << "\t" << volumes[o] << "\t" << m  << "\n";
-//        }
     }
 #endif
 }

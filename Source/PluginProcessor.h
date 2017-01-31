@@ -55,7 +55,7 @@ using namespace std;
 #endif
 
 #ifndef USE_ACTIVE_SPEAKERS
-#define USE_ACTIVE_SPEAKERS 0
+#define USE_ACTIVE_SPEAKERS 1
 #endif
 
 #ifndef USE_TOUCH_OSC
