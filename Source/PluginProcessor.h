@@ -55,7 +55,7 @@ using namespace std;
 #endif
 
 #ifndef USE_ACTIVE_SPEAKERS
-#define USE_ACTIVE_SPEAKERS 1
+#define USE_ACTIVE_SPEAKERS 0
 #endif
 
 #ifndef USE_TOUCH_OSC
@@ -864,7 +864,8 @@ private:
     vector<float*> outputs;
 #else
     unique_ptr< unique_ptr<float[]>[] > inputs;
-    unique_ptr<float *[]> outputs;
+//    unique_ptr<float *[]> outputs;
+    float* outputs[16];
 #endif
     
     

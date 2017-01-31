@@ -1161,7 +1161,7 @@ void SpatGrisAudioProcessor::updateInputOutputSizes(){
     for (int i = 0; i < mNumberOfSources; ++i) {
         inputs[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
     }
-    outputs = unique_ptr<float *[]>(new float* [mNumberOfSpeakers]);
+//    outputs = unique_ptr<float *[]>(new float* [mNumberOfSpeakers]);
 #endif
 }
 
