@@ -863,11 +863,8 @@ private:
     vector<float*> outputs;
 #else
     unique_ptr< unique_ptr<float[]>[] > inputs;
-    unique_ptr< unique_ptr<float[]>[] > outputs;
-    
+    unique_ptr<float *[]> outputs;
 #endif
-    
-    
     
     
 #if TIME_PROCESS
