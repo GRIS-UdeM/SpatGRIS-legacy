@@ -855,9 +855,8 @@ private:
     
     bool bThetasPrinted = false;
     
-    JUCE_COMPILER_WARNING("mSpeakerVolumes and mParameterRamps should probably NOT be a vector")
-    vector<vector<float>> mParameterRamps;
-    
+
+    vector<vector<float>> mParameterRamps;    
     
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
