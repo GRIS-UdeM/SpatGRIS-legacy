@@ -1141,46 +1141,32 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     //---------- INIT MEMORY STUFF -------
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
 
+    updateInputOutputRampsSizes();
+}
+
+void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
 #if USE_VECTORS
+    //resize parameter ramps
     mParameterRamps.resize(kNumberOfParameters);
     for (auto &curParameterRamp : mParameterRamps){
         curParameterRamp.resize(m_iDawBufferSize);
     }
-#else
-    for (int i = 0; i < kNumberOfParameters; ++i) {
-        mParameterRamps[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-    }
-#endif
-    
-    updateInputOutputSizes();
-}
-
-void SpatGrisAudioProcessor::updateInputOutputSizes(){
-#if USE_VECTORS
+    //resize inputcopy and outputs
     mInputsCopy.resize(mNumberOfSources);
     for (auto &curInput : mInputsCopy){
         curInput.resize(m_iDawBufferSize);
     }
     mOutputs.resize(mNumberOfSpeakers);
 #else
-    
-    //    mInputsCopy = new float* [8];
-    //    for (int i = 0; i < 8; ++i){
-    //        mInputsCopy[i] = new float[samplesPerBlock];
-    //    }
-    //
-    //    mOutputs = new float* [16];
-    //    for (int i = 0; i < 16; ++i){
-    //        mOutputs[i] = new float[samplesPerBlock];
-    //    }
-    //    bArraysAllocated = true;
-    
-    
+    //resize parameter ramps
+    for (int i = 0; i < kNumberOfParameters; ++i) {
+        mParameterRamps[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
+    }
+    //resize inputcopy and outputs
     mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
     for (int i = 0; i < mNumberOfSources; ++i) {
         mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
     }
-//    mOutputs = unique_ptr<float *[]>(new float* [mNumberOfSpeakers]);
 #endif
 }
 
@@ -1265,7 +1251,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
     if (m_iDawBufferSize != pBuffer.getNumSamples()){
         m_iDawBufferSize = pBuffer.getNumSamples();
-        updateInputOutputSizes();
+        updateInputOutputRampsSizes();
     }
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {

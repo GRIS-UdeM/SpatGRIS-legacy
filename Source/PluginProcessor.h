@@ -778,7 +778,7 @@ public:
     void startOrStopSourceUpdateThread();
 	
 private:
-    void updateInputOutputSizes();
+    void updateInputOutputRampsSizes();
 
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
@@ -864,7 +864,6 @@ private:
 #else
     JUCE_COMPILER_WARNING("the first dimension of mInputsCopy could be constant of 8")
     unique_ptr< unique_ptr<float[]>[] > mInputsCopy;
-//    unique_ptr< unique_ptr<float[]>[] > mParameterRamps;
     unique_ptr<float[]> mParameterRamps[kNumberOfParameters];
     float* mOutputs[16];
     float mSpeakerVolumes[8][16];
