@@ -1523,17 +1523,22 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 }
     
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, const int &f) {
-#if USE_ACTIVE_SPEAKERS
-    const Array<float> &volumes = mSpeakerVolumes[source];
-    for (auto &curActiveSpeakerId : mActiveSpeakers){
-        float m = 1 - mParameterRamps[getParamForSpeakerM(curActiveSpeakerId)][f];
-        mOutputs[curActiveSpeakerId][f] += sample * volumes[curActiveSpeakerId] * m;
-    }
-    
-#else
+//#if USE_ACTIVE_SPEAKERS
+//    const Array<float> &volumes = mSpeakerVolumes[source];
+//    for (auto &curActiveSpeakerId : mActiveSpeakers){
+//        float m = 1 - mParameterRamps[getParamForSpeakerM(curActiveSpeakerId)][f];
+//        mOutputs[curActiveSpeakerId][f] += sample * volumes[curActiveSpeakerId] * m;
+//    }
+//    
+//#else
 #if USE_VECTORS
     const Array<float> &volumes = mSpeakerVolumes[source];
+#if USE_ACTIVE_SPEAKERS
+    for (int i = 0; i < mNumberOfActiveSpeakers; ++i) {
+        int o = m
+#else
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
+#endif
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         mOutputs[o][f] += sample * volumes[o] * m;
     }
@@ -1544,7 +1549,7 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         mOutputs[o][f] += sample * volumes[o] * m;
     }
 #endif
-#endif
+//#endif
 }
     
 void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &mOutputs, const int &bufferSize) {
@@ -1727,9 +1732,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
 }
 
 void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
-#if USE_ACTIVE_SPEAKERS
-    mActiveSpeakers.clear();
-#endif
     //if we're outside the main, first circle, only 2 speakers will play
     if (fCurSampleR >= 1 || mNumberOfSpeakers == 2) {
         // find left and right speakers
@@ -1739,8 +1741,9 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         findLeftAndRightSpeakers(fCurSampleT, *p_pfParams, left, right, dLeft, dRight);
         
 #if USE_ACTIVE_SPEAKERS
-        mActiveSpeakers.push_back(left);
-        mActiveSpeakers.push_back(right);
+        mNumberActiveSpeakers = 2;
+        mActiveSpeakers[0] = left;
+        mActiveSpeakers[1] = right;
 #endif
         
         // add to output
@@ -1774,10 +1777,11 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
         findLeftAndRightSpeakers(fCurSampleBackTheta, *p_pfParams, iBackLeftSpID, iBackRightSpId, dBackLeft, dBackRight);
         
 #if USE_ACTIVE_SPEAKERS
-        mActiveSpeakers.push_back(iFrontLeftSpID);
-        mActiveSpeakers.push_back(iFrontRightSpId);
-        mActiveSpeakers.push_back(iBackLeftSpID);
-        mActiveSpeakers.push_back(iBackRightSpId);
+        mNumberActiveSpeakers = 4 ;
+        mActiveSpeakers[0] = iFrontLeftSpID;
+        mActiveSpeakers[1] = iFrontRightSpId;
+        mActiveSpeakers[2] = iBackLeftSpID;
+        mActiveSpeakers[3] = iBackRightSpId;
 #endif
         
         float fFrontVol = fCurSampleR * 0.5f + 0.5f;

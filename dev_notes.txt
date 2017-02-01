@@ -986,3 +986,8 @@ VECTOR
     THE PROBLEM IS that we're not copying data from input buffer to
     inputs member variable. rather we're relying on crazy inputsCopy 
     bullshit.
+
+---------------- 2017-02-01 ---------------------
+active speakers: enlever push_back
+enlever mSpeakerVolumes pour revenir à comment c'était avec octogris
+avant fix_116

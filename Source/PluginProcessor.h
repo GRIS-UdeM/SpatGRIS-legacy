@@ -55,7 +55,7 @@ using namespace std;
 #endif
 
 #ifndef USE_ACTIVE_SPEAKERS
-#define USE_ACTIVE_SPEAKERS 0
+#define USE_ACTIVE_SPEAKERS 0 
 #endif
 
 #ifndef USE_TOUCH_OSC
@@ -937,7 +937,8 @@ private:
     bool isNewMovementMode(float v);
 
 #if USE_ACTIVE_SPEAKERS
-    vector<int> mActiveSpeakers;
+    int mNumberActiveSpeakers;
+    float mActiveSpeakers[4];
 #endif
     
     
