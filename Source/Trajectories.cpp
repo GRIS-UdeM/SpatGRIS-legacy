@@ -1,4 +1,4 @@
-/*
+ /*
  ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
  
@@ -42,6 +42,8 @@ Trajectory::Trajectory(const TrajectoryProperties& properties)
         m_fDurationSingleTraj = 0.0001;
     }
     
+    m_bInfLoopRepeats  = (properties.repeats == 0.0);
+   
     float fRepeats = (properties.repeats < 0.0001) ? 0.0001 : properties.repeats;
     m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
 }
@@ -63,7 +65,7 @@ bool Trajectory::process(float seconds, float beats) {
     if (!m_bStarted) {
         start();
     }
-	if (m_fSpeed*m_fTimeDone >= m_fTotalDuration) {
+	if (m_fSpeed*m_fTimeDone >= m_fTotalDuration && ! m_bInfLoopRepeats) {
         stop();
 		return true;
 	}

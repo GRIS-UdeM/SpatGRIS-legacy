@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 0
+#define USE_VECTORS 1
 #endif
 
 #ifndef BUFFER_PROCESS_DATA
@@ -943,6 +943,7 @@ private:
     
     bool bArraysAllocated;
     
+
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
 //    int loudestSpeaker = -1;

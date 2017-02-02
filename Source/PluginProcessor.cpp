@@ -208,8 +208,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		mSmoothedParameters.add(0);
     }
     
-    mNumberOfSources = -1;
-    mNumberOfSpeakers = -1;
+    mNumberOfSources = 0;
+    mNumberOfSpeakers = 0;
 
 	bool bIsWindows;
 
@@ -848,6 +848,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         
         m_pMover->updateNumberOfSources();
         
+        
         if (bUseDefaultValues){
             double anglePerSource = 360 / mNumberOfSources;
             double offset, axisOffset;
@@ -889,8 +890,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
             mPrevTs.set(i, getSourceRT(i).y);
             
         }
+        updateInputOutputRampsSizes();
         mHostChangedParameterProcessor++;
     }
+    
     //restart audio processing
     suspendProcessing (false);
     
@@ -1157,6 +1160,8 @@ void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
         curInput.resize(m_iDawBufferSize);
     }
     mOutputs.resize(mNumberOfSpeakers);
+    
+    
 #else
     //resize parameter ramps
     for (int i = 0; i < kNumberOfParameters; ++i) {
@@ -1185,7 +1190,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 #if TIME_PROCESS
     Time beginTime = Time::getCurrentTime();
 #endif
-    
+
     //==================================== CHECK SOME STUFF ===========================================
 	// sanity check for auval
 	if (pBuffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
@@ -1256,8 +1261,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
-            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
-            mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+           
             
 #if USE_VECTORS
             JUCE_COMPILER_WARNING("protentially faster ways of doing this. do a test!")
@@ -1273,8 +1277,14 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
             paramCopy[getParamForSourceY(iCurChannel)] = paramCopy[getParamForSourceY(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
         }
         
+        
+        
         //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
 #if USE_VECTORS
+        
+        //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
+        mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+        
         if (mRoutingMode == kInternalWrite){
 JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likely redone")
 //            for (auto &curOutput : mOutputs){
@@ -1596,11 +1606,14 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
-    
+     //mOutputs.resize(mNumberOfSpeakers);
     // clear mOutputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
+        
         float *output = mOutputs[iCurOutput];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
+        
+        
     }
     
     //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
@@ -1826,8 +1839,10 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     
     // clear mOutputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
+        
         float *output = mOutputs[o];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
+        
     }
     
     vector<Area> areas;
