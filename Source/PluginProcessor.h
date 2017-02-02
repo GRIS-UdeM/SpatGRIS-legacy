@@ -42,12 +42,8 @@ using namespace std;
 #define USE_VECTORS 0
 #endif
 
-#ifndef BUFFER_PROCESS_DATA
-#define BUFFER_PROCESS_DATA 0
-#endif
-
 #ifndef TIME_PROCESS
-#define TIME_PROCESS 0
+#define TIME_PROCESS 1
 #endif
 
 #ifndef OUTPUT_RAMPING
