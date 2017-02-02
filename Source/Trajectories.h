@@ -112,6 +112,7 @@ protected:
 	float m_fTotalDuration;
 	bool  m_bUseBeats;
     float m_fSpeed;
+    bool m_bInfLoopRepeats;
 };
 
 #endif  // TRAJECTORIES_H_INCLUDED

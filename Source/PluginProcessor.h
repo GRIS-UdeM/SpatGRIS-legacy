@@ -944,6 +944,7 @@ private:
     
     bool bArraysAllocated;
     
+
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
 //    int loudestSpeaker = -1;

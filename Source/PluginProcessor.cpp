@@ -208,8 +208,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		mSmoothedParameters.add(0);
     }
     
-    mNumberOfSources = -1;
-    mNumberOfSpeakers = -1;
+    mNumberOfSources = 0;
+    mNumberOfSpeakers = 0;
 
 	bool bIsWindows;
 
@@ -848,6 +848,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         
         m_pMover->updateNumberOfSources();
         
+        
         if (bUseDefaultValues){
             double anglePerSource = 360 / mNumberOfSources;
             double offset, axisOffset;
@@ -889,8 +890,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
             mPrevTs.set(i, getSourceRT(i).y);
             
         }
+//        updateInputOutputRampsSizes();
         mHostChangedParameterProcessor++;
     }
+    
     //restart audio processing
     suspendProcessing (false);
     
@@ -1159,6 +1162,8 @@ void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
         curInput.resize(m_iDawBufferSize);
     }
     mOutputs.resize(mNumberOfSpeakers);
+    
+    
 #else
     //resize parameter ramps
     for (int i = 0; i < kNumberOfParameters; ++i) {
@@ -1187,7 +1192,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 #if TIME_PROCESS
     Time beginTime = Time::getCurrentTime();
 #endif
-    
+
     //==================================== CHECK SOME STUFF ===========================================
 	// sanity check for auval
 	if (pBuffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
@@ -1603,11 +1608,13 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
-    
     // clear mOutputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
+        
         float *output = mOutputs[iCurOutput];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
+        
+        
     }
     
     //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
@@ -1832,8 +1839,10 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     
     // clear mOutputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
+        
         float *output = mOutputs[o];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
+        
     }
     
     vector<Area> areas;
