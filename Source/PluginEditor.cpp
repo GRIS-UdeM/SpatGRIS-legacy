@@ -632,6 +632,7 @@ AudioProcessorEditor (ownerFilter)
         
         
         if(mFilter->getTrState() == kTrWriting){
+            JUCE_COMPILER_WARNING("#127: cannot call updateTrajectoryStartComponent(true) because we don't want to store current locations. need to use enum instead of bool");
             updateTrajectoryStartComponent(true);
             mTrWriteButton->setToggleState(true, dontSendNotification);
         }
