@@ -932,6 +932,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
                 mSpeakerVolumes[j].add(0);
             }
         }
+        mOutputs.resize(mNumberOfSpeakers);
 #else
         for (int i = 0; i < mNumberOfSources; i++) {
             for (int j = 0; j < mNumberOfSpeakers; j++){
@@ -940,6 +941,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
         }
         
 #endif
+        
         mHostChangedParameterProcessor++;
     }
     //starts audio processing again
@@ -1195,7 +1197,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
 	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
 		pBuffer.clear();
-        //maximum number of output channels when writing to internal is 2. Higher mOutputs will be ignored
+        //maximum number of output channels when writing to internal is 2. Higher outputs will be ignored
 		int outChannels = (mNumberOfSpeakers > 2) ? 2 : mNumberOfSpeakers;
         //here, e.g., internalRead12 = 2, so offset = 0, internalRead34 = 3, so offset = 2; internalRead45 = 4 so offset = 4
 		int offset = (mRoutingMode - 2) * 2;
@@ -1256,9 +1258,6 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
-            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
-            mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
-            
 #if USE_VECTORS
             JUCE_COMPILER_WARNING("protentially faster ways of doing this. do a test!")
             vector<float> &curInput = mInputsCopy[iCurChannel];
@@ -1272,6 +1271,9 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
             paramCopy[getParamForSourceX(iCurChannel)] = paramCopy[getParamForSourceX(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
             paramCopy[getParamForSourceY(iCurChannel)] = paramCopy[getParamForSourceY(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
         }
+        
+        //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
+        mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
         
         //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
 #if USE_VECTORS

@@ -988,6 +988,6 @@ VECTOR
     bullshit.
 
 ---------------- 2017-02-01 ---------------------
-active speakers: enlever push_back
+X-active speakers: enlever push_back
 enlever mSpeakerVolumes pour revenir à comment c'était avec octogris
 avant fix_116
