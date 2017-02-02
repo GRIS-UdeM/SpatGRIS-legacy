@@ -880,6 +880,13 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         mPrevRs.set(i, getSourceRT(i).x);
         mPrevTs.set(i, getSourceRT(i).y);
     }
+    
+#if !USE_VECTORS
+    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
+    for (int i = 0; i < mNumberOfSources; ++i) {
+        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
+    }
+#endif
     mHostChangedParameterProcessor++;
     
     startOrStopSourceUpdateThread();
@@ -1133,14 +1140,12 @@ void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
         curInput.resize(m_iDawBufferSize);
     }
     mOutputs.resize(mNumberOfSpeakers);
-    
-    
 #else
     //resize parameter ramps
     for (int i = 0; i < kNumberOfParameters; ++i) {
         mParameterRamps[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
     }
-    //resize inputcopy and outputs
+    //resize inputcopy
     mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
     for (int i = 0; i < mNumberOfSources; ++i) {
         mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
