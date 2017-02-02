@@ -50,9 +50,11 @@ void FieldComponent::clearTrajectoryPath(){
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){
-    float fAbsoluteX = p_fX * getWidth();
-    float fAbsoluteY = (1-p_fY) * getHeight();
-    m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
+    if(isShowing()){
+        float fAbsoluteX = p_fX * getWidth();
+        float fAbsoluteY = (1-p_fY) * getHeight();
+        m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
+    }
 }
 
 FPoint FieldComponent::getSourcePoint(int i)
