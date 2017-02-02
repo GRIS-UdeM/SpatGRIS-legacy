@@ -318,7 +318,7 @@ AudioProcessorEditor (ownerFilter)
         mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelectCombo);
         mComponents.add(mSrcSelectCombo);
         mSrcSelectCombo->addListener(this);
-        updateSources(true);
+        updateEditorSources(true);
     }
     
     // speakers
@@ -356,7 +356,7 @@ AudioProcessorEditor (ownerFilter)
         mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelectCombo);
         mComponents.add(mSpSelectCombo);
         mSpSelectCombo->addListener(this);
-        updateSpeakers(true);
+        updateEditorSpeakers(true);
     }
 
     int dh = kDefaultLabelHeight;
@@ -1275,7 +1275,8 @@ void SpatGrisAudioProcessorEditor::resized()
     mSpeakersBox->setBounds(x, y + lh, kRightColumnWidth, h - (kMargin + kParamBoxHeight + kMargin + y + lh + iExtraSpace));
 }
 
-void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
+void SpatGrisAudioProcessorEditor::updateEditorSources(bool p_bCalledFromConstructor){
+    const MessageManagerLock mmLock;
     
     //if we're not in constructor, clear source and movement constraint combos, and ensure movement constraint is valid
     if (!p_bCalledFromConstructor){
@@ -1300,7 +1301,8 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
 }
 
 
-void SpatGrisAudioProcessorEditor::updateSpeakers(bool p_bCalledFromConstructor){
+void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstructor){
+    const MessageManagerLock mmLock;
     //remove old stuff
     Component *ct = mSpeakersBox->getContent();
     for (int iCurLevelComponent = 0; iCurLevelComponent < mMuteButtons.size(); ++iCurLevelComponent){
@@ -1683,8 +1685,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         int iSelectedMode = mInputOutputModeCombo->getSelectedId();
         mFilter->setInputOutputMode(iSelectedMode);
         
-		updateSources(false);
-		updateSpeakers(false);
+		updateEditorSources(false);
+		updateEditorSpeakers(false);
         
         //if we're loading a preset, make sure we keep the current source and speaker locations
         if (m_bLoadingPreset){

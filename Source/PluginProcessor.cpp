@@ -886,11 +886,6 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
-    
-    //if new number of speakers is same as before, return
-    if (p_iNewNumberOfSpeakers == mNumberOfSpeakers){
-        return;
-    }
     mNumberOfSpeakers = p_iNewNumberOfSpeakers;
     
     if (mRoutingMode == kInternalWrite) {
@@ -1506,14 +1501,6 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 }
     
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, const int &f) {
-//#if USE_ACTIVE_SPEAKERS
-//    const Array<float> &volumes = mSpeakerVolumes[source];
-//    for (auto &curActiveSpeakerId : mActiveSpeakers){
-//        float m = 1 - mParameterRamps[getParamForSpeakerM(curActiveSpeakerId)][f];
-//        mOutputs[curActiveSpeakerId][f] += sample * volumes[curActiveSpeakerId] * m;
-//    }
-//    
-//#else
 #if USE_VECTORS
     const Array<float> &volumes = mSpeakerVolumes[source];
 #if USE_ACTIVE_SPEAKERS
@@ -1532,7 +1519,6 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
         mOutputs[o][f] += sample * volumes[o] * m;
     }
 #endif
-//#endif
 }
     
 void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &mOutputs, const int &bufferSize) {
