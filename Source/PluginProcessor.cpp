@@ -890,7 +890,6 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
             mPrevTs.set(i, getSourceRT(i).y);
             
         }
-//        updateInputOutputRampsSizes();
         mHostChangedParameterProcessor++;
     }
     
