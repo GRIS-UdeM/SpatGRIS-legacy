@@ -1526,14 +1526,11 @@ void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample
 #endif
 }
     
-void SpatGrisAudioProcessor::addBufferToOutputs(const int &source, const float *sample, vector<float*> &mOutputs, const int &bufferSize) {
-    for (int o = 0; o < mNumberOfSpeakers; ++o) {
-        float m = 1 - mParameterRamps[getParamForSpeakerM(o)][0];
-        for (int iCurSample = 0; iCurSample < bufferSize; ++iCurSample){
-            mOutputs[o][iCurSample] += sample[iCurSample] * mSpeakerVolumes[source][o] * m;
-        }
-    }
+void SpatGrisAudioProcessor::addToOutput (const float &sample, const int &speaker, const int &f){
+    float m = 1 - mParameterRamps[getParamForSpeakerM(speaker)][f];
+    mOutputs[speaker][f] += sample * m;
 }
+    
     
     
 void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const float &fOldValuesPortion){

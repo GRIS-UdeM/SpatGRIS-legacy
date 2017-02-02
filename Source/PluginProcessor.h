@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 0
+#define USE_VECTORS 1
 #endif
 
 #ifndef TIME_PROCESS
@@ -892,8 +892,8 @@ private:
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
     
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
-    void addBufferToOutputs(const int &source, const float *sample, vector<float*> &mOutputs, const int &bufferSize);
     void addToOutputs(const int &source, const float &sample, const int &f);
+    void addToOutput (const float &sample, const int &speaker, const int &f);
     void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
