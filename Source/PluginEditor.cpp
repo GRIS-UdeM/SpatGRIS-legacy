@@ -1275,7 +1275,6 @@ void SpatGrisAudioProcessorEditor::resized()
     mSpeakersBox->setBounds(x, y + lh, kRightColumnWidth, h - (kMargin + kParamBoxHeight + kMargin + y + lh + iExtraSpace));
 }
 
-JUCE_COMPILER_WARNING("what is this??? calls like this should come from the processor")
 void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     //if we're not in constructor, clear source and movement constraint combos, and ensure movement constraint is valid
@@ -1284,9 +1283,6 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
         mMovementModeCombo->clear(dontSendNotification);
         updateMovementModeCombo();
     }
-    //update number of sources in mover. this puts all sources at 0,0, ie, bottom left corner
-    m_pMover->updateNumberOfSources();
-    
 
     //if we're not in constructor, reset source placement
     if (!p_bCalledFromConstructor){
@@ -1295,8 +1291,8 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
     
     //update content of source combobox
     int index = 1;
-    int iCurSources = mFilter->getNumberOfSources();
-    for (int i = 0; i < iCurSources; i++){
+    int iNumSources = mFilter->getNumberOfSources();
+    for (int i = 0; i < iNumSources; i++){
         String s; s << i+1;
         mSrcSelectCombo->addItem(s, index++);
     }
