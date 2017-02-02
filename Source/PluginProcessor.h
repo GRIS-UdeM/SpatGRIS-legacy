@@ -50,6 +50,11 @@ using namespace std;
 #define OUTPUT_RAMPING 0
 #endif
 
+#ifndef SET_SPEAKER_VOL
+#define SET_SPEAKER_VOL 0
+#endif
+
+
 #ifndef USE_ACTIVE_SPEAKERS
 #define USE_ACTIVE_SPEAKERS 0 
 #endif
@@ -894,7 +899,7 @@ private:
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addToOutputs(const int &source, const float &sample, const int &f);
     void addToOutput (const float &sample, const int &speaker, const int &f);
-    void spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
+    void spatializeSample(const float &fCurSampleValue, const int &pISampleId, const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
     void ProcessData                (float *params);

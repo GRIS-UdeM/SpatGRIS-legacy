@@ -1531,8 +1531,6 @@ void SpatGrisAudioProcessor::addToOutput (const float &sample, const int &speake
     mOutputs[speaker][f] += sample * m;
 }
     
-    
-    
 void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const float &fOldValuesPortion){
     
     //init stuff
@@ -1661,7 +1659,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
             spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
 #else
             vector<bool> empty;
-            spatializeSample(iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
+            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
 #endif
             
 #if TIME_PROCESS
@@ -1688,7 +1686,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
 	}
 }
 
-void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
+void SpatGrisAudioProcessor::spatializeSample(const float &fCurSampleValue, const int &pISampleId, const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
     //if we're outside the main, first circle, only 2 speakers will play
     if (fCurSampleR >= 1 || mNumberOfSpeakers == 2) {
         // find left and right speakers
@@ -1708,15 +1706,22 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
             float dTotal = dLeft + dRight;
             float vLeft = 1 - dLeft / dTotal;
             float vRight = 1 - dRight / dTotal;
-            
+#if SET_SPEAKER_VOL
             setSpeakerVolume(iCurSource, vLeft,  fOldValuesPortion, left,  &vSpeakersCurrentlyInUse);
             setSpeakerVolume(iCurSource, vRight, fOldValuesPortion, right, &vSpeakersCurrentlyInUse);
+#else
+            addToOutput(fCurSampleValue * vLeft,  left, pISampleId);
+            addToOutput(fCurSampleValue * vRight,  right, pISampleId);
+#endif
         } else {
             // one side is empty!
             int o = (left >= 0) ? left : right;
             jassert(o >= 0);
-            
+#if SET_SPEAKER_VOL
             setSpeakerVolume(iCurSource, 1, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+#else
+            addToOutput(fCurSampleValue, o, pISampleId);
+#endif
         }
     }
     //if we're inside the main circle, 4 speakers will play
@@ -1749,15 +1754,22 @@ void SpatGrisAudioProcessor::spatializeSample(const int &iCurSource, const float
             float dTotal = fFrontLeftSpAngle + fFrontRightSpAngle;
             float vLeft = 1 - fFrontLeftSpAngle / dTotal;
             float vRight = 1 - fFrontRightSpAngle / dTotal;
-            //const int &source, const float &targetVolume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse) {
+#if SET_SPEAKER_VOL
             setSpeakerVolume(iCurSource, vLeft * fFrontVol, fOldValuesPortion, iFrontLeftSpID, &vSpeakersCurrentlyInUse);
             setSpeakerVolume(iCurSource, vRight * fFrontVol, fOldValuesPortion, iFrontRightSpId, &vSpeakersCurrentlyInUse);
+#else
+            addToOutput(fCurSampleValue * vLeft * fFrontVol, iFrontLeftSpID, pISampleId);
+            addToOutput(fCurSampleValue * vRight * fFrontVol, iFrontRightSpId, pISampleId);
+#endif
         } else {
             // one side is empty!
             int o = (iFrontLeftSpID >= 0) ? iFrontLeftSpID : iFrontRightSpId;
             jassert(o >= 0);
-            
+            #if SET_SPEAKER_VOL
             setSpeakerVolume(iCurSource, fFrontVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+#else
+            addToOutput(s * front, outputs, o, f);
+#endif
         }
         
         // add to back output
