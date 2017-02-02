@@ -630,6 +630,11 @@ AudioProcessorEditor (ownerFilter)
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
+        
+        if(mFilter->getTrState() == kTrWriting){
+            updateTrajectoryStartComponent(true);
+            mTrWriteButton->setToggleState(true, dontSendNotification);
+        }
        
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
@@ -2295,7 +2300,7 @@ void SpatGrisAudioProcessorEditor::audioProcessorParameterChanged(AudioProcessor
 //==============================================================================
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)
 {
-    g.fillAll (Colours::white);
+    g.fillAll (Colours::white);//Colour::fromRGB(25, 26, 27)
 }
 #if USE_JOYSTICK
 void SpatGrisAudioProcessorEditor::uncheckJoystickButton()

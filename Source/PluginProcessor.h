@@ -133,7 +133,7 @@ static const float kSpeakerDiameter = kSpeakerRadius * 2;
 //==============================================================================
 enum
 {
-    kTrReady,
+    kTrReady = 0,
     kTrWriting
 };
 
