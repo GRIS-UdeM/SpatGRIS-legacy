@@ -297,7 +297,16 @@ void FieldComponent::paint (Graphics& g)
     g.drawLine   (fCenter, fCenter, fCenter + sourceXY.x * fRadius, fCenter - sourceXY.y * fRadius, 1.5);
     float radiusZenith = sqrtf(pow(2 * sourceXY.x * fRadius,2) + pow(2 * sourceXY.y * fRadius,2));
     g.drawEllipse(fCenter - radiusZenith/2 , fCenter - radiusZenith/2, radiusZenith, radiusZenith, 1.5);
-	
+
+    float radius = kSourceRadius*1.2, diameter = kSourceDiameter*1.2;
+    FPoint pCurLoc = getSourcePoint(iSelectedSrc);
+    
+    g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
+
+    g.setColour(Colours::white);
+    radius = kSourceRadius*1.1, diameter = kSourceDiameter*1.1;
+    g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
+
 	// - - - - - - - - - - - -
 	// draw sources
 	// - - - - - - - - - - - -

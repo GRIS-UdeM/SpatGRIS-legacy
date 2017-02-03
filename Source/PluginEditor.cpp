@@ -50,7 +50,7 @@ string toString(const T &value) {
 #include "HID_Utilities_External.h"
 #endif
 
-#define TIME_THINGS 0
+#define TIME_THINGS 1
 #if TIME_THINGS
     #include <ctime>
 #endif
@@ -142,7 +142,7 @@ public:
         g.setColour(mBgColour);
         g.fillRect(box);
         g.setColour(Colours::black);
-        g.drawRect(box);
+        //g.drawRect(box);
     }
     
     void resized() {
@@ -267,13 +267,14 @@ AudioProcessorEditor (ownerFilter)
         int dh = kDefaultLabelHeight, x = 0, y = 0, w = kCenterColumnWidth;
         //SOURCE PARAMETER BOX
         mSourcesBox = new Box(true, &mGrisFeel);
+        	
         mSourcesBox->setBackgroundColour(tabBg);
         addAndMakeVisible(mSourcesBox);
         mComponents.add(mSourcesBox);
         Component *boxContent = mSourcesBox->getContent();
         //main box label
         mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
-        mSourcesBoxLabel->setColour(Label::textColourId, Colours::white);
+        mSourcesBoxLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
 
         y += 5;
         m_iSelectedSrcEditor = mFilter->getSelectedSrc();
@@ -333,7 +334,7 @@ AudioProcessorEditor (ownerFilter)
         int x = 0, y = 5, w = kRightColumnWidth;
         
         mSpeakersBoxLabel = addLabel("Output parameters:", x, y, kRightColumnWidth, kDefaultLabelHeight, this);
-        mSpeakersBoxLabel->setColour(Label::textColourId, Colours::black);
+        mSpeakersBoxLabel->setColour(Label::textColourId,mGrisFeel.getFontColour());
 
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
@@ -623,7 +624,7 @@ AudioProcessorEditor (ownerFilter)
         y += dh + 5;
         
         mTrProgressBar = new MiniProgressBar();
-        mTrProgressBar->setSize(tew, dh);
+        mTrProgressBar->setSize(cbw , dh-5);//tew
         mTrProgressBar->setTopLeftPosition(x, y);
         mTrProgressBar->setVisible(false);
         
@@ -632,7 +633,7 @@ AudioProcessorEditor (ownerFilter)
         
         
         if(mFilter->getTrState() == kTrWriting){
-            updateTrajectoryStartComponent(true);
+            updateTrajectoryStartComponent(kRunning);
             mTrWriteButton->setToggleState(true, dontSendNotification);
         }
        
@@ -1631,7 +1632,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         if (t) {
             t->stop();                              //stop it
             mFilter->setTrajectory(nullptr);        //delete it
-            updateTrajectoryStartComponent(false);  //re-activate trajectory components
+            updateTrajectoryStartComponent(kSetOff);  //re-activate trajectory components
             mFieldNeedRepaint = true;
         }
         //a trajectory does not exist, create one
@@ -1655,7 +1656,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             
             mFilter->setTrajectory(Trajectory::CreateTrajectory(properties));
             
-            updateTrajectoryStartComponent(true);
+            updateTrajectoryStartComponent(kSetOn);
         }
     }
     else if (button == mTrEndPointButton) {
@@ -2041,56 +2042,74 @@ void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Componen
     }
 }
 
-void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(bool p_bIsStarting){
-    if (p_bIsStarting){
-        mFilter->storeCurrentLocations();
-        setTrStateEditor(kTrWriting);
-        mTrProgressBar->setValue(0);
-        mFilter->setIsRecordingAutomation(true);    //this starts the source update thread
-        mTrWriteButton->setButtonText("Cancel");
-        mTrProgressBar->setVisible(true);
-    } else {
-        mFilter->setIsRecordingAutomation(false);
-        mFilter->restoreCurrentLocations(-1);
-        setTrStateEditor(kTrReady);
-        mTrWriteButton->setButtonText("Ready");
-        mTrProgressBar->setVisible(false);
+void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStatus p_bIsStarting){
+    
+    bool isStarting = false;
+    switch (p_bIsStarting){
+        case kSetOn:
+            mFilter->storeCurrentLocations();
+            setTrStateEditor(kTrWriting);
+            mTrProgressBar->setValue(0);
+            mFilter->setIsRecordingAutomation(true);    //this starts the source update thread
+            mTrWriteButton->setButtonText("Cancel");
+            mTrProgressBar->setVisible(true);
+            isStarting = true;
+            break;
+            
+        case kSetOff:
+            mFilter->setIsRecordingAutomation(false);
+            mFilter->restoreCurrentLocations(-1);
+            setTrStateEditor(kTrReady);
+            mTrWriteButton->setButtonText("Ready");
+            mTrProgressBar->setVisible(false);
+            isStarting = false;
+            break;
+            
+        case kRunning:
+            setTrStateEditor(kTrWriting);
+            mTrWriteButton->setButtonText("Cancel");
+            mTrProgressBar->setVisible(true);
+            isStarting = true;
+            break;
     }
     
-    updateSingleTrajectoryStartComponent(mTrDampeningTextEditor,    p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrDeviationTextEditor,    p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrTurnsTextEditor,        p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrEllipseWidthTextEditor, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrEndPointButton,         p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrResetEndButton,       p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrSeparateAutomationMode, p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrReturnComboBox,         p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrTypeComboBox,           p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrDuration,               p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrUnits,                  p_bIsStarting);
-    updateSingleTrajectoryStartComponent(mTrRepeats,                p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     p_bIsStarting);
-    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   p_bIsStarting);
+   
+   
+    
+    updateSingleTrajectoryStartComponent(mTrDampeningTextEditor,    isStarting);
+    updateSingleTrajectoryStartComponent(mTrDeviationTextEditor,    isStarting);
+    updateSingleTrajectoryStartComponent(mTrTurnsTextEditor,        isStarting);
+    updateSingleTrajectoryStartComponent(mTrEllipseWidthTextEditor, isStarting);
+    updateSingleTrajectoryStartComponent(mTrEndPointButton,         isStarting);
+    updateSingleTrajectoryStartComponent(m_pTrResetEndButton,       isStarting);
+    updateSingleTrajectoryStartComponent(mTrSeparateAutomationMode, isStarting);
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      isStarting);
+    updateSingleTrajectoryStartComponent(mTrReturnComboBox,         isStarting);
+    updateSingleTrajectoryStartComponent(mTrTypeComboBox,           isStarting);
+    updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      isStarting);
+    updateSingleTrajectoryStartComponent(mTrDuration,               isStarting);
+    updateSingleTrajectoryStartComponent(mTrUnits,                  isStarting);
+    updateSingleTrajectoryStartComponent(mTrRepeats,                isStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     isStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   isStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     isStarting);
+    updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   isStarting);
 }
 
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
-//#if TIME_THINGS
-//    std::ostringstream oss;
-//    clock_t init = clock();
-//#endif
+#if TIME_THINGS
+    std::ostringstream oss;
+    clock_t init = clock();
+#endif
 
     updateTrajectoryStuff();
   
-//#if TIME_THINGS
-//    clock_t timeLevels = clock();
-//    oss << "levels\t" << timeLevels - timeField << "\t";
-//#endif
+#if TIME_THINGS
+    clock_t timeLevels = clock();
+    //oss << "levels\t" << timeLevels - timeField << "\t";
+#endif
     
 #if USE_DB_METERS
     if (!mFilter->getIsRecordingAutomation()){
@@ -2101,10 +2120,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #endif
     
     
-//#if TIME_THINGS
-//    clock_t timeTraj = clock();
-//    oss << "traj\t" << timeTraj - init << "\t";
-//#endif
+#if TIME_THINGS
+    clock_t timeTraj = clock();
+    oss << "traj\t" << timeTraj - init << "\t";
+#endif
     
     if (mField->justSelectedEndPoint()){
         updateEndLocationTextEditors();
@@ -2123,10 +2142,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         propertyChanged();
     }
     
-//#if TIME_THINGS
-//    clock_t timeProperty = clock();
-//    oss << "property\t" << timeProperty - timeTraj << "\t";
-//#endif
+#if TIME_THINGS
+    clock_t timeProperty = clock();
+    oss << "property\t" << timeProperty - timeTraj << "\t";
+#endif
 
     hcpProcessor = mFilter->getHostChangedParameter();
     if (hcpProcessor != mHostChangedParameterEditor) {
@@ -2140,10 +2159,10 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mField->repaint();
     }
 
-//#if TIME_THINGS
-//    clock_t timeField = clock();
-//    oss << "field\t" << timeField - timeProperty << "\t";
-//#endif
+#if TIME_THINGS
+    clock_t timeField = clock();
+    oss << "field\t" << timeField - timeProperty << "\t";
+#endif
     
     if (mNeedRepaint){
         repaintTheStuff();
@@ -2153,11 +2172,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mOsc->heartbeat();
     }
     
-//#if TIME_THINGS
-//    clock_t timeOsc = clock();
-//    oss << "osc\t" << timeOsc - timeSpeakers;
-//    mTimingVector.push_back(oss.str());
-//#endif
+#if TIME_THINGS
+    clock_t timeOsc = clock();
+    oss << "osc\t" << timeOsc - timeField;
+    mTimingVector.push_back(oss.str());
+#endif
     
     mNeedRepaint        = false;
     mFieldNeedRepaint   = false;
@@ -2176,7 +2195,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStuff(){
                 mTrCycleCount = iCurCycle;
             }
         } else {
-            updateTrajectoryStartComponent(false);                          //re-activate trajectory components
+            updateTrajectoryStartComponent(kSetOff);                          //re-activate trajectory components
             mTrWriteButton->setToggleState(false, dontSendNotification);    //untoggle button
         }
         mFieldNeedRepaint = true;
@@ -2243,10 +2262,11 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
     mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
     
-    //#if TIME_THINGS
-    //        clock_t timeValues = clock();
-    //        oss << "Values\t" << timeValues - timeGuiTab << "\t";
-    //#endif
+    #if TIME_THINGS
+            ostringstream oss;
+            clock_t timeValues = clock();
+            oss << "Values\t" << timeValues  << "\t";
+    #endif
     
     //so these text editors will update only when we're not playing and moving stuff around
     if (!mFilter->isPlaying()){
@@ -2254,10 +2274,10 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         updateSpeakerLocationTextEditor();
     }
     
-    //#if TIME_THINGS
-    //        clock_t timeTextEd = clock();
-    //        oss << "TextEd\t" << timeTextEd - timeValues << "\t";
-    //#endif
+    #if TIME_THINGS
+            clock_t timeTextEd = clock();
+            oss << "TextEd\t" << timeTextEd - timeValues << "\t";
+    #endif
     
     //update sliders and mute, these could be automated
     int iSelSrc = mFilter->getSelectedSrc();
@@ -2278,10 +2298,10 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         mMuteButtons.getUnchecked(i)->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
     }
     
-    //#if TIME_THINGS
-    //        clock_t timeSpeakers = clock();
-    //        oss << "Speakers\t" << timeSpeakers - timeSources << "\t";
-    //#endif
+    #if TIME_THINGS
+            clock_t timeSpeakers = clock();
+            oss << "Speakers\t" << timeSpeakers - timeTextEd << "\t";
+    #endif
 }
 
 void SpatGrisAudioProcessorEditor::audioProcessorChanged (AudioProcessor* processor){

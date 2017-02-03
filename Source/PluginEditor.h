@@ -66,6 +66,12 @@ enum placement{
 
 };
 
+enum trajectoryStatus{
+    kSetOn = 0,
+    kSetOff,
+    kRunning,
+};
+
 class MiniProgressBar;
 class ParamSliderGRIS;
 class OctTabbedComponent;
@@ -273,7 +279,7 @@ private:
     void updateSpeakerLocationTextEditor();
     void updateMovementModeCombo();
     void updateTrajectoryTypeComponents();
-    void updateTrajectoryStartComponent(bool p_bIsStarting);
+    void updateTrajectoryStartComponent(trajectoryStatus p_bIsStarting);
     void updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting);
     void updateEndLocationTextEditors();
     void updateInputOutputCombo();
