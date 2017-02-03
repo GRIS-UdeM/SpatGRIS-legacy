@@ -991,3 +991,12 @@ VECTOR
 X-active speakers: enlever push_back
 enlever mSpeakerVolumes pour revenir à comment c'était avec octogris
 avant fix_116
+
+MEETING
+vb: faire version performante plus vite possible
+testeurs: tester à fond
+david: video avec script
+sourcefogrge spatgris (download simple + download bundle avec soundflower/jack/zirkonium)
+est-ce qu'on peut distribuer jack?
+automation de modes de mouvements: empècher lecture entre les valeurs. 0.25 = .249999 à .2500001
+
