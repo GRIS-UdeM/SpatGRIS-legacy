@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 1
+#define USE_VECTORS 0
 #endif
 
 #ifndef TIME_PROCESS
@@ -779,6 +779,8 @@ public:
     void startOrStopSourceUpdateThread();
 	
 private:
+    
+    bool isKnownHost();
     void updateInputOutputRampsSizes();
 
 	bool m_bAllowInputOutputModeSelection;
@@ -860,14 +862,18 @@ private:
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
     vector<float*> mOutputs;
-    Array<Array<float>> mSpeakerVolumes;
+    #if SET_SPEAKER_VOL
+        Array<Array<float>> mSpeakerVolumes;
+    #endif
     vector<vector<float>> mParameterRamps;
 #else
     JUCE_COMPILER_WARNING("the first dimension of mInputsCopy could be constant of 8")
     unique_ptr< unique_ptr<float[]>[] > mInputsCopy;
     unique_ptr<float[]> mParameterRamps[kNumberOfParameters];
     float* mOutputs[16];
-    float mSpeakerVolumes[8][16];
+    #if SET_SPEAKER_VOL
+        float mSpeakerVolumes[8][16];
+    #endif
 #endif
     
     
@@ -895,9 +901,10 @@ private:
     void setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues);
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
-    
+#if SET_SPEAKER_VOL
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addToOutputs(const int &source, const float &sample, const int &f);
+#endif
     void addToOutput (const float &sample, const int &speaker, const int &f);
     void spatializeSample(const float &fCurSampleValue, const int &pISampleId, const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
     
