@@ -61,10 +61,9 @@ public:
     void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
     bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
     
+    bool isDestructed(){ return bIsDestructed;}
     
-    bool isDestructed(){
-        return bIsDestructed;
-    }
+    
 private:
 	SpatGrisAudioProcessor *mFilter;
 	SourceMover *m_pMover;
