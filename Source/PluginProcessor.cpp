@@ -511,7 +511,7 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
 }
 
 
-void SpatGrisAudioProcessor::setParameterInternal (int index, float newValue){
+void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float &newValue){
     
     //unknown host is logic's au eval tool. we just shouldn't get here with that.
     if (!isKnownHost()){
@@ -523,9 +523,9 @@ void SpatGrisAudioProcessor::setParameterInternal (int index, float newValue){
         return;
     }
     if (!areSameParameterValues(fOldValue, newValue)){
-        if (newValue == 0){
-            DBG("#54: TRYING TO SET PARAMETER " << getParameterName(index) << " TO ZERO");
-            //return;
+        if (newValue == 0 && isSourceLocationParameter(index)){
+            DBG("#54: TRYING TO SET PARAMETER " << index << " " << getParameterName(index) << " TO ZERO");
+            return;
         }
         
         mParameters.set(index, newValue);
@@ -558,6 +558,15 @@ void SpatGrisAudioProcessor::setParameterInternal (int index, float newValue){
         }
         ++mHostChangedParameterProcessor;
     }
+}
+
+bool SpatGrisAudioProcessor::isSourceLocationParameter(const int &index){
+    for (int iCurSource = 0; iCurSource < mNumberOfSources; ++iCurSource) {
+        if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource)){
+            return true;
+        }
+    }
+    return false;
 }
 
 

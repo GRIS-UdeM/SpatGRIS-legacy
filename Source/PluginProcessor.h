@@ -47,7 +47,7 @@ using namespace std;
 #endif
 
 #ifndef TIME_PROCESS
-#define TIME_PROCESS 1
+#define TIME_PROCESS 0
 #endif
 
 #ifndef USE_TOUCH_OSC
@@ -316,8 +316,9 @@ public:
     const String getName() const;
 
     void setParameter (int index, float newValue);
-    void setParameterInternal (int index, float newValue);
+    void setParameterInternal (const int &index, const float &newValue);
     void setParameterNotifyingHost (int index, float newValue);
+    bool isSourceLocationParameter(const int &index);
 
     
     int             getNumParameters();
