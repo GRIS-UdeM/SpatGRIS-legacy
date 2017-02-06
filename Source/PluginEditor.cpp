@@ -2316,8 +2316,7 @@ void SpatGrisAudioProcessorEditor::audioProcessorParameterChanged(AudioProcessor
 //==============================================================================
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)
 {
-    
-    g.fillAll (mGrisFeel.getBackgroundColour());//Colour::fromRGB(25, 26, 27)
+    g.fillAll (mGrisFeel.getWinBackgroundColour());
 }
 #if USE_JOYSTICK
 void SpatGrisAudioProcessorEditor::uncheckJoystickButton()
