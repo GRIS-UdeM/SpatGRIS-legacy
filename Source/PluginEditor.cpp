@@ -1291,7 +1291,10 @@ void SpatGrisAudioProcessorEditor::updateSources(bool p_bCalledFromConstructor){
         updateMovementModeCombo();
     }
     //update number of sources in mover. this puts all sources at 0,0, ie, bottom left corner
-    m_pMover->updateNumberOfSources();
+    if(!p_bCalledFromConstructor){
+        m_pMover->updateNumberOfSources();
+    }
+    
     
 
     //if we're not in constructor, reset source placement
