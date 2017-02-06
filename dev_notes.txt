@@ -1007,18 +1007,9 @@ SPATGRIS CODE
     between a set and get
 
 ---------------- 2017-02-06 --------------------
-SET_SPEAKER_VOL not working when not using vectors
-    apparently it is working now...? this is probably an intermittent problem
-logic AU test not working
-    
-r
-q
-s
-r
-q
-q
-
-q
-p
-r
---------------- 
+X-SET_SPEAKER_VOL not working when not using vectors
+    apparently it is working now...? 
+X-logic AU test not working
+X-compare times
+    with no output ramping, no setSpeakerVol, no active speakers, using vectors or not is the same
+    using active speakers or not is also the same. i think we have micro-optimized everything we need to micro optimize in the audio processing algo. Next thing would be to rethink the main loops 

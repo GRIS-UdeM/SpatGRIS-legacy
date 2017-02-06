@@ -33,13 +33,12 @@
 #include <memory>
 using namespace std;
 
-
 #ifndef USE_DB_METERS
 #define USE_DB_METERS 1
 #endif
 
 #ifndef USE_VECTORS
-#define USE_VECTORS 0
+#define USE_VECTORS 1
 #endif
 
 #ifndef TIME_PROCESS
@@ -54,9 +53,8 @@ using namespace std;
 #define SET_SPEAKER_VOL 0
 #endif
 
-
 #ifndef USE_ACTIVE_SPEAKERS
-#define USE_ACTIVE_SPEAKERS 0 
+#define USE_ACTIVE_SPEAKERS 1
 #endif
 
 #ifndef USE_TOUCH_OSC
