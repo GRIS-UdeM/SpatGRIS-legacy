@@ -891,10 +891,10 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     }
     
 #if !USE_VECTORS
-    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
-    for (int i = 0; i < mNumberOfSources; ++i) {
-        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-    }
+//    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
+//    for (int i = 0; i < mNumberOfSources; ++i) {
+//        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
+//    }
 #endif
     mHostChangedParameterProcessor++;
     
@@ -1155,15 +1155,15 @@ void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
     }
     mOutputs.resize(mNumberOfSpeakers);
 #else
-    //resize parameter ramps
-    for (int i = 0; i < kNumberOfParameters; ++i) {
-        mParameterRamps[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-    }
-    //resize inputcopy
-    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
-    for (int i = 0; i < mNumberOfSources; ++i) {
-        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-    }
+//    //resize parameter ramps
+//    for (int i = 0; i < kNumberOfParameters; ++i) {
+//        mParameterRamps[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
+//    }
+//    //resize inputcopy
+//    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
+//    for (int i = 0; i < mNumberOfSources; ++i) {
+//        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
+//    }
 #endif
 }
 
@@ -1260,7 +1260,8 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
                 curInput[iCurSample] = pBuffer.getSample(iCurChannel, iCurSample);
             }
 #else
-            memcpy(mInputsCopy[iCurChannel].get(), pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
+            jassert(m_iDawBufferSize <= kMaxBufferSize);
+            memcpy(mInputsCopy[iCurChannel], pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
 #endif
             //denormalize source position
             paramCopy[getParamForSourceX(iCurChannel)] = paramCopy[getParamForSourceX(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
@@ -1327,7 +1328,7 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
 #if USE_VECTORS
         float *ramp         = mParameterRamps[kRoutingVolume].data();
 #else
-        float *ramp         = mParameterRamps[kRoutingVolume].get();
+        float *ramp         = mParameterRamps[kRoutingVolume];
 #endif
 		const float smooth  = denormalize(kSmoothMin, kSmoothMax, paramCopy[kSmooth]); // milliseconds
 		const float sm_o    = powf(0.01f, 1000.f / (smooth * m_dSampleRate));
@@ -1615,8 +1616,8 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
         float *xCurSource = mParameterRamps[getParamForSourceX(iCurSource)].data();
         float *yCurSource = mParameterRamps[getParamForSourceY(iCurSource)].data();
 #else
-        float *xCurSource = mParameterRamps[getParamForSourceX(iCurSource)].get();
-        float *yCurSource = mParameterRamps[getParamForSourceY(iCurSource)].get();
+        float *xCurSource = mParameterRamps[getParamForSourceX(iCurSource)];
+        float *yCurSource = mParameterRamps[getParamForSourceY(iCurSource)];
 #endif
 
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
@@ -1879,10 +1880,10 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
         float *input_y = mParameterRamps[getParamForSourceY(i)].data();
         float *input_d = mParameterRamps[getParamForSourceD(i)].data();
 #else
-        float *input = mInputsCopy[i].get();
-        float *input_x = mParameterRamps[getParamForSourceX(i)].get();
-        float *input_y = mParameterRamps[getParamForSourceY(i)].get();
-        float *input_d = mParameterRamps[getParamForSourceD(i)].get();
+        float *input = mInputsCopy[i];
+        float *input_x = mParameterRamps[getParamForSourceX(i)];
+        float *input_y = mParameterRamps[getParamForSourceY(i)];
+        float *input_d = mParameterRamps[getParamForSourceD(i)];
 #endif
         
         for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
@@ -2012,7 +2013,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
 #if USE_VECTORS
         float *ramp         = mParameterRamps[i].data();
 #else
-        float *ramp         = mParameterRamps[i].get();
+        float *ramp         = mParameterRamps[i];
 #endif
         
 		for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
@@ -2031,9 +2032,9 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
         float *output_y = mParameterRamps[getParamForSpeakerY(o)].data();
         float *output_m = mParameterRamps[getParamForSpeakerM(o)].data();
 #else
-        float *output_x = mParameterRamps[getParamForSpeakerX(o)].get();
-        float *output_y = mParameterRamps[getParamForSpeakerY(o)].get();
-        float *output_m = mParameterRamps[getParamForSpeakerM(o)].get();
+        float *output_x = mParameterRamps[getParamForSpeakerX(o)];
+        float *output_y = mParameterRamps[getParamForSpeakerY(o)];
+        float *output_m = mParameterRamps[getParamForSpeakerM(o)];
 #endif
         vector<float> output_adj(m_iDawBufferSize, 0);
         for (unsigned int f = 0; f < m_iDawBufferSize; f++){
@@ -2048,10 +2049,10 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
             float *input_y = mParameterRamps[getParamForSourceY(i)].data();
             float *input_d = mParameterRamps[getParamForSourceD(i)].data();
 #else
-            float *input = mInputsCopy[i].get();
-            float *input_x = mParameterRamps[getParamForSourceX(i)].get();
-            float *input_y = mParameterRamps[getParamForSourceY(i)].get();
-            float *input_d = mParameterRamps[getParamForSourceD(i)].get();
+            float *input = mInputsCopy[i];
+            float *input_x = mParameterRamps[getParamForSourceX(i)];
+            float *input_y = mParameterRamps[getParamForSourceY(i)];
+            float *input_d = mParameterRamps[getParamForSourceD(i)];
 #endif
             
             for (unsigned int f = 0; f < m_iDawBufferSize; f++){

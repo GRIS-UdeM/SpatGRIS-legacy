@@ -867,9 +867,11 @@ private:
     #endif
     vector<vector<float>> mParameterRamps;
 #else
-    JUCE_COMPILER_WARNING("the first dimension of mInputsCopy could be constant of 8")
-    unique_ptr< unique_ptr<float[]>[] > mInputsCopy;
-    unique_ptr<float[]> mParameterRamps[kNumberOfParameters];
+#define kMaxChannels  (16)
+#define kMaxBufferSize (4096)
+    float mInputsCopy[16][kMaxBufferSize];
+    float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
+    
     float* mOutputs[16];
     #if SET_SPEAKER_VOL
         float mSpeakerVolumes[8][16];
