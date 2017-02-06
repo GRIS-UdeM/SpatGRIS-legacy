@@ -50,7 +50,7 @@ void FieldComponent::clearTrajectoryPath(){
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){
-    if(isShowing()){
+    if(this->getParentComponent() != nullptr){
         float fAbsoluteX = p_fX * getWidth();
         float fAbsoluteY = (1-p_fY) * getHeight();
         m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
@@ -298,13 +298,13 @@ void FieldComponent::paint (Graphics& g)
     float radiusZenith = sqrtf(pow(2 * sourceXY.x * fRadius,2) + pow(2 * sourceXY.y * fRadius,2));
     g.drawEllipse(fCenter - radiusZenith/2 , fCenter - radiusZenith/2, radiusZenith, radiusZenith, 1.5);
 
-    float radius = kSourceRadius*1.2, diameter = kSourceDiameter*1.2;
+    float radius = kSourceRadius*1.22, diameter = kSourceDiameter*1.22;
     FPoint pCurLoc = getSourcePoint(iSelectedSrc);
-    
+    g.setColour(Colours::whitesmoke);
     g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
 
     g.setColour(Colours::white);
-    radius = kSourceRadius*1.1, diameter = kSourceDiameter*1.1;
+    radius = kSourceRadius*1.12, diameter = kSourceDiameter*1.12;
     g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
 
 	// - - - - - - - - - - - -
@@ -332,7 +332,7 @@ void FieldComponent::paint (Graphics& g)
 		g.setColour(Colour::fromHSV(hue, 1, 1, 1));
 		g.fillEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter);
 		
-		g.setColour(Colours::red);
+		g.setColour(Colours::black);
 		g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 1);
 		
 		String s;
@@ -357,7 +357,9 @@ void FieldComponent::paint (Graphics& g)
         for (int iCurPoint = 1; iCurPoint < m_dqAllPathPoints.size(); ++iCurPoint){
             trajectoryPath.lineTo (m_dqAllPathPoints[iCurPoint].x, m_dqAllPathPoints[iCurPoint].y);
         }
-        g.setColour(Colour(0, 102, 255));
+        float hue = (float)mFilter->getSelectedSrc() / mFilter->getNumberOfSources() + 0.577251;
+        g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
+        //g.setColour(Colour(0, 102, 255));
         g.strokePath (trajectoryPath, PathStrokeType (2.0f, PathStrokeType::JointStyle::curved));
     }
     
