@@ -463,7 +463,6 @@ int SpatGrisAudioProcessor::getNumParameters() {
 }
 
 float SpatGrisAudioProcessor::getParameter (int index) {
-//    cout << "getting param " << index << " == " << mParameters[index] << endl;
     return mParameters[index];
 }
 
@@ -495,7 +494,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     
     //unknown host is logic's au eval tool
     if (!isKnownHost()){
-//        cout << "setting param " << index << " to " << newValue << endl;
         mParameters.set(index, newValue);
         return;
     }
@@ -506,7 +504,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
             if (iCurSource != getSelectedSrc()){
                 if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource) ||
                     index == getParamForSourceAzimSpan(iCurSource) || index == getParamForSourceElevSpan(iCurSource)) {
-                    cout << "return from setParameter" << endl;
                     return;
                 }
             }
