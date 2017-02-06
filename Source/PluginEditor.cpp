@@ -1288,13 +1288,12 @@ void SpatGrisAudioProcessorEditor::updateEditorSources(bool p_bCalledFromConstru
         mSrcSelectCombo->clear(dontSendNotification);
         mMovementModeCombo->clear(dontSendNotification);
         updateMovementModeCombo();
-    }
-
-    //if we're not in constructor, reset source placement
-    if (!p_bCalledFromConstructor){
+        //update number of sources in mover. this puts all sources at 0,0, ie, bottom left corner
+        m_pMover->updateNumberOfSources();
+        //if we're not in constructor, reset source placement
         buttonClicked(mApplySrcPlacementButton);
     }
-    
+
     //update content of source combobox
     int index = 1;
     int iNumSources = mFilter->getNumberOfSources();
