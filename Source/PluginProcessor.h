@@ -33,6 +33,7 @@
 #include <memory>
 using namespace std;
 
+
 #ifndef USE_DB_METERS
 #define USE_DB_METERS 1
 #endif
@@ -41,16 +42,12 @@ using namespace std;
 #define USE_VECTORS 1
 #endif
 
-#ifndef TIME_PROCESS
-#define TIME_PROCESS 0
-#endif
-
 #ifndef OUTPUT_RAMPING
 #define OUTPUT_RAMPING 0
 #endif
 
-#ifndef SET_SPEAKER_VOL
-#define SET_SPEAKER_VOL 0
+#ifndef TIME_PROCESS
+#define TIME_PROCESS 1
 #endif
 
 #ifndef USE_TOUCH_OSC
@@ -856,7 +853,7 @@ private:
 #if USE_VECTORS
     vector<vector<float>> mInputsCopy;
     vector<float*> mOutputs;
-    #if SET_SPEAKER_VOL
+    #if OUTPUT_RAMPING
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
@@ -867,7 +864,7 @@ private:
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
     
     float* mOutputs[16];
-    #if SET_SPEAKER_VOL
+    #if OUTPUT_RAMPING
         float mSpeakerVolumes[8][16];
     #endif
 #endif
@@ -897,7 +894,7 @@ private:
     void setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues);
 	
 	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
-#if SET_SPEAKER_VOL
+#if OUTPUT_RAMPING
     void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
     void addToOutputs(const int &source, const float &sample, const int &f);
 #endif
