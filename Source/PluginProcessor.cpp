@@ -235,16 +235,12 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
     
-
-
-    
 	mCalculateLevels = 0;
 	mApplyFilter = true;
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
 	setMovementMode(0, false);
-    
     
 	mShowGridLines  = false;
     m_bOscActive    = true;
@@ -307,7 +303,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
-
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
@@ -497,13 +492,21 @@ bool SpatGrisAudioProcessor::isKnownHost(){
 }
 
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
+    
+    //unknown host is logic's au eval tool
+    if (!isKnownHost()){
+//        cout << "setting param " << index << " to " << newValue << endl;
+        mParameters.set(index, newValue);
+        return;
+    }
+    
     //return if mode is non-indedent and DAW is attempting to set position or azim/elev span for non-selected source
-    if (isKnownHost() && getMovementMode() != Independent){
+    if (getMovementMode() != Independent){
         for (int iCurSource = 0; iCurSource < getNumberOfSources(); ++iCurSource){
             if (iCurSource != getSelectedSrc()){
                 if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource) ||
                     index == getParamForSourceAzimSpan(iCurSource) || index == getParamForSourceElevSpan(iCurSource)) {
-//                    cout << "return from setParameter\n";
+                    cout << "return from setParameter" << endl;
                     return;
                 }
             }
@@ -515,24 +518,24 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
 
 void SpatGrisAudioProcessor::setParameterInternal (int index, float newValue){
     
-    float fOldValue = mParameters.getUnchecked(index);
-    if (isKnownHost()){
-        if (index == kMovementMode && !isNewMovementMode(newValue)){
-//            cout << "return from setParameterInternal\n";
-            return;
-        }
+    //unknown host is logic's au eval tool. we just shouldn't get here with that.
+    if (!isKnownHost()){
+        return;
     }
     
-    if (!isKnownHost() || !areSameParameterValues(fOldValue, newValue)){
+    float fOldValue = mParameters.getUnchecked(index);
+    if (index == kMovementMode && !isNewMovementMode(newValue)){
+        return;
+    }
+    if (!areSameParameterValues(fOldValue, newValue)){
         if (newValue == 0){
             DBG("#54: TRYING TO SET PARAMETER " << getParameterName(index) << " TO ZERO");
             //return;
         }
         
-//        cout << "setting param " << index << " to " << newValue << endl;
         mParameters.set(index, newValue);
         
-        if (isKnownHost() && index == kMovementMode && m_pMover){
+        if (index == kMovementMode && m_pMover){
             m_pMover->storeAllDownPositions();
             startOrStopSourceUpdateThread();
         }

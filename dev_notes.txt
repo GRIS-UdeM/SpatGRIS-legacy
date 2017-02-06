@@ -1005,3 +1005,20 @@ SPATGRIS CODE
 *reaper sometimes crash because of a leaking messagemanager
 *logic AU test fails because of some parameter (prob movement mode) that changes values 
     between a set and get
+
+---------------- 2017-02-06 --------------------
+SET_SPEAKER_VOL not working when not using vectors
+    apparently it is working now...? this is probably an intermittent problem
+logic AU test not working
+    
+r
+q
+s
+r
+q
+q
+
+q
+p
+r
+--------------- 
