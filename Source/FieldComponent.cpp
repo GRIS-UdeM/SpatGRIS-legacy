@@ -50,7 +50,7 @@ void FieldComponent::clearTrajectoryPath(){
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){
-    if(this->getParentComponent() != nullptr){
+    if(this->getParentComponent() != nullptr && isShowing()){
         float fAbsoluteX = p_fX * getWidth();
         float fAbsoluteY = (1-p_fY) * getHeight();
         m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
@@ -61,41 +61,48 @@ FPoint FieldComponent::getSourcePoint(int i)
 {
 	const int fieldWidth = getWidth();
 	FPoint p = mFilter->getSourceXY01(i);
-	float x = p.x * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	float y = p.y * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	return FPoint(x, fieldWidth - y);
+	//float x = p.x * (fieldWidth - kSourceDiameter) + kSourceRadius;
+	//float y = p.y * (fieldWidth - kSourceDiameter) + kSourceRadius;
+	return FPoint((p.x * (fieldWidth - kSourceDiameter) + kSourceRadius), fieldWidth - (p.y * (fieldWidth - kSourceDiameter) + kSourceRadius));
 }
 //this is NOT a duplicate of one of the convert functions in processor.h
 FPoint FieldComponent::convertSourceRT(float r, float t)
 {
 	const int fieldWidth = getWidth();
 	FPoint p(r * cosf(t), r * sinf(t));
-	float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	return FPoint(x, fieldWidth - y);
+	//float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
+	//float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
+	return FPoint((((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius), fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius));
 }
 
 FPoint FieldComponent::getSpeakerPoint(int i)
 {
 	const int fieldWidth = getWidth();
 	FPoint p = mFilter->getSpeakerXY(i);
-	float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
-	float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
-	return FPoint(x, fieldWidth - y);
+	//float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
+	//float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
+    return FPoint(((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius, fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius));
 }
 
 float FieldComponent::getDistance(int source, int speaker)
 {
-	FPoint i = mFilter->getSourceXY(source);
-	FPoint o = mFilter->getSpeakerXY(speaker);
-	return i.getDistanceFrom(o);
+	//FPoint i = mFilter->getSourceXY(source);
+	//FPoint o = mFilter->getSpeakerXY(speaker);
+	return mFilter->getSourceXY(source).getDistanceFrom(mFilter->getSpeakerXY(speaker));
 }
 
 void FieldComponent::paint (Graphics& g)
 {
-	int fieldWidth = getWidth();
-	int fieldHeight = getHeight();
-	int processMode = mFilter->getProcessMode();
+    String stringVal;
+	const int fieldWidth = getWidth();
+	const int fieldHeight = getHeight();
+	const int processMode = mFilter->getProcessMode();
+    float hue = 0.0;
+    float hueSelect = 0.0;
+    float w, x;
+    float radius, diameter;
+    float fFieldCenter = fieldWidth/2;
+    FPoint pCurLoc;
 	
     g.setColour(mGrisFeel.getFieldColour());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
@@ -106,8 +113,8 @@ void FieldComponent::paint (Graphics& g)
 	g.setColour(mGrisFeel.getLightColour());
     int iCurRadius = (processMode == kOscSpatMode) ? kRadiusMax : 1;
 	for (; iCurRadius <= kRadiusMax; ++iCurRadius) {
-		float w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
-		float x = (fieldWidth - w) / 2;
+		w = (iCurRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
+		x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 	}
     
@@ -115,8 +122,8 @@ void FieldComponent::paint (Graphics& g)
     // draw small, center background circles
     // - - - - - - - - - - - -
 	if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
-		float w = (kThetaLockRampRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
-		float x = (fieldWidth - w) / 2;
+		w = (kThetaLockRampRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
+		x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 		
 	}
@@ -137,7 +144,7 @@ void FieldComponent::paint (Graphics& g)
     // - - - - - - - - - - - -
     if(processMode == kOscSpatMode){
         g.setColour(Colours::white);
-        g.drawLine(fieldWidth/2, kSourceRadius, fieldWidth/2, fieldHeight-kSourceRadius);
+        g.drawLine(fFieldCenter, kSourceRadius, fFieldCenter, fieldHeight-kSourceRadius);
         g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
     }
     
@@ -145,142 +152,155 @@ void FieldComponent::paint (Graphics& g)
 	// draw translucid circles
 	// - - - - - - - - - - - -
     const float adj_factor = 1 / sqrtf(2);
-    if (processMode == kFreeVolumeMode){
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-            float sourceDist = mFilter->getDenormedSourceD(i);
-            float reachDist = 1 / (adj_factor * sourceDist);
-            
-            float radius = (reachDist / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter);
-            float diameter = radius * 2;
-            
-            FPoint p = getSourcePoint(i);
-            
-            float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
-            if (hue > 1) hue -= 1;
-            
-            g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
-            g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
-            g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
-            g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
-        }
-    } else if (processMode == kPanSpanMode){
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-            float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
-            if (hue > 1){
-                hue -= 1;
+    
+    switch (processMode){
+        case kFreeVolumeMode:
+            for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                
+                const float reachDist = 1 / (adj_factor * mFilter->getDenormedSourceD(i));
+                
+                radius = (reachDist / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter);
+                const float diameter = radius * 2;
+                
+                pCurLoc = getSourcePoint(i);
+                
+                hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
+                if (hue > 1){
+                    hue -= 1;
+                }
+                
+                g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
+                g.fillEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter);
+                g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
+                g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 1);
             }
-            FPoint rt = mFilter->getSourceRT(i);
-            float r = rt.x;
-            float angle = mFilter->getSourceD(i) * M_PI;
-            float t[2] = { rt.y + angle, rt.y - angle };
+            break;
             
-            float fs = fieldWidth - kSourceDiameter;
-            float x = fs*0.25 + kSourceRadius;
-            float y = fs*0.25 + kSourceRadius;
-            float w = fs*0.5;
-            float h = fs*0.5;
-            float r1 = 0.5*M_PI-t[0];
-            float r2 = 0.5*M_PI-t[1];
-            float ir = (r >= .999) ? 2 : 0;
-            
-            if (r >= .999) {
-                g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f));
-                Path p;
-                p.addPieSegment(x, y, w, h, r1, r2, ir);
-                g.fillPath(p);
-            } else {
-                float front = r * 0.5f + 0.5f;
-                float back = 1 - front;
-                {
-                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * front));
+        case kPanSpanMode:
+            for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
+                if (hue > 1){
+                    hue -= 1;
+                }
+                FPoint rt = mFilter->getSourceRT(i);
+                float r = rt.x;
+                float angle = mFilter->getSourceD(i) * M_PI;
+                float t[2] = { rt.y + angle, rt.y - angle };
+                
+                float fs = fieldWidth - kSourceDiameter;
+                float x = fs*0.25 + kSourceRadius;
+                float y = fs*0.25 + kSourceRadius;
+                float w = fs*0.5;
+                float h = fs*0.5;
+                float r1 = 0.5*M_PI-t[0];
+                float r2 = 0.5*M_PI-t[1];
+                float ir = (r >= .999) ? 2 : 0;
+                
+                if (r >= .999) {
+                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f));
                     Path p;
                     p.addPieSegment(x, y, w, h, r1, r2, ir);
                     g.fillPath(p);
+                } else {
+                    float front = r * 0.5f + 0.5f;
+                    float back = 1 - front;
+                    {
+                        g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * front));
+                        Path p;
+                        p.addPieSegment(x, y, w, h, r1, r2, ir);
+                        g.fillPath(p);
+                    }
+                    {
+                        g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * back));
+                        Path p;
+                        p.addPieSegment(x, y, w, h, r1 + M_PI, r2 + M_PI, ir);
+                        g.fillPath(p);
+                    }
                 }
-                {
-                    g.setColour(Colour::fromHSV(hue, 1, 1, 0.4f * back));
-                    Path p;
-                    p.addPieSegment(x, y, w, h, r1 + M_PI, r2 + M_PI, ir);
-                    g.fillPath(p);
+            }
+            break;
+            
+        case kOscSpatMode:
+            for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
+                if (hue > 1){
+                    hue -= 1;
                 }
+                float HRAzimSpan = 360*mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,360]
+                float HRElevSpan = 90 *mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,90]
+                
+                //get current azim+elev in angles
+                FPoint azimElev = mFilter->getSourceAzimElev(i, true);  //azim is [-1,1],  elevation is [0,.5]
+                float HRAzim = azimElev.x * 180;   //in zirkosc [-180,180]
+                float HRElev = azimElev.y * 180;   //in zirkosc [0,89.9999]
+                
+                //calculate max and min elevation in degrees
+                Point<float> maxElev = {HRAzim, HRElev+HRElevSpan/2};
+                Point<float> minElev = {HRAzim, HRElev-HRElevSpan/2};
+                
+                if(minElev.getY() < 0){
+                    maxElev.setY(maxElev.getY() - minElev.getY());
+                    minElev.setY(0);
+                }
+                
+                //convert max min elev to xy
+                Point<float> screenMaxElev = degreeToXy(maxElev, fieldWidth);
+                Point<float> screenMinElev = degreeToXy(minElev, fieldWidth);
+                
+                //form minmax elev, calculate minmax radius
+                float maxRadius = sqrtf(screenMaxElev.getX()*screenMaxElev.getX() + screenMaxElev.getY()*screenMaxElev.getY());
+                float minRadius = sqrtf(screenMinElev.getX()*screenMinElev.getX() + screenMinElev.getY()*screenMinElev.getY());
+                
+                //drawing the path for spanning
+                Path myPath;
+                float x = screenMinElev.getX();
+                float y = screenMinElev.getY();
+                
+                myPath.startNewSubPath(fFieldCenter+x,fFieldCenter+y);
+                
+                //half first arc center
+                myPath.addCentredArc(    fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim),                      degreeToRadian(-HRAzim + HRAzimSpan/2 ));
+                
+                if (maxElev.getY() > 90.f) { // if we are over the top of the dome we draw the adjacent angle
+                    myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, M_PI+degreeToRadian(-HRAzim + HRAzimSpan/2),  M_PI+degreeToRadian(-HRAzim - HRAzimSpan/2));
+                } else {
+                    myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, degreeToRadian(-HRAzim+HRAzimSpan/2),         degreeToRadian(-HRAzim-HRAzimSpan/2));
+                }
+                myPath.addCentredArc    (fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim-HRAzimSpan/2),         degreeToRadian(-HRAzim));
+                myPath.closeSubPath();
+                
+                g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
+                g.fillPath(myPath);
+                g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
+                PathStrokeType strokeType = PathStrokeType(2.5);
+                g.strokePath(myPath, strokeType);
             }
-        }
-    } else if (processMode == kOscSpatMode){
-        for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-            float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
-            if (hue > 1){
-                hue -= 1;
-            }
-            float HRAzimSpan = 360*mFilter->getSourceAzimSpan01(i);  //in zirkosc, this is [0,360]
-            float HRElevSpan = 90 *mFilter->getSourceElevSpan01(i);  //in zirkosc, this is [0,90]
-            
-            //get current azim+elev in angles
-            FPoint azimElev = mFilter->getSourceAzimElev(i, true);  //azim is [-1,1],  elevation is [0,.5]
-            float HRAzim = azimElev.x * 180;   //in zirkosc [-180,180]
-            float HRElev = azimElev.y * 180;   //in zirkosc [0,89.9999]
- 
-            //calculate max and min elevation in degrees
-            Point<float> maxElev = {HRAzim, HRElev+HRElevSpan/2};
-            Point<float> minElev = {HRAzim, HRElev-HRElevSpan/2};
-            
-            if(minElev.getY() < 0){
-                maxElev.setY(maxElev.getY() - minElev.getY());
-                minElev.setY(0);
-            }
-            
-            //convert max min elev to xy
-            Point<float> screenMaxElev = degreeToXy(maxElev, fieldWidth);
-            Point<float> screenMinElev = degreeToXy(minElev, fieldWidth);
-            
-            //form minmax elev, calculate minmax radius
-            float maxRadius = sqrtf(screenMaxElev.getX()*screenMaxElev.getX() + screenMaxElev.getY()*screenMaxElev.getY());
-            float minRadius = sqrtf(screenMinElev.getX()*screenMinElev.getX() + screenMinElev.getY()*screenMinElev.getY());
-            
-            //drawing the path for spanning
-            Path myPath;
-            float x = screenMinElev.getX();
-            float y = screenMinElev.getY();
-            float fFieldCenter = fieldWidth/2;
-            myPath.startNewSubPath(fFieldCenter+x,fFieldCenter+y);
-            
-            //half first arc center
-            myPath.addCentredArc(    fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim),                      degreeToRadian(-HRAzim + HRAzimSpan/2 ));
-            
-            if (maxElev.getY() > 90.f) { // if we are over the top of the dome we draw the adjacent angle
-                myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, M_PI+degreeToRadian(-HRAzim + HRAzimSpan/2),  M_PI+degreeToRadian(-HRAzim - HRAzimSpan/2));
-            } else {
-                myPath.addCentredArc(fFieldCenter, fFieldCenter, maxRadius, maxRadius, 0.0, degreeToRadian(-HRAzim+HRAzimSpan/2),         degreeToRadian(-HRAzim-HRAzimSpan/2));
-            }
-            myPath.addCentredArc    (fFieldCenter, fFieldCenter, minRadius, minRadius, 0.0, degreeToRadian(-HRAzim-HRAzimSpan/2),         degreeToRadian(-HRAzim));
-            myPath.closeSubPath();
-            
-            g.setColour(Colour::fromHSV(hue, 1, 1, 0.1));
-            g.fillPath(myPath);
-            g.setColour(Colour::fromHSV(hue, 1, 1, 0.5));
-            PathStrokeType strokeType = PathStrokeType(2.5);
-            g.strokePath(myPath, strokeType);
-        }
+            break;
     }
+    
+   
     
 	// - - - - - - - - - - - -
 	// draw speakers
 	// - - - - - - - - - - - -
     if (processMode != kOscSpatMode){
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++) {
-            const float radius = kSpeakerRadius, diameter = kSpeakerDiameter;
-            FPoint p = getSpeakerPoint(i);
+            radius = kSpeakerRadius, diameter = kSpeakerDiameter;
+            FPoint pCurLoc = getSpeakerPoint(i);
             g.setColour(Colour::fromHSV(2.f/3.f, 0, 0.5, 1));
-            g.fillEllipse(p.x - radius, p.y - radius, diameter, diameter);
+            g.fillEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter);
             
             g.setColour(Colours::white);
-            g.drawEllipse(p.x - radius, p.y - radius, diameter, diameter, 1);
+            g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 1);
             
-            String s; s << i+1;
+            stringVal.clear();
+            stringVal << i+1;
+            
             g.setColour(Colours::black);
             g.setFont(mGrisFeel.getFont());
-            g.drawText(s, p.x - radius + 1, p.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
+            g.drawText(stringVal, pCurLoc.x - radius + 1, pCurLoc.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
             g.setColour(Colours::white);
-            g.drawText(s, p.x - radius, p.y - radius, diameter, diameter, Justification(Justification::centred), false);
+            g.drawText(stringVal, pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, Justification(Justification::centred), false);
         }
     }
 
@@ -288,45 +308,46 @@ void FieldComponent::paint (Graphics& g)
     //draw line and circle for selected source
     // - - - - - - - - - - - -
     int iSelectedSrc = mFilter->getSelectedSrc();
-    float hue = (float)iSelectedSrc / mFilter->getNumberOfSources() + 0.577251;
-    if (hue > 1) hue -= 1;
-    g.setColour(Colour::fromHSV(hue, 1, 1, 0.8f));
+    hueSelect = (float)iSelectedSrc / mFilter->getNumberOfSources() + 0.577251;
+    if (hueSelect > 1){
+        hueSelect -= 1;
+    }
+    g.setColour(Colour::fromHSV(hueSelect, 1, 1, 0.8f));
     FPoint sourceXY = mFilter->getSourceXY(iSelectedSrc);
-    float fCenter = fieldWidth/2;
-    float fRadius = (fieldWidth - kSourceDiameter)/4;
-    g.drawLine   (fCenter, fCenter, fCenter + sourceXY.x * fRadius, fCenter - sourceXY.y * fRadius, 1.5);
-    float radiusZenith = sqrtf(pow(2 * sourceXY.x * fRadius,2) + pow(2 * sourceXY.y * fRadius,2));
-    g.drawEllipse(fCenter - radiusZenith/2 , fCenter - radiusZenith/2, radiusZenith, radiusZenith, 1.5);
 
-    float radius = kSourceRadius*1.22, diameter = kSourceDiameter*1.22;
-    FPoint pCurLoc = getSourcePoint(iSelectedSrc);
+    float fRadius = (fieldWidth - kSourceDiameter)/4;
+    g.drawLine   (fFieldCenter, fFieldCenter, fFieldCenter + sourceXY.x * fRadius, fFieldCenter - sourceXY.y * fRadius, 1.5);
+    float radiusZenith = sqrtf(pow(2 * sourceXY.x * fRadius,2) + pow(2 * sourceXY.y * fRadius,2));
+    g.drawEllipse(fFieldCenter - radiusZenith/2 , fFieldCenter - radiusZenith/2, radiusZenith, radiusZenith, 1.5);
+
+    radius = kSourceRadius*1.22, diameter = kSourceDiameter*1.22;
+    pCurLoc = getSourcePoint(iSelectedSrc);
     g.setColour(Colours::whitesmoke);
     g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
 
-    g.setColour(Colours::white);
-    radius = kSourceRadius*1.12, diameter = kSourceDiameter*1.12;
-    g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
-
+    
 	// - - - - - - - - - - - -
 	// draw sources
 	// - - - - - - - - - - - -
 	for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-		const float radius = kSourceRadius, diameter = kSourceDiameter;
-		FPoint pCurLoc = getSourcePoint(i);
+        radius = kSourceRadius, diameter = kSourceDiameter;
+		pCurLoc = getSourcePoint(i);
 		
-		float hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
-		if (hue > 1) hue -= 1;
+		hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
+        if (hue > 1){
+            hue -= 1;
+        }
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
 
         //draw the line that goes with every source
 		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
 			FPoint rt = mFilter->getSourceRT(i);
-			float r = rt.x;
-			float t = rt.y;
-			FPoint p1 = convertSourceRT(1, t);
-			FPoint p2 = convertSourceRT((r >= .999) ? 2 : -1, t);
-            g.drawLine(Line<float>(p1, p2));
+			//float r = rt.x;
+			//float t = rt.y;
+			//FPoint p1 = convertSourceRT(1, t);
+			//FPoint p2 = convertSourceRT((r >= .999) ? 2 : -1, t);
+            g.drawLine(Line<float>(convertSourceRT(1, rt.y), convertSourceRT((rt.x >= .999) ? 2 : -1, rt.y)));
 		}
 		
 		g.setColour(Colour::fromHSV(hue, 1, 1, 1));
@@ -335,20 +356,22 @@ void FieldComponent::paint (Graphics& g)
 		g.setColour(Colours::black);
 		g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 1);
 		
-		String s;
+
+        stringVal.clear();
         if (mFilter->getProcessMode() == kOscSpatMode){
-            s << mFilter->getOscSpat1stSrcId()+i;
+            stringVal << mFilter->getOscSpat1stSrcId()+i;
         } else {
-            s << i+1;
+            stringVal << i+1;
         }
 	
 		g.setColour(Colours::black);
         g.setFont(mGrisFeel.getFont());
-		g.drawText(s, pCurLoc.x - radius + 1, pCurLoc.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
+		g.drawText(stringVal, pCurLoc.x - radius + 1, pCurLoc.y - radius + 1, diameter, diameter, Justification(Justification::centred), false);
 					
 		g.setColour(Colours::white);
-		g.drawText(s, pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, Justification(Justification::centred), false);
+		g.drawText(stringVal, pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, Justification(Justification::centred), false);
 	}
+    
     // TRAJECTORY PATH
     if (m_dqAllPathPoints.size() > 2){
         Path trajectoryPath;
@@ -357,9 +380,7 @@ void FieldComponent::paint (Graphics& g)
         for (int iCurPoint = 1; iCurPoint < m_dqAllPathPoints.size(); ++iCurPoint){
             trajectoryPath.lineTo (m_dqAllPathPoints[iCurPoint].x, m_dqAllPathPoints[iCurPoint].y);
         }
-        float hue = (float)mFilter->getSelectedSrc() / mFilter->getNumberOfSources() + 0.577251;
-        g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
-        //g.setColour(Colour(0, 102, 255));
+        g.setColour(Colour::fromHSV(hueSelect, 1, 1, 0.5f));
         g.strokePath (trajectoryPath, PathStrokeType (2.0f, PathStrokeType::JointStyle::curved));
     }
     
