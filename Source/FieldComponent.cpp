@@ -61,8 +61,6 @@ FPoint FieldComponent::getSourcePoint(int i)
 {
 	const int fieldWidth = getWidth();
 	FPoint p = mFilter->getSourceXY01(i);
-	//float x = p.x * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	//float y = p.y * (fieldWidth - kSourceDiameter) + kSourceRadius;
 	return FPoint((p.x * (fieldWidth - kSourceDiameter) + kSourceRadius), fieldWidth - (p.y * (fieldWidth - kSourceDiameter) + kSourceRadius));
 }
 //this is NOT a duplicate of one of the convert functions in processor.h
@@ -70,8 +68,6 @@ FPoint FieldComponent::convertSourceRT(float r, float t)
 {
 	const int fieldWidth = getWidth();
 	FPoint p(r * cosf(t), r * sinf(t));
-	//float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	//float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
 	return FPoint((((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius), fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius));
 }
 
@@ -79,15 +75,11 @@ FPoint FieldComponent::getSpeakerPoint(int i)
 {
 	const int fieldWidth = getWidth();
 	FPoint p = mFilter->getSpeakerXY(i);
-	//float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
-	//float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
     return FPoint(((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius, fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius));
 }
 
 float FieldComponent::getDistance(int source, int speaker)
 {
-	//FPoint i = mFilter->getSourceXY(source);
-	//FPoint o = mFilter->getSpeakerXY(speaker);
 	return mFilter->getSourceXY(source).getDistanceFrom(mFilter->getSpeakerXY(speaker));
 }
 
