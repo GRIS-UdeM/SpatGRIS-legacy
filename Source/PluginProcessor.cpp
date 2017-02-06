@@ -177,8 +177,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	//DBG(sysDir);
 #endif
  
-    bArraysAllocated = false;
-    
     m_pOscSpatThread        = new OscSpatThread(this);
     m_pSourceUpdateThread   = new SourceUpdateThread(this);
     m_OwnedThreads.add(m_pOscSpatThread);
@@ -1526,12 +1524,7 @@ void SpatGrisAudioProcessor::setSpeakerVolume(const int &source, const float &ta
 void SpatGrisAudioProcessor::addToOutputs(const int &source, const float &sample, const int &f) {
 #if USE_VECTORS
     const Array<float> &volumes = mSpeakerVolumes[source];
-#if USE_ACTIVE_SPEAKERS
-    for (int i = 0; i < mNumberOfActiveSpeakers; ++i) {
-        int o = m
-#else
     for (int o = 0; o < mNumberOfSpeakers; ++o) {
-#endif
         float m = 1 - mParameterRamps[getParamForSpeakerM(o)][f];
         mOutputs[o][f] += sample * volumes[o] * m;
     }
@@ -1715,13 +1708,7 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
         float dLeft, dRight;
         
         findLeftAndRightSpeakers(fCurSampleT, *p_pfParams, left, right, dLeft, dRight);
-        
-#if USE_ACTIVE_SPEAKERS
-        mNumberActiveSpeakers = 2;
-        mActiveSpeakers[0] = left;
-        mActiveSpeakers[1] = right;
-#endif
-        
+
         // add to output
         if (left >= 0 && right >= 0) {
             float dTotal = dLeft + dRight;
@@ -1758,14 +1745,6 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
         int iBackLeftSpID, iBackRightSpId;
         float dBackLeft, dBackRight;
         findLeftAndRightSpeakers(fCurSampleBackTheta, *p_pfParams, iBackLeftSpID, iBackRightSpId, dBackLeft, dBackRight);
-        
-#if USE_ACTIVE_SPEAKERS
-        mNumberActiveSpeakers = 4 ;
-        mActiveSpeakers[0] = iFrontLeftSpID;
-        mActiveSpeakers[1] = iFrontRightSpId;
-        mActiveSpeakers[2] = iBackLeftSpID;
-        mActiveSpeakers[3] = iBackRightSpId;
-#endif
         
         float fFrontVol = fCurSampleR * 0.5f + 0.5f;
         float fBackVol = 1 - fFrontVol;

@@ -53,10 +53,6 @@ using namespace std;
 #define SET_SPEAKER_VOL 0
 #endif
 
-#ifndef USE_ACTIVE_SPEAKERS
-#define USE_ACTIVE_SPEAKERS 1
-#endif
-
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
 #endif
@@ -943,15 +939,6 @@ private:
     bool m_bIsPlaying;
 
     bool isNewMovementMode(float v);
-
-#if USE_ACTIVE_SPEAKERS
-    int mNumberActiveSpeakers;
-    float mActiveSpeakers[4];
-#endif
-    
-    
-    bool bArraysAllocated;
-    
 
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
