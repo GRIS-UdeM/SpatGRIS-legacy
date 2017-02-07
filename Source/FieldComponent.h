@@ -44,7 +44,7 @@ class FieldComponent : public Component
 public:
     FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *mover);
     ~FieldComponent();
-
+    
     void paint (Graphics&);
 	
 	void mouseDown (const MouseEvent &event);
@@ -60,9 +60,7 @@ public:
     
     void setJustSelectedEndPoint(bool selected){ m_bJustSelectedEndPoint = selected;}
     bool justSelectedEndPoint(){ return m_bJustSelectedEndPoint;}
-    
-    bool isDestructed(){ return bIsDestructed;}
-    
+
     
 private:
 	SpatGrisAudioProcessor *mFilter;
@@ -91,7 +89,6 @@ private:
     int m_iCurPathLines;
     int m_iMaxPathLines;
     std::deque<FPoint> m_dqAllPathPoints;
-    bool bIsDestructed;
     bool m_bJustSelectedEndPoint;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)

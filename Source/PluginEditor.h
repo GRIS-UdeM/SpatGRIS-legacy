@@ -107,7 +107,7 @@ public:
     void textEditorFocusLost (TextEditor &textEditor);
     void textEditorReturnKeyPressed(TextEditor &textEditor);
 	
-    //! Called every 50ms;
+    //! 30Hz refresh (see hertzRefresh)
 	void timerCallback();
     void propertyChanged();
     void updateTrajectoryStuff();

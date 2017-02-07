@@ -29,6 +29,7 @@
 
 static const float kMinLevel = -60.f;
 static const float kMaxLevel = 1.f;
+static const float kMaxMin = kMaxLevel - kMinLevel;
 
 //==============================================================================
 LevelComponent::LevelComponent(SpatGrisAudioProcessor* filter, int index)
@@ -47,9 +48,9 @@ LevelComponent::~LevelComponent()
 	
 }
 
+
 void LevelComponent::refreshIfNeeded(){
     float level;
-    
     uint64_t processCounter = mFilter->getProcessCounter();
     if (mLastProcessCounter != processCounter) {
         mLastProcessCounter = processCounter;
@@ -68,7 +69,7 @@ void LevelComponent::refreshIfNeeded(){
 
 void LevelComponent::paint (Graphics& g)
 {
-	float level = linearToDb(mShowLevel);
+	float level = linearToDb(mFilter->getLevel(mIndex));
 	if (level < kMinLevel) level = kMinLevel;
     else if (level > kMaxLevel){
         level = kMaxLevel;
@@ -87,9 +88,7 @@ void LevelComponent::paint (Graphics& g)
 	
 	//fprintf(stderr, "speaker %d linear: %.3f dB: %.1f hue: %.3f\n", mIndex, mLastLevel, level, hue);
 	
-	//g.fillAll (Colours::black);
     g.fillAll (mLookAndFeel.getDarkColour());
 	g.setColour (Colour::fromHSV(hue, 1, 1, 1));
-	juce::Rectangle<int> r(0, 0, getWidth() * (level - kMinLevel) / (kMaxLevel - kMinLevel), getHeight());
-	g.fillRect(r);
+    g.fillRect(0, 0, (int)(getWidth() * (level - kMinLevel) / (kMaxMin)), getHeight());
 }
