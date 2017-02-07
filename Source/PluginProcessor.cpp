@@ -1322,12 +1322,10 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
             paramCopy[getParamForSpeakerX(iCurChannel)] = t;
         }
     }
-    
 
 #if TIME_PROCESS
     Time time3SourceSpeakers = Time::getCurrentTime();
 #endif
-
     ProcessData(paramCopy);
     
 #if TIME_PROCESS
@@ -1447,6 +1445,7 @@ void SpatGrisAudioProcessor::processTrajectory(){
         }
     }
 }
+                       
 void SpatGrisAudioProcessor::ProcessData(float *params) {
 	switch(mProcessMode) {
         case kFreeVolumeMode:	ProcessDataFreeVolumeMode(params);	break;
@@ -1596,17 +1595,12 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     }
 }
     
-    
-    
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
     // clear mOutputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
-        
         float *output = mOutputs[iCurOutput];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
-        
-        
     }
     
     //if a given speaker is currently in use, we flag it in here, so that we know which speakers are not in use and can set their output to 0
@@ -1673,7 +1667,6 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
 #if TIME_PROCESS
             Time timeFilter = Time::getCurrentTime();
 #endif
-
             // adjust volume of fCurSampleValue based on volume options from 'volume and filters' tab
             float dbSource;
             if (fCurSampleR >= 1) {
@@ -1818,25 +1811,25 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
 }
 
 void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
-    
-    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * m_dSampleRate));
-    createParameterRamps(params, fOldValuesPortion);
-    
     // clear mOutputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
         float *output = mOutputs[o];
         memset(output, 0, m_iDawBufferSize * sizeof(float));
-        
     }
     
-    vector<Area> areas;
-    areas.resize(mNumberOfSpeakers * s_iMaxAreas);
+    //------------------------------- DISTRIBUTE PARAMETER CHANGE OVER SAMPLES IN THE BUFFER ------------------------------------------
+    const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * m_dSampleRate));
+    createParameterRamps(params, fOldValuesPortion);
+    
+    JUCE_COMPILER_WARNING("this vector should be in USE_VECTORS")
+    vector<Area> areas(mNumberOfSpeakers * s_iMaxAreas);
+    
 #if OUTPUT_RAMPING
     vector<bool> vSpeakersCurrentlyInUse;
 #endif
 
     int areaCount = 0;
-    
+    //--------------------------------- CREATE AREAS ------------------------------------------
     if (mNumberOfSpeakers > 2) {
         for (int iCurSpeaker = 0; iCurSpeaker < mNumberOfSpeakers; iCurSpeaker++) {
             float fCurAngle = params[getParamForSpeakerX(iCurSpeaker)];
@@ -1867,7 +1860,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     
     jassert(areaCount > 0);
     
-    // compute
+    //------------------------------- FOR EACH SOUND SOURCE ------------------------------------------
     // in this context: source T, R are actually source X, Y
     for (int i = 0; i < mNumberOfSources; i++) {
 #if USE_VECTORS
@@ -1882,7 +1875,8 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
         float *input_d = mParameterRamps[getParamForSourceD(i)];
 #endif
         
-        for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
+        //------------------------------- FOR EACH SAMPLE ------------------------------------------
+        for (unsigned int f = 0; f < m_iDawBufferSize; ++f) {
 #if OUTPUT_RAMPING
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
 #endif
@@ -1948,7 +1942,6 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
             jassert(t >= 0 && t <= kThetaMax);
             jassert(angle > 0 && angle <= kHalfCircle);
             
-            JUCE_COMPILER_WARNING("outFactors need to be defined in prepare to play or something")
             vector<float> outFactors(mNumberOfSpeakers);
             
             float factor = (r < 1) ? (r * 0.5f + 0.5f) : 1;
@@ -1973,14 +1966,13 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
                 else break;
             }
             
-            JUCE_COMPILER_WARNING("we probably cannot afford to run through the speaker list twice")
             float total = 0;
             for (int o = 0; o < mNumberOfSpeakers; o++) {
                 total += outFactors[o];
             }
             jassert(total > 0);
-            
             float adj = tv / total;
+            
 #if OUTPUT_RAMPING
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, NULL);
@@ -1992,7 +1984,6 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
                     addToOutput(s * outFactors[o] * adj, o, f);
                 }
             }
-
 #endif
         }
     }
@@ -2018,6 +2009,7 @@ void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
 		}
 		mSmoothedParameters.setUnchecked(i, currentParam);
 	}
+    
 	// in this context: T, R are actually X, Y
 	const float adj_factor = 1 / sqrtf(2);
 	for (int o = 0; o < mNumberOfSpeakers; o++) {
