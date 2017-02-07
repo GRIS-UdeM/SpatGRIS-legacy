@@ -945,7 +945,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
         }
     }
 #endif
-    mOutputs.resize(mNumberOfSpeakers);
+//    mOutputs.resize(mNumberOfSpeakers);
 #elif OUTPUT_RAMPING
     for (int i = 0; i < mNumberOfSources; i++) {
         for (int j = 0; j < mNumberOfSpeakers; j++){
@@ -1170,11 +1170,11 @@ void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
         curParameterRamp.resize(m_iDawBufferSize);
     }
     //resize inputcopy and outputs
-    mInputsCopy.resize(mNumberOfSources);
+//    mInputsCopy.resize(mNumberOfSources);
     for (auto &curInput : mInputsCopy){
         curInput.resize(m_iDawBufferSize);
     }
-    mOutputs.resize(mNumberOfSpeakers);
+//    mOutputs.resize(mNumberOfSpeakers);
 #else
 //    //resize parameter ramps
 //    for (int i = 0; i < kNumberOfParameters; ++i) {

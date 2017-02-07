@@ -127,8 +127,9 @@ enum constantParameters{
 };
 
 JUCE_COMPILER_WARNING("make sure these are applied everywhere")
-#define kMaxChannels  (16)
-#define kMaxBufferSize (4096)
+#define kMaxInputs      (8)
+#define kMaxChannels    (16)
+#define kMaxBufferSize  (4096)
 
 #define kNumberOfParameters (kNonConstantParameters + kConstantParameters)
 
@@ -881,19 +882,22 @@ private:
     
     
 #if USE_VECTORS
-    vector<vector<float>> mInputsCopy;
-    vector<float*> mOutputs;
-    #if OUTPUT_RAMPING
+//    vector<vector<float>> mInputsCopy;
+//    vector<float*> mOutputs;
+    vector<float> mInputsCopy[kMaxInputs];
+    float* mOutputs[kMaxChannels];
+    
+#if OUTPUT_RAMPING
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
 #else
-    float mInputsCopy[16][kMaxBufferSize];
+    float mInputsCopy[kMaxChannels][kMaxBufferSize];
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
     
-    float* mOutputs[16];
+    float* mOutputs[kMaxChannels];
     #if OUTPUT_RAMPING
-        float mSpeakerVolumes[8][16];
+        float mSpeakerVolumes[kMaxInputs][kMaxChannels];
     #endif
 #endif
     
