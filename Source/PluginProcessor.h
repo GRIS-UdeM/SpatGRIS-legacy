@@ -39,7 +39,7 @@ using namespace std;
 #endif
 
 #ifndef ALLOW_MVT_MODE_AUTOMATION
-#define ALLOW_MVT_MODE_AUTOMATION 0
+#define ALLOW_MVT_MODE_AUTOMATION 1
 #endif
 
 #ifndef USE_VECTORS

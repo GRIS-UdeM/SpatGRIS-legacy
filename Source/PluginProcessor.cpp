@@ -477,12 +477,7 @@ bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
         if (areSameParameterValues(m_fNewValue, fCurMode)){
             //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
-            float fCurSelectedMode = getParameter(kMovementMode);
-            if (areSameParameterValues(fCurMode, fCurSelectedMode)){
-                return false;
-            } else {
-                return true;
-            }
+            return !(areSameParameterValues(fCurMode, getParameter(kMovementMode)));
         }
     }
     return false;
@@ -925,6 +920,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
+    
     mNumberOfSpeakers = p_iNewNumberOfSpeakers;
     
     if (mRoutingMode == kInternalWrite) {
@@ -1278,11 +1274,11 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
 #if USE_VECTORS
-            JUCE_COMPILER_WARNING("protentially faster ways of doing this. do a test!")
             vector<float> &curInput = mInputsCopy[iCurChannel];
             for (int iCurSample = 0; iCurSample < m_iDawBufferSize; ++iCurSample){
                 curInput[iCurSample] = pBuffer.getSample(iCurChannel, iCurSample);
             }
+            //mInputsCopy[iCurChannel].assign(pBuffer.getReadPointer(iCurChannel), pBuffer.getReadPointer(iCurChannel) + pBuffer.getNumSamples());
 #else
             jassert(m_iDawBufferSize <= kMaxBufferSize);
             memcpy(mInputsCopy[iCurChannel], pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
