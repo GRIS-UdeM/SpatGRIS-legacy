@@ -935,8 +935,9 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     if (bUseDefaultValues){
         updateSpeakerLocation(true, false, false);
     }
-#if USE_VECTORS 
+
 #if OUTPUT_RAMPING
+#if USE_VECTORS
     mSpeakerVolumes.clear();
     for (int i = 0; i < mNumberOfSources; i++) {
         mSpeakerVolumes.add(Array<float>());
@@ -944,15 +945,13 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
             mSpeakerVolumes[j].add(0);
         }
     }
-#endif
-//    mOutputs.resize(mNumberOfSpeakers);
-#elif OUTPUT_RAMPING
+#else
     for (int i = 0; i < mNumberOfSources; i++) {
         for (int j = 0; j < mNumberOfSpeakers; j++){
             mSpeakerVolumes[i][j] = 0.f;
         }
     }
-    
+#endif
 #endif
     
     mHostChangedParameterProcessor++;
@@ -1170,21 +1169,9 @@ void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
         curParameterRamp.resize(m_iDawBufferSize);
     }
     //resize inputcopy and outputs
-//    mInputsCopy.resize(mNumberOfSources);
     for (auto &curInput : mInputsCopy){
         curInput.resize(m_iDawBufferSize);
     }
-//    mOutputs.resize(mNumberOfSpeakers);
-#else
-//    //resize parameter ramps
-//    for (int i = 0; i < kNumberOfParameters; ++i) {
-//        mParameterRamps[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-//    }
-//    //resize inputcopy
-//    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
-//    for (int i = 0; i < mNumberOfSources; ++i) {
-//        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-//    }
 #endif
 }
 
@@ -1282,11 +1269,11 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
         if (iCurChannel < mNumberOfSources){
 #if USE_VECTORS
-            JUCE_COMPILER_WARNING("protentially faster ways of doing this. do a test!")
             vector<float> &curInput = mInputsCopy[iCurChannel];
             for (int iCurSample = 0; iCurSample < m_iDawBufferSize; ++iCurSample){
                 curInput[iCurSample] = pBuffer.getSample(iCurChannel, iCurSample);
             }
+//            mInputsCopy[iCurChannel].assign(pBuffer.getReadPointer(iCurChannel), pBuffer.getReadPointer(iCurChannel) + m_iDawBufferSize);
 #else
             jassert(m_iDawBufferSize <= kMaxBufferSize);
             memcpy(mInputsCopy[iCurChannel], pBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
@@ -1296,13 +1283,9 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
             paramCopy[getParamForSourceY(iCurChannel)] = paramCopy[getParamForSourceY(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
         }
         
-        
         //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
 #if ALLOW_INTERNAL_WRITE
         if (mRoutingMode == kInternalWrite){
-//            for (auto &curOutput : mOutputs){
-//                memcpy(curOutput, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
-//            }
             mOutputs[iCurChannel] = mRoutingTempAudioBuffer.getWritePointer(iCurChannel);
         } else {
 #endif
