@@ -199,9 +199,11 @@ private:
     Label *mStateJoystick;
     Label *m_VersionLabel;
 	
+#if ALLOW_INTERNAL_WRITE
 	ComboBox *mRoutingModeCombo;
     Component *mRoutingModeLabel;
 	Slider *mRoutingVolumeSlider;
+#endif
     
     ImageComponent m_logoImage;
 

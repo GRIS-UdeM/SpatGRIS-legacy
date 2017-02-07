@@ -33,9 +33,12 @@
 #include <memory>
 using namespace std;
 
-
 #ifndef USE_DB_METERS
 #define USE_DB_METERS 1
+#endif
+
+#ifndef ALLOW_INTERNAL_WRITE
+#define ALLOW_INTERNAL_WRITE 1
 #endif
 
 #ifndef ALLOW_MVT_MODE_AUTOMATION
@@ -123,6 +126,11 @@ enum constantParameters{
 #endif
 };
 
+JUCE_COMPILER_WARNING("make sure these are applied everywhere")
+#define kMaxInputs      (8)
+#define kMaxChannels    (16)
+#define kMaxBufferSize  (4096)
+
 #define kNumberOfParameters (kNonConstantParameters + kConstantParameters)
 
 //==============================================================================
@@ -170,8 +178,10 @@ enum InputOutputModes {
 
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
 
+
 enum RoutingModes{
      kNormalRouting = 0
+    #if ALLOW_INTERNAL_WRITE
     ,kInternalWrite
     ,kInternalRead12
     ,kInternalRead34
@@ -182,7 +192,9 @@ enum RoutingModes{
     ,kInternalRead1213
     ,kInternalRead1314
     ,kInternalRead1516
+    #endif
 };
+
 
 //==============================================================================
 // these must be normalized/denormalized for processing
@@ -412,7 +424,8 @@ public:
     
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
-        
+    
+#if ALLOW_INTERNAL_WRITE
 	int getRoutingMode() const { return mRoutingMode; }
 	void setRoutingMode(int s) {
         mRoutingMode = s;
@@ -421,6 +434,7 @@ public:
         }
     }
 	void updateRoutingTempAudioBuffer();
+#endif
     
     int getGuiWidth() const{return mGuiWidth;}
     int getGuiHeight() const{return mGuiHeight;}
@@ -868,21 +882,22 @@ private:
     
     
 #if USE_VECTORS
-    vector<vector<float>> mInputsCopy;
-    vector<float*> mOutputs;
-    #if OUTPUT_RAMPING
+//    vector<vector<float>> mInputsCopy;
+//    vector<float*> mOutputs;
+    vector<float> mInputsCopy[kMaxInputs];
+    float* mOutputs[kMaxChannels];
+    
+#if OUTPUT_RAMPING
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
 #else
-#define kMaxChannels  (16)
-#define kMaxBufferSize (4096)
-    float mInputsCopy[16][kMaxBufferSize];
+    float mInputsCopy[kMaxChannels][kMaxBufferSize];
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
     
-    float* mOutputs[16];
+    float* mOutputs[kMaxChannels];
     #if OUTPUT_RAMPING
-        float mSpeakerVolumes[8][16];
+        float mSpeakerVolumes[kMaxInputs][kMaxChannels];
     #endif
 #endif
     
