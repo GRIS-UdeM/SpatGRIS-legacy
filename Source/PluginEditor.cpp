@@ -60,7 +60,7 @@ string toString(const T &value) {
 //==============================================================================
 static const int kDefaultLabelHeight = 18;
 static const int kParamBoxHeight = 165;
-static const int kTimerDelay = 1000 / 20; // 20 fps
+static const int hertzRefresh = 30; // 30 fps
 
 //==============================================================================
 
@@ -942,7 +942,8 @@ AudioProcessorEditor (ownerFilter)
     addAndMakeVisible (m_pResizer = new ResizableCornerComponent (this, &m_oResizeLimits));
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
-    startTimer(kTimerDelay);
+    startTimerHz (hertzRefresh);
+
 }
 
 
@@ -1213,6 +1214,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
 
 SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
 {
+    
     mFilter->setCalculateLevels(false);
     mFilter->removeListener(this);
 
@@ -1238,6 +1240,7 @@ SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
     m_pMover->end(kLeap);
     m_pMover->end(kHID);
 #endif
+    
 }
 
 void SpatGrisAudioProcessorEditor::resized()
@@ -2069,9 +2072,6 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
             break;
     }
     
-   
-   
-    
     updateSingleTrajectoryStartComponent(mTrDampeningTextEditor,    isStarting);
     updateSingleTrajectoryStartComponent(mTrDeviationTextEditor,    isStarting);
     updateSingleTrajectoryStartComponent(mTrTurnsTextEditor,        isStarting);
@@ -2176,7 +2176,7 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     
     mNeedRepaint        = false;
     mFieldNeedRepaint   = false;
-    startTimer(kTimerDelay);
+    //startTimer(kTimerDelay);
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryStuff(){

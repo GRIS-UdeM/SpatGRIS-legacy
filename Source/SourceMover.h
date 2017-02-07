@@ -61,8 +61,10 @@ public:
     void storeAllDownPositions();
     void storeDownPosition(int id, FPoint pointRT);
 	void end(MoverType mt);
+    void setFieldExists(bool v){ mFieldExists = v; }
     
     void setFieldComponent(FieldComponent* field){
+        mFieldExists = true;
         mField = field;
     }
 	
@@ -70,6 +72,7 @@ private:
 	SpatGrisAudioProcessor *mFilter;
 	MoverType mMoverType;
 	int mSelectedSrc;
+    bool mFieldExists;
 	
 	Array<FPoint> mSourcesDownXY;
 	Array<FPoint> mSourcesDownRT;

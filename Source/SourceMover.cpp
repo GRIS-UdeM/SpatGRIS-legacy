@@ -88,7 +88,7 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
     //move selected source to pointXY01 only if not kSourceThread. In kSourceThread it is already being moved by automation
     if (mMoverType != kSourceThread){
         mFilter->setSourceXY01(mSelectedSrc, pointXY01);
-        if (!mField->isDestructed()){ //mField could be null when we're exiting while playing
+        if (mFieldExists){
             mField->updatePositionTrace(pointXY01.x, pointXY01.y);
         }
     }

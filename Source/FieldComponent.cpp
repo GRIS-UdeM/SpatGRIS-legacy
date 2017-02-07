@@ -34,7 +34,6 @@ FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *move
 , m_pMover(mover)
 , m_iCurPathLines(0)
 , m_iMaxPathLines(10)
-, bIsDestructed(false)
 , m_bJustSelectedEndPoint(false)
 {
     m_pMover->setFieldComponent(this);
@@ -42,36 +41,30 @@ FieldComponent::FieldComponent(SpatGrisAudioProcessor* filter, SourceMover *move
 
 FieldComponent::~FieldComponent()
 {
-    bIsDestructed = true;
+    m_pMover->setFieldExists(false);    //FieldComponent adress is NOT null when object is destroy
 }
+
 
 void FieldComponent::clearTrajectoryPath(){
     m_dqAllPathPoints.clear();
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){
-    if(this->getParentComponent() != nullptr && isShowing()){
-        float fAbsoluteX = p_fX * getWidth();
-        float fAbsoluteY = (1-p_fY) * getHeight();
-        m_dqAllPathPoints.push_back(FPoint(fAbsoluteX, fAbsoluteY));
-    }
+    m_dqAllPathPoints.push_back(FPoint(p_fX * getWidth(), (1-p_fY) * getHeight()));
 }
 
 FPoint FieldComponent::getSourcePoint(int i)
 {
 	const int fieldWidth = getWidth();
 	FPoint p = mFilter->getSourceXY01(i);
-	//float x = p.x * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	//float y = p.y * (fieldWidth - kSourceDiameter) + kSourceRadius;
 	return FPoint((p.x * (fieldWidth - kSourceDiameter) + kSourceRadius), fieldWidth - (p.y * (fieldWidth - kSourceDiameter) + kSourceRadius));
 }
+
 //this is NOT a duplicate of one of the convert functions in processor.h
 FPoint FieldComponent::convertSourceRT(float r, float t)
 {
 	const int fieldWidth = getWidth();
 	FPoint p(r * cosf(t), r * sinf(t));
-	//float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
-	//float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius;
 	return FPoint((((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius), fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSourceDiameter) + kSourceRadius));
 }
 
@@ -79,15 +72,11 @@ FPoint FieldComponent::getSpeakerPoint(int i)
 {
 	const int fieldWidth = getWidth();
 	FPoint p = mFilter->getSpeakerXY(i);
-	//float x = ((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
-	//float y = ((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius;
     return FPoint(((p.x + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius, fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax*2)) * (fieldWidth - kSpeakerDiameter) + kSpeakerRadius));
 }
 
 float FieldComponent::getDistance(int source, int speaker)
 {
-	//FPoint i = mFilter->getSourceXY(source);
-	//FPoint o = mFilter->getSpeakerXY(speaker);
 	return mFilter->getSourceXY(source).getDistanceFrom(mFilter->getSpeakerXY(speaker));
 }
 
@@ -131,12 +120,14 @@ void FieldComponent::paint (Graphics& g)
 	// draw the grid
 	// - - - - - - - - - - - -
 	if (mFilter->getShowGridLines()) {
-		g.setColour(Colour::fromFloatRGBA(0, 0, 0.3f, 1));
+		g.setColour(Colour::fromRGB(55, 56, 57));
 		const int gridCount = 8;
 		for (int i = 1; i < gridCount; i++) {
 			g.drawLine(fieldWidth * i / gridCount, 0, fieldHeight * i / gridCount, fieldHeight);
 			g.drawLine(0, fieldHeight * i / gridCount, fieldWidth, fieldHeight * i / gridCount);
 		}
+        g.drawLine(0, 0, fieldHeight , fieldHeight);
+        g.drawLine(0, fieldHeight, fieldHeight , 0);
 	}
     
     // - - - - - - - - - - - -
@@ -343,10 +334,6 @@ void FieldComponent::paint (Graphics& g)
         //draw the line that goes with every source
 		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
 			FPoint rt = mFilter->getSourceRT(i);
-			//float r = rt.x;
-			//float t = rt.y;
-			//FPoint p1 = convertSourceRT(1, t);
-			//FPoint p2 = convertSourceRT((r >= .999) ? 2 : -1, t);
             g.drawLine(Line<float>(convertSourceRT(1, rt.y), convertSourceRT((rt.x >= .999) ? 2 : -1, rt.y)));
 		}
 		
