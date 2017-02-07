@@ -960,7 +960,7 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
 
 #if ALLOW_INTERNAL_WRITE
 void SpatGrisAudioProcessor::updateRoutingTempAudioBuffer() {
-	mRoutingTempAudioBuffer.setSize(mNumberOfSpeakers, kMaxSize);
+	mRoutingTempAudioBuffer.setSize(mNumberOfSpeakers, kMaxBufferSize);
 }
 #endif
 
@@ -1225,7 +1225,6 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
         //for every output channel
 		for (int c = 0; c < outChannels; c++) {
             //copy oriFramesToProcess samples from the router's channel (offset+c) into buffer channel c, starting at sample 0
-            JUCE_COMPILER_WARNING("could use move semantics here?")
 			pBuffer.copyFrom(c, 0, Router::instance().outputBuffers(m_iDawBufferSize)[offset + c], m_iDawBufferSize);
 			Router::instance().clear(offset + c);
 		}
@@ -1297,15 +1296,19 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
             paramCopy[getParamForSourceY(iCurChannel)] = paramCopy[getParamForSourceY(iCurChannel)] * (2*kRadiusMax) - kRadiusMax;
         }
         
-        //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
-        mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
         
         //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
 #if ALLOW_INTERNAL_WRITE
         if (mRoutingMode == kInternalWrite){
-            for (auto &curOutput : mOutputs){
-                memcpy(curOutput.data(, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
-            }
+//            for (auto &curOutput : mOutputs){
+//                memcpy(curOutput, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
+//            }
+            mOutputs[iCurChannel] = mRoutingTempAudioBuffer.getWritePointer(iCurChannel);
+        } else {
+#endif
+            //copy pointers to pBuffer[mNumberOfSources][DAW buffer size] into mOutputs[mNumberOfSources]
+            mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
+#if ALLOW_INTERNAL_WRITE
         }
 #endif
         if (mProcessMode == kFreeVolumeMode) {

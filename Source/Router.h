@@ -28,9 +28,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#define kChannels (16)
-#define kMaxSize (1024)
-
 class Router
 {
 private:

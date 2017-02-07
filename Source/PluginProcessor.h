@@ -38,11 +38,11 @@ using namespace std;
 #endif
 
 #ifndef ALLOW_INTERNAL_WRITE
-#define ALLOW_INTERNAL_WRITE 0
+#define ALLOW_INTERNAL_WRITE 1
 #endif
 
 #ifndef ALLOW_MVT_MODE_AUTOMATION
-#define ALLOW_MVT_MODE_AUTOMATION 0
+#define ALLOW_MVT_MODE_AUTOMATION 1
 #endif
 
 #ifndef USE_VECTORS
@@ -125,6 +125,10 @@ enum constantParameters{
     kConstantParameters =	9
 #endif
 };
+
+JUCE_COMPILER_WARNING("make sure these are applied everywhere")
+#define kMaxChannels  (16)
+#define kMaxBufferSize (4096)
 
 #define kNumberOfParameters (kNonConstantParameters + kConstantParameters)
 
@@ -884,8 +888,6 @@ private:
     #endif
     vector<vector<float>> mParameterRamps;
 #else
-#define kMaxChannels  (16)
-#define kMaxBufferSize (4096)
     float mInputsCopy[16][kMaxBufferSize];
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
     

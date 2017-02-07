@@ -22,6 +22,7 @@
  ==============================================================================
  */
 
+#include "PluginProcessor.h"
 #include "Router.h"
 
 Router & Router::instance()
@@ -32,7 +33,7 @@ Router & Router::instance()
 
 Router::Router()
 :
-	mOutputBuffers(kChannels, kMaxSize)
+	mOutputBuffers(kMaxChannels, kMaxBufferSize)
 {
 }
 
@@ -50,7 +51,7 @@ void Router::accumulate(int channels, int frames, const AudioSampleBuffer &buffe
 }
 
 float ** Router::outputBuffers(int frames) {
-	if (frames > kMaxSize) {
+	if (frames > kMaxBufferSize) {
 		printf("unexpected frames size: %d\n", frames);
 		jassertfalse;
 		return NULL;
