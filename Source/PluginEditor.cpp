@@ -342,8 +342,10 @@ AudioProcessorEditor (ownerFilter)
 #if USE_DB_METERS
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
 #endif
+#if ALLOW_INTERNAL_WRITE
         addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
 		y += dh;
+
 #if WIN32
 		mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y+20, w/4, 200, ct);
 #else
@@ -351,6 +353,7 @@ AudioProcessorEditor (ownerFilter)
 #endif
         mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 30, dh);
         mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
+#endif
         y += dh + 5;
         
         mSpSelectCombo = new ComboBox();
@@ -414,6 +417,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 5;
             updateInputOutputCombo();
         }
+        #if ALLOW_INTERNAL_WRITE
         mRoutingModeLabel = addLabel("Routing mode:", x, y, w, dh, box);
         y += dh + 5;
         {
@@ -439,6 +443,7 @@ AudioProcessorEditor (ownerFilter)
             cb->addListener(this);
             mRoutingModeCombo = cb;
         }
+#endif
         
         mOscActiveButton = addCheckbox("Osc Active", mFilter->getOscActive(), x, y, w, dh, box);
         //-----------------------------
@@ -973,12 +978,15 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
     //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
     int iMaxSpeakers;
+#if ALLOW_INTERNAL_WRITE
     if (mFilter->getRoutingMode() == kInternalWrite){
         iMaxSpeakers = 16;
     } else {
-
         iMaxSpeakers = mFilter->getTotalNumOutputChannels();
     }
+#else
+    iMaxSpeakers = mFilter->getTotalNumOutputChannels();
+#endif
 
     if (iMaxSpeakers >=1)  { mInputOutputModeCombo->addItem("1x1",  i1o1+1);  }
     if (iMaxSpeakers >=2)  { mInputOutputModeCombo->addItem("1x2",  i1o2+1);  }
@@ -1067,8 +1075,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSpeakersBox->setEnabled(false);
         mSmoothingLabel->setEnabled(false);
         mSmoothingSlider->setEnabled(false);
+#if ALLOW_INTERNAL_WRITE
         mRoutingModeCombo->setEnabled(false);
         mRoutingModeLabel->setEnabled(false);
+#endif
         mMaxSpanVolumeLabel->setEnabled(false);
         mMaxSpanVolumeSlider->setEnabled(false);
         mTabs->getTabContentComponent(2)->setEnabled(false);
@@ -1090,8 +1100,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSpeakersBox->setEnabled(true);
         mSmoothingLabel->setEnabled(true);
         mSmoothingSlider->setEnabled(true);
+#if ALLOW_INTERNAL_WRITE
         mRoutingModeCombo->setEnabled(true);
         mRoutingModeLabel->setEnabled(true);
+#endif
         mMaxSpanVolumeLabel->setEnabled(true);
         mMaxSpanVolumeSlider->setEnabled(true);
         mTabs->getTabContentComponent(2)->setEnabled(true);
@@ -1960,11 +1972,13 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             }
         }
     }
+    #if ALLOW_INTERNAL_WRITE
     else if (comboBox == mRoutingModeCombo) {
         JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
         updateRoutingModeComponents();
 	}
+#endif
     else if (comboBox == mProcessModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
         mFilter->setProcessMode(iSelectedMode);
@@ -2256,7 +2270,9 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
     mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
+    #if ALLOW_INTERNAL_WRITE
     mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
+#endif
     
     #if TIME_THINGS
             ostringstream oss;

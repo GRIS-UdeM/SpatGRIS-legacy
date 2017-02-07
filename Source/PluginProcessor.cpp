@@ -257,7 +257,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mProcessCounter = 0;
 	//mLastTimeInSamples = -1;
 	setProcessMode(kPanVolumeMode);
+#if ALLOW_INTERNAL_WRITE
 	mRoutingMode = kNormalRouting;
+#endif
     //version 9
     updateInputOutputMode();
     mSrcPlacementMode = 1;
@@ -913,23 +915,17 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         mPrevTs.set(i, getSourceRT(i).y);
     }
     
-#if !USE_VECTORS
-//    mInputsCopy  = unique_ptr< unique_ptr<float[]>[] >(new unique_ptr<float[]>[mNumberOfSources]);
-//    for (int i = 0; i < mNumberOfSources; ++i) {
-//        mInputsCopy[i] = unique_ptr<float[]>(new float[m_iDawBufferSize]);
-//    }
-#endif
     mHostChangedParameterProcessor++;
-    
     startOrStopSourceUpdateThread();
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
     mNumberOfSpeakers = p_iNewNumberOfSpeakers;
-    
+#if ALLOW_INTERNAL_WRITE
     if (mRoutingMode == kInternalWrite) {
         updateRoutingTempAudioBuffer();
     }
+#endif
 #if USE_DB_METERS
     mLevels.resize(mNumberOfSpeakers);
     for (int i = 0; i < mNumberOfSpeakers; i++){
@@ -962,10 +958,11 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     mHostChangedParameterProcessor++;
 }
 
-
+#if ALLOW_INTERNAL_WRITE
 void SpatGrisAudioProcessor::updateRoutingTempAudioBuffer() {
 	mRoutingTempAudioBuffer.setSize(mNumberOfSpeakers, kMaxSize);
 }
+#endif
 
 void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise){
     float anglePerSp = kThetaMax / getNumberOfSpeakers();
@@ -1209,11 +1206,16 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 
     //==================================== CHECK SOME STUFF ===========================================
 	// sanity check for auval
+#if ALLOW_INTERNAL_WRITE
 	if (pBuffer.getNumChannels() < ((mRoutingMode == kInternalWrite) ? mNumberOfSources : jmax(mNumberOfSources, mNumberOfSpeakers))) {
+#else
+    if (pBuffer.getNumChannels() < jmax(mNumberOfSources, mNumberOfSpeakers)) {
+#endif
 		printf("unexpected channel count %d vs %dx%d rmode: %d\n", pBuffer.getNumChannels(), mNumberOfSources, mNumberOfSpeakers, mRoutingMode);
 		return;
 	}
     //if we're in any of the internal READ modes, copy stuff from Router into buffer and return
+#if ALLOW_INTERNAL_WRITE
 	if (mProcessMode != kOscSpatMode && mRoutingMode >= kInternalRead12) {
 		pBuffer.clear();
         //maximum number of output channels when writing to internal is 2. Higher outputs will be ignored
@@ -1229,6 +1231,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 		}
 		return;
 	}
+#endif
 
     //==================================== PROCESS TRAJECTORIES ===========================================
     processTrajectory();
@@ -1259,11 +1262,13 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 	if (mProcessMode == kPanSpanMode) {
 		paramCopy[kMaxSpanVolume] = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, paramCopy[kMaxSpanVolume]);
 	}
+#if ALLOW_INTERNAL_WRITE
 	if (mRoutingMode == kInternalWrite) {
 		paramCopy[kRoutingVolume] = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, paramCopy[kRoutingVolume]);
         jassert(mRoutingTempAudioBuffer.getNumSamples() >= m_iDawBufferSize);
         jassert(mRoutingTempAudioBuffer.getNumChannels() >= mNumberOfSpeakers);
 	}
+#endif
     
 #if TIME_PROCESS
     Time time2ParamCopy = Time::getCurrentTime();
@@ -1296,12 +1301,11 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
         mOutputs[iCurChannel] = pBuffer.getWritePointer(iCurChannel);
         
         //if we're in internal write, get pointer to audio data from mRoutingTempAudioBuffer, otherwise get it from pBuffer
-#if USE_VECTORS
+#if ALLOW_INTERNAL_WRITE
         if (mRoutingMode == kInternalWrite){
-JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likely redone")
-//            for (auto &curOutput : mOutputs){
-//                memcpy(curOutput.data(, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
-//            }
+            for (auto &curOutput : mOutputs){
+                memcpy(curOutput.data(, mRoutingTempAudioBuffer.getWritePointer(iCurChannel), m_iDawBufferSize * sizeof(float));
+            }
         }
 #endif
         if (mProcessMode == kFreeVolumeMode) {
@@ -1323,28 +1327,15 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
 #if TIME_PROCESS
     Time time3SourceSpeakers = Time::getCurrentTime();
 #endif
-    
-//#if USE_VECTORS
-//    if (mRoutingMode == kInternalWrite) {
-//        ProcessData(mInputsCopy, mOutputs, paramCopy);        //if we're in internal write, we don't need to make a copy of the input samples
-//    } else {
-//        ProcessData(inputsCopy, mOutputs, paramCopy);
-//    }
-//#else
-    
+
     ProcessData(paramCopy);
-    
-//#endif
-    
-    
-    
-    
     
 #if TIME_PROCESS
     Time time4ProcessData = Time::getCurrentTime();
 #endif
     
     //==================================== INTERNAL WRITE STUFF ===========================================
+#if ALLOW_INTERNAL_WRITE
     if (mRoutingMode == kInternalWrite){
 		// apply routing volume
 		float currentParam  = mSmoothedParameters[kRoutingVolume];
@@ -1369,6 +1360,7 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
             }
 		}
 	}
+#endif
     
 #if USE_DB_METERS
     //==================================== DB METER STUFF ===========================================
@@ -1395,11 +1387,12 @@ JUCE_COMPILER_WARNING("internal write mode will need to be tested and most likel
 		}
 	}
 #endif
-    
+#if ALLOW_INTERNAL_WRITE
 	if (mRoutingMode == kInternalWrite) {
 		Router::instance().accumulate(mNumberOfSpeakers, m_iDawBufferSize, mRoutingTempAudioBuffer);
 		pBuffer.clear();
 	}
+#endif
 	
     //this is only used for the level components, ie the db meters
 	mProcessCounter++;
@@ -2268,7 +2261,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mLeapEnabled        = xmlState->getIntAttribute ("mLeapEnabled", 0);
             mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
             mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
+            #if ALLOW_INTERNAL_WRITE
             setRoutingMode(xmlState->getIntAttribute ("mRoutingMode", kNormalRouting));
+#endif
             mParameters.set(kSmooth,        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
             mParameters.set(kVolumeNear,    static_cast<float>(xmlState->getDoubleAttribute("kVolumeNear", normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault))));
             mParameters.set(kVolumeMid,     static_cast<float>(xmlState->getDoubleAttribute("kVolumeMid", normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault))));

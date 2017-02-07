@@ -33,9 +33,12 @@
 #include <memory>
 using namespace std;
 
-
 #ifndef USE_DB_METERS
 #define USE_DB_METERS 1
+#endif
+
+#ifndef ALLOW_INTERNAL_WRITE
+#define ALLOW_INTERNAL_WRITE 0
 #endif
 
 #ifndef ALLOW_MVT_MODE_AUTOMATION
@@ -170,8 +173,10 @@ enum InputOutputModes {
 
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
 
+
 enum RoutingModes{
      kNormalRouting = 0
+    #if ALLOW_INTERNAL_WRITE
     ,kInternalWrite
     ,kInternalRead12
     ,kInternalRead34
@@ -182,7 +187,9 @@ enum RoutingModes{
     ,kInternalRead1213
     ,kInternalRead1314
     ,kInternalRead1516
+    #endif
 };
+
 
 //==============================================================================
 // these must be normalized/denormalized for processing
@@ -412,7 +419,8 @@ public:
     
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
-        
+    
+#if ALLOW_INTERNAL_WRITE
 	int getRoutingMode() const { return mRoutingMode; }
 	void setRoutingMode(int s) {
         mRoutingMode = s;
@@ -421,6 +429,7 @@ public:
         }
     }
 	void updateRoutingTempAudioBuffer();
+#endif
     
     int getGuiWidth() const{return mGuiWidth;}
     int getGuiHeight() const{return mGuiHeight;}
