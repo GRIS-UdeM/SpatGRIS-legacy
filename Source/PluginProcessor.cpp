@@ -199,7 +199,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mParameters.set(kFilterFar,     normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault));
 	mParameters.set(kMaxSpanVolume, normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault));
 	mParameters.set(kRoutingVolume, normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
+#if ALLOW_MVT_MODE_AUTOMATION
     mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
+#endif
 
 	mSmoothedParameters.resize(kNumberOfParameters);
     for (int i = 0; i < kNumberOfParameters; ++i){
@@ -238,7 +240,11 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
+#if ALLOW_MVT_MODE_AUTOMATION
 	setMovementMode(0, false);
+#else
+    setMovementMode(0);
+#endif
     
 	mShowGridLines  = false;
     m_bOscActive    = true;
@@ -465,7 +471,7 @@ float SpatGrisAudioProcessor::getParameter (int index) {
 }
 
 
-
+#if ALLOW_MVT_MODE_AUTOMATION
 bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
@@ -481,6 +487,7 @@ bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     }
     return false;
 }
+#endif
 
 bool SpatGrisAudioProcessor::isKnownHost(){
     return (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer() ||
@@ -519,9 +526,12 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
     }
     
     float fOldValue = mParameters.getUnchecked(index);
+    
+#if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && !isNewMovementMode(newValue)){
         return;
     }
+#endif
     if (!areSameParameterValues(fOldValue, newValue)){
         if (newValue == 0 && isSourceLocationParameter(index)){
             DBG("#54: TRYING TO SET PARAMETER " << index << " " << getParameterName(index) << " TO ZERO");
@@ -530,10 +540,12 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
         
         mParameters.set(index, newValue);
         
+#if ALLOW_MVT_MODE_AUTOMATION
         if (index == kMovementMode && m_pMover){
             m_pMover->storeAllDownPositions();
             startOrStopSourceUpdateThread();
         }
+#endif
 
         if (!m_bPreventSourceLocationUpdate){
             for (int iCurSource = 0; iCurSource < getNumberOfSources(); ++iCurSource){
@@ -583,9 +595,11 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         default:
             break;
     }
+#if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && m_pMover){
         m_pMover->storeAllDownPositions();
     }
+#endif
     sendParamChangeMessageToListeners(index, newValue);
 }
 
@@ -600,8 +614,9 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 	if (index == kFilterFar)	return "Filter Far";
 	if (index == kMaxSpanVolume)return "Max span volume";
 	if (index == kRoutingVolume)return "Routing volume";
+#if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode) return "Movement Mode";
-	
+#endif
     if (index < mNumberOfSources * kParamsPerSource) {
 		String s("Source ");
 		s << (index / kParamsPerSource + 1);
@@ -628,7 +643,7 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 	
     return String::empty;
 }
-
+#if ALLOW_MVT_MODE_AUTOMATION
 void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
     if (p_bNotifyHost){
         setParameterNotifyingHost(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
@@ -636,6 +651,7 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
         setParameterInternal(kMovementMode, normalize(kMovementModeMin, kMovementModeMax, i));
     }
 }
+#endif
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
@@ -1001,9 +1017,11 @@ int SpatGrisAudioProcessor::getParameterNumSteps (int index){
 const String SpatGrisAudioProcessor::getParameterText (int index)
 {
     switch (index) {
+#if ALLOW_MVT_MODE_AUTOMATION
         case kMovementMode:
             return GetMovementModeName(getMovementMode());
             break;
+#endif
             
         default:
             return String::empty;
@@ -2210,7 +2228,9 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             m_bOscActive        = xmlState->getIntAttribute ("m_bOscActive", 1);
             mTrSeparateAutomationMode  = xmlState->getIntAttribute ("mTrIndependentMode", mTrSeparateAutomationMode);
+#if ALLOW_MVT_MODE_AUTOMATION
             setMovementMode(xmlState->getIntAttribute ("m_iMovementMode", 0), false);
+#endif
             mLinkSurfaceOrPan   = xmlState->getIntAttribute ("mLinkSurfaceOrPan", 0);
             mLinkAzimSpan       = xmlState->getIntAttribute ("mLinkAzimSpan", 0);
             mLinkElevSpan       = xmlState->getIntAttribute ("mLinkElevSpan", 0);

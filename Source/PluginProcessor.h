@@ -38,6 +38,10 @@ using namespace std;
 #define USE_DB_METERS 1
 #endif
 
+#ifndef ALLOW_MVT_MODE_AUTOMATION
+#define ALLOW_MVT_MODE_AUTOMATION 0
+#endif
+
 #ifndef USE_VECTORS
 #define USE_VECTORS 1
 #endif
@@ -111,8 +115,12 @@ enum constantParameters{
 	kFilterFar =			6 + kNonConstantParameters,
 	kMaxSpanVolume =		7 + kNonConstantParameters,
 	kRoutingVolume =		8 + kNonConstantParameters,
+#if ALLOW_MVT_MODE_AUTOMATION
     kMovementMode =         9 + kNonConstantParameters,
 	kConstantParameters =	10
+#else
+    kConstantParameters =	9
+#endif
 };
 
 #define kNumberOfParameters (kNonConstantParameters + kConstantParameters)
@@ -379,11 +387,19 @@ public:
     
     bool getIndependentMode() const { return mTrSeparateAutomationMode; }
     void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
-    
-	int getMovementMode() { 
+#if ALLOW_MVT_MODE_AUTOMATION
+    bool isNewMovementMode(float v);
+	int getMovementMode() {
 		return static_cast<int>(round(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode))));
 	}
     void setMovementMode(int i, bool p_bNotifyHost = true);
+#else
+    int getMovementMode() {
+        return m_iMovementMode;
+    }
+    void setMovementMode(int i){ m_iMovementMode = i;}
+#endif
+    
     
 	bool getLinkSurfaceOrPan() const { return mLinkSurfaceOrPan; }
 	void setLinkSurfaceOrPan(bool s) { mLinkSurfaceOrPan = s; }
@@ -935,8 +951,10 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
-
-    bool isNewMovementMode(float v);
+    
+#if !ALLOW_MVT_MODE_AUTOMATION
+    int m_iMovementMode;
+#endif
 
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;
