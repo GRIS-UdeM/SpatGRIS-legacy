@@ -23,6 +23,7 @@
  ==============================================================================
  */
 
+
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
@@ -284,20 +285,14 @@ static inline float linearToDb(float linear)
 
 
 //isequal() equals()
-static bool areSame(double a, double b)
-{
+static bool areSame(double a, double b) {
     return fabs(a - b) < .0001;
 }
 
-static bool areSameParameterValues(double a, double b)
-{
-    if (host.isLogic()){
-        return fabs(a - b) < .01;
-    } else {
-        return fabs(a - b) < .0001;
-    }
+JUCE_COMPILER_WARNING("should take number of steps as arguments. eg. 8 steps in movement mode")
+static bool areSameStepParameterValues(double a, double b) {
+    return fabs(a - b) < .1;
 }
-
 
 typedef Point<float> FPoint;
 
@@ -757,7 +752,7 @@ public:
         
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
-        startOrStopSourceUpdateThread();
+        bypassOrNotSourceUpdateThread();
     }
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
@@ -798,7 +793,7 @@ public:
     
     bool isPlaying(){ return m_bIsPlaying;}
     void threadUpdateNonSelectedSourcePositions();
-    void startOrStopSourceUpdateThread();
+    void bypassOrNotSourceUpdateThread();
 	
 private:
     
@@ -884,6 +879,7 @@ private:
 #if USE_VECTORS
 //    vector<vector<float>> mInputsCopy;
 //    vector<float*> mOutputs;
+
     vector<float> mInputsCopy[kMaxInputs];
     float* mOutputs[kMaxChannels];
     

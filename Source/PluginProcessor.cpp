@@ -88,12 +88,14 @@ public:
     }
     
     void run() override {
-        while (! threadShouldExit() && !m_bBypass) {
-            m_pProcessor->threadUpdateNonSelectedSourcePositions();
+        while (!threadShouldExit()) {
+            if (!m_bBypass){
+                m_pProcessor->threadUpdateNonSelectedSourcePositions();
+            }
             wait (m_iInterval);
         }
     }
-    void setBypass(bool p_bBypass){
+    void setThreadBypass(bool p_bBypass){
         m_bBypass = p_bBypass;
     }
     bool getBypass(){
@@ -319,13 +321,17 @@ SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     }
 }
 
-void SpatGrisAudioProcessor::startOrStopSourceUpdateThread(){
+void SpatGrisAudioProcessor::bypassOrNotSourceUpdateThread(){
     //we don't want the thread to run when we only have 1 source, when we're recording automation (because then the regular move
     //will already move all sources according to movement constraints, and when we're in independent mode.
-    if (mNumberOfSources == 1 || m_bIsRecordingAutomation /*|| getMovementMode() == 0*/) {
-        m_pSourceUpdateThread->setBypass(false);
-    } else if (!m_pSourceUpdateThread->isThreadRunning()){
-        m_pSourceUpdateThread->setBypass(true);
+    if (m_bIsRecordingAutomation){
+        m_pSourceUpdateThread->setThreadBypass(true);
+    } else {
+        if (mNumberOfSources == 1 || getMovementMode() == 0) {
+            m_pSourceUpdateThread->setThreadBypass(true);
+        } else {
+            m_pSourceUpdateThread->setThreadBypass(false);
+        }
     }
 }
 
@@ -477,14 +483,10 @@ float SpatGrisAudioProcessor::getParameter (int index) {
 bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
-        if (areSameParameterValues(m_fNewValue, fCurMode)){
+        if (areSameStepParameterValues(m_fNewValue, fCurMode)){
             //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
             float fCurSelectedMode = getParameter(kMovementMode);
-            if (areSameParameterValues(fCurMode, fCurSelectedMode)){
-                return false;
-            } else {
-                return true;
-            }
+            return !areSame(fCurMode, fCurSelectedMode);
         }
     }
     return false;
@@ -528,13 +530,13 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
     }
     
     float fOldValue = mParameters.getUnchecked(index);
-    
+        
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && !isNewMovementMode(newValue)){
         return;
     }
 #endif
-    if (!areSameParameterValues(fOldValue, newValue)){
+    if (!areSame(fOldValue, newValue)){
         if (newValue == 0 && isSourceLocationParameter(index)){
             DBG("#54: TRYING TO SET PARAMETER " << index << " " << getParameterName(index) << " TO ZERO");
             return;
@@ -545,7 +547,7 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
 #if ALLOW_MVT_MODE_AUTOMATION
         if (index == kMovementMode && m_pMover){
             m_pMover->storeAllDownPositions();
-            startOrStopSourceUpdateThread();
+            bypassOrNotSourceUpdateThread();
         }
 #endif
 
@@ -916,7 +918,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
     }
     
     mHostChangedParameterProcessor++;
-    startOrStopSourceUpdateThread();
+    bypassOrNotSourceUpdateThread();
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
@@ -1264,6 +1266,12 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     if (m_iDawBufferSize != pBuffer.getNumSamples()){
         m_iDawBufferSize = pBuffer.getNumSamples();
         updateInputOutputRampsSizes();
+    }
+        
+    if (mNumberOfSpeakers < pBuffer.getNumChannels()){
+        for (int i = mNumberOfSpeakers; i < pBuffer.getNumChannels(); ++i) {
+            memset(pBuffer.getWritePointer(i), 0, m_iDawBufferSize * sizeof(float));
+        }
     }
     
     for (int iCurChannel = 0; iCurChannel < mNumberOfSpeakers; ++iCurChannel) {
