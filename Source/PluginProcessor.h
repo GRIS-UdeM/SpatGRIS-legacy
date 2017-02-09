@@ -127,7 +127,7 @@ enum constantParameters{
 #endif
 };
 
-JUCE_COMPILER_WARNING("make sure these are applied everywhere")
+JUCE_COMPILER_WARNING("make sure these are applied everywhere. could even use the max given by juce")
 #define kMaxInputs      (8)
 #define kMaxChannels    (16)
 #define kMaxBufferSize  (4096)
@@ -266,32 +266,28 @@ static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin 
 static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin;
 
 //==============================================================================
-static inline float normalize(float min, float max, float value)
-{
+static inline float normalize(float min, float max, float value) {
 	return (value - min) / (max - min);
 }
-static inline float denormalize(float min, float max, float value)
-{
+
+static inline float denormalize(float min, float max, float value) {
 	return min + value * (max - min);
 }
-static inline float dbToLinear(float db)
-{
+
+static inline float dbToLinear(float db) {
 	return powf(10.f, (db) * 0.05f);
 }
-static inline float linearToDb(float linear)
-{
+
+static inline float linearToDb(float linear) {
 	return log10f(linear) * 20.f;
 }
-
-
-//isequal() equals()
 static bool areSame(double a, double b) {
     return fabs(a - b) < .0001;
 }
 
-JUCE_COMPILER_WARNING("should take number of steps as arguments. eg. 8 steps in movement mode")
-static bool areSameStepParameterValues(double a, double b) {
-    return fabs(a - b) < .1;
+static bool areSameStepParameterValues(double a, double b, int iTotalSteps) {
+    float nearest = roundf(1.f/iTotalSteps * 10) / 10;
+    return fabs(a - b) < nearest;
 }
 
 typedef Point<float> FPoint;

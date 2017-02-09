@@ -483,7 +483,7 @@ float SpatGrisAudioProcessor::getParameter (int index) {
 bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
-        if (areSameStepParameterValues(m_fNewValue, fCurMode)){
+        if (areSameStepParameterValues(m_fNewValue, fCurMode, TotalNumberMovementModes)){
             //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
             float fCurSelectedMode = getParameter(kMovementMode);
             return !areSame(fCurMode, fCurSelectedMode);
