@@ -58,6 +58,10 @@ using namespace std;
 #define TIME_PROCESS 0
 #endif
 
+#ifndef TIME_GUI
+#define TIME_GUI 0
+#endif
+
 #ifndef USE_TOUCH_OSC
     #define USE_TOUCH_OSC 1
 #endif

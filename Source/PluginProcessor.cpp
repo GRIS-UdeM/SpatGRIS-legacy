@@ -2071,7 +2071,6 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 //==============================================================================
 
 void SpatGrisAudioProcessor::storeCurrentLocations(){
-    JUCE_COMPILER_WARNING("should we store down locations here??")
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
         mBufferSrcLocX[i]  = mParameters[getParamForSourceX(i)];
         mBufferSrcLocY[i]  = mParameters[getParamForSourceY(i)];
