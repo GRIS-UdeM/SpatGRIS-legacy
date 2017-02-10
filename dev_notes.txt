@@ -1035,5 +1035,6 @@ OSC Bug Conclusion :
     mais un probleme sur le nombre de SpatGris qui envoie OSC 
         (2 SpatGRIS, 2 *2 sources, 180 pk/s AVEC glitch)
 
+Probleme trouve, surement une mauvaise utilisation des sources inputs du Zirkonium (SourceInputId)
 
 
