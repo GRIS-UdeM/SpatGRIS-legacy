@@ -243,9 +243,9 @@ Robert sent a new version of the zirkonium, alpha 12. Il n'est pas compatible av
 
 GENERAL TO DO HERE:
 * understand vbap algorithm (read paper(s))
-	* wait for David
+    * wait for David
 * understand vbap PD code (zirkonium version or original)
-	* wait for David
+    * wait for David
 * understand what is required to have software being seen as audio cards, essentially what soundflower and jack do. 
 * understand how to deal with audio outputs, ie what zirkonium does. 
 
@@ -1013,3 +1013,27 @@ X-logic AU test not working
 X-compare times
     with no output ramping, no setSpeakerVol, no active speakers, using vectors or not is the same
     using active speakers or not is also the same. i think we have micro-optimized everything we need to micro optimize in the audio processing algo. Next thing would be to rethink the main loops 
+
+
+---------------- 2017-02-10 --------------------
+Test Hexa OSC Spatialization
+Ne pas rajouter de cle USB quand la spatialisation fonctionne
+Test avec Reaper
+    Source strereo de la track 2 Jump dans le Zirkomium vue 3D entre 2 positions (Message OSC responsable)
+    OSC est toujours active MEME quand le plugin est OFF dans Reaper : cree de la latence pour rien avec le zirkonium
+        Oblige de couper "OSC Active" sinon ca ram meme quand le son est Mute
+
+    Cela nous limite à utilise 1 seul SpatGRIS actif
+
+Test avec DP
+    Pas de probleme avec l'enregistrement d'automation rapide en mode "Latch"
+    Toujours le meme soucis avec OSC (Voir Reaper)
+
+OSC Bug Conclusion :
+    Ce n'est pas un probleme sur le nombre de pakets 
+        (1 SpatGRIS, 8 sources, 300 pk/s sans glitch) 
+    mais un probleme sur le nombre de SpatGris qui envoie OSC 
+        (2 SpatGRIS, 2 *2 sources, 180 pk/s AVEC glitch)
+
+
+
