@@ -31,6 +31,8 @@
 typedef Point<float> FPoint;
 #include <memory>
 
+#define N_DECIMAL_POINTS_PRECISION (1000)
+
 class SpatGrisAudioProcessor;
 class SourceMover;
 
@@ -89,7 +91,8 @@ public:
     
     float getSpeed(){ return m_fSpeed;}
     void  setSpeed(float p_fSpeed){
-        if (p_fSpeed >= -2.f && p_fSpeed <= 2.f){
+        
+        if (p_fSpeed >= -3.f && p_fSpeed <= 3.f){
             m_fSpeed = p_fSpeed;
         }
     }

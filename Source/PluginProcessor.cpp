@@ -603,6 +603,13 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
     if (index == kMovementMode && m_pMover){
         m_pMover->storeAllDownPositions();
     }
+    if (index == kTrajectorySpeed){
+        //mParameterRamps[kTrajectorySpeed].pop_back();
+        //mParameterRamps[kTrajectorySpeed].insert(mParameterRamps[kTrajectorySpeed].begin(),newValue);
+        fSpeedTrajectory = newValue;
+        //float t = *mParameterRamps[kTrajectorySpeed].end();
+        //mTrajectory->setSpeed(newValue);
+    }
 #endif
     sendParamChangeMessageToListeners(index, newValue);
 }
@@ -1430,6 +1437,7 @@ void SpatGrisAudioProcessor::processTrajectory(){
     Trajectory::Ptr trajectory = mTrajectory;
     if (trajectory) {
         if (m_bIsPlaying) {
+            trajectory->setSpeed(fSpeedTrajectory);
             double bps = cpi.bpm / 60;
             float seconds = m_iDawBufferSize / m_dSampleRate;
             float beats = seconds * bps;

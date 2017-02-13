@@ -79,6 +79,8 @@ using namespace std;
     size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #endif
 
+#define M_E 2.71828182845904523536
+
 //==============================================================================
 
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
@@ -121,10 +123,14 @@ enum constantParameters{
 	kRoutingVolume =		8 + kNonConstantParameters,
 #if ALLOW_MVT_MODE_AUTOMATION
     kMovementMode =         9 + kNonConstantParameters,
-	kConstantParameters =	10
+    kTrajectorySpeed =      10 + kNonConstantParameters,
+	kConstantParameters =	11
 #else
-    kConstantParameters =	9
+    kTrajectorySpeed =      9 + kNonConstantParameters,
+    kConstantParameters =	10
+    
 #endif
+    
 };
 
 JUCE_COMPILER_WARNING("make sure these are applied everywhere")
@@ -525,6 +531,9 @@ public:
     
 	const String getOscSendIp() const { return mOscSendIp; }
 	void setOscSendIp(String s) { mOscSendIp = s;}
+    
+    /*float getTrajectorySpeed(){ return mTrajectory->getSpeed();}
+    void setTrajectorySpeed(float v){ mTrajectory->setSpeed(v);}*/
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
@@ -962,6 +971,8 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    float fSpeedTrajectory;
     
 #if !ALLOW_MVT_MODE_AUTOMATION
     int m_iMovementMode;

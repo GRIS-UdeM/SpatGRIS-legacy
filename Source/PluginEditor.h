@@ -55,6 +55,7 @@ enum paramTypes {
 	kParamRoutingVolume,
     kParamAzimSpan,
     kParamElevSpan,
+    kParamTrajSpeed,
 };
 
 enum placement{
@@ -193,6 +194,7 @@ private:
 	Slider *mFilterMid;
 	Slider *mFilterNear;
 	Slider *mMaxSpanVolumeSlider;
+    Slider *mSpeedTrajectory;
     Component *mMaxSpanVolumeLabel;
     //Label *mShowChange;
     Label *mStateLeap;
@@ -293,7 +295,7 @@ private:
 	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
 	TextButton* addButton(const String &s, int x, int y, int w, int h, Component *into);
     TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
-	ParamSliderGRIS* addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into);
+	ParamSliderGRIS* addParamSliderGRIS(paramTypes paramType, int si, float v, int x, int y, int w, int h, Component *into);
     
 //    JoystickUpdateThread*   m_pJoystickUpdateThread;
     
