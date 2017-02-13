@@ -1,4 +1,4 @@
- /*
+/*
  ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
  

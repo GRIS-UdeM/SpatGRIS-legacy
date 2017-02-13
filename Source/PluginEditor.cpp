@@ -623,7 +623,7 @@ AudioProcessorEditor (ownerFilter)
         mTrWriteButton = addButton("Ready", x, y, cbw, dh, box);
         mTrWriteButton->setClickingTogglesState(true);
         
-        mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin, y, 300, dh, box);
+        mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin-2, y-4, 300, dh, box);
         mTrEndPointLabel->setVisible(false);
         
         y += dh + 5;
@@ -632,6 +632,18 @@ AudioProcessorEditor (ownerFilter)
         mTrProgressBar->setSize(cbw , dh-5);//tew
         mTrProgressBar->setTopLeftPosition(x, y);
         mTrProgressBar->setVisible(false);
+        
+        x = 1*cbw + 2*kMargin;
+        
+        addLabel("Speed:", x-2, y-14, w+10, dh, box);
+        
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, 1, x, y, w, dh-5, box);
+        ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
+        ds->setRange(-2.5f, 2.5f);
+        
+        //ds->setTextBoxStyle (Slider::TextBoxBelow, false, 90, 20);
+        mSpeedTrajectory = ds;
+
         
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
@@ -644,6 +656,9 @@ AudioProcessorEditor (ownerFilter)
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
         addLabel("Movements:", x, y, w-50, dh, box);
+        
+ 
+       
         
     }
     
@@ -1478,11 +1493,36 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, int x, 
     return te;
 }
 
-ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType, int si, float v, int x, int y, int w, int h, Component *into)
+ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(paramTypes paramType, int si, float v, int x, int y, int w, int h, Component *into)
 {
     int index ;
+    ParamSliderGRIS *ds;
+    
+    switch(paramType) {
+        case kParamSource :
+            index = mFilter->getParamForSourceD(si);
+            v = 1.f - v;
+            ds = new ParamSliderGRIS(index, paramType, mSurfaceOrPanLinkButton, mFilter);
+            break;
+        
+        case kParamAzimSpan :
+            index = mFilter->getParamForSourceAzimSpan(si);
+            ds = new ParamSliderGRIS(index, paramType, mAzimSpanLinkButton, mFilter);
+            break;
+            
+        case kParamElevSpan :
+            index = mFilter->getParamForSourceElevSpan(si);
+            ds = new ParamSliderGRIS(index, paramType, mElevSpanLinkButton, mFilter);
+            break;
+        
+        default:
+            index = si;
+            ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
+        
+    }
+    
     //if we're adding a slider for a paramType == kParamSource, this slider will control the SourceD.
-    if (paramType == kParamSource){
+    /*if (paramType == kParamSource){
         index = mFilter->getParamForSourceD(si);
         //and the processor's sourceD is reversed from the editor's
         v = 1.f - v;
@@ -1493,10 +1533,12 @@ ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType,
     } else {
         //otherwise, it controls directly the constantParameter
         index = si;
-    }
+    }*/
     
-    ParamSliderGRIS *ds;// = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mSurfaceOrPanLinkButton : NULL, mFilter);
-    if (paramType == kParamSource){
+    // = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mSurfaceOrPanLinkButton : NULL, mFilter);
+    
+    
+    /*if (paramType == kParamSource){
         ds = new ParamSliderGRIS(index, paramType, mSurfaceOrPanLinkButton, mFilter);
     } else if (paramType == kParamAzimSpan){
         ds = new ParamSliderGRIS(index, paramType, mAzimSpanLinkButton, mFilter);
@@ -1504,10 +1546,12 @@ ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(int paramType,
         ds = new ParamSliderGRIS(index, paramType, mElevSpanLinkButton, mFilter);
     } else {
         ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
-    }
+    }*/
+    
     ds->setRange(0, 1);
+
     ds->setValue(v);
-    ds->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    ds->setTextBoxStyle(Slider::NoTextBox, true,0,0);
     ds->setSize(w, h);
     ds->setTopLeftPosition(x, y);
     ds->setLookAndFeel(&mGrisFeel);

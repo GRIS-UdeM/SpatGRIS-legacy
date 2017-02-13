@@ -23,6 +23,7 @@
  ==============================================================================
  */
 
+
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
@@ -78,6 +79,8 @@ using namespace std;
     size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #endif
 
+#define M_E 2.71828182845904523536
+
 //==============================================================================
 
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
@@ -120,10 +123,14 @@ enum constantParameters{
 	kRoutingVolume =		8 + kNonConstantParameters,
 #if ALLOW_MVT_MODE_AUTOMATION
     kMovementMode =         9 + kNonConstantParameters,
-	kConstantParameters =	10
+    kTrajectorySpeed =      10 + kNonConstantParameters,
+	kConstantParameters =	11
 #else
-    kConstantParameters =	9
+    kTrajectorySpeed =      9 + kNonConstantParameters,
+    kConstantParameters =	10
+    
 #endif
+    
 };
 
 JUCE_COMPILER_WARNING("make sure these are applied everywhere")
@@ -284,20 +291,14 @@ static inline float linearToDb(float linear)
 
 
 //isequal() equals()
-static bool areSame(double a, double b)
-{
+static bool areSame(double a, double b) {
     return fabs(a - b) < .0001;
 }
 
-static bool areSameParameterValues(double a, double b)
-{
-    if (host.isLogic()){
-        return fabs(a - b) < .01;
-    } else {
-        return fabs(a - b) < .0001;
-    }
+JUCE_COMPILER_WARNING("should take number of steps as arguments. eg. 8 steps in movement mode")
+static bool areSameStepParameterValues(double a, double b) {
+    return fabs(a - b) < .1;
 }
-
 
 typedef Point<float> FPoint;
 
@@ -530,6 +531,9 @@ public:
     
 	const String getOscSendIp() const { return mOscSendIp; }
 	void setOscSendIp(String s) { mOscSendIp = s;}
+    
+    /*float getTrajectorySpeed(){ return mTrajectory->getSpeed();}
+    void setTrajectorySpeed(float v){ mTrajectory->setSpeed(v);}*/
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
@@ -757,7 +761,7 @@ public:
         
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
-        startOrStopSourceUpdateThread();
+        bypassOrNotSourceUpdateThread();
     }
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
 
@@ -798,7 +802,7 @@ public:
     
     bool isPlaying(){ return m_bIsPlaying;}
     void threadUpdateNonSelectedSourcePositions();
-    void startOrStopSourceUpdateThread();
+    void bypassOrNotSourceUpdateThread();
 	
 private:
     
@@ -884,6 +888,7 @@ private:
 #if USE_VECTORS
 //    vector<vector<float>> mInputsCopy;
 //    vector<float*> mOutputs;
+
     vector<float> mInputsCopy[kMaxInputs];
     float* mOutputs[kMaxChannels];
     
@@ -966,6 +971,8 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    float fSpeedTrajectory;
     
 #if !ALLOW_MVT_MODE_AUTOMATION
     int m_iMovementMode;
