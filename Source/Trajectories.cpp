@@ -44,7 +44,7 @@ Trajectory::Trajectory(const TrajectoryProperties& properties)
     
     m_bInfLoopRepeats  = (properties.repeats == 0.0);
    
-    float fRepeats = (properties.repeats < 0.0001) ? 0.0001 : properties.repeats;
+    float fRepeats = (properties.repeats < 0.0001) ? 1.0 : properties.repeats;
     m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
 }
 
@@ -400,7 +400,7 @@ protected:
             if(m_fTimeDone<=0){ m_fTimeDone = m_fDurationSingleTraj;}
         }
         
-        cout << m_fTimeDone  << "  #  " <<  fDeltaTheta << "  #  " << m_fDurationSingleTraj <<  " -- " << (fDeltaTheta < 0.0f) << " : "<< (!m_bReturn && (fDeltaTheta> M_PI || fDeltaTheta < 0.0f)) << endl;
+        //cout << m_fTimeDone  << "  #  " <<  fDeltaTheta << "  #  " << m_fDurationSingleTraj <<  " -- " << (fDeltaTheta < 0.0f) << " : "<< (!m_bReturn && (fDeltaTheta> M_PI || fDeltaTheta < 0.0f)) << endl;
         if (m_bCCW){
             fDeltaTheta = -fDeltaTheta;
         }
@@ -458,16 +458,17 @@ class PendulumTrajectory : public Trajectory
 public:
     PendulumTrajectory(const TrajectoryProperties& properties)
     :Trajectory(properties)
+    , mCCW(*properties.direction == CCW)
     , m_bRT(properties.bReturn)
     , m_fDeviation(properties.deviation)
     , m_fTotalDampening(properties.dampening)
     {
         mEndPointXy01 = FPoint(properties.endPoint.x, 1-properties.endPoint.y);
-        if (*properties.direction == InCCW || *properties.direction == OutCCW){
+        /*if (*properties.direction == InCCW || *properties.direction == OutCCW){
             mCCW = true;
         } else {
             mCCW = false;
-        }
+        }*/
     }
 
 protected:
@@ -494,10 +495,20 @@ protected:
         //calculate current progress and dampening
         
         //WORK IN Progress-----------------------------------------
+        //float fCurrentProgress  = modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
+        //float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
         
         
-        float fCurrentProgress  = m_fTimeDone / m_fDurationSingleTraj;//modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
+        float fCurrentProgress  = m_fTimeDone / m_fDurationSingleTraj;                   //modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
         float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
+       
+        if(!m_bRT && (fCurrentProgress> 1.0f || fCurrentProgress < 0.0f)){
+            fCurrentProgress = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart) ;
+            if(m_fTimeDone<=0){ m_fTimeDone = m_fDurationSingleTraj; }
+        }
+        
+        //cout << m_fTimeDone  << "  #  " <<  fCurrentProgress << "  #  " << m_fDurationSingleTraj <<  " -- " <<  m_bRT << endl;
+        
         //if y is dependent, use slope equation, otherwise just go vertically. All calculations in cartesian coordinates.
         if (m_bYisDependent){
             //as we dampen, we move the start point and shorten the length
@@ -519,12 +530,17 @@ protected:
         //convert to RT to implement angular deviation
         FPoint pointRT = mFilter->convertXy012Rt(FPoint(fCurX01, fCurY01), false);
         //float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
-        float deviationAngle = (float)(m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
-        deviationAngle = m_fDeviation*2*M_PI;//modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
         
+       // -float deviationAngle = (float)(m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
+       //- deviationAngle = m_fDeviation*2*M_PI;// m_fDeviation    //modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
+        float deviationAngle = (m_fTimeDone / m_fTotalDuration) * 2 * M_PI * m_fDeviation;
+        
+        
+        //float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
         if (!mCCW) {
             deviationAngle = - deviationAngle;
         }
+        
         //convert back to XY01 and move
         FPoint pointXY01 = mFilter->convertRt2Xy01(pointRT.x, pointRT.y + deviationAngle);
         m_pMover->move(pointXY01, kTrajectory);
