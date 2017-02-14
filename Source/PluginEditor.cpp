@@ -963,7 +963,7 @@ AudioProcessorEditor (ownerFilter)
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
     startTimerHz (hertzRefresh);
-
+    
 }
 
 
@@ -1040,9 +1040,14 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
         int last = mInputOutputModeCombo->getNumItems();
         int id = mInputOutputModeCombo->getItemId(last-1);
         mFilter->setInputOutputMode(id);
+        mInputOutputModeCombo->setSelectedId(id);
+    }else{
+        mInputOutputModeCombo->setSelectedId(mode);
     }
     
-    mInputOutputModeCombo->setSelectedId(mode);
+    //updateEditorSources(true);
+    updateEditorSpeakers(true);
+    //repaintTheStuff();
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
@@ -2153,6 +2158,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
+    
 #if TIME_THINGS
     std::ostringstream oss;
     clock_t init = clock();
@@ -2166,9 +2172,11 @@ void SpatGrisAudioProcessorEditor::timerCallback()
 #endif
     
 #if USE_DB_METERS
-    if (!mFilter->getIsRecordingAutomation()){
-        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){            
-            mLevelComponents.getUnchecked(i)->refreshIfNeeded();
+    if (!mFilter->getIsRecordingAutomation() && !mFilter->isLevelUilcok()){
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
+            if(!mFilter->isLevelUilcok() && mLevelComponents[i] != NULL){
+                mLevelComponents.getUnchecked(i)->refreshIfNeeded();
+            }
         }
     }
 #endif
@@ -2262,10 +2270,11 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     if (mFilter->getIsAllowInputOutputModeSelection()){
         int iNewMode = mFilter->getInputOutputMode();
         if (iNewMode != mInputOutputModeCombo->getSelectedId()){
+            
             mFilter->storeCurrentLocations();
             m_bLoadingPreset = true;
-            mInputOutputModeCombo->setSelectedId(iNewMode);
-            buttonClicked(mApplyInputOutputModeButton);
+            mFilter->setInputOutputMode(iNewMode);
+            updateInputOutputCombo();
         }
     }
     
