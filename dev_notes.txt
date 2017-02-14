@@ -1013,3 +1013,5 @@ X-logic AU test not working
 X-compare times
     with no output ramping, no setSpeakerVol, no active speakers, using vectors or not is the same
     using active speakers or not is also the same. i think we have micro-optimized everything we need to micro optimize in the audio processing algo. Next thing would be to rethink the main loops 
+------
+
