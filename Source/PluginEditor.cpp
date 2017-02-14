@@ -1959,7 +1959,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             }
         }
     }
-    #if ALLOW_INTERNAL_WRITE
+#if ALLOW_INTERNAL_WRITE
     else if (comboBox == mRoutingModeCombo) {
         JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
