@@ -195,7 +195,6 @@ void SourceMover::end(MoverType mt) {
 }
 
 void SourceMover::updateNumberOfSources(){
-
     mSourcesDownXY.clear();
     mSourcesDownRT.clear();
     mSourcesAngularOrder.clear();

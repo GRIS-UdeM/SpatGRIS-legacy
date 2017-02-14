@@ -311,8 +311,10 @@ private:
     
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
-
-    std::vector<string> mTimingVector;
+    
+#if TIME_GUI
+    int m_iGuiRefreshCounter = 0;
+#endif
     
     int m_iSelectedSrcEditor;
 };

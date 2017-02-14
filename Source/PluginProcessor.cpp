@@ -483,7 +483,7 @@ float SpatGrisAudioProcessor::getParameter (int index) {
 bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
-        if (areSameStepParameterValues(m_fNewValue, fCurMode)){
+        if (areSameStepParameterValues(m_fNewValue, fCurMode, TotalNumberMovementModes)){
             //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
             return !(areSameStepParameterValues(fCurMode, getParameter(kMovementMode)));
 
@@ -2081,7 +2081,6 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 //==============================================================================
 
 void SpatGrisAudioProcessor::storeCurrentLocations(){
-    JUCE_COMPILER_WARNING("should we store down locations here??")
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
         mBufferSrcLocX[i]  = mParameters[getParamForSourceX(i)];
         mBufferSrcLocY[i]  = mParameters[getParamForSourceY(i)];

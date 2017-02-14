@@ -50,11 +50,6 @@ string toString(const T &value) {
 #include "HID_Utilities_External.h"
 #endif
 
-#define TIME_THINGS 1
-#if TIME_THINGS
-    #include <ctime>
-#endif
-
 #define STRING2(x) #x
 #define STRING(x) STRING2(x)
 //==============================================================================
@@ -1676,12 +1671,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     
     if (button == mTrWriteButton) {
-//#if TIME_THINGS
-//        for(auto line : mTimingVector){
-//            cout << line << newLine;
-//            mTimingVector.clear();
-//        }
-//#endif
         Trajectory::Ptr t = mFilter->getTrajectory();
         //if a trajectory exists
         if (t) {
@@ -1692,8 +1681,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         }
         //a trajectory does not exist, create one
         else {
-            JUCE_COMPILER_WARNING("we should probably use the values coming from the processor? And all conversions (like /360) should be done in processor, I think")
-    
             TrajectoryProperties properties;
             properties.type         = mTrTypeComboBox->getSelectedId();
             properties.filter       = mFilter;
@@ -2016,7 +2003,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             }
         }
     }
-    #if ALLOW_INTERNAL_WRITE
+#if ALLOW_INTERNAL_WRITE
     else if (comboBox == mRoutingModeCombo) {
         JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
 		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
@@ -2151,20 +2138,22 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
 }
 
 //==============================================================================
-void SpatGrisAudioProcessorEditor::timerCallback()
-{
-#if TIME_THINGS
+void SpatGrisAudioProcessorEditor::timerCallback(){
+
+//---------------------------------------- TRAJECTORIES -----------------------------------------
+#if TIME_GUI
     std::ostringstream oss;
-    clock_t init = clock();
+    Time init = Time::getCurrentTime();
 #endif
 
     updateTrajectoryStuff();
-  
-#if TIME_THINGS
-    clock_t timeLevels = clock();
-    //oss << "levels\t" << timeLevels - timeField << "\t";
-#endif
     
+#if TIME_GUI
+    Time timeTraj = Time::getCurrentTime();
+    oss << "traj\t" << (timeTraj - init).inMilliseconds() << "\t";
+#endif
+
+//---------------------------------------- DB METERS -----------------------------------------
 #if USE_DB_METERS
     if (!mFilter->getIsRecordingAutomation()){
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){            
@@ -2173,12 +2162,12 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     }
 #endif
     
-    
-#if TIME_THINGS
-    clock_t timeTraj = clock();
-    oss << "traj\t" << timeTraj - init << "\t";
+#if TIME_GUI
+    Time timeDbMeters = Time::getCurrentTime();
+    oss << "db meters\t" << (timeDbMeters - timeTraj).inMilliseconds() << "\t";
 #endif
-    
+
+//---------------------------------------- PROPERTIES -----------------------------------------
     if (mField->justSelectedEndPoint()){
         updateEndLocationTextEditors();
         mTrEndPointButton->setToggleState(false, dontSendNotification);
@@ -2196,11 +2185,13 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         propertyChanged();
     }
     
-#if TIME_THINGS
-    clock_t timeProperty = clock();
-    oss << "property\t" << timeProperty - timeTraj << "\t";
+#if TIME_GUI
+    Time timeProperties = Time::getCurrentTime();
+    oss << "properties\t" << (timeProperties - timeDbMeters).inMilliseconds() << "\t";
 #endif
-
+    
+//---------------------------------------- FIELD -----------------------------------------
+    
     hcpProcessor = mFilter->getHostChangedParameter();
     if (hcpProcessor != mHostChangedParameterEditor) {
         mHostChangedParameterEditor = hcpProcessor;
@@ -2213,10 +2204,12 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mField->repaint();
     }
 
-#if TIME_THINGS
-    clock_t timeField = clock();
-    oss << "field\t" << timeField - timeProperty << "\t";
+#if TIME_GUI
+    Time timeField = Time::getCurrentTime();
+    oss << "properties\t" << (timeField - timeProperties).inMilliseconds() << "\t";
 #endif
+    
+//---------------------------------------- REPAINT -----------------------------------------
     
     if (mNeedRepaint){
         repaintTheStuff();
@@ -2226,15 +2219,19 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         mOsc->heartbeat();
     }
     
-#if TIME_THINGS
-    clock_t timeOsc = clock();
-    oss << "osc\t" << timeOsc - timeField;
-    mTimingVector.push_back(oss.str());
+#if TIME_GUI
+    Time repaint = Time::getCurrentTime();
+    oss << "repaintTOTAL\t" << (repaint - timeField).inMilliseconds() << "\t";
+    
+    m_iGuiRefreshCounter++;
+    if (m_iGuiRefreshCounter % (2 * hertzRefresh) == 0){
+        cout << oss.str() << newLine;
+        m_iGuiRefreshCounter = 0;
+    }
 #endif
     
     mNeedRepaint        = false;
     mFieldNeedRepaint   = false;
-    //startTimer(kTimerDelay);
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryStuff(){
@@ -2303,6 +2300,11 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
 }
 
 void SpatGrisAudioProcessorEditor::repaintTheStuff(){
+#if TIME_GUI
+    ostringstream oss;
+    Time repaintInit = Time::getCurrentTime();
+#endif
+    
     mMovementModeCombo->setSelectedId(mFilter->getMovementMode() + 1);
     
     //apparently all these sliders are automatable
@@ -2314,15 +2316,14 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
     mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
-    #if ALLOW_INTERNAL_WRITE
+#if ALLOW_INTERNAL_WRITE
     mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
 #endif
     
-    #if TIME_THINGS
-            ostringstream oss;
-            clock_t timeValues = clock();
-            oss << "Values\t" << timeValues  << "\t";
-    #endif
+#if TIME_GUI
+    Time timeSliders = Time::getCurrentTime();
+    oss << "repaint sliders\t" << (timeSliders - repaintInit).inMilliseconds() << "\t";
+#endif
     
     //so these text editors will update only when we're not playing and moving stuff around
     if (!mFilter->isPlaying()){
@@ -2330,10 +2331,10 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         updateSpeakerLocationTextEditor();
     }
     
-    #if TIME_THINGS
-            clock_t timeTextEd = clock();
-            oss << "TextEd\t" << timeTextEd - timeValues << "\t";
-    #endif
+#if TIME_GUI
+    Time timeTextEd = Time::getCurrentTime();
+    oss << "repaint TextEd\t" << (timeTextEd - timeSliders).inMilliseconds() << "\t";
+#endif
     
     //update sliders and mute, these could be automated
     int iSelSrc = mFilter->getSelectedSrc();
@@ -2354,10 +2355,10 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         mMuteButtons.getUnchecked(i)->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
     }
     
-    #if TIME_THINGS
-            clock_t timeSpeakers = clock();
-            oss << "Speakers\t" << timeSpeakers - timeTextEd << "\t";
-    #endif
+#if TIME_GUI
+    Time timeSelectedSrc = Time::getCurrentTime();
+    oss << "repaint sel src\t" << (timeSelectedSrc - timeTextEd).inMilliseconds() << "\t";
+#endif
 }
 
 void SpatGrisAudioProcessorEditor::audioProcessorChanged (AudioProcessor* processor){
