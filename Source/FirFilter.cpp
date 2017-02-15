@@ -51,7 +51,7 @@ void FirFilter::setSampleRate(int sr) {
 	
     if (sr) {
 //        fprintf(stderr, "Spatgris: unsupported sample rate %d for filtering...\n", sr);
-        DBG("Spatgris: unsupported sample rate %d for filtering...\n" + sr);
+        DBG("Spatgris: unsupported sample rate %d for filtering...\n" + String(sr));
     }	mFir = -1;
 }
 
