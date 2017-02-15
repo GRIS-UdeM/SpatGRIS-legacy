@@ -535,7 +535,7 @@ public:
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
-        if(mLevels[index]==NULL){return 0.0f;}
+        if(!mLevels[index]){return 0.0f;}
         return mLevels.getUnchecked(index);
 #else
         return -1.f;
@@ -814,7 +814,7 @@ private:
     
 	Array<float> mParameters;
 	
-	int mCalculateLevels;
+	bool mCalculateLevels;
 #if USE_DB_METERS
 	Array<float> mLevels;
 #endif

@@ -265,8 +265,7 @@ Boolean HIDConfigureActionOfType(actionTypeMask		inActionTypeMask,
         }
         
         // HIDDumpDeviceInfo(tIOHIDDeviceRef);
-        CFIndex count = HIDCountDeviceElementsOfType(tIOHIDDeviceRef,
-                                                     elementType);
+        CFIndex count = HIDCountDeviceElementsOfType(tIOHIDDeviceRef, elementType);
         if (count > maxElements) {
             maxElements = count;
         }

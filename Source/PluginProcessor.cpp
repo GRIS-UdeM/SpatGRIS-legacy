@@ -213,15 +213,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     mNumberOfSources = 0;
     mNumberOfSpeakers = 0;
 
-	bool bIsWindows;
 
-#if WIN32
-	bIsWindows = true;
-#else
-	bIsWindows = false;
-#endif
-    
-  //	if (host.isReaper() || host.isAbletonLive() || (bIsWindows && host.isDigitalPerformer())){
     if (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer()){
 		m_bAllowInputOutputModeSelection = true;
 	} else {
@@ -237,7 +229,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
     
-	mCalculateLevels = 0;
+	mCalculateLevels = false;
 	mApplyFilter = true;
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
@@ -393,7 +385,8 @@ void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
 #endif
     
 	// keep count of number of editors
-    (c) ? mCalculateLevels++ :  mCalculateLevels--;
+    mCalculateLevels = c;
+    //(c) ? mCalculateLevels++ :  mCalculateLevels--;
 }
 
 void SpatGrisAudioProcessor::setProcessMode(int s) {
@@ -1445,16 +1438,19 @@ void SpatGrisAudioProcessor::processTrajectory(){
     m_bIsPlaying = cpi.isPlaying;
     
     // process trajectory if there is one going on
-    Trajectory::Ptr trajectory = mTrajectory;
-    if (trajectory) {
+
+    if (mTrajectory) {
         if (m_bIsPlaying) {
-            trajectory->setSpeed(fSpeedTrajectory);
+            mTrajectory->setSpeed(fSpeedTrajectory);
             double bps = cpi.bpm / 60;
             float seconds = m_iDawBufferSize / m_dSampleRate;
             float beats = seconds * bps;
             
-            bool done = trajectory->process(seconds, beats);
-            if (done) mTrajectory = NULL;
+            bool done = mTrajectory->process(seconds, beats);
+            if (done){
+                //mTrajectory.~ReferenceCountedObjectPtr();
+                mTrajectory = nullptr;
+            }
         }
     }
 }

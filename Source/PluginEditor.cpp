@@ -2081,13 +2081,13 @@ void SpatGrisAudioProcessorEditor::updateSingleTrajectoryStartComponent(Componen
             te->setColour (TextEditor::textColourId, juce::Colour::greyLevel(.6));
             te->applyFontToAllText (mGrisFeel.getFont());
         }
-        p_oComponent->setEnabled(false);
+        if(p_oComponent){ p_oComponent->setEnabled(false); }
     } else {
         if (TextEditor* te = dynamic_cast<TextEditor*>(p_oComponent)) {
             te->setColour (TextEditor::textColourId, juce::Colours::black);
             te->applyFontToAllText (mGrisFeel.getFont());
         }
-        p_oComponent->setEnabled(true);
+        if(p_oComponent){ p_oComponent->setEnabled(true); }
     }
 }
 
