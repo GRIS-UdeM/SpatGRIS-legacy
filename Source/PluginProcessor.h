@@ -1,4 +1,4 @@
-/*
+ /*
  ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
  
@@ -82,8 +82,6 @@ using namespace std;
 #if JUCE_MSVC
     size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #endif
-
-#define M_E 2.71828182845904523536
 
 //==============================================================================
 
@@ -181,10 +179,10 @@ enum AllMovementModes {
     TotalNumberMovementModes
 };
 
-
+JUCE_COMPILER_WARNING("Check Order InputOutputModes AND x12x")
 //because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
 enum InputOutputModes {
-    i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12, i1o1, i12o12
+    i1o1 = 0, i1o2, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12, i12o12
 };
 
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
@@ -537,6 +535,7 @@ public:
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
+        if(mLevels[index]==NULL){return 0.0f;}
         return mLevels.getUnchecked(index);
 #else
         return -1.f;
@@ -801,6 +800,7 @@ public:
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
     
     bool isPlaying(){ return m_bIsPlaying;}
+    bool isLevelUilcok(){ return bLevelUiLock; }
     void threadUpdateNonSelectedSourcePositions();
     void bypassOrNotSourceUpdateThread();
 	
@@ -883,7 +883,7 @@ private:
     vector<float> allSampleValues;
     
     bool bThetasPrinted = false;
-    
+    bool bLevelUiLock = false;
     
 #if USE_VECTORS
 //    vector<vector<float>> mInputsCopy;

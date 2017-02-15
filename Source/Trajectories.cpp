@@ -79,6 +79,7 @@ bool Trajectory::process(float seconds, float beats) {
 }
 
 float Trajectory::progress() {
+    if(m_bInfLoopRepeats){ return 1.0f; }
 	return  m_fSpeed * m_fTimeDone / m_fTotalDuration;
 }
 
@@ -185,19 +186,18 @@ public:
 //    CircleTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, float p_fTurns)
     CircleTrajectory(const TrajectoryProperties& properties)
     : Trajectory(properties)
-    , mCCW(*properties.direction == CCW)
+    , m_bCCW(*properties.direction == CCW)
     , m_fTurns(properties.turns)
     {
     }
     
 protected:
     void childProcess(float duration, float seconds) {
-        float integralPart;
-        float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
+        float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;
         
         //DeltaTheta = modf(fDeltaTheta/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
         
-        if (!mCCW) fDeltaTheta = -fDeltaTheta;
+        if (!m_bCCW) fDeltaTheta = -fDeltaTheta;
         fDeltaTheta = fDeltaTheta * 2 * M_PI ;
         
         //move to initial position + delta theta
@@ -206,162 +206,17 @@ protected:
         m_pMover->move(newPointXY01, kTrajectory);
         
 
-        
-        //figure delta theta
-        //float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / (m_fDurationSingleTraj)) ;//* (float)m_fSpeed;
-        /*int integerPart = (int)currSpeed;
-        int decimalPart = ((int)(currSpeed*N_DECIMAL_POINTS_PRECISION)%N_DECIMAL_POINTS_PRECISION);
-        float v  = (float)integerPart+((float)decimalPart/N_DECIMAL_POINTS_PRECISION);
-        cout << v <<  "   *   " << m_fSpeed << endl;*/
-      /*  float accl =1;
-
-        if( currSpeed!=m_fSpeed)
-        {
-            accel=1;
-            
-            if(currSpeed > m_fSpeed){
-                currSpeed = currSpeed-(0.001f*accel);
-                 pow(1.0f*M_E, pow(-1.0f*M_E,-2.0f*currSpeed) );
-                if(currSpeed<m_fSpeed){
-                    currSpeed = m_fSpeed;
-                    accel = 1;
-                }
-            }
-            else{
-                currSpeed = currSpeed+(0.001f*accel);
-                if(currSpeed>m_fSpeed){
-                    currSpeed = m_fSpeed;
-                    accel = 1;
-                }
-            }
-            
-        }
-        if(m_fSpeed==0){
-            currSpeed=0;
-        }
-        else{
-            
-            
-            float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / (m_fDurationSingleTraj)) ;//* (float)m_fSpeed;
-
-                        if( isnan(accl)) accl = 1;
-           // cout << fDeltaTheta <<  "   *   " << m_fTurns << "   *   " << m_fTimeDone << "   *   " << m_fDurationSingleTraj << endl;
-
-            //fDeltaTheta = modf(fDeltaTheta/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
-            fDeltaTheta = fDeltaTheta * 2 * M_PI;
-            if (!mCCW) fDeltaTheta = -fDeltaTheta;
-            float addV = (float)((float)currSpeed*(float)currSpeed);
-            if(currSpeed < 0){
-                fDeltaTheta = -fDeltaTheta;
-                fDeltaTheta += accl;
-            }
-            else{
-                fDeltaTheta -= accl;
-            }
-                        //fDeltaTheta +=currSpeed;
-            
-            //fDeltaTheta*=currSpeed;
-            cout << fDeltaTheta <<  "   #   " << currSpeed << "   #   " << m_fSpeed << "   #   " << accl<< endl;
-            
-            //move to initial position + delta theta
-            FPoint startPointRT  = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
-            FPoint newPointXY01  = mFilter->convertRt2Xy01(startPointRT.x, startPointRT.y+fDeltaTheta);
-            m_pMover->move(newPointXY01, kTrajectory);
-        }*/
-
     }
 	
 private:
-	bool mCCW;
+	bool m_bCCW;
     float m_fTurns;
     float currSpeed = 1;
     float startPChange = 0;
     float accel = 1;
 };
 
-// ==============================================================================
-//class SpiralTrajectory : public Trajectory {
-//public:
-//    JUCE_COMPILER_WARNING("i should only use pairs or only FPoints")
-//    JUCE_COMPILER_WARNING("make a struct containing all trajectory parameters")
-//    SpiralTrajectory(SpatGrisAudioProcessor *filter, SourceMover *p_pMover, float duration, bool beats, float times, bool ccw, bool in, bool rt, float p_fTurns, const std::pair<float, float> &endPair)
-//    : Trajectory(filter, p_pMover, duration, beats, times)
-//    , m_bCCW(ccw)
-//    , m_bReturn(rt)
-//    , m_fTurns(p_fTurns)
-//    , m_fEndPairXY01(endPair)
-//    { }
-//
-//protected:
-//    void childInit() {
-//        mStartPointRt = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
-//        mEndPointRt   = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second));
-//        //if start ray is bigger than end ray, we are going in
-//        m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
-//    }
-//    void childProcess(float duration, float seconds) {
-//        
-//        //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
-//        float fDeltaTheta, integralPart;
-//        int iMultiple = (m_bReturn ? 2 : 1);    //in return spiral, delta angle goes twice as fast
-//        fDeltaTheta = iMultiple * fmodf(m_fTimeDone / m_fDurationSingleTraj * M_PI, M_PI);
-//        if (m_bCCW){
-//            fDeltaTheta = -fDeltaTheta;
-//        }
-//        
-//        //figure fCurR and fCurT. in this part of the algo, it is assumed that the end point is either the middle (if going in) or the outside (if going out) of the circle
-//        float fCurT   = mStartPointRt.y + fDeltaTheta * 2 * m_fTurns;
-//        float fStartR = mStartPointRt.x;
-//        float fDeltaR = (cosf(fDeltaTheta)+1) * 0.5;   //l here oscillates between 1 @ start and 0 when fDeltaTheta == M_PI), following a cosine. linear is : float fDeltaR = (M_PI - fDeltaTheta) / M_PI;
-//        float fCurR;
-//        if (m_bGoingIn) {
-//            //fCurR simply goes [fStartR, 0] following a cosine curve
-//            fCurR = fStartR * fDeltaR;
-//        } else {
-//            //fCurR goes from fStartR to kRadiusMax following a cosine curve
-//            fCurR = fStartR + (1 - fDeltaR) * (kRadiusMax - fStartR);
-//        }
-//        
-//        //CARTESIAN TRANSLATION
-//        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
-//        //do linear XY translation to end point
-//        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //fTranslationFactor goes [0,1] for every cycle
-//        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
-//            //reverse direction when we reach halfway in return spiral
-//            fTranslationFactor = 1-fTranslationFactor;
-//        }
-//        if (m_bGoingIn){
-//            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first -.5);
-//            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second-.5);
-//        } else {
-//            //here, fTranslationFactor grows linearly, the rest is constants
-//            FPoint untranslatedEndOutPointXY01 = mFilter->convertRt2Xy01(kRadiusMax, mStartPointRt.y);
-//            curPointXY01.x += fTranslationFactor * (m_fEndPairXY01.first  - untranslatedEndOutPointXY01.x);
-//            curPointXY01.y -= fTranslationFactor * (m_fEndPairXY01.second - untranslatedEndOutPointXY01.y);
-//        }
-//        
-//        //POLAR TRANSLATION
-////        float fTranslationFactor = modf(m_fTimeDone / m_fDurationSingleTraj, &intYegralPart);    //fTranslationFactor goes [0,1] for every cycle
-////        if (m_bReturn && fabs(fDeltaTheta) >= M_PI){
-////            //reverse direction when we reach halfway in return spiral
-////            fTranslationFactor = 1-fTranslationFactor;
-////        }
-////        
-////        FPoint untranslatedEndPointRt = FPoint(kRadiusMax, mStartPointRt.y);
-////        FPoint actualEndPointRt       = mFilter->convertXy012Rt(FPoint(m_fEndPairXY01.first, m_fEndPairXY01.second), false);
-////        fCurR += fTranslationFactor * (untranslatedEndPointRt.x - actualEndPointRt.x);
-////        fCurT += fTranslationFactor * (untranslatedEndPointRt.y - actualEndPointRt.y);
-////        FPoint curPointXY01 = mFilter->convertRt2Xy01(fCurR, fCurT);
-//
-//        m_pMover->move(curPointXY01, kTrajectory);
-//    }
-//    
-//private:
-//    bool m_bCCW, m_bGoingIn, m_bReturn;
-//    float m_fTurns;
-//    std::pair<float, float> m_fEndPairXY01;
-//    FPoint mStartPointRt, mEndPointRt;
-//};
+
 
 class SpiralTrajectory : public Trajectory {
 public:
@@ -458,17 +313,12 @@ class PendulumTrajectory : public Trajectory
 public:
     PendulumTrajectory(const TrajectoryProperties& properties)
     :Trajectory(properties)
-    , mCCW(*properties.direction == CCW)
+    , m_bCCW(*properties.direction == CCW)
     , m_bRT(properties.bReturn)
     , m_fDeviation(properties.deviation)
     , m_fTotalDampening(properties.dampening)
     {
         mEndPointXy01 = FPoint(properties.endPoint.x, 1-properties.endPoint.y);
-        /*if (*properties.direction == InCCW || *properties.direction == OutCCW){
-            mCCW = true;
-        } else {
-            mCCW = false;
-        }*/
     }
 
 protected:
@@ -494,7 +344,6 @@ protected:
         int iReturn = m_bRT ? 2:1;
         //calculate current progress and dampening
         
-        //WORK IN Progress-----------------------------------------
         //float fCurrentProgress  = modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
         //float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
         
@@ -537,7 +386,7 @@ protected:
         
         
         //float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
-        if (!mCCW) {
+        if (!m_bCCW) {
             deviationAngle = - deviationAngle;
         }
         
@@ -546,7 +395,7 @@ protected:
         m_pMover->move(pointXY01, kTrajectory);
     }
 private:
-    bool mCCW, m_bRT, m_bYisDependent;
+    bool m_bCCW, m_bRT, m_bYisDependent;
     FPoint mStartPointXy01, mEndPointXy01;
     float m_fM;
     float m_fB;
@@ -561,7 +410,7 @@ class EllipseTrajectory : public Trajectory
 public:
 	EllipseTrajectory(const TrajectoryProperties& properties)
 	: Trajectory(properties)
-    , mCCW(*properties.direction == CCW)
+    , m_bCCW(*properties.direction == CCW)
     , m_fTurns(properties.turns)
     , m_fWidth(properties.width)
     { }
@@ -572,12 +421,11 @@ protected:
     }
     
 	void childProcess(float duration, float seconds) {
-        float integralPart;
         //calculate delta theta
         float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
         
         fDeltaTheta = fDeltaTheta*2*M_PI;//modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart) * m_fTurns*2*M_PI;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
-        if (!mCCW){
+        if (!m_bCCW){
             fDeltaTheta = -fDeltaTheta;
         }
         // calculate fCurR and fCurT , using http://www.edmath.org/MATtours/ellipses/ellipses1.07.3.html first part at the top, with a = 1
@@ -593,7 +441,7 @@ protected:
     }
 	
 private:
-	bool mCCW;
+	bool m_bCCW;
     float m_fTurns;
     float m_fWidth;
     FPoint mStartPointRT;
@@ -712,7 +560,6 @@ protected:
                 //convert ±radius range to 01 range
                 p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                 p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
-                if (mFilter->getIndependentMode()){}
                 m_pMover->move(p, kTrajectory);
             }
         }
@@ -896,7 +743,6 @@ String Trajectory::GetTrajectoryName(int i) {
 Trajectory::Ptr Trajectory::CreateTrajectory(const TrajectoryProperties& properties) {
     
     switch(properties.type) {
-
         case Circle:                     return new CircleTrajectory                (properties);
         case EllipseTr:                  return new EllipseTrajectory               (properties);
         case Spiral:                     return new SpiralTrajectory                (properties);

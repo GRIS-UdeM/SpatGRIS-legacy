@@ -207,6 +207,7 @@ public:
             case kParamFilterNear: value = denormalize(-100, 0, value); break;
             case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
             case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
+            case kParamTrajSpeed : return String(value, 3);
         }
         
         if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));

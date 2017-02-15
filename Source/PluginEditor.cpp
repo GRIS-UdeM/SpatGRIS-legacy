@@ -630,7 +630,7 @@ AudioProcessorEditor (ownerFilter)
         
         x = 1*cbw + 2*kMargin;
         
-        addLabel("Speed:", x-2, y-14, w+10, dh, box);
+        addLabel("Speed", x-4, y-14, w+10, dh, box);
         
         Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, 1, x, y, w, dh-5, box);
         ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
@@ -958,7 +958,7 @@ AudioProcessorEditor (ownerFilter)
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
     startTimerHz (hertzRefresh);
-
+    
 }
 
 
@@ -1035,9 +1035,14 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
         int last = mInputOutputModeCombo->getNumItems();
         int id = mInputOutputModeCombo->getItemId(last-1);
         mFilter->setInputOutputMode(id);
+        mInputOutputModeCombo->setSelectedId(id);
+    }else{
+        mInputOutputModeCombo->setSelectedId(mode);
     }
     
-    mInputOutputModeCombo->setSelectedId(mode);
+    //updateEditorSources(true);
+    updateEditorSpeakers(true);
+    //repaintTheStuff();
 }
 
 void SpatGrisAudioProcessorEditor::updateEndLocationTextEditors(){
@@ -2139,7 +2144,6 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
 
 //==============================================================================
 void SpatGrisAudioProcessorEditor::timerCallback(){
-
 //---------------------------------------- TRAJECTORIES -----------------------------------------
 #if TIME_GUI
     std::ostringstream oss;
@@ -2155,9 +2159,11 @@ void SpatGrisAudioProcessorEditor::timerCallback(){
 
 //---------------------------------------- DB METERS -----------------------------------------
 #if USE_DB_METERS
-    if (!mFilter->getIsRecordingAutomation()){
-        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){            
-            mLevelComponents.getUnchecked(i)->refreshIfNeeded();
+    if (!mFilter->getIsRecordingAutomation() && !mFilter->isLevelUilcok()){
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
+            if(!mFilter->isLevelUilcok() && mLevelComponents[i] != NULL){
+                mLevelComponents.getUnchecked(i)->refreshIfNeeded();
+            }
         }
     }
 #endif
@@ -2259,10 +2265,11 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     if (mFilter->getIsAllowInputOutputModeSelection()){
         int iNewMode = mFilter->getInputOutputMode();
         if (iNewMode != mInputOutputModeCombo->getSelectedId()){
+            
             mFilter->storeCurrentLocations();
             m_bLoadingPreset = true;
-            mInputOutputModeCombo->setSelectedId(iNewMode);
-            buttonClicked(mApplyInputOutputModeButton);
+            mFilter->setInputOutputMode(iNewMode);
+            updateInputOutputCombo();
         }
     }
     
