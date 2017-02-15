@@ -52,9 +52,8 @@ void SourceMover::begin(int s, MoverType mt) {
 	
     if (mMoverType != kSourceThread){
         mFilter->setIsRecordingAutomation(true);
-        cout << "beginParameterChangeGesture for param " << mFilter->getParamForSourceX(mSelectedSrc) << "\n";
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
-//        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
 #if ALLOW_MVT_MODE_AUTOMATION
 //        mFilter->beginParameterChangeGesture(kMovementMode);
 #endif
@@ -81,7 +80,6 @@ void SourceMover::storeDownPosition(int id, FPoint pointRT){
 
 //in kSourceThread, FPoint p is the current location of the selected source, as read on the automation, and we move only the non-selected sources based on location of selected source
 void SourceMover::move(FPoint pointXY01, MoverType mt) {
-    cout << "move\n";
     if (mMoverType != mt){
         return;
     }
@@ -182,9 +180,8 @@ void SourceMover::end(MoverType mt) {
     if (mMoverType != mt){
         return;
     } else if (mMoverType != kSourceThread){
-        cout << "ENDParameterChangeGesture for param " << mFilter->getParamForSourceX(mSelectedSrc) << "\n";
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
-//        mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
 #if ALLOW_MVT_MODE_AUTOMATION
 //        mFilter->endParameterChangeGesture(kMovementMode);
 #endif

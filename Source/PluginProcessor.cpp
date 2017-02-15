@@ -493,12 +493,9 @@ bool SpatGrisAudioProcessor::isKnownHost(){
 }
 
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
-    cout << "set parameter " << index << " to " << newValue << newLine;
-    
     //unknown host is logic's au eval tool
     if (!isKnownHost()){
         mParameters.set(index, newValue);
-        cout << "unknown host\n";
         return;
     }
     
@@ -508,7 +505,6 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
             if (iCurSource != getSelectedSrc()){
                 if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource) ||
                     index == getParamForSourceAzimSpan(iCurSource) || index == getParamForSourceElevSpan(iCurSource)) {
-                    cout << "return from setParam\n";
                     return;
                 }
             }
@@ -522,7 +518,6 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
     
     //unknown host is logic's au eval tool. we just shouldn't get here with that.
     if (!isKnownHost()){
-        cout << "unknown host internal\n";
         return;
     }
     
@@ -530,7 +525,6 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
         
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && !isNewMovementMode(newValue)){
-        cout << "not new movement\n";
         return;
     }
 #endif
@@ -541,7 +535,7 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
         }
         
         mParameters.set(index, newValue);
-        cout << "setting " << index << " to " << newValue <<  "\n";
+//        cout << "setting " << index << " to " << newValue <<  "\n";
         
 #if ALLOW_MVT_MODE_AUTOMATION
         if (index == kMovementMode && m_pMover){
@@ -589,7 +583,7 @@ bool SpatGrisAudioProcessor::isSourceLocationParameter(const int &index){
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
     mParameters.set(index, newValue);
-    cout << "parameter not host" << index << " changed to " << newValue << newLine;
+//    cout << "parameter notifying host " << index << " changed to " << newValue << newLine;
     switch(index % kParamsPerSource) {
         case kSourceX:
         case kSourceY:
@@ -1164,7 +1158,7 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
 
 #if TIME_PROCESS
-    cout << "SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters\n";
+    DBG("SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters");
 #endif
     
     //---------- INIT MEMORY STUFF -------
@@ -1813,9 +1807,6 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             addToOutput(p_fCurSampleValue * fBackVol, o, p_iSampleId);
 #endif
         }
-//        if (iCurSource == 0){
-//            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
-//        }
     }
 }
 
