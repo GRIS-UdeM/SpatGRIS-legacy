@@ -79,8 +79,6 @@ using namespace std;
     size_t strlcpy(char * dst, const char * src, size_t dstsize);
 #endif
 
-#define M_E 2.71828182845904523536
-
 //==============================================================================
 
 static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers

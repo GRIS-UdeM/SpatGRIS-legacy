@@ -635,7 +635,7 @@ AudioProcessorEditor (ownerFilter)
         
         x = 1*cbw + 2*kMargin;
         
-        addLabel("Speed:", x-2, y-14, w+10, dh, box);
+        addLabel("Speed", x-4, y-14, w+10, dh, box);
         
         Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, 1, x, y, w, dh-5, box);
         ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
