@@ -178,7 +178,7 @@ private:
     ToggleButton *mEnableLeap;
 	ToggleButton *mShowGridLines;
     ToggleButton *mOscActiveButton;
-    ToggleButton *mTrSeparateAutomationMode;
+    ToggleButton *mTrSeparateAutomationModeButton;
     ToggleButton *mApplyFilterButton;
 	ComboBox *mMovementModeCombo;
     ComboBox *mInputOutputModeCombo;

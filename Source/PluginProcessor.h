@@ -35,7 +35,7 @@
 using namespace std;
 
 #ifndef USE_DB_METERS
-#define USE_DB_METERS 1
+#define USE_DB_METERS 0
 #endif
 
 #ifndef ALLOW_INTERNAL_WRITE

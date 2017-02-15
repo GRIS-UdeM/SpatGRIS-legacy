@@ -532,7 +532,7 @@ AudioProcessorEditor (ownerFilter)
         }
         
         
-        mTrSeparateAutomationMode = addCheckbox("Force separate automation", mFilter->getShowGridLines(), x+3*(cbw+5)-40, y, cbw+20, dh, box);
+        mTrSeparateAutomationModeButton = addCheckbox("Force separate automation", mFilter->getShowGridLines(), x+3*(cbw+5)-40, y, cbw+20, dh, box);
         
         int tewShort = 30;
         int x2 = x+3*(cbw+5);
@@ -1196,9 +1196,9 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
     }
 
     if (iSelectedTrajectory == RandomTarget || iSelectedTrajectory == RandomTrajectory){
-        mTrSeparateAutomationMode->setVisible(true);
+        mTrSeparateAutomationModeButton->setVisible(true);
     } else {
-        mTrSeparateAutomationMode->setVisible(false);
+        mTrSeparateAutomationModeButton->setVisible(false);
     }
     
     unique_ptr<vector<String>> allDirections = Trajectory::getAllPossibleDirections(iSelectedTrajectory);
@@ -1764,7 +1764,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mOscActiveButton) {
         mFilter->setOscActive(button->getToggleState());
     }
-    else if (button == mTrSeparateAutomationMode) {
+    else if (button == mTrSeparateAutomationModeButton) {
         mFilter->setIndependentMode(button->getToggleState());
     }
     else if (button == mSurfaceOrPanLinkButton) {
@@ -2123,7 +2123,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
     updateSingleTrajectoryStartComponent(mTrEllipseWidthTextEditor, isStarting);
     updateSingleTrajectoryStartComponent(mTrEndPointButton,         isStarting);
     updateSingleTrajectoryStartComponent(m_pTrResetEndButton,       isStarting);
-    updateSingleTrajectoryStartComponent(mTrSeparateAutomationMode, isStarting);
+    updateSingleTrajectoryStartComponent(mTrSeparateAutomationModeButton, isStarting);
     updateSingleTrajectoryStartComponent(mTrDirectionComboBox,      isStarting);
     updateSingleTrajectoryStartComponent(mTrReturnComboBox,         isStarting);
     updateSingleTrajectoryStartComponent(mTrTypeComboBox,           isStarting);
@@ -2292,7 +2292,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
 #endif
     mShowGridLines->setToggleState(mFilter->getShowGridLines(),             dontSendNotification);
     mOscActiveButton->setToggleState(mFilter->getOscActive(),               dontSendNotification);
-    mTrSeparateAutomationMode->setToggleState(mFilter->getIndependentMode(),dontSendNotification);
+    mTrSeparateAutomationModeButton->setToggleState(mFilter->getIndependentMode(),dontSendNotification);
     mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkSurfaceOrPan(),     dontSendNotification);
     mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
     mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
