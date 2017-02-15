@@ -675,10 +675,9 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
-    mInputOutputMode = p_iInputOutputMode-1;
     const MessageManagerLock mmLock;            //prevents gui from running
     suspendProcessing (true);                   //prevents audio process thread from running
-    
+    mInputOutputMode = p_iInputOutputMode-1;
     switch (mInputOutputMode){
         case i1o1:
             setNumberOfSources(1, false);
@@ -789,6 +788,7 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     }
     //restart audio processing
     suspendProcessing (false);
+
 }
 
 void SpatGrisAudioProcessor::updateInputOutputMode (){
@@ -2214,6 +2214,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr) {
+        bLevelUiLock = true;
         // make sure that it's actually our type of XML object..˝
         if (xmlState->hasTagName ("SPATGRIS_SETTINGS")) {
             int version         = xmlState->getIntAttribute ("kDataVersion", 1);
@@ -2308,6 +2309,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             }
         }
     }
+    bLevelUiLock = false;
     mHostChangedParameterProcessor++;
     mHostChangedPropertyProcessor++;
 }
