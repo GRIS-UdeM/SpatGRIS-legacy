@@ -210,8 +210,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		mSmoothedParameters.add(0);
     }
     
-    mNumberOfSources = 0;
-    mNumberOfSpeakers = 0;
 
 
     if (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer()){
@@ -224,8 +222,17 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_pMover = std::move(pMover);
     
     //SET SOURCES AND SPEAKERS
+//    mNumberOfSources = 0;
+//    mNumberOfSpeakers = 0;
+    
     int iSources  = getTotalNumInputChannels();
+    if (iSources == 0){
+        iSources = 2;
+    }
     int iSpeakers = getTotalNumOutputChannels();
+    if (iSpeakers == 0){
+        iSpeakers = 2;
+    }
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
     
@@ -468,6 +475,7 @@ int SpatGrisAudioProcessor::getNumParameters() {
 }
 
 float SpatGrisAudioProcessor::getParameter (int index) {
+    cout << "getParameter " << getParameterName(index) << " " << index << " = " << mParameters[index] << newLine;
     return mParameters[index];
 }
 
@@ -495,6 +503,7 @@ bool SpatGrisAudioProcessor::isKnownHost(){
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     //unknown host is logic's au eval tool
     if (!isKnownHost()){
+        cout << "logic au eval set " << getParameterName(index) << " " << index << " to " << newValue << newLine;
         mParameters.set(index, newValue);
         return;
     }
@@ -582,6 +591,9 @@ bool SpatGrisAudioProcessor::isSourceLocationParameter(const int &index){
 
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
+    if (!isKnownHost()){
+        return;
+    }
     mParameters.set(index, newValue);
 //    cout << "parameter notifying host " << index << " changed to " << newValue << newLine;
     switch(index % kParamsPerSource) {
