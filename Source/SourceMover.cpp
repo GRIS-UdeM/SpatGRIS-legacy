@@ -102,7 +102,6 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
         
         if (delSelSrcPosRT.isOrigin()){
-            cout << "no change\n";
             return;     //return if delta is null
         }
         float vxo = pointXY01.x, vyo = pointXY01.y;

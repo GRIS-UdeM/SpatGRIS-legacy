@@ -210,10 +210,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		mSmoothedParameters.add(0);
     }
     
-    mNumberOfSources = 0;
-    mNumberOfSpeakers = 0;
-
-
     if (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer()){
 		m_bAllowInputOutputModeSelection = true;
 	} else {
@@ -225,7 +221,13 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
     //SET SOURCES AND SPEAKERS
     int iSources  = getTotalNumInputChannels();
+    if (iSources == 0){
+        iSources = 2;
+    }
     int iSpeakers = getTotalNumOutputChannels();
+    if (iSpeakers == 0){
+        iSpeakers = 2;
+    }
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
     
@@ -535,7 +537,6 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
         }
         
         mParameters.set(index, newValue);
-//        cout << "setting " << index << " to " << newValue <<  "\n";
         
 #if ALLOW_MVT_MODE_AUTOMATION
         if (index == kMovementMode && m_pMover){
@@ -566,8 +567,6 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
             }
         }
         ++mHostChangedParameterProcessor;
-    } else {
-        cout << "same values\n";
     }
 }
 
@@ -582,8 +581,12 @@ bool SpatGrisAudioProcessor::isSourceLocationParameter(const int &index){
 
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
+    if (!isKnownHost()){
+        //if in logic au test tool, return
+        return;
+    }
     mParameters.set(index, newValue);
-//    cout << "parameter notifying host " << index << " changed to " << newValue << newLine;
+
     switch(index % kParamsPerSource) {
         case kSourceX:
         case kSourceY:
@@ -1004,16 +1007,7 @@ void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
 }
 
 int SpatGrisAudioProcessor::getParameterNumSteps (int index){
-//    cout << "getParameterNumSteps " << index << newLine;
-//    switch (index) {
-//        case kMovementMode:
-//                cout << "getParameterNumSteps TotalNumberMovementModes" << newLine;
-//            return TotalNumberMovementModes;
-//            break;
-//            
-//        default:
-            return getDefaultNumParameterSteps();
-//    }
+    return getDefaultNumParameterSteps();
 }
 
 const String SpatGrisAudioProcessor::getParameterText (int index)

@@ -10,7 +10,6 @@
 		004E29914D939E3E4685E921 /* juce_data_structures.mm in Sources */ = {isa = PBXBuildFile; fileRef = DF951D481763A0A88DD73572 /* juce_data_structures.mm */; };
 		0401E33BEA0A1048A678DB23 /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = E4BD418F8CB7CE3E78B996C6 /* juce_audio_processors.mm */; };
 		0CC32A0140D035C26DFA9FCE /* juce_RTAS_DigiCode1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 98883D0EAB9BF4C98C6D1110 /* juce_RTAS_DigiCode1.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
-		0DB3F89B1E4CFF7100B41CCF /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1111834A1AF4A290032237DE /* AUCarbonViewControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 201E445B33653CBCBDFEF788 /* AUCarbonViewControl.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		1A7D392E905CA39DD3F64B49 /* HID_Queue_Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CD3992A710C26FFEC6A67E86 /* HID_Queue_Utilities.cpp */; };
 		1D5DB0C471235F0DC99EDB1D /* SourceMover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 351ED414B7D7027BC011357F /* SourceMover.cpp */; };
@@ -58,6 +57,7 @@
 		AAAC67D4263DA75F7C541EE3 /* juce_gui_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE7E5DF6F838ED6446019124 /* juce_gui_basics.mm */; };
 		ADE606E9654B3EF899191559 /* PluginEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E3B03A738441659AEC9376 /* PluginEditor.cpp */; };
 		B0B72164C8A3ED7CD83D2858 /* juce_osc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8C6565CAF670C7129B196DF /* juce_osc.cpp */; };
+		B15FB4141E560069001639C9 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		B378F196776FD008F0ED4EA2 /* AUBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 965B3F877D7BEA87D4489B8B /* AUBuffer.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		B6B84F39203CE00BE267B359 /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F46516B5ACBA00B9606D180 /* CAVectorUnit.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		B6D7952F46E362B1A5B4BE2F /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = F8B94EB70412EFA7441864D8 /* juce_core.mm */; };
@@ -88,13 +88,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		0DB3F89A1E4CFF6200B41CCF /* CopyFiles */ = {
+		B15FB4131E560061001639C9 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
+			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				0DB3F89B1E4CFF7100B41CCF /* libLeap.dylib in CopyFiles */,
+				B15FB4141E560069001639C9 /* libLeap.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2984,7 +2984,7 @@
 				9B535A1C434303D4AA33E340 /* Rez */,
 				AFBAB6135653C9B7B9F10AA5 /* Sources */,
 				AE1FAB299C5E8BE3F6E82000 /* Frameworks */,
-				0DB3F89A1E4CFF6200B41CCF /* CopyFiles */,
+				B15FB4131E560061001639C9 /* CopyFiles */,
 				ACB59ACAAF55A1838119385D /* Post-build script */,
 			);
 			buildRules = (
@@ -3179,7 +3179,7 @@
 		40ACBD50202375DB656EB74F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
