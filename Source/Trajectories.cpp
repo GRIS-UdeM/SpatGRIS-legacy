@@ -255,7 +255,6 @@ protected:
             if(m_fTimeDone<=0){ m_fTimeDone = m_fDurationSingleTraj;}
         }
         
-        //cout << m_fTimeDone  << "  #  " <<  fDeltaTheta << "  #  " << m_fDurationSingleTraj <<  " -- " << (fDeltaTheta < 0.0f) << " : "<< (!m_bReturn && (fDeltaTheta> M_PI || fDeltaTheta < 0.0f)) << endl;
         if (m_bCCW){
             fDeltaTheta = -fDeltaTheta;
         }
@@ -347,7 +346,6 @@ protected:
         //float fCurrentProgress  = modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
         //float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
         
-        
         float fCurrentProgress  = m_fTimeDone / m_fDurationSingleTraj;                   //modf(m_fSpeed * m_fTimeDone / m_fDurationSingleTraj, &integralPart);    //currentProgress goes 0->1 for every cycle
         float fCurDampening     = m_fTotalDampening * m_fTimeDone / m_fTotalDuration;    //fCurDampening goes 0->m_fTotalDampening during the whole duration of the trajectory
        
@@ -355,8 +353,6 @@ protected:
             fCurrentProgress = modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart) ;
             if(m_fTimeDone<=0){ m_fTimeDone = m_fDurationSingleTraj; }
         }
-        
-        //cout << m_fTimeDone  << "  #  " <<  fCurrentProgress << "  #  " << m_fDurationSingleTraj <<  " -- " <<  m_bRT << endl;
         
         //if y is dependent, use slope equation, otherwise just go vertically. All calculations in cartesian coordinates.
         if (m_bYisDependent){

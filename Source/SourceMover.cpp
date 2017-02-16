@@ -53,7 +53,7 @@ void SourceMover::begin(int s, MoverType mt) {
     if (mMoverType != kSourceThread){
         mFilter->setIsRecordingAutomation(true);
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
-//        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
 #if ALLOW_MVT_MODE_AUTOMATION
 //        mFilter->beginParameterChangeGesture(kMovementMode);
 #endif
@@ -180,7 +180,7 @@ void SourceMover::end(MoverType mt) {
         return;
     } else if (mMoverType != kSourceThread){
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
-//        mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
+        mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
 #if ALLOW_MVT_MODE_AUTOMATION
 //        mFilter->endParameterChangeGesture(kMovementMode);
 #endif

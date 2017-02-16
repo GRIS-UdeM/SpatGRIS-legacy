@@ -210,10 +210,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		mSmoothedParameters.add(0);
     }
     
-    mNumberOfSources = 0;
-    mNumberOfSpeakers = 0;
-
-
     if (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer()){
 		m_bAllowInputOutputModeSelection = true;
 	} else {
@@ -225,7 +221,13 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
     //SET SOURCES AND SPEAKERS
     int iSources  = getTotalNumInputChannels();
+    if (iSources == 0){
+        iSources = 2;
+    }
     int iSpeakers = getTotalNumOutputChannels();
+    if (iSpeakers == 0){
+        iSpeakers = 2;
+    }
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
     
@@ -579,6 +581,10 @@ bool SpatGrisAudioProcessor::isSourceLocationParameter(const int &index){
 
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
+    if (!isKnownHost()){
+        //if in logic au test tool, return
+        return;
+    }
     mParameters.set(index, newValue);
     switch(index % kParamsPerSource) {
         case kSourceX:
@@ -1000,16 +1006,7 @@ void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
 }
 
 int SpatGrisAudioProcessor::getParameterNumSteps (int index){
-//    cout << "getParameterNumSteps " << index << newLine;
-//    switch (index) {
-//        case kMovementMode:
-//                cout << "getParameterNumSteps TotalNumberMovementModes" << newLine;
-//            return TotalNumberMovementModes;
-//            break;
-//            
-//        default:
-            return getDefaultNumParameterSteps();
-//    }
+    return getDefaultNumParameterSteps();
 }
 
 const String SpatGrisAudioProcessor::getParameterText (int index)
@@ -1154,7 +1151,7 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
 
 #if TIME_PROCESS
-    cout << "SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters\n";
+    DBG("SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters");
 #endif
     
     //---------- INIT MEMORY STUFF -------
@@ -1803,9 +1800,6 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             addToOutput(p_fCurSampleValue * fBackVol, o, p_iSampleId);
 #endif
         }
-//        if (iCurSource == 0){
-//            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
-//        }
     }
 }
 
