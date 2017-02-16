@@ -210,18 +210,6 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 		mSmoothedParameters.add(0);
     }
     
-    mNumberOfSources = 0;
-    mNumberOfSpeakers = 0;
-
-	bool bIsWindows;
-
-#if WIN32
-	bIsWindows = true;
-#else
-	bIsWindows = false;
-#endif
-    
-  //	if (host.isReaper() || host.isAbletonLive() || (bIsWindows && host.isDigitalPerformer())){
     if (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer()){
 		m_bAllowInputOutputModeSelection = true;
 	} else {
@@ -233,11 +221,17 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
     //SET SOURCES AND SPEAKERS
     int iSources  = getTotalNumInputChannels();
+    if (iSources == 0){
+        iSources = 2;
+    }
     int iSpeakers = getTotalNumOutputChannels();
+    if (iSpeakers == 0){
+        iSpeakers = 2;
+    }
     setNumberOfSources(iSources, true);
     setNumberOfSpeakers(iSpeakers, true);
     
-	mCalculateLevels = 0;
+	mCalculateLevels = false;
 	mApplyFilter = true;
 	mLinkSurfaceOrPan = false;
     mLinkAzimSpan = false;
@@ -393,7 +387,8 @@ void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
 #endif
     
 	// keep count of number of editors
-    (c) ? mCalculateLevels++ :  mCalculateLevels--;
+    mCalculateLevels = c;
+    //(c) ? mCalculateLevels++ :  mCalculateLevels--;
 }
 
 void SpatGrisAudioProcessor::setProcessMode(int s) {
@@ -483,10 +478,10 @@ float SpatGrisAudioProcessor::getParameter (int index) {
 bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
     for (int iCurMode = 0; iCurMode < TotalNumberMovementModes; ++iCurMode) {
         float fCurMode = normalize(Independent, TotalNumberMovementModes-1, iCurMode);
-        if (areSameStepParameterValues(m_fNewValue, fCurMode)){
+        if (areSameStepParameterValues(m_fNewValue, fCurMode, TotalNumberMovementModes)){
             //m_fNewValue encodes the movement mode fCurMode. Is fCurMode the same as the currently selected movement mode?
-            float fCurSelectedMode = getParameter(kMovementMode);
-            return !areSame(fCurMode, fCurSelectedMode);
+            return !(areSame(fCurMode, getParameter(kMovementMode)));
+
         }
     }
     return false;
@@ -500,7 +495,6 @@ bool SpatGrisAudioProcessor::isKnownHost(){
 }
 
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
-    
     //unknown host is logic's au eval tool
     if (!isKnownHost()){
         mParameters.set(index, newValue);
@@ -587,6 +581,10 @@ bool SpatGrisAudioProcessor::isSourceLocationParameter(const int &index){
 
 
 void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValue) {
+    if (!isKnownHost()){
+        //if in logic au test tool, return
+        return;
+    }
     mParameters.set(index, newValue);
     switch(index % kParamsPerSource) {
         case kSourceX:
@@ -602,6 +600,13 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && m_pMover){
         m_pMover->storeAllDownPositions();
+    }
+    if (index == kTrajectorySpeed){
+        //mParameterRamps[kTrajectorySpeed].pop_back();
+        //mParameterRamps[kTrajectorySpeed].insert(mParameterRamps[kTrajectorySpeed].begin(),newValue);
+        fSpeedTrajectory = newValue;
+        //float t = *mParameterRamps[kTrajectorySpeed].end();
+        //mTrajectory->setSpeed(newValue);
     }
 #endif
     sendParamChangeMessageToListeners(index, newValue);
@@ -659,10 +664,9 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     
-    mInputOutputMode = p_iInputOutputMode-1;
     const MessageManagerLock mmLock;            //prevents gui from running
     suspendProcessing (true);                   //prevents audio process thread from running
-    
+    mInputOutputMode = p_iInputOutputMode-1;
     switch (mInputOutputMode){
         case i1o1:
             setNumberOfSources(1, false);
@@ -773,6 +777,7 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     }
     //restart audio processing
     suspendProcessing (false);
+
 }
 
 void SpatGrisAudioProcessor::updateInputOutputMode (){
@@ -922,6 +927,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
 }
 
 void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues){
+    
     mNumberOfSpeakers = p_iNewNumberOfSpeakers;
 #if ALLOW_INTERNAL_WRITE
     if (mRoutingMode == kInternalWrite) {
@@ -1000,16 +1006,7 @@ void SpatGrisAudioProcessor::updateSpeakerLocation(bool p_bAlternate, bool p_bSt
 }
 
 int SpatGrisAudioProcessor::getParameterNumSteps (int index){
-//    cout << "getParameterNumSteps " << index << newLine;
-//    switch (index) {
-//        case kMovementMode:
-//                cout << "getParameterNumSteps TotalNumberMovementModes" << newLine;
-//            return TotalNumberMovementModes;
-//            break;
-//            
-//        default:
-            return getDefaultNumParameterSteps();
-//    }
+    return getDefaultNumParameterSteps();
 }
 
 const String SpatGrisAudioProcessor::getParameterText (int index)
@@ -1154,7 +1151,7 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     }
 
 #if TIME_PROCESS
-    cout << "SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters\n";
+    DBG("SPATgris\ntrajectories\tparamCopy\tprepareSrcSpk\ttotProcesData\tAvgParamRamp\tAvgFilter\tAvgVolume\tAvgSpatial\tAvgAddOutputs\tDbMeters");
 #endif
     
     //---------- INIT MEMORY STUFF -------
@@ -1281,6 +1278,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
             for (int iCurSample = 0; iCurSample < m_iDawBufferSize; ++iCurSample){
                 curInput[iCurSample] = pBuffer.getSample(iCurChannel, iCurSample);
             }
+
 //            mInputsCopy[iCurChannel].assign(pBuffer.getReadPointer(iCurChannel), pBuffer.getReadPointer(iCurChannel) + m_iDawBufferSize);
 #else
             jassert(m_iDawBufferSize <= kMaxBufferSize);
@@ -1427,15 +1425,19 @@ void SpatGrisAudioProcessor::processTrajectory(){
     m_bIsPlaying = cpi.isPlaying;
     
     // process trajectory if there is one going on
-    Trajectory::Ptr trajectory = mTrajectory;
-    if (trajectory) {
+
+    if (mTrajectory) {
         if (m_bIsPlaying) {
+            mTrajectory->setSpeed(fSpeedTrajectory);
             double bps = cpi.bpm / 60;
             float seconds = m_iDawBufferSize / m_dSampleRate;
             float beats = seconds * bps;
             
-            bool done = trajectory->process(seconds, beats);
-            if (done) mTrajectory = NULL;
+            bool done = mTrajectory->process(seconds, beats);
+            if (done){
+                //mTrajectory.~ReferenceCountedObjectPtr();
+                mTrajectory = nullptr;
+            }
         }
     }
 }
@@ -1798,9 +1800,6 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             addToOutput(p_fCurSampleValue * fBackVol, o, p_iSampleId);
 #endif
         }
-//        if (iCurSource == 0){
-//            cout << iFrontLeftSpID << "\t" << fFrontLeftSpAngle << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\t" << iFrontLeftSpID << "\n";
-//        }
     }
 }
 
@@ -2071,7 +2070,6 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 //==============================================================================
 
 void SpatGrisAudioProcessor::storeCurrentLocations(){
-    JUCE_COMPILER_WARNING("should we store down locations here??")
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
         mBufferSrcLocX[i]  = mParameters[getParamForSourceX(i)];
         mBufferSrcLocY[i]  = mParameters[getParamForSourceY(i)];
@@ -2196,6 +2194,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr) {
+        bLevelUiLock = true;
         // make sure that it's actually our type of XML object..˝
         if (xmlState->hasTagName ("SPATGRIS_SETTINGS")) {
             int version         = xmlState->getIntAttribute ("kDataVersion", 1);
@@ -2290,6 +2289,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             }
         }
     }
+    bLevelUiLock = false;
     mHostChangedParameterProcessor++;
     mHostChangedPropertyProcessor++;
 }

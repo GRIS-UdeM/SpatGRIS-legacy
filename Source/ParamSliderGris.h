@@ -66,6 +66,7 @@ public:
                 case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
+                //case kParamTrajSpeed:       newVal = 1; break;
             }
             
             if (mParamType == kParamSource && mLinkButton->getToggleState()) {
@@ -95,6 +96,8 @@ public:
                 mFilter->setPreventSourceAzimElevSpanUpdate(false);
             } else if (mFilter->getParameter(mParamIndex) != newVal){
                 mFilter->setParameterNotifyingHost(mParamIndex, newVal);
+            } else if (mParamType == kParamTrajSpeed && mLinkButton->getToggleState()) {
+                mFilter->setParameterNotifyingHost(mParamIndex,newVal);
             }
             
         } else {
@@ -204,6 +207,7 @@ public:
             case kParamFilterNear: value = denormalize(-100, 0, value); break;
             case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
             case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
+            case kParamTrajSpeed : return String(value, 3);
         }
         
         if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));

@@ -1,4 +1,4 @@
-/*
+ /*
  ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
  
@@ -56,6 +56,10 @@ using namespace std;
 
 #ifndef TIME_PROCESS
 #define TIME_PROCESS 0
+#endif
+
+#ifndef TIME_GUI
+#define TIME_GUI 0
 #endif
 
 #ifndef USE_TOUCH_OSC
@@ -121,13 +125,17 @@ enum constantParameters{
 	kRoutingVolume =		8 + kNonConstantParameters,
 #if ALLOW_MVT_MODE_AUTOMATION
     kMovementMode =         9 + kNonConstantParameters,
-	kConstantParameters =	10
+    kTrajectorySpeed =      10 + kNonConstantParameters,
+	kConstantParameters =	11
 #else
-    kConstantParameters =	9
+    kTrajectorySpeed =      9 + kNonConstantParameters,
+    kConstantParameters =	10
+    
 #endif
+    
 };
 
-JUCE_COMPILER_WARNING("make sure these are applied everywhere")
+JUCE_COMPILER_WARNING("make sure these are applied everywhere. could even use the max given by juce")
 #define kMaxInputs      (8)
 #define kMaxChannels    (16)
 #define kMaxBufferSize  (4096)
@@ -171,10 +179,10 @@ enum AllMovementModes {
     TotalNumberMovementModes
 };
 
-
+JUCE_COMPILER_WARNING("Check Order InputOutputModes AND x12x")
 //because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
 enum InputOutputModes {
-    i1o2 = 0, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12, i1o1, i12o12
+    i1o1 = 0, i1o2, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12, i12o12
 };
 
 enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
@@ -266,32 +274,28 @@ static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin 
 static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin;
 
 //==============================================================================
-static inline float normalize(float min, float max, float value)
-{
+static inline float normalize(float min, float max, float value) {
 	return (value - min) / (max - min);
 }
-static inline float denormalize(float min, float max, float value)
-{
+
+static inline float denormalize(float min, float max, float value) {
 	return min + value * (max - min);
 }
-static inline float dbToLinear(float db)
-{
+
+static inline float dbToLinear(float db) {
 	return powf(10.f, (db) * 0.05f);
 }
-static inline float linearToDb(float linear)
-{
+
+static inline float linearToDb(float linear) {
 	return log10f(linear) * 20.f;
 }
-
-
-//isequal() equals()
 static bool areSame(double a, double b) {
     return fabs(a - b) < .0001;
 }
 
-JUCE_COMPILER_WARNING("should take number of steps as arguments. eg. 8 steps in movement mode")
-static bool areSameStepParameterValues(double a, double b) {
-    return fabs(a - b) < .1;
+static bool areSameStepParameterValues(double a, double b, int iTotalSteps) {
+    float nearest = roundf(1.f/iTotalSteps * 10) / 10;
+    return fabs(a - b) < nearest;
 }
 
 typedef Point<float> FPoint;
@@ -525,9 +529,13 @@ public:
     
 	const String getOscSendIp() const { return mOscSendIp; }
 	void setOscSendIp(String s) { mOscSendIp = s;}
+    
+    /*float getTrajectorySpeed(){ return mTrajectory->getSpeed();}
+    void setTrajectorySpeed(float v){ mTrajectory->setSpeed(v);}*/
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
+        if(!mLevels[index]){return 0.0f;}
         return mLevels.getUnchecked(index);
 #else
         return -1.f;
@@ -792,6 +800,7 @@ public:
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
     
     bool isPlaying(){ return m_bIsPlaying;}
+    bool isLevelUilcok(){ return bLevelUiLock; }
     void threadUpdateNonSelectedSourcePositions();
     void bypassOrNotSourceUpdateThread();
 	
@@ -805,7 +814,7 @@ private:
     
 	Array<float> mParameters;
 	
-	int mCalculateLevels;
+	bool mCalculateLevels;
 #if USE_DB_METERS
 	Array<float> mLevels;
 #endif
@@ -874,7 +883,7 @@ private:
     vector<float> allSampleValues;
     
     bool bThetasPrinted = false;
-    
+    bool bLevelUiLock = false;
     
 #if USE_VECTORS
 //    vector<vector<float>> mInputsCopy;
@@ -962,6 +971,8 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    
+    float fSpeedTrajectory;
     
 #if !ALLOW_MVT_MODE_AUTOMATION
     int m_iMovementMode;

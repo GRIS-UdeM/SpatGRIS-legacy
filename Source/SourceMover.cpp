@@ -55,7 +55,7 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
 #if ALLOW_MVT_MODE_AUTOMATION
-        mFilter->beginParameterChangeGesture(kMovementMode);
+//        mFilter->beginParameterChangeGesture(kMovementMode);
 #endif
 
         storeAllDownPositions();
@@ -63,14 +63,11 @@ void SourceMover::begin(int s, MoverType mt) {
 }
 
 void SourceMover::storeAllDownPositions(){
-//    //if we are not in independent mode and have more than 1 source, we store the initial position of all sources
-
-        int iNbrSrc = mFilter->getNumberOfSources();
-        for (int j = 0; j < iNbrSrc; j++) {
-            mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
-            mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
-        }
-//    }
+    int iNbrSrc = mFilter->getNumberOfSources();
+    for (int j = 0; j < iNbrSrc; j++) {
+        mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
+        mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
+    }
 }
 
 void SourceMover::storeDownPosition(int id, FPoint pointRT){
@@ -185,7 +182,7 @@ void SourceMover::end(MoverType mt) {
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
 #if ALLOW_MVT_MODE_AUTOMATION
-        mFilter->endParameterChangeGesture(kMovementMode);
+//        mFilter->endParameterChangeGesture(kMovementMode);
 #endif
         mFilter->setIsRecordingAutomation(false);
         mField->clearTrajectoryPath();
@@ -195,7 +192,6 @@ void SourceMover::end(MoverType mt) {
 }
 
 void SourceMover::updateNumberOfSources(){
-
     mSourcesDownXY.clear();
     mSourcesDownRT.clear();
     mSourcesAngularOrder.clear();

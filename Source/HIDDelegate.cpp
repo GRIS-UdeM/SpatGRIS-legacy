@@ -305,7 +305,6 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
             continue;
         }
         //smoothing values
-        JUCE_COMPILER_WARNING("smooth should be multiplied by sampling rate")
         const float smooth = denormalize(kSmoothMin, kSmoothMax, mFilter->getSmoothing()); // milliseconds
         const float fOldValuesPortion = powf(0.01f, 1000.f / smooth);
         

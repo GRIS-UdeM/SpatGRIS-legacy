@@ -69,7 +69,11 @@ void LevelComponent::refreshIfNeeded(){
 
 void LevelComponent::paint (Graphics& g)
 {
+    
 	float level = linearToDb(mFilter->getLevel(mIndex));
+    if (isnan(level)){
+        level = 0;
+    }
 	if (level < kMinLevel) level = kMinLevel;
     else if (level > kMaxLevel){
         level = kMaxLevel;

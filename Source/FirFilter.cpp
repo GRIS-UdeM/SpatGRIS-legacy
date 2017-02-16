@@ -34,6 +34,7 @@
 #endif
 
 #include "_firs.h"
+#include <sstream>
 
 void FirFilter::reset()
 {
@@ -50,8 +51,9 @@ void FirFilter::setSampleRate(int sr) {
 	}
 	
     if (sr) {
-//        fprintf(stderr, "Spatgris: unsupported sample rate %d for filtering...\n", sr);
-        DBG("Spatgris: unsupported sample rate %d for filtering...\n" + sr);
+        std::ostringstream oss;
+        oss << "Spatgris: unsupported sample rate " << sr << "for filtering...\n";
+        DBG(oss.str());
     }	mFir = -1;
 }
 
