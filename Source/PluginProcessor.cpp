@@ -1444,9 +1444,9 @@ void SpatGrisAudioProcessor::processTrajectory(){
                        
 void SpatGrisAudioProcessor::ProcessData(float *params) {
 	switch(mProcessMode) {
-        case kFreeVolumeMode:	ProcessDataFreeVolumeMode(params);	break;
-        case kPanVolumeMode:	ProcessDataPanVolumeMode (params);	break;
-        case kPanSpanMode:		ProcessDataPanSpanMode   (params);	break;
+        case kFreeVolumeMode:	ProcessDataFree(params);	break;
+        case kPanVolumeMode:	ProcessDataPan (params);	break;
+        case kPanSpanMode:		ProcessDataSpan   (params);	break;
         default: jassertfalse;
 	}
 }
@@ -1592,7 +1592,7 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
 }
     
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
-void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
+void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
     // clear mOutputs[]
     for (int iCurOutput = 0; iCurOutput < mNumberOfSpeakers; ++iCurOutput) {
         float *output = mOutputs[iCurOutput];
@@ -1641,10 +1641,48 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
             if (fCurSampleR > kRadiusMax) {
                 fCurSampleR = kRadiusMax;
             }
-			float fCurSampleT = atan2f(fCurSampleY, fCurSampleX);       //atan2f is the arctangent with 2 variables
-            if (fCurSampleT < 0){
-                fCurSampleT += kThetaMax;
+			float fCurSampleThetaTemp = atan2f(fCurSampleY, fCurSampleX);       //atan2f is the arctangent with 2 variables
+            if (fCurSampleThetaTemp < 0){
+                fCurSampleThetaTemp += kThetaMax;
             }
+            
+            //lock angle when passing in center
+            float fCurSampleTheta;
+            if (fCurSampleR >= kThetaRampRadius) {
+                fCurSampleTheta = fCurSampleThetaTemp;
+                mLockedThetas.setUnchecked(iCurSource, fCurSampleThetaTemp);
+            } else {
+                //cout << fCurSampleTheta << " ; "  ;
+
+                fCurSampleTheta = mLockedThetas.getUnchecked(iCurSource);
+                //cout << fCurSampleTheta << " ; "  << kThetaRampRadius << newLine;
+                
+                
+                /*
+                float fNewProportion = (fCurSampleR >= kThetaLockRadius) ? ((fCurSampleR - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : .5;
+                
+                float oldTheta = mLockedThetas.getUnchecked(iCurSource);
+                float deltaTheta = oldTheta - fCurSampleThetaTemp;
+                
+                if (deltaTheta < 0) deltaTheta = -deltaTheta;
+                
+                if (deltaTheta > kQuarterCircle) {
+                    // assume flipped side
+                    if (oldTheta > fCurSampleThetaTemp) oldTheta -= kHalfCircle;
+                    else oldTheta += kHalfCircle;
+                }
+                
+                fCurSampleTheta = fNewProportion * fCurSampleThetaTemp + (1 - fNewProportion) * oldTheta;
+                
+//                cout << fCurSampleTheta << " ; ";
+                
+                if (fCurSampleTheta < 0) fCurSampleTheta += kThetaMax;
+                else if (fCurSampleTheta >= kThetaMax) fCurSampleTheta -= kThetaMax;
+                
+//                cout << fCurSampleTheta << " ; " << fNewProportion << newLine;*/
+            }
+            
+            jassert(fCurSampleTheta >= 0 && fCurSampleTheta <= kThetaMax);
             
 #if TIME_PROCESS
             Time timeParameterRamps = Time::getCurrentTime();
@@ -1678,7 +1716,7 @@ void SpatGrisAudioProcessor::ProcessDataPanVolumeMode(float *p_pfParamCopy) {
             spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
 #else
             vector<bool> empty;
-            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
+            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleThetaTemp, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
 #endif
             
 #if TIME_PROCESS
@@ -1803,7 +1841,7 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
+void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
     // clear mOutputs
     for (int o = 0; o < mNumberOfSpeakers; o++) {
         float *output = mOutputs[o];
@@ -1902,7 +1940,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
                 s = mFilters[i].process(s, distance);
             }
             
-            // adjust input volume
+            //adjust input volume
             float dbSource;
             if (r >= 1) {
                 dbSource = denormalize(params[kVolumeMid], params[kVolumeFar], (r - 1));
@@ -1911,13 +1949,13 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
             }
             s *= dbToLinear(dbSource);
             
-            
+            //lock angle when passing in center
             float t;
-            if (r >= kThetaLockRadius) {
+            if (r >= kThetaRampRadius) {
                 t = it;
                 mLockedThetas.setUnchecked(i, it);
             } else {
-                float c = (r >= kThetaLockRampRadius) ? ((r - kThetaLockRampRadius) / (kThetaLockRadius - kThetaLockRampRadius)) : 0;
+                float c = (r >= kThetaLockRadius) ? ((r - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : 0;
                 float lt = mLockedThetas.getUnchecked(i);
                 float dt = lt - it;
                 if (dt < 0) dt = -dt;
@@ -1982,7 +2020,7 @@ void SpatGrisAudioProcessor::ProcessDataPanSpanMode(float *params) {
     }
 }
 
-void SpatGrisAudioProcessor::ProcessDataFreeVolumeMode(float *params) {
+void SpatGrisAudioProcessor::ProcessDataFree(float *params) {
 	// ramp all non constant parameters
     const float smooth = denormalize(kSmoothMin, kSmoothMax, params[kSmooth]); // milliseconds
 	const float fOldValuesPortion = powf(0.01f, 1000.f / (smooth * m_dSampleRate));

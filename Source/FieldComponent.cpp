@@ -111,7 +111,7 @@ void FieldComponent::paint (Graphics& g)
     // draw small, center background circles
     // - - - - - - - - - - - -
 	if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
-		w = (kThetaLockRampRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
+		w = (kThetaLockRadius / kRadiusMax) * (fieldWidth - kSourceDiameter);
 		x = (fieldWidth - w) / 2;
 		g.drawEllipse(x, x, w, w, 1);
 		

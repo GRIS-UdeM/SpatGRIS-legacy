@@ -32,6 +32,7 @@
 #include "FirFilter.h"
 #include "Trajectories.h"
 #include <memory>
+
 using namespace std;
 
 #ifndef USE_DB_METERS
@@ -261,8 +262,14 @@ static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
 static const float kThetaMax = M_PI * 2;
-static const float kThetaLockRadius = 0.05;
-static const float kThetaLockRampRadius = 0.025;
+
+static const float kThetaRampRadius = 0.2;//0.05
+static const float kThetaLockRadius = 0.2 ;//0.025
+
+//static const float kThetaRampRadius = 0.025;
+//static const float kThetaLockRadius = 0.001;
+
+
 static const float kSourceDefaultRadius = 1.f;
 
 static const int    kMargin             = 10;
@@ -940,9 +947,9 @@ private:
     
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
     void ProcessData                (float *params);
-    void ProcessDataFreeVolumeMode  (float *params);
-    void ProcessDataPanVolumeMode   (float *params);
-    void ProcessDataPanSpanMode     (float *params);
+    void ProcessDataFree  (float *params);
+    void ProcessDataPan   (float *params);
+    void ProcessDataSpan     (float *params);
     void processTrajectory();
     
     
