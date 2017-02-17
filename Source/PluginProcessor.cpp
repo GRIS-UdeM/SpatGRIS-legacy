@@ -1973,7 +1973,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             jassert(t >= 0 && t <= kThetaMax);
             jassert(angle > 0 && angle <= kHalfCircle);
             
-            memset(outFactors, 0, kMaxChannels * sizeof(float));
+            memset(mOutFactors, 0, kMaxChannels * sizeof(float));
             
             float factor = (r < 1) ? (r * 0.5f + 0.5f) : 1;
             
@@ -1981,13 +1981,13 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                 float tl = t - angle, tr = t + angle;
                 
                 if (tl < 0) {
-                    Integrate(tl + kThetaMax, kThetaMax, mAllAreas, areaCount, outFactors, factor);
-                    Integrate(0, tr, mAllAreas, areaCount, outFactors, factor);
+                    Integrate(tl + kThetaMax, kThetaMax, mAllAreas, areaCount, mOutFactors, factor);
+                    Integrate(0, tr, mAllAreas, areaCount, mOutFactors, factor);
                 } else if (tr > kThetaMax) {
-                    Integrate(tl, kThetaMax, mAllAreas, areaCount, outFactors, factor);
-                    Integrate(0, tr - kThetaMax, mAllAreas, areaCount, outFactors, factor);
+                    Integrate(tl, kThetaMax, mAllAreas, areaCount, mOutFactors, factor);
+                    Integrate(0, tr - kThetaMax, mAllAreas, areaCount, mOutFactors, factor);
                 } else {
-                    Integrate(tl, tr, mAllAreas, areaCount, outFactors, factor);
+                    Integrate(tl, tr, mAllAreas, areaCount, mOutFactors, factor);
                 }
                 
                 if (r < 1) {
@@ -1999,20 +1999,20 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             
             float total = 0;
             for (int o = 0; o < mNumberOfSpeakers; o++) {
-                total += outFactors[o];
+                total += mOutFactors[o];
             }
             jassert(total > 0);
             float adj = tv / total;
             
 #if OUTPUT_RAMPING
             for (int o = 0; o < mNumberOfSpeakers; o++){
-                setSpeakerVolume(i, outFactors[o] * adj, fOldValuesPortion, o, NULL);
+                setSpeakerVolume(i, mOutFactors[o] * adj, fOldValuesPortion, o, NULL);
             }
             addToOutputs(i, s, f);
 #else
             for (int o = 0; o < mNumberOfSpeakers; o++){
-                if (outFactors[o]){
-                    addToOutput(s * outFactors[o] * adj, o, f);
+                if (mOutFactors[o]){
+                    addToOutput(s * mOutFactors[o] * adj, o, f);
                 }
             }
 #endif

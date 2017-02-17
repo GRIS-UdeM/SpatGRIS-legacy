@@ -921,8 +921,7 @@ private:
     
 #endif
     vector<Area> mAllAreas;
-    float outFactors[kMaxChannels];
-    
+    float mOutFactors[kMaxChannels];
     
 #if TIME_PROCESS
 #define kTimeSlots (10)
