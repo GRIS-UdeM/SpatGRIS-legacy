@@ -632,7 +632,7 @@ AudioProcessorEditor (ownerFilter)
         
         addLabel("Speed", x-4, y-14, w+10, dh, box);
         
-        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, 1, x, y, w, dh-5, box);
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, mFilter->getParameter(kTrajectorySpeed), x, y, w, dh-5, box);
         ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
         ds->setRange(-2.5f, 2.5f);
         
@@ -2323,6 +2323,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
     mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
+    mSpeedTrajectory->      setValue(mFilter->getParameter(kTrajectorySpeed));
 #if ALLOW_INTERNAL_WRITE
     mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
 #endif
