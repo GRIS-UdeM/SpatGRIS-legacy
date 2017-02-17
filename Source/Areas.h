@@ -54,7 +54,7 @@ public:
 };
 
 
-static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, vector<Area> &areas, int &areaCount, int &speakerCount)
+static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, Area *areas, int &areaCount, int &speakerCount)
 {
     jassert(ix1 < ix2);
     
@@ -95,7 +95,7 @@ static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, vec
         areas[areaCount++] = Area(speaker, ix1, iy1, ix2, iy2);
     }
 }
-static void Integrate(float x1, float x2, const vector<Area> &areas, int areaCount, float mOutFactors[], float factor)
+static void Integrate(float x1, float x2, const Area *areas, int areaCount, float *mOutFactors, float factor)
 {
     if (x1 == x2)
     {

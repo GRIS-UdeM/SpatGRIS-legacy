@@ -920,7 +920,8 @@ private:
     
     
 #endif
-    vector<Area> mAllAreas;
+//    vector<Area> mAllAreas;
+    Area mAllAreas[kMaxChannels * MAX_AREAS];
     float mOutFactors[kMaxChannels];
     
 #if TIME_PROCESS

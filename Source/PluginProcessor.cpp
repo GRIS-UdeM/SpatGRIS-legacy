@@ -306,7 +306,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
         mParameters.set(getParamForSpeakerM(i), 0);
     }
     
-    mAllAreas.resize(kMaxChannels * MAX_AREAS);
+//    mAllAreas.resize(kMaxChannels * MAX_AREAS);
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
