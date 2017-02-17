@@ -306,7 +306,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
         mParameters.set(getParamForSpeakerM(i), 0);
     }
     
-    allAreas.resize(kMaxChannels * MAX_AREAS);
+    mAllAreas.resize(kMaxChannels * MAX_AREAS);
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
@@ -1855,8 +1855,6 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
     const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * m_dSampleRate));
     createParameterRamps(params, fOldValuesPortion);
     
-//    vector<Area> allAreas(mNumberOfSpeakers * MAX_AREAS);
-    
 #if OUTPUT_RAMPING
     vector<bool> vSpeakersCurrentlyInUse;
 #endif
@@ -1873,8 +1871,8 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             jassert(left >= 0 && right >= 0);
             jassert(dLeft > 0 && dRight > 0);
             
-            AddArea(iCurSpeaker, fCurAngle - dLeft, 0, fCurAngle, 1, allAreas, areaCount, mNumberOfSpeakers);
-            AddArea(iCurSpeaker, fCurAngle, 1, fCurAngle + dRight, 0, allAreas, areaCount, mNumberOfSpeakers);
+            AddArea(iCurSpeaker, fCurAngle - dLeft, 0, fCurAngle, 1, mAllAreas, areaCount, mNumberOfSpeakers);
+            AddArea(iCurSpeaker, fCurAngle, 1, fCurAngle + dRight, 0, mAllAreas, areaCount, mNumberOfSpeakers);
         }
     } else if (mNumberOfSpeakers == 2) {
         int s1 = (params[getParamForSpeakerX(0)] < params[getParamForSpeakerX(1)]) ? 0 : 1;
@@ -1882,13 +1880,13 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
         float t1 = params[getParamForSpeakerX(s1)];
         float t2 = params[getParamForSpeakerX(s2)];
         
-        AddArea(s1, t2 - kThetaMax, 0, t1, 1, allAreas, areaCount, mNumberOfSpeakers);
-        AddArea(s1, t1, 1, t2, 0, allAreas, areaCount, mNumberOfSpeakers);
+        AddArea(s1, t2 - kThetaMax, 0, t1, 1, mAllAreas, areaCount, mNumberOfSpeakers);
+        AddArea(s1, t1, 1, t2, 0, mAllAreas, areaCount, mNumberOfSpeakers);
         
-        AddArea(s2, t1, 0, t2, 1, allAreas, areaCount, mNumberOfSpeakers);
-        AddArea(s2, t2, 1, t1 + kThetaMax, 0, allAreas, areaCount, mNumberOfSpeakers);
+        AddArea(s2, t1, 0, t2, 1, mAllAreas, areaCount, mNumberOfSpeakers);
+        AddArea(s2, t2, 1, t1 + kThetaMax, 0, mAllAreas, areaCount, mNumberOfSpeakers);
     } else {
-        AddArea(0, 0, 1, kThetaMax, 1, allAreas, areaCount, mNumberOfSpeakers);
+        AddArea(0, 0, 1, kThetaMax, 1, mAllAreas, areaCount, mNumberOfSpeakers);
     }
     
     jassert(areaCount > 0);
@@ -1975,7 +1973,9 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             jassert(t >= 0 && t <= kThetaMax);
             jassert(angle > 0 && angle <= kHalfCircle);
             
-            vector<float> outFactors(mNumberOfSpeakers);
+//            vector<float> outFactors(mNumberOfSpeakers);
+            outFactors.assign(kMaxChannels, 0);
+//            memset(outFactors, 0, kMaxChannels * sizeof(float));
             
             float factor = (r < 1) ? (r * 0.5f + 0.5f) : 1;
             
@@ -1983,13 +1983,13 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                 float tl = t - angle, tr = t + angle;
                 
                 if (tl < 0) {
-                    Integrate(tl + kThetaMax, kThetaMax, allAreas, areaCount, outFactors, factor);
-                    Integrate(0, tr, allAreas, areaCount, outFactors, factor);
+                    Integrate(tl + kThetaMax, kThetaMax, mAllAreas, areaCount, outFactors, factor);
+                    Integrate(0, tr, mAllAreas, areaCount, outFactors, factor);
                 } else if (tr > kThetaMax) {
-                    Integrate(tl, kThetaMax, allAreas, areaCount, outFactors, factor);
-                    Integrate(0, tr - kThetaMax, allAreas, areaCount, outFactors, factor);
+                    Integrate(tl, kThetaMax, mAllAreas, areaCount, outFactors, factor);
+                    Integrate(0, tr - kThetaMax, mAllAreas, areaCount, outFactors, factor);
                 } else {
-                    Integrate(tl, tr, allAreas, areaCount, outFactors, factor);
+                    Integrate(tl, tr, mAllAreas, areaCount, outFactors, factor);
                 }
                 
                 if (r < 1) {
