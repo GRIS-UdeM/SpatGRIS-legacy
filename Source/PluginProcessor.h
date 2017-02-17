@@ -88,10 +88,6 @@ using namespace std;
 
 //==============================================================================
 
-#ifndef MAX_AREAS
-#define MAX_AREAS 3 //this number is used as a multiplicator of mNumberOfSpeakers
-#endif
-
 JUCE_COMPILER_WARNING("this variable and logic needs to be removed")
 static const bool s_bUseNewGui = true;
 
@@ -320,11 +316,9 @@ typedef struct
 } IndexedAngle;
 int IndexedAngleCompare(const void *a, const void *b);
 
-
 class OscSpatThread;
 class SourceUpdateThread;
 class SourceMover;
-
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor

@@ -31,6 +31,10 @@
 
 static const float kThetaMax = M_PI * 2;
 
+#ifndef MAX_AREAS
+#define MAX_AREAS 3 //this number is used as a multiplicator of mNumberOfSpeakers
+#endif
+
 #include <stdio.h>
 
 class Area

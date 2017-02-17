@@ -1913,9 +1913,10 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             float x = input_x[iCurSampleId];
             float y = input_y[iCurSampleId];
             float d = input_d[iCurSampleId];
-            
+
             if (d > 1){
                d = normalize(kSourceMinDistance, kSourceMaxDistance, d);
+                cout << "NORMALIZE\n";
             }
             
             float tv = dbToLinear((1-d) * params[kMaxSpanVolume]);
@@ -1928,7 +1929,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             if (it < 0) it += kThetaMax;
             
             //if (r < 1 && d > 0.5) d = 0.5;
-            if (d < 1e-6) d = 1e-6;
+            if (d < 1e-6) d = 1e-6;          
             float angle = d * M_PI;
             
             if (mApplyFilter) {
@@ -1976,7 +1977,8 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             float factor = (r < 1) ? (r * 0.5f + 0.5f) : 1;
             
             for (int side = 0; side < 2; side++) {
-                float tl = t - angle, tr = t + angle;
+                float tl = t - angle;
+                float tr = t + angle;
                 
                 if (tl < 0) {
                     Integrate(tl + kThetaMax, kThetaMax, mAllAreas, areaCount, mOutFactors, factor);
@@ -2004,9 +2006,9 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             
 #if OUTPUT_RAMPING
             for (int o = 0; o < mNumberOfSpeakers; o++){
-                setSpeakerVolume(i, mOutFactors[o] * adj, fOldValuesPortion, o, NULL);
+                setSpeakerVolume(iCurSource, mOutFactors[o] * adj, fOldValuesPortion, o, NULL);
             }
-            addToOutputs(i, s, f);
+            addToOutputs(iCurSource, s, iCurSampleId);
 #else
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (mOutFactors[o]){
@@ -2282,7 +2284,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mLeapEnabled        = xmlState->getIntAttribute ("mLeapEnabled", 0);
             mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
             mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
-            #if ALLOW_INTERNAL_WRITE
+#if ALLOW_INTERNAL_WRITE
             setRoutingMode(xmlState->getIntAttribute ("mRoutingMode", kNormalRouting));
 #endif
             mParameters.set(kSmooth,        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
@@ -2297,31 +2299,33 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
 //            int iMax = JucePlugin_MaxNumInputChannels;
 //            int iMax = getTotalNumInputChannels();
             int iMax = getNumberOfSources();
-            for (int i = 0; i < iMax; ++i){
-                String srcX = "src" + to_string(i) + "x";
+            for (int iCurSource = 0; iCurSource < iMax; ++iCurSource){
+                String srcX = "src" + to_string(iCurSource) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));
-                mParameters.set(getParamForSourceX(i), fX01);
-                String srcY = "src" + to_string(i) + "y";
+                mParameters.set(getParamForSourceX(iCurSource), fX01);
+                String srcY = "src" + to_string(iCurSource) + "y";
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
-                mParameters.set(getParamForSourceY(i), fY01);
+                mParameters.set(getParamForSourceY(iCurSource), fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
                 if (m_pMover){
-                    m_pMover->storeDownPosition(i, convertXy012Rt(curPoint));
+                    m_pMover->storeDownPosition(iCurSource, convertXy012Rt(curPoint));
                 }
-                String srcD = "src" + to_string(i) + "d";
-                mParameters.set(getParamForSourceD(i), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
-                String srcAS = "src" + to_string(i) + "AS";
-                mParameters.set(getParamForSourceAzimSpan(i), static_cast<float>(xmlState->getDoubleAttribute(srcAS, 0)));
-                String srcES = "src" + to_string(i) + "ES";
-                mParameters.set(getParamForSourceElevSpan(i), static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
+                String srcD = "src" + to_string(iCurSource) + "d";
+                mParameters.set(getParamForSourceD(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
+                
+                String srcAS = "src" + to_string(iCurSource) + "AS";
+                mParameters.set(getParamForSourceAzimSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcAS, 0)));
+                
+                String srcES = "src" + to_string(iCurSource) + "ES";
+                mParameters.set(getParamForSourceElevSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
             }
-            for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i){
-                String spkX = "spk" + to_string(i) + "x";
-                mParameters.set(getParamForSpeakerX(i), static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));
-                String spkY = "spk" + to_string(i) + "y";
-                mParameters.set(getParamForSpeakerY(i), static_cast<float>(xmlState->getDoubleAttribute(spkY, 0)));
-                String spkM = "spk" + to_string(i) + "m";
-                mParameters.set(getParamForSpeakerM(i), static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
+            for (int iCurSpeaker = 0; iCurSpeaker < JucePlugin_MaxNumOutputChannels; ++iCurSpeaker){
+                String spkX = "spk" + to_string(iCurSpeaker) + "x";
+                mParameters.set(getParamForSpeakerX(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));
+                String spkY = "spk" + to_string(iCurSpeaker) + "y";
+                mParameters.set(getParamForSpeakerY(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkY, 0)));
+                String spkM = "spk" + to_string(iCurSpeaker) + "m";
+                mParameters.set(getParamForSpeakerM(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
             }
         }
     }

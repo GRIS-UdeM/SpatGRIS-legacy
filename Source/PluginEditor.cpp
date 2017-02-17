@@ -1501,7 +1501,6 @@ ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(paramTypes par
     switch(paramType) {
         case kParamSource :
             index = mFilter->getParamForSourceD(si);
-            v = 1.f - v;
             ds = new ParamSliderGRIS(index, paramType, mSurfaceOrPanLinkButton, mFilter);
             break;
         
@@ -1520,33 +1519,6 @@ ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(paramTypes par
             ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
         
     }
-    
-    //if we're adding a slider for a paramType == kParamSource, this slider will control the SourceD.
-    /*if (paramType == kParamSource){
-        index = mFilter->getParamForSourceD(si);
-        //and the processor's sourceD is reversed from the editor's
-        v = 1.f - v;
-    } else if (paramType == kParamAzimSpan){
-        index = mFilter->getParamForSourceAzimSpan(si);
-    } else if (paramType == kParamElevSpan){
-        index = mFilter->getParamForSourceElevSpan(si);
-    } else {
-        //otherwise, it controls directly the constantParameter
-        index = si;
-    }*/
-    
-    // = new ParamSliderGRIS(index, paramType, (paramType == kParamSource) ? mSurfaceOrPanLinkButton : NULL, mFilter);
-    
-    
-    /*if (paramType == kParamSource){
-        ds = new ParamSliderGRIS(index, paramType, mSurfaceOrPanLinkButton, mFilter);
-    } else if (paramType == kParamAzimSpan){
-        ds = new ParamSliderGRIS(index, paramType, mAzimSpanLinkButton, mFilter);
-    } else if (paramType == kParamElevSpan){
-        ds = new ParamSliderGRIS(index, paramType, mElevSpanLinkButton, mFilter);
-    } else {
-        ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
-    }*/
     
     ds->setRange(0, 1);
 
