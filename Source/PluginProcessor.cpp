@@ -1652,13 +1652,7 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
                 fCurSampleTheta = fCurSampleThetaTemp;
                 mLockedThetas.setUnchecked(iCurSource, fCurSampleThetaTemp);
             } else {
-                //cout << fCurSampleTheta << " ; "  ;
 
-                fCurSampleTheta = mLockedThetas.getUnchecked(iCurSource);
-                //cout << fCurSampleTheta << " ; "  << kThetaRampRadius << newLine;
-                
-                
-                /*
                 float fNewProportion = (fCurSampleR >= kThetaLockRadius) ? ((fCurSampleR - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : .5;
                 
                 float oldTheta = mLockedThetas.getUnchecked(iCurSource);
@@ -1674,12 +1668,9 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
                 
                 fCurSampleTheta = fNewProportion * fCurSampleThetaTemp + (1 - fNewProportion) * oldTheta;
                 
-//                cout << fCurSampleTheta << " ; ";
-                
                 if (fCurSampleTheta < 0) fCurSampleTheta += kThetaMax;
                 else if (fCurSampleTheta >= kThetaMax) fCurSampleTheta -= kThetaMax;
                 
-//                cout << fCurSampleTheta << " ; " << fNewProportion << newLine;*/
             }
             
             jassert(fCurSampleTheta >= 0 && fCurSampleTheta <= kThetaMax);
@@ -1713,10 +1704,10 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
             Time timeVolume = Time::getCurrentTime();
 #endif
 #if OUTPUT_RAMPING
-            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleT, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
+            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleTheta, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
 #else
             vector<bool> empty;
-            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleThetaTemp, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
+            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleTheta, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
 #endif
             
 #if TIME_PROCESS

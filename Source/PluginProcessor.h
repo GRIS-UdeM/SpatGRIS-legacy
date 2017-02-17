@@ -263,8 +263,8 @@ static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
 static const float kThetaMax = M_PI * 2;
 
-static const float kThetaRampRadius = 0.2;//0.05
-static const float kThetaLockRadius = 0.2 ;//0.025
+static const float kThetaRampRadius = 0.05;
+static const float kThetaLockRadius = 0.025;
 
 //static const float kThetaRampRadius = 0.025;
 //static const float kThetaLockRadius = 0.001;
