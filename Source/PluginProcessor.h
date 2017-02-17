@@ -266,8 +266,8 @@ static const float kThetaMax = M_PI * 2;
 static const float kThetaRampRadius = 0.05;
 static const float kThetaLockRadius = 0.025;
 
-//static const float kThetaRampRadius = 0.025;
-//static const float kThetaLockRadius = 0.001;
+//static const float kThetaRampRadius = 0.25;
+//static const float kThetaLockRadius = 0.20;
 
 
 static const float kSourceDefaultRadius = 1.f;
@@ -984,6 +984,8 @@ private:
 #if !ALLOW_MVT_MODE_AUTOMATION
     int m_iMovementMode;
 #endif
+    
+//    vector<float> thetas;
 
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;

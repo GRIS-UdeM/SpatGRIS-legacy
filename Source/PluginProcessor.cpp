@@ -1158,6 +1158,8 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
 
     updateInputOutputRampsSizes();
+    
+//    thetas.reserve(999999999);
 }
 
 void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
@@ -1179,6 +1181,10 @@ void SpatGrisAudioProcessor::releaseResources() {
 #if USE_VECTORS
     mParameterRamps.clear();
 #endif
+//    for (auto &t : thetas){
+//        cout << t << "\n";
+//    }
+
 }
 
 void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages)
@@ -1446,7 +1452,7 @@ void SpatGrisAudioProcessor::ProcessData(float *params) {
 	switch(mProcessMode) {
         case kFreeVolumeMode:	ProcessDataFree(params);	break;
         case kPanVolumeMode:	ProcessDataPan (params);	break;
-        case kPanSpanMode:		ProcessDataSpan   (params);	break;
+        case kPanSpanMode:		ProcessDataSpan(params);	break;
         default: jassertfalse;
 	}
 }
@@ -1620,7 +1626,7 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
         float *xCurSource = mParameterRamps[getParamForSourceX(iCurSource)];
         float *yCurSource = mParameterRamps[getParamForSourceY(iCurSource)];
 #endif
-
+        
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
 		for (unsigned int iSampleId = 0; iSampleId < m_iDawBufferSize; ++iSampleId) {
 #if TIME_PROCESS
@@ -1670,6 +1676,10 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
                 
                 if (fCurSampleTheta < 0) fCurSampleTheta += kThetaMax;
                 else if (fCurSampleTheta >= kThetaMax) fCurSampleTheta -= kThetaMax;
+                
+//                if (iCurSource == 0){
+//                    thetas.push_back(fCurSampleTheta);
+//                }
                 
             }
             
