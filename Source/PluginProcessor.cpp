@@ -1893,12 +1893,12 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
     
     //------------------------------- FOR EACH SOUND SOURCE ------------------------------------------
     // in this context: source T, R are actually source X, Y
-    for (int i = 0; i < mNumberOfSources; i++) {
+    for (int iCurSource = 0; iCurSource < mNumberOfSources; iCurSource++) {
 #if USE_VECTORS
-        float *input = mInputsCopy[i].data();
-        float *input_x = mParameterRamps[getParamForSourceX(i)].data();
-        float *input_y = mParameterRamps[getParamForSourceY(i)].data();
-        float *input_d = mParameterRamps[getParamForSourceD(i)].data();
+        float *input = mInputsCopy[iCurSource].data();
+        float *input_x = mParameterRamps[getParamForSourceX(iCurSource)].data();
+        float *input_y = mParameterRamps[getParamForSourceY(iCurSource)].data();
+        float *input_d = mParameterRamps[getParamForSourceD(iCurSource)].data();
 #else
         float *input = mInputsCopy[i];
         float *input_x = mParameterRamps[getParamForSourceX(i)];
@@ -1907,14 +1907,14 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
 #endif
         
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
-        for (unsigned int f = 0; f < m_iDawBufferSize; ++f) {
+        for (unsigned int iCurSampleId = 0; iCurSampleId < m_iDawBufferSize; ++iCurSampleId) {
 #if OUTPUT_RAMPING
             vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
 #endif
-            float s = input[f];
-            float x = input_x[f];
-            float y = input_y[f];
-            float d = input_d[f];
+            float s = input[iCurSampleId];
+            float x = input_x[iCurSampleId];
+            float y = input_y[iCurSampleId];
+            float d = input_d[iCurSampleId];
             
             if (d > 1){
                d = normalize(kSourceMinDistance, kSourceMaxDistance, d);
@@ -1937,7 +1937,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                 float distance;
                 if (r >= 1) distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
                 else distance = denormalize(params[kFilterNear], params[kFilterMid], r);
-                s = mFilters[i].process(s, distance);
+                s = mFilters[iCurSource].process(s, distance);
             }
             
             //adjust input volume
@@ -1953,10 +1953,10 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             float t;
             if (r >= kThetaRampRadius) {
                 t = it;
-                mLockedThetas.setUnchecked(i, it);
+                mLockedThetas.setUnchecked(iCurSource, it);
             } else {
                 float c = (r >= kThetaLockRadius) ? ((r - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : 0;
-                float lt = mLockedThetas.getUnchecked(i);
+                float lt = mLockedThetas.getUnchecked(iCurSource);
                 float dt = lt - it;
                 if (dt < 0) dt = -dt;
                 if (dt > kQuarterCircle) {
@@ -2012,7 +2012,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
 #else
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (mOutFactors[o]){
-                    addToOutput(s * mOutFactors[o] * adj, o, f);
+                    addToOutput(s * mOutFactors[o] * adj, o, iCurSampleId);
                 }
             }
 #endif
