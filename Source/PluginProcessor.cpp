@@ -1973,9 +1973,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             jassert(t >= 0 && t <= kThetaMax);
             jassert(angle > 0 && angle <= kHalfCircle);
             
-//            vector<float> outFactors(mNumberOfSpeakers);
-            outFactors.assign(kMaxChannels, 0);
-//            memset(outFactors, 0, kMaxChannels * sizeof(float));
+            memset(outFactors, 0, kMaxChannels * sizeof(float));
             
             float factor = (r < 1) ? (r * 0.5f + 0.5f) : 1;
             

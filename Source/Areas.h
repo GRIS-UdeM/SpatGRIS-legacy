@@ -95,7 +95,7 @@ static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, vec
         areas[areaCount++] = Area(speaker, ix1, iy1, ix2, iy2);
     }
 }
-static void Integrate(float x1, float x2, const vector<Area> &areas, int areaCount, vector<float> &outFactors, float factor)
+static void Integrate(float x1, float x2, const vector<Area> &areas, int areaCount, float outFactors[], float factor)
 {
     if (x1 == x2)
     {
