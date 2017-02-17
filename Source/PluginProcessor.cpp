@@ -1158,8 +1158,6 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
 
     updateInputOutputRampsSizes();
-    
-//    thetas.reserve(999999999);
 }
 
 void SpatGrisAudioProcessor::updateInputOutputRampsSizes(){
@@ -1181,10 +1179,6 @@ void SpatGrisAudioProcessor::releaseResources() {
 #if USE_VECTORS
     mParameterRamps.clear();
 #endif
-//    for (auto &t : thetas){
-//        cout << t << "\n";
-//    }
-
 }
 
 void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages)
@@ -1653,35 +1647,31 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
             }
             
             //lock angle when passing in center
-            float fCurSampleTheta;
-            if (fCurSampleR >= kThetaRampRadius) {
-                fCurSampleTheta = fCurSampleThetaTemp;
-                mLockedThetas.setUnchecked(iCurSource, fCurSampleThetaTemp);
-            } else {
-
-                float fNewProportion = (fCurSampleR >= kThetaLockRadius) ? ((fCurSampleR - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : .5;
-                
-                float oldTheta = mLockedThetas.getUnchecked(iCurSource);
-                float deltaTheta = oldTheta - fCurSampleThetaTemp;
-                
-                if (deltaTheta < 0) deltaTheta = -deltaTheta;
-                
-                if (deltaTheta > kQuarterCircle) {
-                    // assume flipped side
-                    if (oldTheta > fCurSampleThetaTemp) oldTheta -= kHalfCircle;
-                    else oldTheta += kHalfCircle;
-                }
-                
-                fCurSampleTheta = fNewProportion * fCurSampleThetaTemp + (1 - fNewProportion) * oldTheta;
-                
-                if (fCurSampleTheta < 0) fCurSampleTheta += kThetaMax;
-                else if (fCurSampleTheta >= kThetaMax) fCurSampleTheta -= kThetaMax;
-                
-//                if (iCurSource == 0){
-//                    thetas.push_back(fCurSampleTheta);
+            float fCurSampleTheta = fCurSampleThetaTemp;
+            JUCE_COMPILER_WARNING("this code was a failed attempt to fix #137")
+//            if (fCurSampleR >= kThetaRampRadius) {
+//                fCurSampleTheta = fCurSampleThetaTemp;
+//                mLockedThetas.setUnchecked(iCurSource, fCurSampleThetaTemp);
+//            } else {
+//
+//                float fNewProportion = (fCurSampleR >= kThetaLockRadius) ? ((fCurSampleR - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : .5;
+//                
+//                float oldTheta = mLockedThetas.getUnchecked(iCurSource);
+//                float deltaTheta = oldTheta - fCurSampleThetaTemp;
+//                
+//                if (deltaTheta < 0) deltaTheta = -deltaTheta;
+//                
+//                if (deltaTheta > kQuarterCircle) {
+//                    // assume flipped side
+//                    if (oldTheta > fCurSampleThetaTemp) oldTheta -= kHalfCircle;
+//                    else oldTheta += kHalfCircle;
 //                }
-                
-            }
+//                
+//                fCurSampleTheta = fNewProportion * fCurSampleThetaTemp + (1 - fNewProportion) * oldTheta;
+//                
+//                if (fCurSampleTheta < 0) fCurSampleTheta += kThetaMax;
+//                else if (fCurSampleTheta >= kThetaMax) fCurSampleTheta -= kThetaMax;
+//            }
             
             jassert(fCurSampleTheta >= 0 && fCurSampleTheta <= kThetaMax);
             
