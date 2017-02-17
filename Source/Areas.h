@@ -29,6 +29,8 @@
 #ifndef Areas_hpp
 #define Areas_hpp
 
+static const float kThetaMax = M_PI * 2;
+
 #include <stdio.h>
 
 class Area
@@ -66,10 +68,10 @@ static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, vec
         
         float yc = (0 - ix1) / (ix2 - ix1) * (iy2 - iy1) + iy1;
         
-        jassert(areaCount < speakerCount * s_iMaxAreas);
+        jassert(areaCount < speakerCount * MAX_AREAS);
         areas[areaCount++] = Area(speaker, kThetaMax + ix1, iy1, kThetaMax, yc);
         
-        jassert(areaCount < speakerCount * s_iMaxAreas);
+        jassert(areaCount < speakerCount * MAX_AREAS);
         areas[areaCount++] = Area(speaker, 0, yc, ix2, iy2);
     }
     else if (ix2 > kThetaMax)
@@ -79,17 +81,17 @@ static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, vec
         
         float yc = (kThetaMax - ix1) / (ix2 - ix1) * (iy2 - iy1) + iy1;
         
-        jassert(areaCount < speakerCount * s_iMaxAreas);
+        jassert(areaCount < speakerCount * MAX_AREAS);
         areas[areaCount++] = Area(speaker, ix1, iy1, kThetaMax, yc);
         
-        jassert(areaCount < speakerCount * s_iMaxAreas);
+        jassert(areaCount < speakerCount * MAX_AREAS);
         areas[areaCount++] = Area(speaker, 0, yc, ix2 - kThetaMax, iy2);
     }
     else
     {
         jassert(ix1 >= 0 && ix2 <= kThetaMax);
         
-        jassert(areaCount < speakerCount * s_iMaxAreas);
+        jassert(areaCount < speakerCount * MAX_AREAS);
         areas[areaCount++] = Area(speaker, ix1, iy1, ix2, iy2);
     }
 }

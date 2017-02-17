@@ -35,6 +35,8 @@
 
 using namespace std;
 
+#include "Areas.h"
+
 #ifndef USE_DB_METERS
 #define USE_DB_METERS 1
 #endif
@@ -86,7 +88,11 @@ using namespace std;
 
 //==============================================================================
 
-static const int s_iMaxAreas = 3; //this number is used as a multiplicator of mNumberOfSpeakers
+#ifndef MAX_AREAS
+#define MAX_AREAS 3 //this number is used as a multiplicator of mNumberOfSpeakers
+#endif
+
+JUCE_COMPILER_WARNING("this variable and logic needs to be removed")
 static const bool s_bUseNewGui = true;
 
 static PluginHostType host;
@@ -261,7 +267,7 @@ static const float kSpanDefault = 0;
 static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
-static const float kThetaMax = M_PI * 2;
+
 
 static const float kThetaRampRadius = 0.05;
 static const float kThetaLockRadius = 0.025;
@@ -318,6 +324,7 @@ int IndexedAngleCompare(const void *a, const void *b);
 class OscSpatThread;
 class SourceUpdateThread;
 class SourceMover;
+
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor
@@ -893,16 +900,15 @@ private:
     bool bLevelUiLock = false;
     
 #if USE_VECTORS
-//    vector<vector<float>> mInputsCopy;
-//    vector<float*> mOutputs;
-
     vector<float> mInputsCopy[kMaxInputs];
     float* mOutputs[kMaxChannels];
     
-#if OUTPUT_RAMPING
+    #if OUTPUT_RAMPING
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
+    
+    
 #else
     float mInputsCopy[kMaxChannels][kMaxBufferSize];
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
@@ -911,7 +917,10 @@ private:
     #if OUTPUT_RAMPING
         float mSpeakerVolumes[kMaxInputs][kMaxChannels];
     #endif
+    
+    
 #endif
+    vector<Area> allAreas;
     
     
 #if TIME_PROCESS

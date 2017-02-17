@@ -305,6 +305,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
         mParameters.set(getParamForSpeakerM(i), 0);
     }
+    
+    allAreas.resize(kMaxChannels * MAX_AREAS);
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
@@ -1853,8 +1855,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
     const float fOldValuesPortion = powf(0.01f, 1000.f / (denormalize(kSmoothMin, kSmoothMax, params[kSmooth]) * m_dSampleRate));
     createParameterRamps(params, fOldValuesPortion);
     
-    JUCE_COMPILER_WARNING("this vector should be in USE_VECTORS")
-    vector<Area> areas(mNumberOfSpeakers * s_iMaxAreas);
+//    vector<Area> allAreas(mNumberOfSpeakers * MAX_AREAS);
     
 #if OUTPUT_RAMPING
     vector<bool> vSpeakersCurrentlyInUse;
@@ -1872,8 +1873,8 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             jassert(left >= 0 && right >= 0);
             jassert(dLeft > 0 && dRight > 0);
             
-            AddArea(iCurSpeaker, fCurAngle - dLeft, 0, fCurAngle, 1, areas, areaCount, mNumberOfSpeakers);
-            AddArea(iCurSpeaker, fCurAngle, 1, fCurAngle + dRight, 0, areas, areaCount, mNumberOfSpeakers);
+            AddArea(iCurSpeaker, fCurAngle - dLeft, 0, fCurAngle, 1, allAreas, areaCount, mNumberOfSpeakers);
+            AddArea(iCurSpeaker, fCurAngle, 1, fCurAngle + dRight, 0, allAreas, areaCount, mNumberOfSpeakers);
         }
     } else if (mNumberOfSpeakers == 2) {
         int s1 = (params[getParamForSpeakerX(0)] < params[getParamForSpeakerX(1)]) ? 0 : 1;
@@ -1881,13 +1882,13 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
         float t1 = params[getParamForSpeakerX(s1)];
         float t2 = params[getParamForSpeakerX(s2)];
         
-        AddArea(s1, t2 - kThetaMax, 0, t1, 1, areas, areaCount, mNumberOfSpeakers);
-        AddArea(s1, t1, 1, t2, 0, areas, areaCount, mNumberOfSpeakers);
+        AddArea(s1, t2 - kThetaMax, 0, t1, 1, allAreas, areaCount, mNumberOfSpeakers);
+        AddArea(s1, t1, 1, t2, 0, allAreas, areaCount, mNumberOfSpeakers);
         
-        AddArea(s2, t1, 0, t2, 1, areas, areaCount, mNumberOfSpeakers);
-        AddArea(s2, t2, 1, t1 + kThetaMax, 0, areas, areaCount, mNumberOfSpeakers);
+        AddArea(s2, t1, 0, t2, 1, allAreas, areaCount, mNumberOfSpeakers);
+        AddArea(s2, t2, 1, t1 + kThetaMax, 0, allAreas, areaCount, mNumberOfSpeakers);
     } else {
-        AddArea(0, 0, 1, kThetaMax, 1, areas, areaCount, mNumberOfSpeakers);
+        AddArea(0, 0, 1, kThetaMax, 1, allAreas, areaCount, mNumberOfSpeakers);
     }
     
     jassert(areaCount > 0);
@@ -1982,13 +1983,13 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                 float tl = t - angle, tr = t + angle;
                 
                 if (tl < 0) {
-                    Integrate(tl + kThetaMax, kThetaMax, areas, areaCount, outFactors, factor);
-                    Integrate(0, tr, areas, areaCount, outFactors, factor);
+                    Integrate(tl + kThetaMax, kThetaMax, allAreas, areaCount, outFactors, factor);
+                    Integrate(0, tr, allAreas, areaCount, outFactors, factor);
                 } else if (tr > kThetaMax) {
-                    Integrate(tl, kThetaMax, areas, areaCount, outFactors, factor);
-                    Integrate(0, tr - kThetaMax, areas, areaCount, outFactors, factor);
+                    Integrate(tl, kThetaMax, allAreas, areaCount, outFactors, factor);
+                    Integrate(0, tr - kThetaMax, allAreas, areaCount, outFactors, factor);
                 } else {
-                    Integrate(tl, tr, areas, areaCount, outFactors, factor);
+                    Integrate(tl, tr, allAreas, areaCount, outFactors, factor);
                 }
                 
                 if (r < 1) {
