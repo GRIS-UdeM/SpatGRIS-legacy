@@ -923,6 +923,8 @@ private:
 //    vector<Area> mAllAreas;
     Area mAllAreas[kMaxChannels * MAX_AREAS];
     float mOutFactors[kMaxChannels];
+    FirFilter mFilters[kMaxInputs];
+    
     
 #if TIME_PROCESS
 #define kTimeSlots (10)
@@ -962,10 +964,9 @@ private:
     void ProcessDataSpan     (float *params);
     void processTrajectory();
     
-    
     int mNumberOfSources;
     int mNumberOfSpeakers;
-    std::vector<FirFilter> mFilters;
+
     bool m_bIsRecordingAutomation;
     int m_iSourceLocationChanged;
     int m_iSourceAzimSpanChanged;

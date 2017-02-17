@@ -155,8 +155,7 @@ int IndexedAngleCompare(const void *a, const void *b)
 
 //==============================================================================
 SpatGrisAudioProcessor::SpatGrisAudioProcessor()
-:mFilters()
-,m_bIsRecordingAutomation(false)
+:m_bIsRecordingAutomation(false)
 ,m_iSourceLocationChanged(-1)
 ,m_iSourceAzimSpanChanged(-1)
 ,m_iSourceElevSpanChanged(-1)
@@ -881,8 +880,7 @@ void SpatGrisAudioProcessor::setNumberOfSources(int p_iNewNumberOfSources, bool 
         return;
     }
     mNumberOfSources = p_iNewNumberOfSources;
-    mFilters.clear();
-    mFilters.resize(mNumberOfSources);
+
     m_pMover->updateNumberOfSources();
     if (bUseDefaultValues){
         double anglePerSource = 360 / mNumberOfSources;
