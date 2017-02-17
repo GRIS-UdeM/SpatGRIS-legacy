@@ -273,6 +273,7 @@ static const float kThetaLockRadius = 0.025;
 
 
 static const float kSourceDefaultRadius = 1.f;
+static const float kSpeedDefault = 1.f;
 
 static const int    kMargin             = 10;
 static const int    kCenterColumnWidth  = 180;
@@ -984,7 +985,6 @@ private:
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
     
-    float fSpeedTrajectory;
     
 #if !ALLOW_MVT_MODE_AUTOMATION
     int m_iMovementMode;
