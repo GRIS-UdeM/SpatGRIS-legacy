@@ -1913,12 +1913,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             float x = input_x[iCurSampleId];
             float y = input_y[iCurSampleId];
             float d = input_d[iCurSampleId];
-
-            if (d > 1){
-               d = normalize(kSourceMinDistance, kSourceMaxDistance, d);
-                cout << "NORMALIZE\n";
-            }
-            
+           
             float tv = dbToLinear((1-d) * params[kMaxSpanVolume]);
             
             // could use the Accelerate framework on mac for these
