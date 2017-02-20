@@ -72,6 +72,29 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 
 #endif
 
+class sourceParameter : public AudioParameterFloat
+{
+public :
+    void setParent(SpatGrisAudioProcessor * f){ this->mFilter = f;}
+    void setValue(float newValue){
+        
+        if (this->mFilter->getMovementMode() != Independent){
+            for (int iCurSource = 0; iCurSource < this->mFilter->getNumberOfSources(); ++iCurSource){
+                if (iCurSource != this->mFilter->getSelectedSrc()){
+                    if (index == this->mFilter->getParamForSourceX(iCurSource) || index == this->mFilter->getParamForSourceY(iCurSource) ||
+                        index == this->mFilter->getParamForSourceAzimSpan(iCurSource) || index == this->mFilter->getParamForSourceElevSpan(iCurSource)) {
+                        return;
+                    }
+                }
+            }
+        }
+        
+    }
+private :
+    SpatGrisAudioProcessor * mFilter;
+    int mSourceNumber;
+};
+
 //==================================== SourceUpdateThread ===================================================================
 class SourceUpdateThread : public Thread
 {
@@ -183,14 +206,28 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_OwnedThreads.add(m_pOscSpatThread);
     m_OwnedThreads.add(m_pSourceUpdateThread);
     
-    m_pSourceUpdateThread->startThread();
-    
+   
+
     //SET PARAMETERS
-	mParameters.resize(kNumberOfParameters);
+	//mParameters.resize(kNumberOfParameters);
     for (int i = 0; i < kNumberOfParameters; i++){
-        mParameters.add(0);
+        mParameters.push_back(new AudioParameterFloat("source "+to_string(i), "Source "+to_string(i),0.f, 1.f, 0));
     }
+    mParameters.push_back(new AudioParameterFloat("kSmooth","KSmooth",kSmoothMin, kSmoothMax, kSmoothDefault));
+    mParameters.push_back(new AudioParameterFloat("kVolumeNear","kVolumeNear",kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault));
+    mParameters.push_back(new AudioParameterFloat("kVolumeMid","kVolumeMid",kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault));
+    mParameters.push_back(new AudioParameterFloat("kVolumeFar","kVolumeFar",kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault));
+    mParameters.push_back(new AudioParameterFloat("kFilterNear","kFilterNear",kFilterNearMin, kFilterNearMax, kFilterNearDefault));
+    mParameters.push_back(new AudioParameterFloat("kFilterMid","kFilterMid",kFilterMidMin, kFilterMidMax, kFilterMidDefault));
+    mParameters.push_back(new AudioParameterFloat("kFilterFar","kFilterFar",kFilterFarMin, kFilterFarMax, kFilterFarDefault));
+    mParameters.push_back(new AudioParameterFloat("kMaxSpanVolume","kMaxSpanVolume",kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault));
+    mParameters.push_back(new AudioParameterFloat("kRoutingVolume","kRoutingVolume",kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
     
+    for(AudioParameterFloat * t :mParameters){
+        addParameter(t);
+    }
+   
+    /*
 	mParameters.set(kSmooth,        normalize(kSmoothMin, kSmoothMax, kSmoothDefault));
 	mParameters.set(kVolumeNear,    normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault));
 	mParameters.set(kVolumeMid,     normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault));
@@ -199,9 +236,10 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mParameters.set(kFilterMid,     normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault));
 	mParameters.set(kFilterFar,     normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault));
 	mParameters.set(kMaxSpanVolume, normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault));
-	mParameters.set(kRoutingVolume, normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
+	mParameters.set(kRoutingVolume, normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));*/
 #if ALLOW_MVT_MODE_AUTOMATION
-    mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
+    addParameter(kMovementModeChoice  = new AudioParameterChoice("mouvement","Mouvement",AllMovementModesStrings,kMovementMode));
+    //mParameters.set(kMovementMode,  normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault));
 #endif
 
 	mSmoothedParameters.resize(kNumberOfParameters);
@@ -298,13 +336,16 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	// default values for parameters
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
         float fDefaultVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance);
-        mParameters.set(getParamForSourceD(i), fDefaultVal);
+        mParameters[getParamForSourceD(i)]->setValueNotifyingHost(fDefaultVal);
+        //mParameters.set(getParamForSourceD(i), fDefaultVal);
     }
 
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
-        mParameters.set(getParamForSpeakerM(i), 0);
+        mParameters[getParamForSpeakerM(i)]->setValueNotifyingHost(0);
+        //mParameters.set(getParamForSpeakerM(i), 0);
     }
     
+     m_pSourceUpdateThread->startThread();
 //    mAllAreas.resize(kMaxChannels * MAX_AREAS);
 }
 
@@ -464,15 +505,15 @@ const String SpatGrisAudioProcessor::getName() const {
 	name << mNumberOfSpeakers;
     return name;
 }
-
+/*
 int SpatGrisAudioProcessor::getNumParameters() {
     return kNumberOfParameters;
-}
-
+}*/
+/*
 float SpatGrisAudioProcessor::getParameter (int index) {
     return mParameters[index];
 }
-
+*/
 
 #if ALLOW_MVT_MODE_AUTOMATION
 bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
@@ -494,10 +535,12 @@ bool SpatGrisAudioProcessor::isKnownHost(){
             host.isNuendo() || host.isSonar());
 }
 
+/*
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     //unknown host is logic's au eval tool
     if (!isKnownHost()){
-        mParameters.set(index, newValue);
+        mParameters[index]->setValueNotifyingHost(newValue);
+        //mParameters.set(index, newValue);
         return;
     }
     
@@ -513,17 +556,17 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         }
     }
     setParameterInternal (index, newValue);
-}
+}*/
 
 
-void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float &newValue){
+void SpatGrisAudioProcessor::setParameterInternal (const int index, const float newValue){
     
     //unknown host is logic's au eval tool. we just shouldn't get here with that.
     if (!isKnownHost()){
         return;
     }
     
-    float fOldValue = mParameters.getUnchecked(index);
+    float fOldValue = mParameters[(index)]->get();
         
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && !isNewMovementMode(newValue)){
@@ -535,8 +578,8 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
             DBG("#54: TRYING TO SET PARAMETER " << index << " " << getParameterName(index) << " TO ZERO");
             return;
         }
-        
-        mParameters.set(index, newValue);
+        mParameters[index]->setValueNotifyingHost(newValue);
+        //mParameters.set(index, newValue);
         
 #if ALLOW_MVT_MODE_AUTOMATION
         if (index == kMovementMode && m_pMover){
@@ -585,7 +628,8 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         //if in logic au test tool, return
         return;
     }
-    mParameters.set(index, newValue);
+    mParameters[index]->setValueNotifyingHost(newValue);
+    //mParameters.set(index, newValue);
     switch(index % kParamsPerSource) {
         case kSourceX:
         case kSourceY:
@@ -1151,7 +1195,7 @@ void SpatGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 #endif
     
     //---------- INIT MEMORY STUFF -------
-    memcpy (mSmoothedParameters.getRawDataPointer(), mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
+    memcpy (mSmoothedParameters.getRawDataPointer(), &mParameters, kNumberOfParameters * sizeof(float));
 
     updateInputOutputRampsSizes();
 }
@@ -1229,7 +1273,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     //==================================== COPY ALL PARAMETERS INTO PARAMCOPY ===========================================
 	// copy mParameters into paramCopy, because we will transform those
 	float paramCopy[kNumberOfParameters];
-    memcpy (paramCopy, mParameters.getRawDataPointer(), kNumberOfParameters * sizeof(float));
+    memcpy (paramCopy, &mParameters, kNumberOfParameters * sizeof(float));
     
     //depending on what mode we are, denormalize parameters we will need
 	if (mProcessMode != kFreeVolumeMode) {
@@ -1842,7 +1886,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
 #if OUTPUT_RAMPING
     vector<bool> vSpeakersCurrentlyInUse;
 #endif
-
+        kMovementModeChoice->juce::AudioProcessorParameter::setValue(<#float newValue#>)
     int areaCount = 0;
     //--------------------------------- CREATE AREAS ------------------------------------------
     if (mNumberOfSpeakers > 2) {
@@ -2090,41 +2134,51 @@ AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()
 
 void SpatGrisAudioProcessor::storeCurrentLocations(){
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
-        mBufferSrcLocX[i]  = mParameters[getParamForSourceX(i)];
-        mBufferSrcLocY[i]  = mParameters[getParamForSourceY(i)];
-        mBufferSrcLocD[i]  = mParameters[getParamForSourceD(i)];
-        mBufferSrcLocAS[i] = mParameters[getParamForSourceAzimSpan(i)];
-        mBufferSrcLocES[i] = mParameters[getParamForSourceElevSpan(i)];
+        mBufferSrcLocX[i]  = mParameters[getParamForSourceX(i)]->get();
+        mBufferSrcLocY[i]  = mParameters[getParamForSourceY(i)]->get();
+        mBufferSrcLocD[i]  = mParameters[getParamForSourceD(i)]->get();
+        mBufferSrcLocAS[i] = mParameters[getParamForSourceAzimSpan(i)]->get();
+        mBufferSrcLocES[i] = mParameters[getParamForSourceElevSpan(i)]->get();
 
     }
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++) {
-        mBufferSpLocX[i] =  mParameters[getParamForSpeakerX(i)];
-        mBufferSpLocY[i] = mParameters[getParamForSpeakerY(i)];
-        mBufferSpLocM[i] = mParameters[getParamForSpeakerM(i)];
+        mBufferSpLocX[i] =  mParameters[getParamForSpeakerX(i)]->get();
+        mBufferSpLocY[i] = mParameters[getParamForSpeakerY(i)]->get();
+        mBufferSpLocM[i] = mParameters[getParamForSpeakerM(i)]->get();
     }
 }
 //p_iLocToRestore == -1 by default, meaning restore all locations
 void SpatGrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
     if (p_iLocToRestore == -1){
         for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++) {
-            mParameters.set(getParamForSourceX(i), mBufferSrcLocX[i]);
-            mParameters.set(getParamForSourceY(i), mBufferSrcLocY[i]);
+            mParameters[getParamForSourceX(i)]->setValueNotifyingHost(mBufferSrcLocX[i]);
+            mParameters[getParamForSourceY(i)]->setValueNotifyingHost(mBufferSrcLocY[i]);
+            //mParameters.set(getParamForSourceX(i), mBufferSrcLocX[i]);
+            //mParameters.set(getParamForSourceY(i), mBufferSrcLocY[i]);
             float fValue = mBufferSrcLocD[i];
-            mParameters.set(getParamForSourceD(i), fValue);
+            mParameters[getParamForSourceD(i)]->setValueNotifyingHost(fValue);
+            //mParameters.set(getParamForSourceD(i), fValue);
         }
     } else {
         //only restore location for selected source
         int i = p_iLocToRestore;
-        mParameters.set(getParamForSourceX(i), mBufferSrcLocX[i]);
-        mParameters.set(getParamForSourceY(i), mBufferSrcLocY[i]);
+        mParameters[getParamForSourceX(i)]->setValueNotifyingHost(mBufferSrcLocX[i]);
+        mParameters[getParamForSourceY(i)]->setValueNotifyingHost(mBufferSrcLocY[i]);
+        //mParameters.set(getParamForSourceX(i), mBufferSrcLocX[i]);
+        //mParameters.set(getParamForSourceY(i), mBufferSrcLocY[i]);
         float fValue = mBufferSrcLocD[i];
-        mParameters.set(getParamForSourceD(i), fValue);
+        //mParameters.set(getParamForSourceD(i), fValue);
+        mParameters[getParamForSourceD(i)]->setValueNotifyingHost(fValue);
     }
     
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++) {
+        mParameters[getParamForSpeakerX(i)]->setValueNotifyingHost(mBufferSpLocX[i]);
+        mParameters[getParamForSpeakerY(i)]->setValueNotifyingHost(mBufferSpLocY[i]);
+        mParameters[getParamForSpeakerM(i)]->setValueNotifyingHost(mBufferSpLocM[i]);
+        /*
         mParameters.set(getParamForSpeakerX(i), mBufferSpLocX[i]);
         mParameters.set(getParamForSpeakerY(i), mBufferSpLocY[i]);
-		mParameters.set(getParamForSpeakerM(i), mBufferSpLocM[i]);
+		mParameters.set(getParamForSpeakerM(i), mBufferSpLocM[i]);*/
     }
 }
 
@@ -2171,41 +2225,41 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("m_fEndLocationX", m_fEndLocationXY01.x);
     xml.setAttribute ("m_fEndLocationY", m_fEndLocationXY01.y);
     xml.setAttribute ("mLeapEnabled", mLeapEnabled);
-    xml.setAttribute ("kMaxSpanVolume", mParameters[kMaxSpanVolume]);
-    xml.setAttribute ("kRoutingVolume", mParameters[kRoutingVolume]);
+    xml.setAttribute ("kMaxSpanVolume", mParameters[kMaxSpanVolume]->get());
+    xml.setAttribute ("kRoutingVolume", mParameters[kRoutingVolume]->get());
     xml.setAttribute ("mRoutingMode", mRoutingMode);
-    xml.setAttribute ("kSmooth", mParameters[kSmooth]);
-    xml.setAttribute ("kVolumeNear", mParameters[kVolumeNear]);
-    xml.setAttribute ("kVolumeMid", mParameters[kVolumeMid]);
-    xml.setAttribute ("kVolumeFar", mParameters[kVolumeFar]);
-    xml.setAttribute ("kFilterNear", mParameters[kFilterNear]);
-    xml.setAttribute ("kFilterMid", mParameters[kFilterMid]);
-    xml.setAttribute ("kFilterFar", mParameters[kFilterFar]);
+    xml.setAttribute ("kSmooth", mParameters[kSmooth]->get());
+    xml.setAttribute ("kVolumeNear", mParameters[kVolumeNear]->get());
+    xml.setAttribute ("kVolumeMid", mParameters[kVolumeMid]->get());
+    xml.setAttribute ("kVolumeFar", mParameters[kVolumeFar]->get());
+    xml.setAttribute ("kFilterNear", mParameters[kFilterNear]->get());
+    xml.setAttribute ("kFilterMid", mParameters[kFilterMid]->get());
+    xml.setAttribute ("kFilterFar", mParameters[kFilterFar]->get());
     xml.setAttribute ("m_iOscSpat1stSrcId", m_iOscSpat1stSrcId);
     xml.setAttribute ("m_iOscSpatPort", m_iOscSpatPort);
     xml.setAttribute ("kTrajectorySpeed", getParameter(kTrajectorySpeed));
     
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i) {
 		String srcX = "src" + to_string(i) + "x";
-        float x = mParameters[getParamForSourceX(i)];
+        float x = mParameters[getParamForSourceX(i)]->get();
         xml.setAttribute (srcX, x);
         String srcY = "src" + to_string(i) + "y";
-        float y = mParameters[getParamForSourceY(i)];
+        float y = mParameters[getParamForSourceY(i)]->get();
         xml.setAttribute (srcY, y);
         String srcD = "src" + to_string(i) + "d";
-        xml.setAttribute (srcD, mParameters[getParamForSourceD(i)]);
+        xml.setAttribute (srcD, mParameters[getParamForSourceD(i)]->get());
         String srcAS = "src" + to_string(i) + "AS";
-        xml.setAttribute (srcAS, mParameters[getParamForSourceAzimSpan(i)]);
+        xml.setAttribute (srcAS, mParameters[getParamForSourceAzimSpan(i)]->get());
         String srcES = "src" + to_string(i) + "ES";
-        xml.setAttribute (srcES, mParameters[getParamForSourceElevSpan(i)]);
+        xml.setAttribute (srcES, mParameters[getParamForSourceElevSpan(i)]->get());
     }
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i) {
         String spkX = "spk" + to_string(i) + "x";
-        xml.setAttribute (spkX, mParameters[getParamForSpeakerX(i)]);
+        xml.setAttribute (spkX, mParameters[getParamForSpeakerX(i)]->get());
         String spkY = "spk" + to_string(i) + "y";
-        xml.setAttribute (spkY, mParameters[getParamForSpeakerY(i)]);
+        xml.setAttribute (spkY, mParameters[getParamForSpeakerY(i)]->get());
         String spkM = "spk" + to_string(i) + "m";
-        xml.setAttribute (spkM, mParameters[getParamForSpeakerM(i)]);
+        xml.setAttribute (spkM, mParameters[getParamForSpeakerM(i)]->get());
     }
     copyXmlToBinary (xml, destData);
 }
@@ -2267,19 +2321,31 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             m_fEndLocationXY01.x  = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationX", m_fEndLocationXY01.x));
             m_fEndLocationXY01.y = static_cast<float>(xmlState->getDoubleAttribute("m_fEndLocationY", m_fEndLocationXY01.y));
             mLeapEnabled        = xmlState->getIntAttribute ("mLeapEnabled", 0);
-            mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
-            mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
+            
+            mParameters[kMaxSpanVolume]->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
+            mParameters[kRoutingVolume]->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
+
+            mParameters[kSmooth ] ->setValueNotifyingHost(        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
+            mParameters[kVolumeNear ] ->setValueNotifyingHost(    static_cast<float>(xmlState->getDoubleAttribute("kVolumeNear", normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault))));
+            mParameters[kVolumeMid ]->setValueNotifyingHost(     static_cast<float>(xmlState->getDoubleAttribute("kVolumeMid", normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault))));
+            mParameters[kVolumeFar]->setValueNotifyingHost(    static_cast<float>(xmlState->getDoubleAttribute("kVolumeFar", normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault))));
+            mParameters[kFilterNear] ->setValueNotifyingHost(    static_cast<float>(xmlState->getDoubleAttribute("kFilterNear", normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault))));
+            mParameters[kFilterMid]->setValueNotifyingHost(     static_cast<float>(xmlState->getDoubleAttribute("kFilterMid", normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault))));
+            mParameters[kFilterFar] ->setValueNotifyingHost(     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
+            mParameters[kTrajectorySpeed] ->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault)));
+            //mParameters.set(kMaxSpanVolume, static_cast<float>(xmlState->getDoubleAttribute("kMaxSpanVolume", normalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, kMaxSpanVolumeDefault))));
+            //mParameters.set(kRoutingVolume, static_cast<float>(xmlState->getDoubleAttribute("kRoutingVolume", normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault))));
 #if ALLOW_INTERNAL_WRITE
             setRoutingMode(xmlState->getIntAttribute ("mRoutingMode", kNormalRouting));
 #endif
-            mParameters.set(kSmooth,        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
+           /* mParameters.set(kSmooth,        static_cast<float>(xmlState->getDoubleAttribute("kSmooth", normalize(kSmoothMin, kSmoothMax, kSmoothDefault))));
             mParameters.set(kVolumeNear,    static_cast<float>(xmlState->getDoubleAttribute("kVolumeNear", normalize(kVolumeNearMin, kVolumeNearMax, kVolumeNearDefault))));
             mParameters.set(kVolumeMid,     static_cast<float>(xmlState->getDoubleAttribute("kVolumeMid", normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault))));
             mParameters.set(kVolumeFar,     static_cast<float>(xmlState->getDoubleAttribute("kVolumeFar", normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault))));
             mParameters.set(kFilterNear,    static_cast<float>(xmlState->getDoubleAttribute("kFilterNear", normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault))));
             mParameters.set(kFilterMid,     static_cast<float>(xmlState->getDoubleAttribute("kFilterMid", normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault))));
             mParameters.set(kFilterFar,     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
-            mParameters.set(kTrajectorySpeed,static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault)));
+            mParameters.set(kTrajectorySpeed,static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault)));*/
             
             m_iOscSpat1stSrcId  = xmlState->getIntAttribute("m_iOscSpat1stSrcId",   m_iOscSpat1stSrcId);
             m_iOscSpatPort      = xmlState->getIntAttribute("m_iOscSpatPort",       m_iOscSpatPort);
@@ -2289,30 +2355,38 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             for (int iCurSource = 0; iCurSource < iMax; ++iCurSource){
                 String srcX = "src" + to_string(iCurSource) + "x";
                 float fX01 = static_cast<float>(xmlState->getDoubleAttribute(srcX, 0));
-                mParameters.set(getParamForSourceX(iCurSource), fX01);
+                mParameters[getParamForSourceX(iCurSource)] ->setValueNotifyingHost(fX01);
+                //mParameters.set(getParamForSourceX(iCurSource), fX01);
                 String srcY = "src" + to_string(iCurSource) + "y";
                 float fY01 = static_cast<float>(xmlState->getDoubleAttribute(srcY, 0));
-                mParameters.set(getParamForSourceY(iCurSource), fY01);
+                //mParameters.set(getParamForSourceY(iCurSource), fY01);
+                mParameters[getParamForSourceY(iCurSource)] ->setValueNotifyingHost(fY01);
                 FPoint curPoint = FPoint(fX01, fY01);
                 if (m_pMover){
                     m_pMover->storeDownPosition(iCurSource, convertXy012Rt(curPoint));
                 }
                 String srcD = "src" + to_string(iCurSource) + "d";
-                mParameters.set(getParamForSourceD(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
+                //mParameters.set(getParamForSourceD(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
+                mParameters[getParamForSourceD(iCurSource)] ->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute(srcD, normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance))));
                 
                 String srcAS = "src" + to_string(iCurSource) + "AS";
-                mParameters.set(getParamForSourceAzimSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcAS, 0)));
-                
+                //mParameters.set(getParamForSourceAzimSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcAS, 0)));
+                mParameters[getParamForSourceAzimSpan(iCurSource)] ->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute(srcAS, 0)));
                 String srcES = "src" + to_string(iCurSource) + "ES";
-                mParameters.set(getParamForSourceElevSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
+                //mParameters.set(getParamForSourceElevSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
+                mParameters[getParamForSourceElevSpan(iCurSource)] ->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
             }
             for (int iCurSpeaker = 0; iCurSpeaker < JucePlugin_MaxNumOutputChannels; ++iCurSpeaker){
                 String spkX = "spk" + to_string(iCurSpeaker) + "x";
-                mParameters.set(getParamForSpeakerX(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));
+                //mParameters.set(getParamForSpeakerX(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));
                 String spkY = "spk" + to_string(iCurSpeaker) + "y";
-                mParameters.set(getParamForSpeakerY(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkY, 0)));
+                //mParameters.set(getParamForSpeakerY(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkY, 0)));
                 String spkM = "spk" + to_string(iCurSpeaker) + "m";
-                mParameters.set(getParamForSpeakerM(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
+                //mParameters.set(getParamForSpeakerM(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
+                
+                mParameters[getParamForSpeakerX(iCurSpeaker)] ->setValueNotifyingHost( static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));
+                mParameters[getParamForSpeakerY(iCurSpeaker)] ->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute(spkY, 0)));
+                mParameters[getParamForSpeakerM(iCurSpeaker)] ->setValueNotifyingHost(static_cast<float>(xmlState->getDoubleAttribute(spkM, 0)));
             }
         }
     }

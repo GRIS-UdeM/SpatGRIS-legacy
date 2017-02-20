@@ -733,7 +733,7 @@ public:
             jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
                       && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
             outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
-
+            
             return noErr;
         }
 

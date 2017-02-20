@@ -182,6 +182,18 @@ enum AllMovementModes {
     TotalNumberMovementModes
 };
 
+static const StringArray  AllMovementModesStrings = {
+    "Independent",
+    "Circular",
+    "CircularFixedRadius",
+    "CircularFixedAngle",
+    "CircularFullyFixed",
+    "DeltaLock",
+    "SymmetricX",
+    "SymmetricY"
+};
+
+
 JUCE_COMPILER_WARNING("Check Order InputOutputModes AND x12x")
 //because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
 enum InputOutputModes {
@@ -232,17 +244,17 @@ static const float kVolumeFarDefault = -36;
 
 static const float kMaxDistance = 2000;
 
-static const float kFilterNearMin = kMaxDistance;
-static const float kFilterNearMax = 0;
+static const float kFilterNearMin = 0;
+static const float kFilterNearMax = kMaxDistance;
 static const float kFilterNearDefault = 0;
 
-static const float kFilterMidMin = kMaxDistance;
-static const float kFilterMidMax = 0;
-static const float kFilterMidDefault = kMaxDistance / 10;
+static const float kFilterMidMin = 0;
+static const float kFilterMidMax = kMaxDistance;
+static const float kFilterMidDefault = kMaxDistance / 10.f;
 
-static const float kFilterFarMin = kMaxDistance;
-static const float kFilterFarMax = 0;
-static const float kFilterFarDefault = kMaxDistance / 2;
+static const float kFilterFarMin = 0;
+static const float kFilterFarMax = kMaxDistance;
+static const float kFilterFarDefault = kMaxDistance / 2.f;
 
 static const float kMaxSpanVolumeMin = 0;
 static const float kMaxSpanVolumeMax = 20;
@@ -251,6 +263,7 @@ static const float kMaxSpanVolumeDefault = 0;
 static const float kRoutingVolumeMin = -120;
 static const float kRoutingVolumeMax = 6;
 static const float kRoutingVolumeDefault = 0;
+
 
 static const float kMovementModeMin = Independent;
 static const float kMovementModeMax = SymmetricY;
@@ -343,14 +356,14 @@ public:
     //==============================================================================
     const String getName() const;
 
-    void setParameter (int index, float newValue);
-    void setParameterInternal (const int &index, const float &newValue);
+    //void setParameter (int index, float newValue);
+    void setParameterInternal (const int index, const float newValue);
     void setParameterNotifyingHost (int index, float newValue);
     bool isSourceLocationParameter(const int &index);
 
     
-    int             getNumParameters();
-    float           getParameter (int index);
+    //int             getNumParameters();
+    //float           getParameter (int index);
     int             getParameterNumSteps (int index);
     const String    getParameterName (int index);
     const String    getParameterText (int index);
@@ -410,7 +423,13 @@ public:
 #if ALLOW_MVT_MODE_AUTOMATION
     bool isNewMovementMode(float v);
 	int getMovementMode() {
-		return static_cast<int>(round(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode))));
+        for(int i = 0; i < AllMovementModesStrings.size(); i++){
+            if(AllMovementModesStrings[i].compare(kMovementModeChoice->getCurrentChoiceName())){
+                return i;
+            }
+        }
+        return 0;
+		//return static_cast<int>(round(denormalize(kMovementModeMin, kMovementModeMax,  )));//getParameter(kMovementMode)
 	}
     void setMovementMode(int i, bool p_bNotifyHost = true);
 #else
@@ -567,14 +586,14 @@ public:
     int getParamForSourceAzimSpan(int index) const { return kSourceAzimSpan + index * kParamsPerSource; }
     int getParamForSourceElevSpan(int index) const { return kSourceElevSpan + index * kParamsPerSource; }
     
-    float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
-    float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
-    float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
+    float getSourceX(int index) const { return mParameters[(kSourceX + index * kParamsPerSource)]->get(); }
+    float getSourceY(int index) const { return mParameters[(kSourceY + index * kParamsPerSource)]->get(); }
+    float getSourceD(int index) const { return mParameters[(kSourceD + index * kParamsPerSource)]->get(); }
     float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
-    float getSourceAzimSpan01(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
-    float getSourceElevSpan01(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
+    float getSourceAzimSpan01(int index) const { return mParameters[(kSourceAzimSpan + index * kParamsPerSource)]->get(); }
+    float getSourceElevSpan01(int index) const { return mParameters[(kSourceElevSpan + index * kParamsPerSource)]->get(); }
     
-    float getSmoothing() const { return mParameters.getUnchecked(kSmooth); }
+    float getSmoothing() const { return mParameters[(kSmooth)]->get(); }
     
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
     
@@ -582,9 +601,9 @@ public:
     inline int getParamForSpeakerY(int index) const { return kSpeakerY + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
     inline int getParamForSpeakerM(int index) const { return kSpeakerM + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
     
-    float getSpeakerX(int index) const { return mParameters.getUnchecked(getParamForSpeakerX(index)); }
-    float getSpeakerY(int index) const { return mParameters.getUnchecked(getParamForSpeakerY(index)); }
-    float getSpeakerM(int index) const { return mParameters.getUnchecked(getParamForSpeakerM(index)); }
+    float getSpeakerX(int index) const { return mParameters[(getParamForSpeakerX(index))]->get(); }
+    float getSpeakerY(int index) const { return mParameters[(getParamForSpeakerY(index))]->get(); }
+    float getSpeakerM(int index) const { return mParameters[(getParamForSpeakerM(index))]->get(); }
     
 	// convenience functions for gui:
 	//01 here means that the output is normalized to [0,1]
@@ -821,7 +840,7 @@ private:
 	bool m_bAllowInputOutputModeSelection;
 	Trajectory::Ptr mTrajectory;
     
-	Array<float> mParameters;
+	//Array<float> mParameters;
 	
 	bool mCalculateLevels;
 #if USE_DB_METERS
@@ -985,7 +1004,9 @@ private:
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
     
-    
+    AudioParameterChoice * kMovementModeChoice;
+
+    std::vector<AudioParameterFloat*> mParameters;
 #if !ALLOW_MVT_MODE_AUTOMATION
     int m_iMovementMode;
 #endif
