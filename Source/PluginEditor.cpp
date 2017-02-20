@@ -194,13 +194,7 @@ AudioProcessorEditor (ownerFilter)
 , mTrCycleCount(-1)
 , mOsc (nullptr)
 {
-    if (s_bUseNewGui){
-        LookAndFeel::setDefaultLookAndFeel(&mGrisFeel);
-    } else {
-        LookAndFeel::setDefaultLookAndFeel(&mV2Feel);
-    }
-//    m_pJoystickUpdateThread = new JoystickUpdateThread(this);
-//    mComponents.add(m_pJoystickUpdateThread);
+    LookAndFeel::setDefaultLookAndFeel(&mGrisFeel);
     
     mHostChangedParameterEditor = mFilter->getHostChangedParameter();
     mHostChangedPropertyEditor  = mFilter->getHostChangedProperty();
@@ -237,11 +231,7 @@ AudioProcessorEditor (ownerFilter)
 
     // param box
     Colour tabBg;
-    if (s_bUseNewGui){
-        tabBg = mGrisFeel.getBackgroundColour();
-    } else {
-        tabBg = Colour::fromRGB(200,200,200);
-    }
+    tabBg = mGrisFeel.getBackgroundColour();
 
     mTabs = new OctTabbedComponent(TabbedButtonBar::TabsAtTop, mFilter);
     mTabs->setLookAndFeel(&mGrisFeel);
@@ -1947,7 +1937,6 @@ void SpatGrisAudioProcessorEditor::applyCurrentSpkPlacement(){
 void SpatGrisAudioProcessorEditor::setDefaultPendulumEndpoint(){
     FPoint pointRT      = mFilter->getSourceRT(m_iSelectedSrcEditor);
     pointRT.y += M_PI;
-    JUCE_COMPILER_WARNING("throughout the code, need to check conversions, especially pertaining to the end location of trajectories. Also need to make the y consistent so that we don't revert it in only some cases")
     FPoint pointXY = mFilter->convertRt2Xy01(pointRT.x, pointRT.y);
     mFilter->setEndLocationXY01(FPoint(pointXY.x, 1-pointXY.y));
 }

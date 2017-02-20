@@ -92,9 +92,6 @@ using namespace std;
 
 //==============================================================================
 
-JUCE_COMPILER_WARNING("this variable and logic needs to be removed")
-static const bool s_bUseNewGui = true;
-
 static PluginHostType host;
 
 // x, y, distance
