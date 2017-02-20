@@ -309,10 +309,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
-    Trajectory::Ptr t = getTrajectory();
-    if (t){
-        t->stop(false);
-        setTrajectory(nullptr);
+    if (mTrajectory){
+        mTrajectory->stop(false);
+        mTrajectory = nullptr;
     }
 }
 
@@ -659,7 +658,9 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
 #endif
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
-    
+    if(mTrajectory){
+        mTrajectory->stop();
+    }
     const MessageManagerLock mmLock;            //prevents gui from running
     suspendProcessing (true);                   //prevents audio process thread from running
     mInputOutputMode = p_iInputOutputMode-1;
@@ -2210,6 +2211,9 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 }
 
 void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
+    if(mTrajectory){
+        mTrajectory->stop();
+    }
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr) {
