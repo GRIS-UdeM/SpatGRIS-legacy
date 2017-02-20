@@ -87,7 +87,7 @@ public:
 	bool process(float seconds, float beats);
 	float progress();
     int progressCycle();
-	void stop();
+	void stop(bool clearTrajectory = true);
     
     float getSpeed(){ return m_fSpeed;}
     void  setSpeed(float p_fSpeed){

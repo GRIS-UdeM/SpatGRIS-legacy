@@ -175,7 +175,7 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
     }
 }
 
-void SourceMover::end(MoverType mt) {
+void SourceMover::end(MoverType mt, bool clearTrajectory) {
     if (mMoverType != mt){
         return;
     } else if (mMoverType != kSourceThread){
@@ -185,7 +185,9 @@ void SourceMover::end(MoverType mt) {
 //        mFilter->endParameterChangeGesture(kMovementMode);
 #endif
         mFilter->setIsRecordingAutomation(false);
-        mField->clearTrajectoryPath();
+        if(clearTrajectory){
+            mField->clearTrajectoryPath();
+        }
     }
     
     mMoverType = kVacant;

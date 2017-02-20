@@ -88,9 +88,9 @@ int Trajectory::progressCycle(){
     return (int) (m_fTimeDone / m_fDurationSingleTraj);
 }
 
-void Trajectory::stop() {
+void Trajectory::stop(bool clearTrajectory) {
 	if (!m_bStarted || m_bStopped) return;
-    m_pMover->end(kTrajectory);
+    m_pMover->end(kTrajectory, clearTrajectory);
 	m_bStopped = true;
 }
 

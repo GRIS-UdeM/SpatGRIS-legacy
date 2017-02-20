@@ -311,7 +311,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor() {
     Trajectory::Ptr t = getTrajectory();
     if (t){
-        t->stop();
+        t->stop(false);
         setTrajectory(nullptr);
     }
 }

@@ -60,7 +60,7 @@ public:
 	void move(FPoint p, MoverType mt);
     void storeAllDownPositions();
     void storeDownPosition(int id, FPoint pointRT);
-	void end(MoverType mt);
+	void end(MoverType mt, bool clearTrajectory = true);
     void setFieldExists(bool v){ mFieldExists = v; }
     
     void setFieldComponent(FieldComponent* field){
