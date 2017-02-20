@@ -277,7 +277,7 @@ AudioProcessorEditor (ownerFilter)
         //--------------------- surface/pan -----------------------
         //add surface/pan label
         mSurfaceOrPanLabel = addLabel("Surface", x, y, w*9/12, dh, boxContent);
-        if (mFilter->getProcessMode() == kPanSpanMode){
+        if (mFilter->getProcessMode() == kSpanMode){
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
         }
         y += dh;
@@ -286,6 +286,7 @@ AudioProcessorEditor (ownerFilter)
         //add surface/pan slider
         float fCurDistance = mFilter->getSourceD(m_iSelectedSrcEditor);
         mSurfaceOrPanSlider = addParamSliderGRIS(kParamSource, m_iSelectedSrcEditor, fCurDistance, x + w*3/12, y, w*9/12, dh, boxContent);
+        mSurfaceOrPanSlider->setIsPanSpan(true);
         y += dh + 10;
         //--------------------- azim span -----------------------
         //add azimSpan label
@@ -453,7 +454,9 @@ AudioProcessorEditor (ownerFilter)
             mProcessModeCombo = new ComboBox();
             int index = 1;
             mProcessModeCombo->addItem("Free volume", index++);
+#if ALLOW_PAN_MODE
             mProcessModeCombo->addItem("Pan volume", index++);
+#endif
             mProcessModeCombo->addItem("Pan span", index++);
             mProcessModeCombo->addItem("OSC Spatialization", index++);
             mProcessModeCombo->setSelectedId(mFilter->getProcessMode() + 1);
@@ -1124,7 +1127,8 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mTabs->getTabContentComponent(2)->setEnabled(true);
         mTabs->getTabContentComponent(4)->setEnabled(true);
     }
-    if (iSelectedMode == kPanVolumeMode){
+#if ALLOW_PAN_MODE
+    if (iSelectedMode == kPanMode){
         mSurfaceOrPanSlider->setEnabled(false);
         mSurfaceOrPanLabel->setEnabled(false);
         mSurfaceOrPanLinkButton->setEnabled(false);
@@ -1134,12 +1138,15 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSurfaceOrPanLinkButton->setEnabled(true);
         mSurfaceOrPanSlider->valueChanged();
     }
-    if (mFilter->getProcessMode() == kPanSpanMode){
+#endif
+    if (mFilter->getProcessMode() == kSpanMode){
         mSurfaceOrPanLabel->setEnabled(true);
+        mSurfaceOrPanSlider->setIsPanSpan(true, false);
         mSurfaceOrPanSlider->setEnabled(true);
         mSurfaceOrPanLinkButton->setEnabled(true);
         static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
     } else if (mFilter->getProcessMode() == kFreeVolumeMode){
+        mSurfaceOrPanSlider->setIsPanSpan(false);
         mSurfaceOrPanLabel->setEnabled(true);
         mSurfaceOrPanSlider->setEnabled(true);
         mSurfaceOrPanLinkButton->setEnabled(true);

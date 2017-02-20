@@ -39,10 +39,24 @@ public:
     mLinkButton(link),
     mFilter(filter),
     mBeganGesture(false),
-    mMouseDown(false)
+    mMouseDown(false),
+    mIsPanSpan(false)
     {
         jassert(mLinkButton || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
         
+    }
+    
+    void setIsPanSpan(bool b, bool p_bSetToDefault = false){
+        mIsPanSpan = b;
+        if (mIsPanSpan && p_bSetToDefault){
+            float newVal = normalize(kSpanMin, kSpanMax, kSpanDefault);
+            for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                int paramIndex = mFilter->getParamForSourceD(i);
+                if (mFilter->getParameter(paramIndex) != newVal){
+                    mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                }
+            }
+        }
     }
     
     void mouseDown (const MouseEvent &e) {
@@ -52,9 +66,15 @@ public:
         bool resetToDefault = e.mods.isAltDown();
         //IF ALT IS PRESSED WE NEED TO RESET SLIDER TO DEFAULT VALUE
         if (resetToDefault) {
-            double newVal;
+            float newVal;
             switch(mParamType) {
-                case kParamSource:          newVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance); break;
+                case kParamSource:
+                    if (mIsPanSpan){
+                        newVal = normalize(kSpanMin, kSpanMax, kSpanDefault);
+                    } else {
+                        newVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance);
+                    }
+                    break;
                 case kParamSmooth:          newVal = normalize(kSmoothMin, kSmoothMax, kSmoothDefault); break;
                 case kParamVolumeFar:       newVal = normalize(kVolumeFarMin, kVolumeFarMax, kVolumeFarDefault); break;
                 case kParamVolumeMid:       newVal = normalize(kVolumeMidMin, kVolumeMidMax, kVolumeMidDefault); break;
@@ -238,7 +258,7 @@ private:
     int mParamIndex, mParamType;
     ToggleButton *mLinkButton;
     SpatGrisAudioProcessor *mFilter;
-    bool mBeganGesture, mMouseDown;
+    bool mBeganGesture, mMouseDown, mIsPanSpan;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSliderGRIS)
 };
