@@ -167,11 +167,9 @@ private:
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
 
-	Array<ToggleButton*> mMuteButtons;
-    
 #if USE_DB_METERS
-	Array<LevelComponent*> mLevelComponents;
-   	Array<Slider*> mAttenuations;
+    LevelComponent* mLevelComponents[kMaxChannels];
+    ToggleButton*   mMuteButtons[kMaxChannels];
 #endif
     
     ToggleButton *mEnableJoystick;

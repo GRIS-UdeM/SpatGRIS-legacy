@@ -327,20 +327,45 @@ AudioProcessorEditor (ownerFilter)
         addLabel("Mute", x, y, muteWidth, dh, ct);
 #if USE_DB_METERS
         addLabel("Level", x+muteWidth, y, w/3, dh, ct);
+        
 #endif
+        
 #if ALLOW_INTERNAL_WRITE
         addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
-		y += dh;
-
+        y += dh;
+        
 #if WIN32
-		mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y+20, w/4, 200, ct);
+        mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y+20, w/4, 200, ct);
 #else
-		mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
+        mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
 #endif
         mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 30, dh);
         mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
 #endif
         y += dh + 5;
+        
+        for (int i = 0; i < kMaxChannels; ++i){
+            String s; s << i+1;
+#if USE_DB_METERS
+            s << ":";
+#endif
+            float fMute = mFilter->getSpeakerM(i);
+            ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
+            mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
+            mMuteButtons[i] = mute;
+            const int muteWidth = 50;
+#if USE_DB_METERS
+            juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
+            LevelComponent *lc = new LevelComponent(mFilter, i);
+            lc->setBounds(level);
+            ct->addAndMakeVisible(lc);
+            mComponents.add(lc);
+            mLevelComponents[i] = lc;
+#endif
+            y += dh + 5;
+        }
+        
+
         
         mSpSelectCombo = new ComboBox();
         mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelectCombo);
@@ -1336,17 +1361,19 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
     const MessageManagerLock mmLock;
     //remove old stuff
     Component *ct = mSpeakersBox->getContent();
-    for (int iCurLevelComponent = 0; iCurLevelComponent < mMuteButtons.size(); ++iCurLevelComponent){
-        ct->removeChildComponent(mMuteButtons.getUnchecked(iCurLevelComponent));
-#if USE_DB_METERS
-        ct->removeChildComponent(mLevelComponents.getUnchecked(iCurLevelComponent));
-        mComponents.removeObject(mLevelComponents.getUnchecked(iCurLevelComponent));
-#endif
-    }
-    mMuteButtons.clear();
+    
+//    for (int iCurLevelComponent = 0; iCurLevelComponent < mMuteButtons.size(); ++iCurLevelComponent){
+//        ct->removeChildComponent(mMuteButtons.getUnchecked(iCurLevelComponent));
+//#if USE_DB_METERS
+//        ct->removeChildComponent(mLevelComponents.getUnchecked(iCurLevelComponent));
+//        mComponents.removeObject(mLevelComponents.getUnchecked(iCurLevelComponent));
+//#endif
+//    }
+    
+//    mMuteButtons.clear();
     mSpSelectCombo->clear();
 #if USE_DB_METERS
-    mLevelComponents.clear();
+//    mLevelComponents.clear();
 #endif
     
     //put new stuff
@@ -1356,27 +1383,33 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
     const int muteWidth = 50;
     y += dh + 5;
 
-    for (int i = 0; i < iCurSpeakers; i++){
-        String s; s << i+1;
-#if USE_DB_METERS
-        s << ":";
-#endif
-        
-		float fMute = mFilter->getSpeakerM(i);
-		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
-        mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
-        mMuteButtons.add(mute);
-        const int muteWidth = 50;
-#if USE_DB_METERS
-        juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
-        LevelComponent *lc = new LevelComponent(mFilter, i);
-        lc->setBounds(level);
-        ct->addAndMakeVisible(lc);
-        mComponents.add(lc);
-        mLevelComponents.add(lc);
-#endif
-        
-        y += dh + 5;
+    for (int i = 0; i < kMaxChannels; i++){
+//        String s; s << i+1;
+//#if USE_DB_METERS
+//        s << ":";
+//#endif
+//        
+//		float fMute = mFilter->getSpeakerM(i);
+//		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
+//        mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
+//        mMuteButtons.add(mute);
+//        const int muteWidth = 50;
+//#if USE_DB_METERS
+//        juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
+//        LevelComponent *lc = new LevelComponent(mFilter, i);
+//        lc->setBounds(level);
+//        ct->addAndMakeVisible(lc);
+//        mComponents.add(lc);
+//        mLevelComponents.add(lc);
+//#endif
+        if (i < iCurSpeakers){
+            y += dh + 5;
+            mLevelComponents[i]->setVisible(true);
+            mMuteButtons[i]->setVisible(true);
+        } else {
+            mLevelComponents[i]->setVisible(false);
+            mMuteButtons[i]->setVisible(false);
+        }
     }
     //ensure box height is not smaller than mRoutingVolumeSlider
     if (y < 200 + 2*dh + 10){
@@ -2130,7 +2163,7 @@ void SpatGrisAudioProcessorEditor::timerCallback(){
     if (!mFilter->getIsRecordingAutomation() && !mFilter->isLevelUilcok()){
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
             if(!mFilter->isLevelUilcok() && mLevelComponents[i] != NULL){
-                mLevelComponents.getUnchecked(i)->refreshIfNeeded();
+                mLevelComponents[i]->refreshIfNeeded();
             }
         }
     }
@@ -2328,7 +2361,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
-        mMuteButtons.getUnchecked(i)->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
+        mMuteButtons[i]->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
     }
     
 #if TIME_GUI

@@ -547,8 +547,10 @@ public:
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
-        if(!mLevels[index]){return 0.0f;}
-        return mLevels.getUnchecked(index);
+//        if(!mLevels[index]){
+//            return 0.0f;
+//        }
+        return mLevels[index];
 #else
         return -1.f;
 #endif
@@ -827,9 +829,7 @@ private:
 	Array<float> mParameters;
 	
 	bool mCalculateLevels;
-#if USE_DB_METERS
-	Array<float> mLevels;
-#endif
+
 	bool mApplyFilter;
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
@@ -905,9 +905,8 @@ private:
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
-    
-    
 #else
+    
     float mInputsCopy[kMaxChannels][kMaxBufferSize];
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
     
@@ -915,14 +914,14 @@ private:
     #if OUTPUT_RAMPING
         float mSpeakerVolumes[kMaxInputs][kMaxChannels];
     #endif
-    
-    
 #endif
-//    vector<Area> mAllAreas;
     Area mAllAreas[kMaxChannels * MAX_AREAS];
     float mOutFactors[kMaxChannels];
     FirFilter mFilters[kMaxInputs];
-    
+#if USE_DB_METERS
+//    Array<float> mLevels;
+    float mLevels[kMaxChannels];
+#endif
     
 #if TIME_PROCESS
 #define kTimeSlots (10)

@@ -377,18 +377,15 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
 
 //==============================================================================
 void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
-    JUCE_COMPILER_WARNING("what does this function do?")
 #if USE_DB_METERS
     if (!mCalculateLevels && c){
-        for (int i = 0; i < mNumberOfSpeakers; i++){
-			mLevels.setUnchecked(i, 0);
+        for (int i = 0; i < kMaxChannels; i++){
+			mLevels[i] = 0.f;
         }
     }
 #endif
     
-	// keep count of number of editors
     mCalculateLevels = c;
-    //(c) ? mCalculateLevels++ :  mCalculateLevels--;
 }
 
 void SpatGrisAudioProcessor::setProcessMode(int s) {
@@ -931,9 +928,8 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     }
 #endif
 #if USE_DB_METERS
-    mLevels.resize(mNumberOfSpeakers);
-    for (int i = 0; i < mNumberOfSpeakers; i++){
-        mLevels.add(0);
+    for (int i = 0; i < kMaxChannels; i++){
+        mLevels[i] = 0.f;
     }
 #endif
     if (bUseDefaultValues){
@@ -1096,8 +1092,8 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 void SpatGrisAudioProcessor::reset() {
 #if USE_DB_METERS
     if (mCalculateLevels){
-        for (int i = 0; i < mNumberOfSpeakers; i++){
-            mLevels.setUnchecked(i, 0);
+        for (int i = 0; i < kMaxChannels; i++){
+            mLevels[i] = 0.f;
         }
     }
 #endif
@@ -1369,7 +1365,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 				float g = (s > env) ? ag : rg;
 				env = g * env + (1.f - g) * s;
 			}
-			mLevels.setUnchecked(o, env);
+			mLevels[o] = env;
 		}
 	}
 #endif
@@ -2248,7 +2244,10 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mOscSendEnabled     = xmlState->getIntAttribute ("mOscSendEnabled", 0);
             mOscSendPort        = xmlState->getIntAttribute ("mOscSendPort", 9000);
             mOscSendIp          = xmlState->getStringAttribute ("mOscSendIp", mOscSendIp);
-            setProcessMode(xmlState->getIntAttribute ("mProcessMode", kSpanMode));
+            int iProcessMode = xmlState->getIntAttribute ("mProcessMode", kSpanMode);
+            if (iProcessMode >= kNumberOfModes){iProcessMode = kSpanMode;}
+            setProcessMode(iProcessMode);
+            
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
             
             setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
