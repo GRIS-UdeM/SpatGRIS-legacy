@@ -42,7 +42,7 @@ using namespace std;
 #endif
 
 #ifndef ALLOW_INTERNAL_WRITE
-#define ALLOW_INTERNAL_WRITE 1
+#define ALLOW_INTERNAL_WRITE 0
 #endif
 
 #ifndef ALLOW_MVT_MODE_AUTOMATION

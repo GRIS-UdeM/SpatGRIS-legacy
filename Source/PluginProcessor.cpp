@@ -219,6 +219,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     m_pMover = std::move(pMover);
     
     //SET SOURCES AND SPEAKERS
+//    mNumberOfSources = 0;
+//    mNumberOfSpeakers = 0;
+    
     int iSources  = getTotalNumInputChannels();
     if (iSources == 0){
         iSources = 2;
@@ -470,6 +473,7 @@ int SpatGrisAudioProcessor::getNumParameters() {
 }
 
 float SpatGrisAudioProcessor::getParameter (int index) {
+    //cout << "getParameter " << getParameterName(index) << " " << index << " = " << mParameters[index] << newLine;
     return mParameters[index];
 }
 
@@ -497,6 +501,7 @@ bool SpatGrisAudioProcessor::isKnownHost(){
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
     //unknown host is logic's au eval tool
     if (!isKnownHost()){
+        //cout << "logic au eval set " << getParameterName(index) << " " << index << " to " << newValue << newLine;
         mParameters.set(index, newValue);
         return;
     }
