@@ -49,6 +49,10 @@ using namespace std;
 #define ALLOW_MVT_MODE_AUTOMATION 1
 #endif
 
+#ifndef ALLOW_PAN_MODE
+#define ALLOW_PAN_MODE 0
+#endif
+
 #ifndef USE_VECTORS
 #define USE_VECTORS 1
 #endif
@@ -87,9 +91,6 @@ using namespace std;
 #endif
 
 //==============================================================================
-
-JUCE_COMPILER_WARNING("this variable and logic needs to be removed")
-static const bool s_bUseNewGui = true;
 
 static PluginHostType host;
 
@@ -188,8 +189,11 @@ enum InputOutputModes {
     i1o1 = 0, i1o2, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12, i12o12
 };
 
-enum ProcessModes{ kFreeVolumeMode = 0, kPanVolumeMode, kPanSpanMode, kOscSpatMode, kNumberOfModes };
-
+#if ALLOW_PAN_MODE
+enum ProcessModes{ kFreeVolumeMode = 0, kPanMode, kSpanMode, kOscSpatMode, kNumberOfModes };
+#else
+enum ProcessModes{ kFreeVolumeMode = 0, kSpanMode, kOscSpatMode, kNumberOfModes };
+#endif
 
 enum RoutingModes{
      kNormalRouting = 0
@@ -263,7 +267,6 @@ static const float kSpanDefault = 0;
 static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
-
 
 static const float kThetaRampRadius = 0.05;
 static const float kThetaLockRadius = 0.025;
@@ -544,8 +547,10 @@ public:
 	
 	float getLevel(int index) const {
 #if USE_DB_METERS
-        if(!mLevels[index]){return 0.0f;}
-        return mLevels.getUnchecked(index);
+//        if(!mLevels[index]){
+//            return 0.0f;
+//        }
+        return mLevels[index];
 #else
         return -1.f;
 #endif
@@ -824,9 +829,7 @@ private:
 	Array<float> mParameters;
 	
 	bool mCalculateLevels;
-#if USE_DB_METERS
-	Array<float> mLevels;
-#endif
+
 	bool mApplyFilter;
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
@@ -902,9 +905,8 @@ private:
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
-    
-    
 #else
+    
     float mInputsCopy[kMaxChannels][kMaxBufferSize];
     float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
     
@@ -912,14 +914,14 @@ private:
     #if OUTPUT_RAMPING
         float mSpeakerVolumes[kMaxInputs][kMaxChannels];
     #endif
-    
-    
 #endif
-//    vector<Area> mAllAreas;
     Area mAllAreas[kMaxChannels * MAX_AREAS];
     float mOutFactors[kMaxChannels];
     FirFilter mFilters[kMaxInputs];
-    
+#if USE_DB_METERS
+//    Array<float> mLevels;
+    float mLevels[kMaxChannels];
+#endif
     
 #if TIME_PROCESS
 #define kTimeSlots (10)
@@ -955,7 +957,9 @@ private:
     void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
     void ProcessData                (float *params);
     void ProcessDataFree  (float *params);
+#if ALLOW_PAN_MODE
     void ProcessDataPan   (float *params);
+#endif
     void ProcessDataSpan     (float *params);
     void processTrajectory();
     

@@ -167,7 +167,7 @@ void FieldComponent::paint (Graphics& g)
             }
             break;
             
-        case kPanSpanMode:
+        case kSpanMode:
             for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                 hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
                 if (hue > 1){

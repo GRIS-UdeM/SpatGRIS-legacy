@@ -254,7 +254,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     setGuiTab(0);
 	mProcessCounter = 0;
 	//mLastTimeInSamples = -1;
-	setProcessMode(kPanVolumeMode);
+	setProcessMode(kSpanMode);
 #if ALLOW_INTERNAL_WRITE
 	mRoutingMode = kNormalRouting;
 #endif
@@ -380,18 +380,15 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
 
 //==============================================================================
 void SpatGrisAudioProcessor::setCalculateLevels(bool c) {
-    JUCE_COMPILER_WARNING("what does this function do?")
 #if USE_DB_METERS
     if (!mCalculateLevels && c){
-        for (int i = 0; i < mNumberOfSpeakers; i++){
-			mLevels.setUnchecked(i, 0);
+        for (int i = 0; i < kMaxChannels; i++){
+			mLevels[i] = 0.f;
         }
     }
 #endif
     
-	// keep count of number of editors
     mCalculateLevels = c;
-    //(c) ? mCalculateLevels++ :  mCalculateLevels--;
 }
 
 void SpatGrisAudioProcessor::setProcessMode(int s) {
@@ -936,9 +933,8 @@ void SpatGrisAudioProcessor::setNumberOfSpeakers(int p_iNewNumberOfSpeakers, boo
     }
 #endif
 #if USE_DB_METERS
-    mLevels.resize(mNumberOfSpeakers);
-    for (int i = 0; i < mNumberOfSpeakers; i++){
-        mLevels.add(0);
+    for (int i = 0; i < kMaxChannels; i++){
+        mLevels[i] = 0.f;
     }
 #endif
     if (bUseDefaultValues){
@@ -1101,8 +1097,8 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 void SpatGrisAudioProcessor::reset() {
 #if USE_DB_METERS
     if (mCalculateLevels){
-        for (int i = 0; i < mNumberOfSpeakers; i++){
-            mLevels.setUnchecked(i, 0);
+        for (int i = 0; i < kMaxChannels; i++){
+            mLevels[i] = 0.f;
         }
     }
 #endif
@@ -1245,7 +1241,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 		paramCopy[kFilterMid]  = denormalize(kFilterMidMin,  kFilterMidMax,  paramCopy[kFilterMid]);
 		paramCopy[kFilterFar]  = denormalize(kFilterFarMin,  kFilterFarMax,  paramCopy[kFilterFar]);
 	}
-	if (mProcessMode == kPanSpanMode) {
+	if (mProcessMode == kSpanMode) {
 		paramCopy[kMaxSpanVolume] = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, paramCopy[kMaxSpanVolume]);
 	}
 #if ALLOW_INTERNAL_WRITE
@@ -1374,7 +1370,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 				float g = (s > env) ? ag : rg;
 				env = g * env + (1.f - g) * s;
 			}
-			mLevels.setUnchecked(o, env);
+			mLevels[o] = env;
 		}
 	}
 #endif
@@ -1446,8 +1442,10 @@ void SpatGrisAudioProcessor::processTrajectory(){
 void SpatGrisAudioProcessor::ProcessData(float *params) {
 	switch(mProcessMode) {
         case kFreeVolumeMode:	ProcessDataFree(params);	break;
-        case kPanVolumeMode:	ProcessDataPan (params);	break;
-        case kPanSpanMode:		ProcessDataSpan(params);	break;
+#if ALLOW_PAN_MODE
+        case kPanMode:          ProcessDataPan (params);	break;
+#endif
+        case kSpanMode:         ProcessDataSpan(params);	break;
         default: jassertfalse;
 	}
 }
@@ -1591,7 +1589,8 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
         mSmoothedParameters.setUnchecked(iCurParamId, currentParamValue);    //store old value for next time
     }
 }
-    
+
+#if ALLOW_PAN_MODE
     //sizes are p_ppfInputs[mNumberOfSources][p_iTotalSamples] and p_ppfOutputs[mNumberOfSpeakers][p_iTotalSamples], and p_pfParams[kNumberOfParameters];
 void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
     // clear mOutputs[]
@@ -1735,6 +1734,7 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
 		}
 	}
 }
+#endif
 
 void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, const int &p_iSampleId, const int &p_iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion){
     //if we're outside the main, first circle, only 2 speakers will play
@@ -2249,7 +2249,10 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mOscSendEnabled     = xmlState->getIntAttribute ("mOscSendEnabled", 0);
             mOscSendPort        = xmlState->getIntAttribute ("mOscSendPort", 9000);
             mOscSendIp          = xmlState->getStringAttribute ("mOscSendIp", mOscSendIp);
-            setProcessMode(xmlState->getIntAttribute ("mProcessMode", kPanVolumeMode));
+            int iProcessMode = xmlState->getIntAttribute ("mProcessMode", kSpanMode);
+            if (iProcessMode >= kNumberOfModes){iProcessMode = kSpanMode;}
+            setProcessMode(iProcessMode);
+            
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
             
             setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
