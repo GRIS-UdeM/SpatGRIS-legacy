@@ -216,7 +216,7 @@ enum RoutingModes{
 // these must be normalized/denormalized for processing
 static const float kSourceMinDistance = 2.5 * 0.5;
 static const float kSourceMaxDistance = 20 * 0.5;
-static const float kSourceDefaultDistance = 5 * 0.5;
+static const float kSourceDefaultDistance = kSourceMinDistance;
 
 static const float kSmoothMin = 1;
 static const float kSmoothMax = 1000;

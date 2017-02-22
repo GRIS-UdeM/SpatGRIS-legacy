@@ -11,6 +11,7 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 91D8D8D8298BC1876FC21590 /* Build configuration list for PBXAggregateTarget "SpatGRIS (All)" */;
 			buildPhases = (
+				0DB888011E5E297B000FA908 /* CopyFiles */,
 			);
 			dependencies = (
 				1C88D632E9205FF4449964D8 /* PBXTargetDependency */,
@@ -114,6 +115,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		0DB888011E5E297B000FA908 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B1F42AB51E54F14500B8C48F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;

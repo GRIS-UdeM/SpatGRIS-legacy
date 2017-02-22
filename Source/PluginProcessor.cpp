@@ -235,7 +235,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
 	mCalculateLevels = false;
 	mApplyFilter = true;
-	mLinkSurfaceOrPan = false;
+	mLinkSurfaceOrPan = true;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
 #if ALLOW_MVT_MODE_AUTOMATION
