@@ -116,9 +116,11 @@ public:
             mContent = new Component();
             mViewport = new Viewport();
             mViewport->setViewedComponent(mContent, false);
-            mViewport->setScrollBarsShown(true, false);
-            mViewport->setScrollBarThickness(10);
+            mViewport->setScrollBarsShown(true, true);
+            mViewport->setScrollBarThickness(6);
             mViewport->getVerticalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            mViewport->getHorizontalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            
             mViewport->setLookAndFeel(feel);
             addAndMakeVisible(mViewport);
         }
@@ -133,11 +135,8 @@ public:
     }
     
     void paint(Graphics &g) {
-        const juce::Rectangle<int> &box = getLocalBounds();
         g.setColour(mBgColour);
-        g.fillRect(box);
-        g.setColour(Colours::black);
-        //g.drawRect(box);
+        g.fillRect(getLocalBounds());
     }
     
     void resized() {
@@ -222,7 +221,7 @@ AudioProcessorEditor (ownerFilter)
 #endif
     
 
-    m_VersionLabel->setText("SpatGRIS" + version,  dontSendNotification);
+    m_VersionLabel->setText("SpatGRIS " + version,  dontSendNotification);
     m_VersionLabel->setJustificationType(Justification(Justification::right));
     m_VersionLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
     m_VersionLabel->setLookAndFeel(&mGrisFeel);
@@ -230,8 +229,7 @@ AudioProcessorEditor (ownerFilter)
     mComponents.add(m_VersionLabel);
 
     // param box
-    Colour tabBg;
-    tabBg = mGrisFeel.getBackgroundColour();
+    Colour tabBg = mGrisFeel.getBackgroundColour();
 
     mTabs = new OctTabbedComponent(TabbedButtonBar::TabsAtTop, mFilter);
     mTabs->setLookAndFeel(&mGrisFeel);
@@ -241,7 +239,6 @@ AudioProcessorEditor (ownerFilter)
     mTabs->addTab("Sources",            tabBg, new Component(), true);
    	mTabs->addTab("Speakers",           tabBg, new Component(), true);
     mTabs->addTab("Interfaces",         tabBg, new Component(), true);
-
     mTabs->setSize(kCenterColumnWidth + kMargin + kRightColumnWidth, kParamBoxHeight);
     addAndMakeVisible(mTabs);
     mComponents.add(mTabs);
@@ -258,7 +255,7 @@ AudioProcessorEditor (ownerFilter)
         mComponents.add(mSourcesBox);
         Component *boxContent = mSourcesBox->getContent();
         //main box label
-        mSourcesBoxLabel = addLabel("Source parameters:", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
+        mSourcesBoxLabel = addLabel("Source parameters", 0, 0, kCenterColumnWidth, kDefaultLabelHeight, this);
         mSourcesBoxLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
 
         y += 5;
@@ -319,50 +316,57 @@ AudioProcessorEditor (ownerFilter)
         
         int x = 0, y = 5, w = kRightColumnWidth;
         
-        mSpeakersBoxLabel = addLabel("Output parameters:", x, y, kRightColumnWidth, kDefaultLabelHeight, this);
+        mSpeakersBoxLabel = addLabel("Output parameters", x, y, kRightColumnWidth, kDefaultLabelHeight, this);
         mSpeakersBoxLabel->setColour(Label::textColourId,mGrisFeel.getFontColour());
 
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
-        addLabel("Mute", x, y, muteWidth, dh, ct);
+        //addLabel("Mute", x, y, muteWidth, dh, ct);
 #if USE_DB_METERS
-        addLabel("Level", x+muteWidth, y, w/3, dh, ct);
-        
+       // addLabel("Level", x+muteWidth, y, w/3, dh, ct);
 #endif
         
 #if ALLOW_INTERNAL_WRITE
         addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
         y += dh;
-        
-#if WIN32
+    #if WIN32
         mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y+20, w/4, 200, ct);
-#else
+    #else
         mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
-#endif
+    #endif
         mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 30, dh);
         mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
 #endif
-        y += dh + 5;
         
+        y += dh + -22;
+        x = 6;
         for (int i = 0; i < kMaxChannels; ++i){
             String s; s << i+1;
-#if USE_DB_METERS
-            s << ":";
-#endif
+            
+            if(i>8){
+                Component * labS = addLabel(s, x-2, 5, muteWidth, dh, ct);
+                mLabelSourceId[i] = labS;
+            }else{
+                Component * labS = addLabel(s, x, 5, muteWidth, dh, ct);
+                mLabelSourceId[i] = labS;
+            }
+            
             float fMute = mFilter->getSpeakerM(i);
-            ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
+            ToggleButton *mute = addCheckbox("", fMute, x-1, 125, muteWidth, dh, ct);
+
             mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
             mMuteButtons[i] = mute;
             const int muteWidth = 50;
 #if USE_DB_METERS
-            juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
+            juce::Rectangle<int> level(x+3, muteWidth-30, dh - 6, w/3 - 10 );
+        
             LevelComponent *lc = new LevelComponent(mFilter, i);
             lc->setBounds(level);
             ct->addAndMakeVisible(lc);
             mComponents.add(lc);
             mLevelComponents[i] = lc;
 #endif
-            y += dh + 5;
+            x += dh + 5;
         }
         
 
@@ -1308,7 +1312,7 @@ void SpatGrisAudioProcessorEditor::resized()
     if (fieldSize < kMinFieldSize){
         fieldSize = kMinFieldSize;
     }
-    
+
     mField->setBounds(kMargin, kMargin, fieldSize, fieldSize);
     mFilter->setFieldWidth(fieldSize);
 
@@ -1317,19 +1321,19 @@ void SpatGrisAudioProcessorEditor::resized()
     int iLabelX = 2*(float)fieldSize/3;
     m_VersionLabel->setBounds(iLabelX,5,fieldSize-iLabelX,25);
     
-    int x = kMargin + fieldSize  + kMargin;
+    int x = kMargin + fieldSize + kMargin + kMargin;
     int y = kMargin;
-    int iExtraSpace = 10;
+    int iExtraSpace = 2;
     mSourcesBoxLabel->setTopLeftPosition(x, y);
     
-    int lh = mSourcesBoxLabel->getHeight() + 2;
-    mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, h - (kMargin + kParamBoxHeight + kMargin + y + lh + iExtraSpace));
+    int lh = mSourcesBoxLabel->getHeight();
+    mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, 155);
     
-    mTabs->setBounds(x, h - (kParamBoxHeight + kMargin + iExtraSpace), kCenterColumnWidth + kMargin + kRightColumnWidth, kParamBoxHeight + iExtraSpace);
-    
-    x += kCenterColumnWidth + kMargin;
+    mTabs->setBounds(x-1, 180, w-(fieldSize + (iExtraSpace * 5)), h - (180 + iExtraSpace));
+
+    x += kCenterColumnWidth + kMargin + kMargin;
     mSpeakersBoxLabel->setTopLeftPosition(x, y);
-    mSpeakersBox->setBounds(x, y + lh, kRightColumnWidth, h - (kMargin + kParamBoxHeight + kMargin + y + lh + iExtraSpace));
+    mSpeakersBox->setBounds(x, y + lh, w-(fieldSize+ kCenterColumnWidth + (iExtraSpace * 7)), 155);
 }
 
 void SpatGrisAudioProcessorEditor::updateEditorSources(bool p_bCalledFromConstructor){
@@ -1406,16 +1410,18 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
             y += dh + 5;
             mLevelComponents[i]->setVisible(true);
             mMuteButtons[i]->setVisible(true);
+            mLabelSourceId[i]->setVisible(true);
         } else {
             mLevelComponents[i]->setVisible(false);
             mMuteButtons[i]->setVisible(false);
+             mLabelSourceId[i]->setVisible(false);
         }
     }
     //ensure box height is not smaller than mRoutingVolumeSlider
     if (y < 200 + 2*dh + 10){
         y = 200 + 2*dh + 10;
     }
-    ct->setSize(w, y);
+    ct->setSize(y, 148);
     
     if (!p_bCalledFromConstructor){
         buttonClicked(mApplySpPlacementButton); 
@@ -1673,6 +1679,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             float v = button->getToggleState() ? 1.f : 0.f;
             mFilter->setParameterNotifyingHost(mFilter->getParamForSpeakerM(i), v);
             mFieldNeedRepaint = true;
+            mLevelComponents[i]->setMute(button->getToggleState());
             return;
         }
     }
@@ -2160,13 +2167,20 @@ void SpatGrisAudioProcessorEditor::timerCallback(){
 
 //---------------------------------------- DB METERS -----------------------------------------
 #if USE_DB_METERS
+    if (!mFilter->getIsRecordingAutomation()){
+        const int nbrS = mFilter->getNumberOfSpeakers();
+        for (int i = 0; i < nbrS; ++i){
+            mLevelComponents[i]->repaint();
+        }
+    }
+    /*
     if (!mFilter->getIsRecordingAutomation() && !mFilter->isLevelUilcok()){
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
             if(!mFilter->isLevelUilcok() && mLevelComponents[i] != NULL){
-                mLevelComponents[i]->refreshIfNeeded();
+                mLevelComponents[i]->repaint();
             }
         }
-    }
+    }*/
 #endif
     
 #if TIME_GUI
@@ -2362,6 +2376,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
         mMuteButtons[i]->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
+        mLevelComponents[i]->setMute(mMuteButtons[i]->getToggleState());
     }
     
 #if TIME_GUI

@@ -30,6 +30,10 @@
 #include "PluginProcessor.h"
 #include "../../GrisCommonFiles/GrisLookAndFeel.h"
 
+static const float kMinLevel = -60.f;
+static const float kMaxLevel = 1.f;
+static const float kMaxMin = kMaxLevel - kMinLevel;
+
 //==============================================================================
 /*
 */
@@ -38,16 +42,20 @@ class LevelComponent : public Component
 public:
     LevelComponent(SpatGrisAudioProcessor* filter, int index);
     ~LevelComponent();
-
+    
+    void setMute(bool b);
     void paint (Graphics&);
-    void refreshIfNeeded();
+    void setBounds(const Rectangle<int> &newBounds);
+    //void refreshIfNeeded();
 	
 private:
 	SpatGrisAudioProcessor *mFilter;
 	int mIndex;
-	float mLevelAdjustment;
+    bool muted;
+    ColourGradient colorGrad;
+	/*float mLevelAdjustment;
 	float mShowLevel;
-	uint64_t mLastProcessCounter;
+	uint64_t mLastProcessCounter;*/
     GrisLookAndFeel mLookAndFeel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelComponent)

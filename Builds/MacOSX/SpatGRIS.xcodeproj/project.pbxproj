@@ -24,6 +24,7 @@
 
 /* Begin PBXBuildFile section */
 		06B2090C38E05308B92A3F08 /* juce_graphics.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77E3C749C4CE6AA8DE6184A7 /* juce_graphics.mm */; };
+		0D002F861E5F85F100F372EF /* libLeap.dylib in Copy Files */ = {isa = PBXBuildFile; fileRef = BB3ED0458B4F5E13C5C5F44C /* libLeap.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		0DCB15E61E5E367300752C0C /* RecentFilesMenuTemplate.nib in Resources */ = {isa = PBXBuildFile; fileRef = 281829C2382995B67A43416C /* RecentFilesMenuTemplate.nib */; };
 		0DCB15E71E5E367300752C0C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 716AD15B4009D703C7B9E228 /* Accelerate.framework */; };
 		0DCB15E81E5E367300752C0C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44D25271EC9597977FE3FDBA /* AudioToolbox.framework */; };
@@ -113,6 +114,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		0D002F851E5F85EB00F372EF /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				0D002F861E5F85F100F372EF /* libLeap.dylib in Copy Files */,
+			);
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0DCB15F41E5E367A00752C0C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3842,6 +3854,7 @@
 			buildConfigurationList = A46A017A1C3D8EB9B940CB4E /* Build configuration list for PBXNativeTarget "SpatGRIS (AU)" */;
 			buildPhases = (
 				3C81ACC4282A3A29260C3059 /* Resources */,
+				0D002F851E5F85EB00F372EF /* Copy Files */,
 				12877AE1962AF5C20F7B7A14 /* Rez */,
 				1AF08D53724199474BBD90AD /* Sources */,
 				6FBFFE7FADF4BB9F43B18322 /* Frameworks */,

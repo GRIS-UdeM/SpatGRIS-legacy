@@ -27,20 +27,19 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "LevelComponent.h"
 
-static const float kMinLevel = -60.f;
-static const float kMaxLevel = 1.f;
-static const float kMaxMin = kMaxLevel - kMinLevel;
+
 
 //==============================================================================
 LevelComponent::LevelComponent(SpatGrisAudioProcessor* filter, int index)
 :
 	mFilter(filter),
 	mIndex(index),
-	mLevelAdjustment(1),
+	/*mLevelAdjustment(1),
 	mShowLevel(0),
-	mLastProcessCounter(0)
+	mLastProcessCounter(0),*/
+    muted(false)
 {
-	
+    
 }
 
 LevelComponent::~LevelComponent()
@@ -48,7 +47,16 @@ LevelComponent::~LevelComponent()
 	
 }
 
+void LevelComponent::setBounds(const Rectangle<int> &newBounds){
+    this->juce::Component::setBounds(newBounds); 
+    colorGrad = ColourGradient(Colours::red, 0.f, 0.f, Colour::fromRGB(17, 255, 159), 0.f, getHeight(), false);
+    colorGrad.addColour(0.1, Colours::yellow);
+}
 
+void LevelComponent::setMute(bool b){
+    muted = b;
+}
+/*
 void LevelComponent::refreshIfNeeded(){
     float level;
     uint64_t processCounter = mFilter->getProcessCounter();
@@ -65,19 +73,11 @@ void LevelComponent::refreshIfNeeded(){
         mShowLevel = level;
         repaint();
     }
-}
+}*/
 
 void LevelComponent::paint (Graphics& g)
 {
-    
-	float level = linearToDb(mFilter->getLevel(mIndex));
-    if (isnan(level)){
-        level = 0;
-    }
-	if (level < kMinLevel) level = kMinLevel;
-    else if (level > kMaxLevel){
-        level = kMaxLevel;
-    }
+    /*
 	const float yellowStart = -6;
 	float hue;
 	if (level > 0)
@@ -88,11 +88,34 @@ void LevelComponent::paint (Graphics& g)
 	{
 		float p = (level - yellowStart) / (-yellowStart); // 0 .. 1
 		hue = (1 - p) / 3.f;
-	}
-	
+	}*/
 	//fprintf(stderr, "speaker %d linear: %.3f dB: %.1f hue: %.3f\n", mIndex, mLastLevel, level, hue);
+
+    if(muted){
+        g.fillAll (mLookAndFeel.getWinBackgroundColour());
+        
+    }else{
+        float level = linearToDb(mFilter->getLevel(mIndex));
+        
+        /*if (isnan(level)){
+            level = 0;
+        }*/
+        
+        if (level < kMinLevel){
+            level = kMinLevel;
+        }
+        else if (level > kMaxLevel){
+            level = kMaxLevel;
+        }
+
+
+        g.setGradientFill(colorGrad);
+        g.fillRect(0, 0, getWidth() ,getHeight());
+        
+        g.setColour(mLookAndFeel.getDarkColour());
+        g.fillRect(0, 0, getWidth() ,(int)(getHeight()*(level/kMinLevel)));
+    }
+    
 	
-    g.fillAll (mLookAndFeel.getDarkColour());
-	g.setColour (Colour::fromHSV(hue, 1, 1, 1));
-    g.fillRect(0, 0, (int)(getWidth() * (level - kMinLevel) / (kMaxMin)), getHeight());
+ 
 }

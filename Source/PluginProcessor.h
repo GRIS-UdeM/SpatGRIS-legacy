@@ -278,7 +278,7 @@ static const float kThetaLockRadius = 0.025;
 static const float kSourceDefaultRadius = 1.f;
 static const float kSpeedDefault = 1.f;
 
-static const int    kMargin             = 10;
+static const int    kMargin             = 2;
 static const int    kCenterColumnWidth  = 180;
 static const int    kDefaultFieldSize   = 500;
 static const int    kMinFieldSize       = 300;

@@ -170,6 +170,7 @@ private:
 #if USE_DB_METERS
     LevelComponent* mLevelComponents[kMaxChannels];
     ToggleButton*   mMuteButtons[kMaxChannels];
+    Component*          mLabelSourceId[kMaxChannels];
 #endif
     
     ToggleButton *mEnableJoystick;
