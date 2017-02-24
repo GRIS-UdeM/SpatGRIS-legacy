@@ -96,24 +96,21 @@ void LevelComponent::paint (Graphics& g)
         
     }else{
         float level = linearToDb(mFilter->getLevel(mIndex));
-        
         /*if (isnan(level)){
             level = 0;
         }*/
         
-        if (level < kMinLevel){
-            level = kMinLevel;
-        }
-        else if (level > kMaxLevel){
-            level = kMaxLevel;
-        }
-
-
         g.setGradientFill(colorGrad);
         g.fillRect(0, 0, getWidth() ,getHeight());
         
-        g.setColour(mLookAndFeel.getDarkColour());
-        g.fillRect(0, 0, getWidth() ,(int)(getHeight()*(level/kMinLevel)));
+        if (level < kMinLevel){
+            level = kMinLevel;
+        }
+        if (level < 0.9f){
+            level = -abs(level);
+            g.setColour(mLookAndFeel.getDarkColour());
+            g.fillRect(0, 0, getWidth() ,(int)(getHeight()*(level/kMinLevel)));
+        }
     }
     
 	

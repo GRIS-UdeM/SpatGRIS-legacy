@@ -275,6 +275,8 @@ private:
 	Box *mSourcesBox;
 	Component *mSpeakersBoxLabel;
 	Box *mSpeakersBox;
+    Box *mTrajectoryBox;
+    Component *mTrajectoryBoxLabel;
     void updateEditorSources(bool p_bCalledFromConstructor);
     void updateEditorSpeakers(bool p_bCalledFromConstructor);
     void updateSourceLocationTextEditor(bool p_bUpdateFilter);

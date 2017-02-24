@@ -234,11 +234,12 @@ AudioProcessorEditor (ownerFilter)
     mTabs = new OctTabbedComponent(TabbedButtonBar::TabsAtTop, mFilter);
     mTabs->setLookAndFeel(&mGrisFeel);
     mTabs->addTab("Settings",           tabBg, new Component(), true);
-    mTabs->addTab("Trajectories",       tabBg, new Component(), true);
+    //mTabs->addTab("Trajectories",       tabBg, new Component(), true);
     mTabs->addTab("Volume & Filters",   tabBg, new Component(), true);
     mTabs->addTab("Sources",            tabBg, new Component(), true);
    	mTabs->addTab("Speakers",           tabBg, new Component(), true);
     mTabs->addTab("Interfaces",         tabBg, new Component(), true);
+    mTabs->setTabBarDepth(28);
     mTabs->setSize(kCenterColumnWidth + kMargin + kRightColumnWidth, kParamBoxHeight);
     addAndMakeVisible(mTabs);
     mComponents.add(mTabs);
@@ -299,7 +300,7 @@ AudioProcessorEditor (ownerFilter)
         boxContent->setSize(w, y);
         
         mSrcSelectCombo = new ComboBox();
-        mTabs->getTabContentComponent(3)->addAndMakeVisible(mSrcSelectCombo);
+        mTabs->getTabContentComponent(2)->addAndMakeVisible(mSrcSelectCombo);
         mComponents.add(mSrcSelectCombo);
         mSrcSelectCombo->addListener(this);
         updateEditorSources(true);
@@ -372,14 +373,207 @@ AudioProcessorEditor (ownerFilter)
 
         
         mSpSelectCombo = new ComboBox();
-        mTabs->getTabContentComponent(4)->addAndMakeVisible(mSpSelectCombo);
+        mTabs->getTabContentComponent(3)->addAndMakeVisible(mSpSelectCombo);
         mComponents.add(mSpSelectCombo);
         mSpSelectCombo->addListener(this);
         updateEditorSpeakers(true);
     }
-
+    
+    
     int dh = kDefaultLabelHeight;
     int iButtonW = 50;
+
+    //Trajectory
+    {
+        mTrajectoryBox = new Box(true, &mGrisFeel);
+        mTrajectoryBox->setBackgroundColour(tabBg);
+        addAndMakeVisible(mTrajectoryBox);
+        mComponents.add(mTrajectoryBox);
+        
+        Component *box = mTrajectoryBox->getContent();
+        mTrajectoryBoxLabel = addLabel("Trajectories", 0,0, 150, dh, this);
+        mTrajectoryBoxLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
+        box->setSize(600, 250);
+        
+        //---------- ROW 1 -------------
+        int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
+        
+        int cbw = 130;
+        {
+            ComboBox *cb = new ComboBox();
+            int index = 1;
+            for (int i = 1; i < Trajectory::NumberOfTrajectories(); i++){
+                cb->addItem(Trajectory::GetTrajectoryName(i), index++);
+            }
+            cb->setSelectedId(mFilter->getTrType());
+            cb->setSize(cbw, dh);
+            cb->setTopLeftPosition(x, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrTypeComboBox = cb;
+            mTrTypeComboBox->addListener(this);
+        }
+        
+        {
+            ComboBox *cb = new ComboBox();
+            cb->setSize(cbw, dh);
+            cb->setTopLeftPosition(x+cbw+5, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrDirectionComboBox = cb;
+            mTrDirectionComboBox->addListener(this);
+        }
+        
+        {
+            ComboBox *cb = new ComboBox();
+            cb->setSize(cbw-40, dh);
+            cb->setTopLeftPosition(x+2*(cbw+5), y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrReturnComboBox = cb;
+            mTrReturnComboBox->addListener(this);
+        }
+        
+        
+        mTrSeparateAutomationModeButton = addCheckbox("Force separate automation", mFilter->getShowGridLines(), x+3*(cbw+5)-40, y, cbw+20, dh, box);
+        
+        int tewShort = 30;
+        int x2 = x+3*(cbw+5);
+        mTrDampeningTextEditor = addTextEditor(String(mFilter->getTrDampening()), x2, y, tewShort, dh, box);
+        mTrDampeningTextEditor->addListener(this);
+        mTrDampeningLabel = addLabel("dampening", x2 + tewShort, y, w, dh, box);
+        
+        mTrTurnsTextEditor = addTextEditor(String(mFilter->getTrTurns()), x2, y, tewShort, dh, box);
+        mTrTurnsTextEditor->addListener(this);
+        mTrTurnsLabel = addLabel("turn(s)", x2 + tewShort, y, w, dh, box);
+        
+        
+        //---------- ROW 2 -------------
+        y += dh + 5;
+        x = kMargin;
+        int tew = 80;
+        
+        mTrDuration = addTextEditor(String(mFilter->getTrDuration()), x, y, tew, dh, box);
+        mTrDuration->addListener(this);
+        x += tew + kMargin;
+        {
+            ComboBox *cb = new ComboBox();
+            int index = 1;
+            cb->addItem("Beat(s)", index++);
+            cb->addItem("Second(s)", index++);
+            
+            cb->setSelectedId(mFilter->getTrUnits());
+            cb->setSize(tew, dh);
+            cb->setTopLeftPosition(x, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrUnits = cb;
+            mTrUnits->addListener(this);
+        }
+        x += tew + kMargin;
+        addLabel("per cycle", x, y, w, dh, box);
+        
+        mTrDeviationTextEditor = addTextEditor(String(mFilter->getTrDeviation()*360), x2, y, tewShort, dh, box);
+        mTrDeviationTextEditor->addListener(this);
+        mTrDeviationLabel = addLabel("deviation", x2 + tewShort, y, w, dh, box);
+        
+        
+        mTrEllipseWidthTextEditor = addTextEditor(String(mFilter->getTrEllipseWidth()*2), x2, y, tewShort, dh, box);
+        mTrEllipseWidthTextEditor->addListener(this);
+        mTrEllipseWidthLabel = addLabel("width factor", x2 + tewShort, y, w, dh, box);
+        
+        
+        //---------- ROW 3 -------------
+        y += dh + 5;
+        x = kMargin;
+        
+        mTrRepeats = addTextEditor(String(mFilter->getTrRepeats()), x, y, tew, dh, box);
+        mTrRepeats->addListener(this);
+        x += tew + kMargin;
+        
+        addLabel("cycle(s)", x, y, w, dh, box);
+        
+        //---------- ROW 4 -------------
+        y += dh + 5;
+        x = kMargin;
+        
+        mTrEndPointButton = addButton("Set end point", x, y, cbw, dh, box);
+        mTrEndPointButton->setClickingTogglesState(true);
+        
+        x += cbw + kMargin;
+        m_pTrEndRayTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
+        m_pTrEndRayTextEditor->setTextToShowWhenEmpty("Ray", juce::Colour::greyLevel(.6));
+        m_pTrEndRayTextEditor->addListener(this);
+        
+        x += cbw/2 + kMargin;
+        m_pTrEndAngleTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
+        m_pTrEndAngleTextEditor->setTextToShowWhenEmpty("Angle", juce::Colour::greyLevel(.6));
+        m_pTrEndAngleTextEditor->addListener(this);
+        updateEndLocationTextEditors();
+        
+        x += cbw/2 + kMargin;
+        m_pTrResetEndButton = addButton("Reset end point", x, y, cbw, dh, box);
+        
+        x = kMargin;
+        y += dh + 5;
+        
+        mTrWriteButton = addButton("Ready", x, y, cbw, dh, box);
+        mTrWriteButton->setClickingTogglesState(true);
+        
+        mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin-2, y-4, 300, dh, box);
+        mTrEndPointLabel->setVisible(false);
+        
+        y += dh + 5;
+        
+        mTrProgressBar = new MiniProgressBar();
+        mTrProgressBar->setSize(cbw , dh-5);//tew
+        mTrProgressBar->setTopLeftPosition(x, y);
+        mTrProgressBar->setVisible(false);
+        
+        x = 1*cbw + 2*kMargin;
+        
+        addLabel("Speed", x-4, y-14, w+10, dh, box);
+        
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, mFilter->getParameter(kTrajectorySpeed), x, y, w, dh-5, box);
+        ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
+        ds->setRange(-2.5f, 2.5f);
+        
+        //ds->setTextBoxStyle (Slider::TextBoxBelow, false, 90, 20);
+        mSpeedTrajectory = ds;
+        
+        
+        box->addChildComponent(mTrProgressBar);
+        mComponents.add(mTrProgressBar);
+        
+        if(mFilter->getTrState() == kTrWriting){
+            updateTrajectoryStartComponent(kRunning);
+            mTrWriteButton->setToggleState(true, dontSendNotification);
+        }
+        
+        x = 2*cbw + 2*kMargin;
+        y = kMargin + dh + 5;
+        addLabel("Movements:", x, y, w-50, dh, box);
+        
+        
+        mMovementModeCombo = new ComboBox();
+        updateMovementModeCombo();
+        
+        box->addAndMakeVisible(mMovementModeCombo);
+        mComponents.add(mMovementModeCombo);
+        mMovementModeCombo->addListener(this);
+
+        y += dh + 5;
+
+        mMovementModeCombo->setBounds(x, y, w, kDefaultLabelHeight);
+
+        
+    }
+    
+    
     
     //--------------- SETTINGS TAB ---------------- //
     Component *box = mTabs->getTabContentComponent(0);
@@ -387,19 +581,7 @@ AudioProcessorEditor (ownerFilter)
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
         
         //-----------------------------
-        // start 1st column
-        
-        addLabel("Movements:", x, y, w, dh, box);
-        y += dh + 5;
-        
-        {
-            mMovementModeCombo = new ComboBox();
-            updateMovementModeCombo();
-            mComponents.add(mMovementModeCombo);
-            y += dh + 5;
-            mMovementModeCombo->addListener(this);
-        }
-        
+        // start 1st column        
         {
             mSmoothingLabel = addLabel("Param smoothing (ms):", x, y, w, dh, box);
             y += dh + 5;
@@ -509,8 +691,9 @@ AudioProcessorEditor (ownerFilter)
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
-    box = mTabs->getTabContentComponent(1);
-    {
+    //box = mTabs->getTabContentComponent(1);
+    //{
+        /*
         //---------- ROW 1 -------------
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
         
@@ -673,14 +856,14 @@ AudioProcessorEditor (ownerFilter)
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
         addLabel("Movements:", x, y, w-50, dh, box);
-        
+        */
  
        
         
-    }
+    //}
     
     //--------------- V & F TAB ---------------- //
-    box = mTabs->getTabContentComponent(2);
+    box = mTabs->getTabContentComponent(1);
     {
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
         
@@ -764,7 +947,7 @@ AudioProcessorEditor (ownerFilter)
     }
     
     //--------------- SOURCES TAB ---------------- //
-    box = mTabs->getTabContentComponent(3);
+    box = mTabs->getTabContentComponent(2);
     {
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
         int selectw = 50;
@@ -821,7 +1004,7 @@ AudioProcessorEditor (ownerFilter)
         
     }
     //--------------- SPEAKERS TAB ---------------- //
-    box = mTabs->getTabContentComponent(4);
+    box = mTabs->getTabContentComponent(3);
     {
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
         int selectw = 50;
@@ -877,7 +1060,7 @@ AudioProcessorEditor (ownerFilter)
 	}
     
     //--------------- INTERFACE TAB ---------------- //
-    box = mTabs->getTabContentComponent(5);
+    box = mTabs->getTabContentComponent(4);
     {
         int x = kMargin, y = kMargin;
         const int m = 10, dh = 18, cw = 300;
@@ -985,6 +1168,7 @@ AudioProcessorEditor (ownerFilter)
 
 
 void SpatGrisAudioProcessorEditor::updateMovementModeComboPosition(){
+    /*
     if(mFilter->getGuiTab() == 0){
         int w = (mTabs->getTabContentComponent(0)->getWidth() - kMargin) / 3 - kMargin;
         mMovementModeCombo->setBounds(kMargin, kMargin+kDefaultLabelHeight+5, w, kDefaultLabelHeight);
@@ -998,7 +1182,7 @@ void SpatGrisAudioProcessorEditor::updateMovementModeComboPosition(){
         mMovementModeCombo->setBounds(x, y, w, kDefaultLabelHeight);
         mTabs->getTabContentComponent(1)->addAndMakeVisible(mMovementModeCombo);
         mTabs->getTabContentComponent(0)->removeChildComponent(mMovementModeCombo);
-    }
+    }*/
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
@@ -1119,8 +1303,8 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
 #endif
         mMaxSpanVolumeLabel->setEnabled(false);
         mMaxSpanVolumeSlider->setEnabled(false);
-        mTabs->getTabContentComponent(2)->setEnabled(false);
-        mTabs->getTabContentComponent(4)->setEnabled(false);
+        mTabs->getTabContentComponent(1)->setEnabled(false);
+        mTabs->getTabContentComponent(3)->setEnabled(false);
     } else {
         mOscSpat1stSrcIdLabel->setVisible(false);
         mOscSpat1stSrcIdTextEditor->setVisible(false);
@@ -1144,8 +1328,8 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
 #endif
         mMaxSpanVolumeLabel->setEnabled(true);
         mMaxSpanVolumeSlider->setEnabled(true);
-        mTabs->getTabContentComponent(2)->setEnabled(true);
-        mTabs->getTabContentComponent(4)->setEnabled(true);
+        mTabs->getTabContentComponent(1)->setEnabled(true);
+        mTabs->getTabContentComponent(3)->setEnabled(true);
     }
 #if ALLOW_PAN_MODE
     if (iSelectedMode == kPanMode){
@@ -1330,7 +1514,10 @@ void SpatGrisAudioProcessorEditor::resized()
     int lh = mSourcesBoxLabel->getHeight();
     mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, 155);
     
-    mTabs->setBounds(x-1, 180, w-(fieldSize + (iExtraSpace * 5)), h - (180 + iExtraSpace));
+    mTrajectoryBoxLabel->setTopLeftPosition(x, 176);
+    mTrajectoryBox->setBounds(x, 192 , w-(fieldSize + (iExtraSpace * 5)), 170);
+
+    mTabs->setBounds(x-1, 180+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 5)), h - (180+186 + iExtraSpace));
 
     x += kCenterColumnWidth + kMargin + kMargin;
     mSpeakersBoxLabel->setTopLeftPosition(x, y);

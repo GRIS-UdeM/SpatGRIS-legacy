@@ -1923,8 +1923,12 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             if (it < 0) it += kThetaMax;
             
             //if (r < 1 && d > 0.5) d = 0.5;
-            if (d < 1e-6) d = 1e-6;          
+            
+            if (d < 1e-6) d = 1e-6;
+            else {if (d >= 1.0f) d = 1.0f-1e-6;}
             float angle = d * M_PI;
+            
+     
             
             if (mApplyFilter) {
                 float distance;
@@ -1954,8 +1958,8 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                 if (dt < 0) dt = -dt;
                 if (dt > kQuarterCircle) {
                     // assume flipped side
-                    if (lt > it) lt -= kHalfCircle;
-                    else lt += kHalfCircle;
+                    if (lt > it) lt -= M_PI;
+                    else lt += M_PI;
                 }
                 t = c * it + (1 - c) * lt;
                 
@@ -1964,7 +1968,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             }
             
             jassert(t >= 0 && t <= kThetaMax);
-            jassert(angle > 0 && angle <= kHalfCircle);
+            jassert(angle > 0 && angle <= M_PI);
             
             memset(mOutFactors, 0, kMaxChannels * sizeof(float));
             
