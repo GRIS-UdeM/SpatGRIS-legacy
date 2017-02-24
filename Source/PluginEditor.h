@@ -139,7 +139,6 @@ public:
 private:
 	SpatGrisAudioProcessor *mFilter;
 
-    LookAndFeel_V2 mV2Feel;
     GrisLookAndFeel mGrisFeel;
     
 	SourceMover *m_pMover;
