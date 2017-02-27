@@ -1368,6 +1368,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     
 #if USE_DB_METERS
     //==================================== DB METER STUFF ===========================================
+    memset(mLevels, 0, kMaxChannels*sizeof(*mLevels));
 	if (mCalculateLevels) {
         //envelope constants
 		const float attack  = kLevelAttackDefault;
@@ -1375,10 +1376,10 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 		const float ag      = powf(0.01f, 1000.f / (attack * m_dSampleRate));
 		const float rg      = powf(0.01f, 1000.f / (release * m_dSampleRate));
 		//for each speaker
-		for (int o = 0; o < mNumberOfSpeakers; o++) {
+		for (int iSpeaker = 0; iSpeaker < mNumberOfSpeakers; iSpeaker++) {
             //get pointer to current spot in output buffer
-			float *output = mOutputs[o];
-			float env = mLevels[o];
+			float *output = mOutputs[iSpeaker];
+			float env = mLevels[iSpeaker];
             
 			//for each frame that are left to process
             for (unsigned int f = 0; f < m_iDawBufferSize; f++) {
@@ -1387,7 +1388,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 				float g = (s > env) ? ag : rg;
 				env = g * env + (1.f - g) * s;
 			}
-			mLevels[o] = env;
+			mLevels[iSpeaker] = env;
 		}
 	}
 #endif
