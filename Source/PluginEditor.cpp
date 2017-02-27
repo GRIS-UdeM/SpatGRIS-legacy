@@ -71,7 +71,7 @@ public:
         g.setColour(Colours::black);
         g.fillRect(box);
         
-        g.setColour(Colour::fromRGB(0,255,0));
+        g.setColour(Colour::fromRGB(17, 255, 159));
         box.setWidth(box.getWidth() * mValue);
         g.fillRect(box);
     }
@@ -398,6 +398,18 @@ AudioProcessorEditor (ownerFilter)
         //---------- ROW 1 -------------
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
         
+    
+        addLabel("Movements:", x, y, w-50, dh, box);
+        mMovementModeCombo = new ComboBox();
+        updateMovementModeCombo();
+        box->addAndMakeVisible(mMovementModeCombo);
+        mComponents.add(mMovementModeCombo);
+        mMovementModeCombo->addListener(this);
+        mMovementModeCombo->setBounds(x+80, y, w, kDefaultLabelHeight);
+      
+        y += dh + 4;
+        x = kMargin;
+        //-------
         int cbw = 130;
         {
             ComboBox *cb = new ComboBox();
@@ -452,7 +464,7 @@ AudioProcessorEditor (ownerFilter)
         
         
         //---------- ROW 2 -------------
-        y += dh + 5;
+        y += dh + 4;
         x = kMargin;
         int tew = 80;
         
@@ -488,7 +500,7 @@ AudioProcessorEditor (ownerFilter)
         
         
         //---------- ROW 3 -------------
-        y += dh + 5;
+        y += dh + 4;
         x = kMargin;
         
         mTrRepeats = addTextEditor(String(mFilter->getTrRepeats()), x, y, tew, dh, box);
@@ -498,7 +510,7 @@ AudioProcessorEditor (ownerFilter)
         addLabel("cycle(s)", x, y, w, dh, box);
         
         //---------- ROW 4 -------------
-        y += dh + 5;
+        y += dh + 4;
         x = kMargin;
         
         mTrEndPointButton = addButton("Set end point", x, y, cbw, dh, box);
@@ -519,7 +531,7 @@ AudioProcessorEditor (ownerFilter)
         m_pTrResetEndButton = addButton("Reset end point", x, y, cbw, dh, box);
         
         x = kMargin;
-        y += dh + 5;
+        y += dh + 4;
         
         mTrWriteButton = addButton("Ready", x, y, cbw, dh, box);
         mTrWriteButton->setClickingTogglesState(true);
@@ -527,7 +539,7 @@ AudioProcessorEditor (ownerFilter)
         mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin-2, y-4, 300, dh, box);
         mTrEndPointLabel->setVisible(false);
         
-        y += dh + 5;
+        y += dh + 4;
         
         mTrProgressBar = new MiniProgressBar();
         mTrProgressBar->setSize(cbw , dh-5);//tew
@@ -538,7 +550,7 @@ AudioProcessorEditor (ownerFilter)
         
         addLabel("Speed", x-4, y-14, w+10, dh, box);
         
-        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, mFilter->getParameter(kTrajectorySpeed), x, y, w, dh-5, box);
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, 2.5f, mFilter->getSpeedTraject(), x, y, w, dh-5, box);
         ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
         ds->setRange(-2.5f, 2.5f);
         
@@ -556,19 +568,15 @@ AudioProcessorEditor (ownerFilter)
         
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
-        addLabel("Movements:", x, y, w-50, dh, box);
-        
-        
+        /*addLabel("Movements:", x, y, w-50, dh, box);
+
         mMovementModeCombo = new ComboBox();
         updateMovementModeCombo();
-        
         box->addAndMakeVisible(mMovementModeCombo);
         mComponents.add(mMovementModeCombo);
         mMovementModeCombo->addListener(this);
-
-        y += dh + 5;
-
-        mMovementModeCombo->setBounds(x, y, w, kDefaultLabelHeight);
+        y += dh + 4;
+        mMovementModeCombo->setBounds(x, y, w, kDefaultLabelHeight);*/
 
         
     }
@@ -583,13 +591,15 @@ AudioProcessorEditor (ownerFilter)
         //-----------------------------
         // start 1st column        
         {
-            mSmoothingLabel = addLabel("Param smoothing (ms):", x, y, w, dh, box);
-            y += dh + 5;
+            mSmoothingLabel = addLabel("Param smoothing (ms)", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamSmooth, kSmooth, mFilter->getParameter(kSmooth), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
+            ds->setLookAndFeel(&mGrisFeel);
+        
             mSmoothingSlider = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
         
@@ -602,8 +612,8 @@ AudioProcessorEditor (ownerFilter)
         mSpPlacementCombo = new ComboBox();
 
         if (mFilter->getIsAllowInputOutputModeSelection()) {
-            addLabel("Input/Output mode:", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Input/Output mode", x, y, w, dh, box);
+            y += dh + 4;
             
             mInputOutputModeCombo = new ComboBox();
             mInputOutputModeCombo->setSize(w - iButtonW, dh);
@@ -611,12 +621,12 @@ AudioProcessorEditor (ownerFilter)
             box->addAndMakeVisible(mInputOutputModeCombo);
             mComponents.add(mInputOutputModeCombo);
             mApplyInputOutputModeButton = addButton("Apply", x + w - iButtonW, y, iButtonW, dh, box);
-            y += dh + 5;
+            y += dh + 4;
             updateInputOutputCombo();
         }
         #if ALLOW_INTERNAL_WRITE
-        mRoutingModeLabel = addLabel("Routing mode:", x, y, w, dh, box);
-        y += dh + 5;
+        mRoutingModeLabel = addLabel("Routing mode", x, y, w, dh, box);
+        y += dh + 4;
         {
             ComboBox *cb = new ComboBox();
             int index = 1;
@@ -635,7 +645,7 @@ AudioProcessorEditor (ownerFilter)
             cb->setTopLeftPosition(x, y);
             box->addAndMakeVisible(cb);
             mComponents.add(cb);
-            y += dh + 5;
+            y += dh + 4;
             
             cb->addListener(this);
             mRoutingModeCombo = cb;
@@ -648,8 +658,8 @@ AudioProcessorEditor (ownerFilter)
         y = kMargin;
         x += w + kMargin;
         
-        addLabel("Process mode:", x, y, w, dh, box);
-        y += dh + 5;
+        addLabel("Process mode", x, y, w, dh, box);
+        y += dh + 4;
         
         {
             mProcessModeCombo = new ComboBox();
@@ -665,29 +675,29 @@ AudioProcessorEditor (ownerFilter)
             mProcessModeCombo->setTopLeftPosition(x, y);
             box->addAndMakeVisible(mProcessModeCombo);
             mComponents.add(mProcessModeCombo);
-            y += dh + 5;
+            y += dh + 4;
             
             mProcessModeCombo->addListener(this);
         }
         
         {
-            mMaxSpanVolumeLabel = addLabel("Max span volume (dB):", x, y, w, dh, box);
-            y += dh + 5;
+            mMaxSpanVolumeLabel = addLabel("Max span volume (dB)", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamMaxSpanVolume, kMaxSpanVolume, mFilter->getParameter(kMaxSpanVolume), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mMaxSpanVolumeSlider = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
         mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
         mOscSpat1stSrcIdTextEditor->addListener(this);
-        y += dh + 5;
+        y += dh + 4;
         
         mOscSpatPortLabel       = addLabel("OSC Spat port:", x, y, w*2/3 - 5, dh, box);
         mOscSpatPortTextEditor  = addTextEditor(String(mFilter->getOscSpatPort()), x + w*2/3, y, w/3, dh, box);
         mOscSpatPortTextEditor->addListener(this);
-        y += dh + 5;
+        y += dh + 4;
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
@@ -751,7 +761,7 @@ AudioProcessorEditor (ownerFilter)
 
         
         //---------- ROW 2 -------------
-        y += dh + 5;
+        y += dh + 4;
         x = kMargin;
         int tew = 80;
         
@@ -787,7 +797,7 @@ AudioProcessorEditor (ownerFilter)
 
         
         //---------- ROW 3 -------------
-        y += dh + 5;
+        y += dh + 4;
         x = kMargin;
         
         mTrRepeats = addTextEditor(String(mFilter->getTrRepeats()), x, y, tew, dh, box);
@@ -797,7 +807,7 @@ AudioProcessorEditor (ownerFilter)
         addLabel("cycle(s)", x, y, w, dh, box);
         
         //---------- ROW 4 -------------
-        y += dh + 5;
+        y += dh + 4;
         x = kMargin;
         
         mTrEndPointButton = addButton("Set end point", x, y, cbw, dh, box);
@@ -818,7 +828,7 @@ AudioProcessorEditor (ownerFilter)
         m_pTrResetEndButton = addButton("Reset end point", x, y, cbw, dh, box);
         
         x = kMargin;
-        y += dh + 5;
+        y += dh + 4;
         
         mTrWriteButton = addButton("Ready", x, y, cbw, dh, box);
         mTrWriteButton->setClickingTogglesState(true);
@@ -826,7 +836,7 @@ AudioProcessorEditor (ownerFilter)
         mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin-2, y-4, 300, dh, box);
         mTrEndPointLabel->setVisible(false);
         
-        y += dh + 5;
+        y += dh + 4;
         
         mTrProgressBar = new MiniProgressBar();
         mTrProgressBar->setSize(cbw , dh-5);//tew
@@ -871,28 +881,28 @@ AudioProcessorEditor (ownerFilter)
         // start 1st column
         
         {
-            addLabel("Volume center (dB):", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Volume center (dB)", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamVolumeNear, kVolumeNear, mFilter->getParameter(kVolumeNear), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeNear = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         
         {
-            addLabel("Filter center:", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Filter center", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamFilterNear, kFilterNear, mFilter->getParameter(kFilterNear), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterNear = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         
         mApplyFilterButton = addCheckbox("Apply Filter", mFilter->getApplyFilter(),
                                    x, y, w, dh, box);
-        y += dh + 5;
+        y += dh + 4;
         
         //-----------------------------
         // start 2nd column
@@ -900,24 +910,24 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
         
         {
-            addLabel("Volume speakers (dB):", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Volume speakers (dB)", x, y, w, dh, box);
+            y += dh + 4;
             
 
             Slider *ds = addParamSliderGRIS(kParamVolumeMid, kVolumeMid, mFilter->getParameter(kVolumeMid), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeMid = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         
         {
-            addLabel("Filter speakers:", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Filter speakers", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamFilterMid, kFilterMid, mFilter->getParameter(kFilterMid), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterMid = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         
         //-----------------------------
@@ -926,23 +936,23 @@ AudioProcessorEditor (ownerFilter)
         x += w + kMargin;
         
         {
-            addLabel("Volume far (dB):", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Volume far (dB)", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamVolumeFar, kVolumeFar, mFilter->getParameter(kVolumeFar), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mVolumeFar = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
         
         {
-            addLabel("Filter far:", x, y, w, dh, box);
-            y += dh + 5;
+            addLabel("Filter far", x, y, w, dh, box);
+            y += dh + 4;
             
             Slider *ds = addParamSliderGRIS(kParamFilterFar, kFilterFar, mFilter->getParameter(kFilterFar), x, y, w, dh, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             mFilterFar = ds;
-            y += dh + 5;
+            y += dh + 4;
         }
     }
     
@@ -953,8 +963,8 @@ AudioProcessorEditor (ownerFilter)
         int selectw = 50;
         
         // column 1
-        addLabel("Source placement:", x, y, w, dh, box);
-        y += dh + 5;
+        addLabel("Source placement", x, y, w, dh, box);
+        y += dh + 4;
 
         //mSrcPlacementCombo = new ComboBox();
         mSrcPlacementCombo->addItem("Left Alternate", kLeftAlternate);
@@ -971,36 +981,34 @@ AudioProcessorEditor (ownerFilter)
         mSrcPlacementCombo->setExplicitFocusOrder(5);
         //mSrcPlacementCombo->addListener(this);
         
-        y += dh + 5;
+        y += dh + 4;
         mApplySrcPlacementButton = addButton("Apply", x, y, iButtonW, dh, box);
         
         // column 2
         y = kMargin;
         x += w + kMargin;
         
-        addLabel("Set RA position:", x, y, w - selectw, dh, box);
+        addLabel("Set RA position", x, y, w - selectw, dh, box);
         mSrcSelectCombo->setSelectedId(m_iSelectedSrcEditor+1);
         mSrcSelectCombo->setSize(selectw, dh);
         mSrcSelectCombo->setTopLeftPosition(x + w - selectw, y);
         mSrcSelectCombo->setExplicitFocusOrder(5);
         
-        int lw = 60, lwm = lw + kMargin;
+        int lw = 60;
+        y += dh + 4;
         
-        y += dh + 5;
-        
-        addLabel("R: 0 to 2, A: 0 to 360", x, y, w, dh, box);
-        y += dh + 5;
-        
-        addLabel("Ray:", x, y, lw, dh, box);
-        mSrcR = addTextEditor("1", x + lwm, y, w - lwm, dh, box);
+        addLabel("Ray", x, y, lw, dh, box);
+        mSrcR = addTextEditor("1", x + (w - selectw -25), y, 75, dh, box);
         mSrcR->setExplicitFocusOrder(6);
         mSrcR->addListener(this);
-        y += dh + 5;
+        addLabel("(0 - 2)", x +(w - selectw+50), y, lw, dh, box);
+        y += dh + 4;
         
-        addLabel("Angle:", x, y, lw, dh, box);
-        mSrcT = addTextEditor("0", x + lwm, y, w - lwm, dh, box);
+        addLabel("Angle", x, y, lw, dh, box);
+        mSrcT = addTextEditor("0", x + (w - selectw -25), y, 75, dh, box);
         mSrcT->setExplicitFocusOrder(7);
         mSrcT->addListener(this);
+        addLabel("(0 - 360)", x +(w - selectw+50), y, lw, dh, box);
         
     }
     //--------------- SPEAKERS TAB ---------------- //
@@ -1010,8 +1018,8 @@ AudioProcessorEditor (ownerFilter)
         int selectw = 50;
         
         //-------- column 1 --------
-        addLabel("Speaker placement:", x, y, w, dh, box);
-        y += dh + 5;
+        addLabel("Speaker placement", x, y, w, dh, box);
+        y += dh + 4;
         
         mSpPlacementCombo->addItem("Left Alternate", kLeftAlternate);
         mSpPlacementCombo->addItem("Left Clockwise", kLeftClockwise);
@@ -1027,7 +1035,7 @@ AudioProcessorEditor (ownerFilter)
         mSpPlacementCombo->setTopLeftPosition(x, y);
         mSpPlacementCombo->setExplicitFocusOrder(5);
         //mSpPlacementCombo->addListener(this);
-        y += dh + 5;
+        y += dh + 4;
         mApplySpPlacementButton = addButton("Apply", x, y, iButtonW, dh, box);
         
         
@@ -1035,29 +1043,31 @@ AudioProcessorEditor (ownerFilter)
         y = kMargin;
         x += w + kMargin;
         
-        addLabel("Set RA position:", x, y, w - selectw, dh, box);
+        addLabel("Set RA position", x, y, w - selectw, dh, box);
         mSpSelectCombo->setSelectedId(mFilter->getSpSelected());
         mSpSelectCombo->setSize(selectw, dh);
         mSpSelectCombo->setTopLeftPosition(x + w - selectw, y);
         mSpSelectCombo->setExplicitFocusOrder(5);
         
-        int lw = 60, lwm = lw + kMargin;
+        int lw = 60;
+        y += dh + 4;
         
-        
-        y += dh + 5;
-        addLabel("R: 0 to 2, A: 0 to 360", x, y, w, dh, box);
-        y += dh + 5;
-        addLabel("Ray:", x, y, lw, dh, box);
-        mSpR = addTextEditor("1", x + lwm, y, w - lwm, dh, box);
+        addLabel("Ray", x, y, lw, dh, box);
+        mSpR = addTextEditor("1", x + (w - selectw -25), y, 75, dh, box);
         mSpR->setExplicitFocusOrder(6);
         mSpR->addListener(this);
+        addLabel("(0 - 2)", x +(w - selectw+50), y, lw, dh, box);
+        y += dh + 4;
         
-        y += dh + 5;
-        addLabel("Angle:", x, y, lw, dh, box);
-        mSpT = addTextEditor("0", x + lwm, y, w - lwm, dh, box);
+        addLabel("Angle", x, y, lw, dh, box);
+        mSpT = addTextEditor("0", x + (w - selectw -25), y, 75, dh, box);
         mSpT->setExplicitFocusOrder(7);
         mSpT->addListener(this);
-	}
+        addLabel("(0 - 360)", x +(w - selectw+50), y, lw, dh, box);
+        
+        
+        
+    }
     
     //--------------- INTERFACE TAB ---------------- //
     box = mTabs->getTabContentComponent(4);
@@ -1066,9 +1076,9 @@ AudioProcessorEditor (ownerFilter)
         const int m = 10, dh = 18, cw = 300;
         int comboW = 40, w = (box->getWidth() - kMargin) / 3 - kMargin;
 #if USE_LEAP
-        addLabel("OSC source:", x, y, w-comboW, dh, box);
+        addLabel("OSC source", x, y, w-comboW, dh, box);
 #else
-        addLabel("OSC/Leap source:", x, y, w-comboW, dh, box);
+        addLabel("OSC/Leap source", x, y, w-comboW, dh, box);
 #endif
         {
             mOscLeapSourceCb = new ComboBox();
@@ -1086,7 +1096,7 @@ AudioProcessorEditor (ownerFilter)
             mComponents.add(mOscLeapSourceCb);            
             mOscLeapSourceCb->addListener(this);
         }
-        y += dh + 5;
+        y += dh + 4;
 #if USE_LEAP           
         mEnableLeap = new ToggleButton();
         mEnableLeap->setButtonText("Enable Leap");
@@ -1103,7 +1113,7 @@ AudioProcessorEditor (ownerFilter)
         mStateLeap->setSize(cw, dh);
         mStateLeap->setJustificationType(Justification::left);
         mStateLeap->setMinimumHorizontalScale(1);
-        mStateLeap->setTopLeftPosition(x+130+ m, y);
+        mStateLeap->setTopLeftPosition(x+80+ m, y);
         box->addAndMakeVisible(mStateLeap);
         mComponents.add(mStateLeap);
        
@@ -1126,7 +1136,7 @@ AudioProcessorEditor (ownerFilter)
         mStateJoystick->setSize(cw, dh);
         mStateJoystick->setJustificationType(Justification::left);
         mStateJoystick->setMinimumHorizontalScale(1);
-        mStateJoystick->setTopLeftPosition(x+130+ m, y);
+        mStateJoystick->setTopLeftPosition(x+100+ m, y);
         box->addAndMakeVisible(mStateJoystick);
         mComponents.add(mStateJoystick);
         
@@ -1135,7 +1145,7 @@ AudioProcessorEditor (ownerFilter)
 #if USE_TOUCH_OSC
         mOsc = CreateOscComponent(mFilter, this);
         if (mOsc) {
-            mOsc->setTopLeftPosition(0, y);
+            mOsc->setTopLeftPosition(x+m+170, kMargin+10);
             mOsc->setSize(box->getWidth(), box->getHeight()-y);
             box->addAndMakeVisible(mOsc);
             mComponents.add(mOsc);
@@ -1573,7 +1583,7 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
    	int dh = kDefaultLabelHeight, x = 0, y = 0, w = kRightColumnWidth;
     
     const int muteWidth = 50;
-    y += dh + 5;
+    y += dh + 4;
 
     for (int i = 0; i < kMaxChannels; i++){
 //        String s; s << i+1;
@@ -1595,7 +1605,7 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
 //        mLevelComponents.add(lc);
 //#endif
         if (i < iCurSpeakers){
-            y += dh + 5;
+            y += dh + 4;
             mLevelComponents[i]->setVisible(true);
             mMuteButtons[i]->setVisible(true);
             mLabelSourceId[i]->setVisible(true);
@@ -1989,7 +1999,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         mFilter->setIsJoystickEnabled(bJoystickEnabled);
         if (bJoystickEnabled) {
             if (!gIOHIDManagerRef) {
-                mStateJoystick->setText("Joystick not connected", dontSendNotification);
+                mStateJoystick->setText("not found", dontSendNotification);
+                mStateJoystick->setColour(Label::textColourId,  Colour(235, 3, 25));
                 gIOHIDManagerRef = IOHIDManagerCreate(CFAllocatorGetDefault(),kIOHIDOptionsTypeNone);
                 if(!gIOHIDManagerRef) {
                     printf("Could not create IOHIDManager");
@@ -1997,11 +2008,13 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
                     mJoystick = HIDDelegate::CreateHIDDelegate(mFilter, this);
                     mJoystick->Initialize_HID(this);
                     if(mJoystick->getDeviceSetRef()) {
-                        mStateJoystick->setText("Joystick connected", dontSendNotification);
+                        mStateJoystick->setText("connected", dontSendNotification);
+                        mStateJoystick->setColour(Label::textColourId, Colour(3,235, 25));
                     } else {
-                        mStateJoystick->setText("Joystick not connected", dontSendNotification);
+                        mStateJoystick->setText("not found", dontSendNotification);
                         mEnableJoystick->setToggleState(false, dontSendNotification);
                         gIOHIDManagerRef = NULL;
+                        mStateJoystick->setColour(Label::textColourId,  Colour(235, 3, 25));
                     }
                 }
             } else {
@@ -2029,7 +2042,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
         
         if (state) {
             if (!gIsLeapConnected) {
-                mStateLeap->setText("Leap not connected", dontSendNotification);
+                mStateLeap->setText("not found", dontSendNotification);
+                mStateLeap->setColour(Label::textColourId,  Colour(235, 3, 25));
                 mController = new Leap::Controller();
                 if(!mController) {
                     printf("Could not create leap controler");
@@ -2039,11 +2053,13 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
                         gIsLeapConnected = 1;
                         mController->addListener(*mleap);
                     } else {
-                        mStateLeap->setText("Leap not connected", dontSendNotification);
+                        mStateLeap->setText("not found", dontSendNotification);
+                        mStateLeap->setColour(Label::textColourId,  Colour(235, 3, 25));
                     }
                 }
             } else {
-                mStateLeap->setText("Leap used in another Octogris", dontSendNotification);
+                mStateLeap->setText("already used", dontSendNotification);
+                mStateLeap->setColour(Label::textColourId, Colour(255, 125,0));
                 mEnableLeap->setToggleState(false, dontSendNotification);
                
             }
@@ -2355,12 +2371,14 @@ void SpatGrisAudioProcessorEditor::timerCallback(){
 
 //---------------------------------------- DB METERS -----------------------------------------
 #if USE_DB_METERS
+    
     if (!mFilter->getIsRecordingAutomation()){
         const int nbrS = mFilter->getNumberOfSpeakers();
         for (int i = 0; i < nbrS; ++i){
             mLevelComponents[i]->repaint();
         }
     }
+    
     /*
     if (!mFilter->getIsRecordingAutomation() && !mFilter->isLevelUilcok()){
         for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
@@ -2526,7 +2544,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterNear->           setValue(mFilter->getParameter(kFilterNear));
     mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
-    mSpeedTrajectory->      setValue(mFilter->getParameter(kTrajectorySpeed));
+    mSpeedTrajectory->      setValue(mFilter->getSpeedTraject());
 #if ALLOW_INTERNAL_WRITE
     mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
 #endif

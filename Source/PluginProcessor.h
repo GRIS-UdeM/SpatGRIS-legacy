@@ -129,11 +129,9 @@ enum constantParameters{
 	kRoutingVolume =		8 + kNonConstantParameters,
 #if ALLOW_MVT_MODE_AUTOMATION
     kMovementMode =         9 + kNonConstantParameters,
-    kTrajectorySpeed =      10 + kNonConstantParameters,
-	kConstantParameters =	11
+    kConstantParameters =   10
 #else
-    kTrajectorySpeed =      9 + kNonConstantParameters,
-    kConstantParameters =	10
+    kTrajectorySpeed =      9
     
 #endif
     
@@ -283,8 +281,8 @@ static const int    kCenterColumnWidth  = 180;
 static const int    kDefaultFieldSize   = 500;
 static const int    kMinFieldSize       = 300;
 static const int    kRightColumnWidth   = 340;
-static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin;
-static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin;
+static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 26;
+static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin + 26;
 
 //==============================================================================
 static inline float normalize(float min, float max, float value) {
@@ -541,6 +539,9 @@ public:
     
 	const String getOscSendIp() const { return mOscSendIp; }
 	void setOscSendIp(String s) { mOscSendIp = s;}
+    
+    float getSpeedTraject() {return mSpeedTraject ;}
+    void setSpeedTraject(float s){mSpeedTraject = s;}
     
     /*float getTrajectorySpeed(){ return mTrajectory->getSpeed();}
     void setTrajectorySpeed(float v){ mTrajectory->setSpeed(v);}*/
@@ -988,6 +989,7 @@ private:
 
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
+    float mSpeedTraject;
     
     
 #if !ALLOW_MVT_MODE_AUTOMATION

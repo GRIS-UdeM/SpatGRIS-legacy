@@ -57,11 +57,11 @@ public:
     ,mNeedToEnd(false)
 	{
         
-		const int m = 10, dh = 18, cw = 130, iw = 120, pw = 60;
+		const int m = 10, dh = 18, cw = 120, iw = 112, pw = 60;
 		int x = m, y = m;
 
 		mReceive = new ToggleButton();
-		mReceive->setButtonText("Receive on ip, port");
+		mReceive->setButtonText("Receive on ip : port");
 		mReceive->setSize(cw, dh);
 		mReceive->setTopLeftPosition(x, y);
 		mReceive->addListener(this);
@@ -84,7 +84,7 @@ public:
             mReceiveIp->setCaretVisible(false);
         }
         addAndMakeVisible(mReceiveIp);
-        
+    
         x += iw + m;
 		
 		mReceivePort = new TextEditor();
@@ -98,7 +98,7 @@ public:
 		x = m; y += dh + m;
 		
 		mSend = new ToggleButton();
-		mSend->setButtonText("Send on ip, port");
+		mSend->setButtonText("Send on ip : port");
 		mSend->setSize(cw, dh);
 		mSend->setTopLeftPosition(x, y);
 		mSend->addListener(this);

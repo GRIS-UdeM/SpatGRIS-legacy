@@ -312,6 +312,7 @@ private:
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
     
+    
 #if TIME_GUI
     int m_iGuiRefreshCounter = 0;
 #endif

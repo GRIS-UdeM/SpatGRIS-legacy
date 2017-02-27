@@ -526,7 +526,7 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
     }
     
     float fOldValue = mParameters.getUnchecked(index);
-        
+    
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode && !isNewMovementMode(newValue)){
         return;
@@ -594,7 +594,6 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         case kSourceD:
         case kSourceAzimSpan:
         case kSourceElevSpan:
-        case kTrajectorySpeed:
             ++mHostChangedParameterProcessor;
             break;
         default:
@@ -605,7 +604,9 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         m_pMover->storeAllDownPositions();
     }
 #endif
+    
     sendParamChangeMessageToListeners(index, newValue);
+    
  
 }
 
@@ -620,9 +621,11 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 	if (index == kFilterFar)	return "Filter Far";
 	if (index == kMaxSpanVolume)return "Max span volume";
 	if (index == kRoutingVolume)return "Routing volume";
+    //if (index == kTrajectorySpeed)return "Speed trajectory";
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode) return "Movement Mode";
 #endif
+    cout << index << " < " <<  mNumberOfSources << " * " << kParamsPerSource <<newLine;
     if (index < mNumberOfSources * kParamsPerSource) {
 		String s("Source ");
 		s << (index / kParamsPerSource + 1);
@@ -637,13 +640,19 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 		return s;
 	}
 	index -= mNumberOfSources * kParamsPerSource;
-	
+	cout << index << " < " <<  mNumberOfSpeakers << " * " << kParamsPerSpeakers <<newLine;
     if (index < mNumberOfSpeakers * kParamsPerSpeakers) {
 		String s("Speaker ");
 		s << (index / kParamsPerSpeakers + 1);
 		switch(index % kParamsPerSpeakers) {
+            case kSpeakerX:          s << " - X"; break;
+            case kSpeakerY:          s << " - Y"; break;
+            case kSpeakerM:          s << " - M"; break;
+            case kSpeakerUnused1:   s << " - Un"; break;
+            case kSpeakerUnused2:   s << " - Un"; break;
             default: return String::empty;
 		}
+        
 		return s;
 	}
 	
@@ -1433,7 +1442,7 @@ void SpatGrisAudioProcessor::processTrajectory(){
 
     if (mTrajectory) {
         if (m_bIsPlaying) {
-            mTrajectory->setSpeed(getParameter(kTrajectorySpeed));
+            mTrajectory->setSpeed(mSpeedTraject);
             double bps = cpi.bpm / 60;
             float seconds = m_iDawBufferSize / m_dSampleRate;
             float beats = seconds * bps;
@@ -2200,7 +2209,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("kFilterFar", mParameters[kFilterFar]);
     xml.setAttribute ("m_iOscSpat1stSrcId", m_iOscSpat1stSrcId);
     xml.setAttribute ("m_iOscSpatPort", m_iOscSpatPort);
-    xml.setAttribute ("kTrajectorySpeed", getParameter(kTrajectorySpeed));
+    xml.setAttribute ("kTrajectorySpeed", mSpeedTraject);
     
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i) {
 		String srcX = "src" + to_string(i) + "x";
@@ -2299,8 +2308,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             mParameters.set(kFilterNear,    static_cast<float>(xmlState->getDoubleAttribute("kFilterNear", normalize(kFilterNearMin, kFilterNearMax, kFilterNearDefault))));
             mParameters.set(kFilterMid,     static_cast<float>(xmlState->getDoubleAttribute("kFilterMid", normalize(kFilterMidMin, kFilterMidMax, kFilterMidDefault))));
             mParameters.set(kFilterFar,     static_cast<float>(xmlState->getDoubleAttribute("kFilterFar", normalize(kFilterFarMin, kFilterFarMax, kFilterFarDefault))));
-            mParameters.set(kTrajectorySpeed,static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault)));
-            
+            //mParameters.set(kTrajectorySpeed,static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault)));
+            mSpeedTraject =static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault));
             m_iOscSpat1stSrcId  = xmlState->getIntAttribute("m_iOscSpat1stSrcId",   m_iOscSpat1stSrcId);
             m_iOscSpatPort      = xmlState->getIntAttribute("m_iOscSpatPort",       m_iOscSpatPort);
 //            int iMax = JucePlugin_MaxNumInputChannels;

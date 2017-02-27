@@ -43,7 +43,6 @@ public:
     mIsPanSpan(false)
     {
         jassert(mLinkButton || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
-        
     }
     
     void setIsPanSpan(bool b, bool p_bSetToDefault = false){
@@ -86,7 +85,7 @@ public:
                 case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
-                case kParamTrajSpeed:       newVal = 1; break;
+                case kParamTrajSpeed:       newVal = 1.0f; break;
             }
             
             if (mParamType == kParamSource && mLinkButton->getToggleState()) {
@@ -199,15 +198,19 @@ public:
                     mFilter->setParameterNotifyingHost(mParamIndex, newVal);
                 }
             }
-        } else {
+        }
+        else if (mParamType == kParamTrajSpeed) {
+            mFilter->setSpeedTraject((float)getValue());
+        }
+        else {
             const float newVal = (float)getValue();
             if (mFilter->getParameter(mParamIndex) != newVal)
                 mFilter->setParameterNotifyingHost(mParamIndex, newVal);
         }
+        
     }
     
     void setParamIndex(int p_iParamIndex){
-    
         mParamIndex = p_iParamIndex;
     }
     
