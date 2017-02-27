@@ -74,6 +74,7 @@ public:
         mReceiveIp = new TextEditor();
 //        mReceiveIp->setColour(TextEditor::textColourId, juce::Colour::greyLevel(.6));
         mReceiveIp->setFont(mGrisFeel.getFont());
+        mReceiveIp->setLookAndFeel(&mGrisFeel);
         mReceiveIp->setSize(iw, dh);
         mReceiveIp->setTopLeftPosition(x, y);
         //if local address does not start with 10., put it in the ip receive box. Using 10.x.x.x addresses is problematic at UdeM
@@ -89,6 +90,7 @@ public:
 		
 		mReceivePort = new TextEditor();
         mReceivePort->setFont(mGrisFeel.getFont());
+        mReceivePort->setLookAndFeel(&mGrisFeel);
 		mReceivePort->setText(String(mFilter->getOscReceivePort()));
 		mReceivePort->setSize(pw, dh);
 		mReceivePort->setTopLeftPosition(x, y);
@@ -110,6 +112,7 @@ public:
 		
 		mSendIp = new TextEditor();
         mSendIp->setFont(mGrisFeel.getFont());
+        mSendIp->setLookAndFeel(&mGrisFeel);
 		mSendIp->setText(mFilter->getOscSendIp());
 		mSendIp->setSize(iw, dh);
         mSendIp->addListener(this);
@@ -120,6 +123,7 @@ public:
 		
 		mSendPort = new TextEditor();
         mSendPort->setFont(mGrisFeel.getFont());
+        mSendPort->setLookAndFeel(&mGrisFeel);
 		mSendPort->setText(String(mFilter->getOscSendPort()));
 		mSendPort->setSize(pw, dh);
 		mSendPort->setTopLeftPosition(x, y);
@@ -175,12 +179,19 @@ public:
                         addListener(this, "/Octo/Source6");
                         addListener(this, "/Octo/Source7");
                         addListener(this, "/Octo/Source8");
-                        mReceivePort->setEnabled(true);
+                        mReceiveIp->setReadOnly(true);
+                        mReceivePort->setReadOnly(true);
+                        mReceiveIp->setEnabled(false);
+                        mReceivePort->setEnabled(false);
+                        
                     }
                 //trying to disconnect
                 } else {
                     if (disconnect()) {
-                        mReceivePort->setEnabled(false);
+                        mReceiveIp->setReadOnly(false);
+                        mReceivePort->setReadOnly(false);
+                        mReceiveIp->setEnabled(true);
+                        mReceivePort->setEnabled(true);
                     } else {
                         DBG("lo_server_thread_new failed (port in use ?)");
                     }
@@ -194,16 +205,22 @@ public:
                     if(!mOscSender.connect(mOscSendIpAddress, iSendPort)){
                         DBG("OSC cannot connect");
                         mSend->setToggleState(false, dontSendNotification);
+                        mSendIp->setReadOnly(false);
+                        mSendPort->setReadOnly(false);
                         mSendIp->setEnabled(true);
                         mSendPort->setEnabled(true);
                     } else {
                         mSourceXY = FPoint(-1, -1);
                         mSource = -1;
+                        mSendIp->setReadOnly(true);
+                        mSendPort->setReadOnly(true);
                         mSendIp->setEnabled(false);
                         mSendPort->setEnabled(false);
                     }
 
                 } else {
+                    mSendIp->setReadOnly(false);
+                    mSendPort->setReadOnly(false);
                     mSendIp->setEnabled(true);
                     mSendPort->setEnabled(true);
                 }

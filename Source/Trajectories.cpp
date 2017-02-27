@@ -528,8 +528,8 @@ protected:
                     
                     FPoint p = mFilter->getSourceXY(iCurSrc);
                     
-                    p.x +=   (rand1 - 0.5) * mSpeed;
-                    p.y +=  (rand2 - 0.5) * mSpeed;
+                    p.x +=   (rand1 - 0.5) * mSpeed*2.0f;
+                    p.y +=  (rand2 - 0.5) * mSpeed*2.0f;
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
@@ -551,8 +551,8 @@ protected:
                 
                 FPoint p = mFilter->getSourceXY(mFilter->getSelectedSrc());
                 
-                p.x += (rand1 - 0.5) * mSpeed;
-                p.y += (rand2 - 0.5) * mSpeed;
+                p.x += (rand1 - 0.5) * mSpeed*2.0f;
+                p.y += (rand2 - 0.5) * mSpeed*2.0f;
                 //convert ±radius range to 01 range
                 p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                 p.y = (p.y + kRadiusMax) / (2*kRadiusMax);

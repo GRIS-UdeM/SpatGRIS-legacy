@@ -1,3 +1,4 @@
+
 /*
  ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
@@ -625,7 +626,6 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 #if ALLOW_MVT_MODE_AUTOMATION
     if (index == kMovementMode) return "Movement Mode";
 #endif
-    cout << index << " < " <<  mNumberOfSources << " * " << kParamsPerSource <<newLine;
     if (index < mNumberOfSources * kParamsPerSource) {
 		String s("Source ");
 		s << (index / kParamsPerSource + 1);
@@ -640,7 +640,6 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 		return s;
 	}
 	index -= mNumberOfSources * kParamsPerSource;
-	cout << index << " < " <<  mNumberOfSpeakers << " * " << kParamsPerSpeakers <<newLine;
     if (index < mNumberOfSpeakers * kParamsPerSpeakers) {
 		String s("Speaker ");
 		s << (index / kParamsPerSpeakers + 1);
@@ -776,16 +775,18 @@ void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
             setNumberOfSources(8, false);
             setNumberOfSpeakers(16, false);
             break;
-        case i16o16:
+        /*case i16o16:
             setNumberOfSources(16, false);
             setNumberOfSpeakers(16, false);
             break;
         case i12o12:
             setNumberOfSources(12, false);
             setNumberOfSpeakers(12, false);
-            break;
+            break;*/
         default:
-            jassertfalse;
+            setNumberOfSources(8, false);
+            setNumberOfSpeakers(16, false);
+            //jassertfalse;
     }
     //restart audio processing
     suspendProcessing (false);
@@ -869,16 +870,16 @@ void SpatGrisAudioProcessor::updateInputOutputMode (){
         mInputOutputMode =  i8o16;
         return;
     }
-    else if (mNumberOfSources == 16 && mNumberOfSpeakers == 16){
+    /*else if (mNumberOfSources == 16 && mNumberOfSpeakers == 16){
         mInputOutputMode =  i16o16;
         return;
     }
     else if (mNumberOfSources == 12 && mNumberOfSpeakers == 12){
         mInputOutputMode =  i12o12;
         return;
-    }
-    
-    jassertfalse;
+    }*/
+    mInputOutputMode =  i8o16;
+    //jassertfalse;
 }
 
 void SpatGrisAudioProcessor::setSrcPlacementMode(int p_i){
@@ -1272,7 +1273,6 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
 #if TIME_PROCESS
     Time time2ParamCopy = Time::getCurrentTime();
 #endif
-    
     //==================================== PREPARE SOURCE AND SPEAKER PARAMETERS ===========================================
     if (m_iDawBufferSize != pBuffer.getNumSamples()){
         m_iDawBufferSize = pBuffer.getNumSamples();
