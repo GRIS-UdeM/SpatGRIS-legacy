@@ -20,8 +20,8 @@ popd
 echo "Created zip file SpatGRIS$VERSION.zip"
 git checkout master
 
-git tag -a v$VERSION -m $MESSAGE
-git push origin $VERSION
+git tag -a "v$VERSION" -m "$MESSAGE"
+git push origin "v$VERSION"
 git push
 
 echo "Done tag v$VERSION and message $MESSAGE"
