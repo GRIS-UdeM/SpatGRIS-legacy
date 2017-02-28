@@ -92,6 +92,8 @@ void FieldComponent::paint (Graphics& g)
     float radius, diameter;
     float fFieldCenter = fieldWidth/2;
     FPoint pCurLoc;
+    int iSelectedSrc = mFilter->getSelectedSrc();
+    FPoint sourceXY = mFilter->getSourceXY(iSelectedSrc);
 	
     g.setColour(mGrisFeel.getFieldColour());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
@@ -139,7 +141,30 @@ void FieldComponent::paint (Graphics& g)
         g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
     }
     
-	// - - - - - - - - - - - -
+
+    // - - - - - - - - - - - -
+    //draw data Source
+    // - - - - - - - - - - - -
+    
+    hueSelect = (float)iSelectedSrc / mFilter->getNumberOfSources() + 0.577251;
+    if (hueSelect > 1){
+        hueSelect -= 1;
+    }
+    
+    g.setColour(Colour::fromHSV(hueSelect, 1, 1, 1));
+    g.drawEllipse(fieldWidth-25 - 9, 50 - 9, 18, 18,3);
+    
+    g.setColour(Colours::white);
+    stringVal.clear();
+    stringVal << iSelectedSrc+1;
+    
+   
+    g.setColour(Colours::white);
+    g.drawText(stringVal, fieldWidth-31, 45, 12, 12, Justification(Justification::centred), false);
+
+    
+    
+    // - - - - - - - - - - - -
 	// draw translucid circles
 	// - - - - - - - - - - - -
     const float adj_factor = 1 / sqrtf(2);
@@ -298,14 +323,11 @@ void FieldComponent::paint (Graphics& g)
     // - - - - - - - - - - - -
     //draw line and circle for selected source
     // - - - - - - - - - - - -
-    int iSelectedSrc = mFilter->getSelectedSrc();
     hueSelect = (float)iSelectedSrc / mFilter->getNumberOfSources() + 0.577251;
     if (hueSelect > 1){
         hueSelect -= 1;
     }
     g.setColour(Colour::fromHSV(hueSelect, 1, 1, 0.8f));
-    FPoint sourceXY = mFilter->getSourceXY(iSelectedSrc);
-
     float fRadius = (fieldWidth - kSourceDiameter)/4;
     g.drawLine   (fFieldCenter, fFieldCenter, fFieldCenter + sourceXY.x * fRadius, fFieldCenter - sourceXY.y * fRadius, 1.5);
     float radiusZenith = sqrtf(pow(2 * sourceXY.x * fRadius,2) + pow(2 * sourceXY.y * fRadius,2));

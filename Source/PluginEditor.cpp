@@ -393,7 +393,7 @@ AudioProcessorEditor (ownerFilter)
         Component *box = mTrajectoryBox->getContent();
         mTrajectoryBoxLabel = addLabel("Trajectories", 0,0, 150, dh, this);
         mTrajectoryBoxLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
-        box->setSize(600, 250);
+        box->setSize(500, 160);
         
         //---------- ROW 1 -------------
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
@@ -405,7 +405,7 @@ AudioProcessorEditor (ownerFilter)
         box->addAndMakeVisible(mMovementModeCombo);
         mComponents.add(mMovementModeCombo);
         mMovementModeCombo->addListener(this);
-        mMovementModeCombo->setBounds(x+80, y, w, kDefaultLabelHeight);
+        mMovementModeCombo->setBounds(x+80, y, w-12, kDefaultLabelHeight);
       
         y += dh + 4;
         x = kMargin;
@@ -656,6 +656,16 @@ AudioProcessorEditor (ownerFilter)
 #endif
         
         mOscActiveButton = addCheckbox("Osc Active", mFilter->getOscActive(), x, y, w, dh, box);
+         y += dh + 4;
+        mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
+        mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
+        mOscSpat1stSrcIdTextEditor->addListener(this);
+        y += dh + 4;
+        
+        mOscSpatPortLabel       = addLabel("OSC Spat port:", x, y, w*2/3 - 5, dh, box);
+        mOscSpatPortTextEditor  = addTextEditor(String(mFilter->getOscSpatPort()), x + w*2/3, y, w/3, dh, box);
+        mOscSpatPortTextEditor->addListener(this);
+        y += dh + 4;
         //-----------------------------
         // start 3rd column
         y = kMargin;
@@ -692,15 +702,7 @@ AudioProcessorEditor (ownerFilter)
             mMaxSpanVolumeSlider = ds;
             y += dh + 4;
         }
-        mOscSpat1stSrcIdLabel = addLabel("1st source ID:", x, y, w*2/3 - 5, dh, box);
-        mOscSpat1stSrcIdTextEditor = addTextEditor(String(mFilter->getOscSpat1stSrcId()), x + w*2/3, y, w/3, dh, box);
-        mOscSpat1stSrcIdTextEditor->addListener(this);
-        y += dh + 4;
         
-        mOscSpatPortLabel       = addLabel("OSC Spat port:", x, y, w*2/3 - 5, dh, box);
-        mOscSpatPortTextEditor  = addTextEditor(String(mFilter->getOscSpatPort()), x + w*2/3, y, w/3, dh, box);
-        mOscSpatPortTextEditor->addListener(this);
-        y += dh + 4;
     }
     
     //--------------- TRAJECTORIES TAB ---------------- //
