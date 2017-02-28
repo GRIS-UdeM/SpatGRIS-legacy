@@ -1294,58 +1294,102 @@ void SpatGrisAudioProcessorEditor::updateRoutingModeComponents(){
 
 
 void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
-    int iSelectedMode = mFilter->getProcessMode();
-    if (iSelectedMode == kOscSpatMode){
-        mOscSpat1stSrcIdLabel->setVisible(true);
-        mOscSpat1stSrcIdTextEditor->setVisible(true);
-        mOscSpatPortLabel->setVisible(true);
-        mOscSpatPortTextEditor->setVisible(true);
-        mOscActiveButton->setVisible(true);
-        
-        mAzimSpanSlider->setEnabled(true);
-        mAzimSpanLabel->setEnabled(true);
-        mAzimSpanLinkButton->setEnabled(true);
-        mElevSpanSlider->setEnabled(true);
-        mElevSpanLabel->setEnabled(true);
-        mElevSpanLinkButton->setEnabled(true);
-        
-        mSpeakersBox->setEnabled(false);
-        mSmoothingLabel->setEnabled(false);
-        mSmoothingSlider->setEnabled(false);
-#if ALLOW_INTERNAL_WRITE
-        mRoutingModeCombo->setEnabled(false);
-        mRoutingModeLabel->setEnabled(false);
-#endif
-        mMaxSpanVolumeLabel->setEnabled(false);
-        mMaxSpanVolumeSlider->setEnabled(false);
-        mTabs->getTabContentComponent(1)->setEnabled(false);
-        mTabs->getTabContentComponent(3)->setEnabled(false);
-    } else {
-        mOscSpat1stSrcIdLabel->setVisible(false);
-        mOscSpat1stSrcIdTextEditor->setVisible(false);
-        mOscSpatPortLabel->setVisible(false);
-        mOscSpatPortTextEditor->setVisible(false);
-        mOscActiveButton->setVisible(false);
 
-        mAzimSpanSlider->setEnabled(false);
-        mAzimSpanLabel->setEnabled(false);
-        mAzimSpanLinkButton->setEnabled(false);
-        mElevSpanSlider->setEnabled(false);
-        mElevSpanLabel->setEnabled(false);
-        mElevSpanLinkButton->setEnabled(false);
-
-        mSpeakersBox->setEnabled(true);
-        mSmoothingLabel->setEnabled(true);
-        mSmoothingSlider->setEnabled(true);
+    switch(mFilter->getProcessMode()) {
+        case kOscSpatMode :
+            mOscSpat1stSrcIdLabel->setVisible(true);
+            mOscSpat1stSrcIdTextEditor->setVisible(true);
+            mOscSpatPortLabel->setVisible(true);
+            mOscSpatPortTextEditor->setVisible(true);
+            mOscActiveButton->setVisible(true);
+            
+            mAzimSpanSlider->setEnabled(true);
+            mAzimSpanLabel->setEnabled(true);
+            mAzimSpanLinkButton->setEnabled(true);
+            mElevSpanSlider->setEnabled(true);
+            mElevSpanLabel->setEnabled(true);
+            mElevSpanLinkButton->setEnabled(true);
+            
+            mSpeakersBox->setEnabled(false);
+            mSmoothingLabel->setEnabled(false);
+            mSmoothingSlider->setEnabled(false);
 #if ALLOW_INTERNAL_WRITE
-        mRoutingModeCombo->setEnabled(true);
-        mRoutingModeLabel->setEnabled(true);
+            mRoutingModeCombo->setEnabled(false);
+            mRoutingModeLabel->setEnabled(false);
 #endif
-        mMaxSpanVolumeLabel->setEnabled(true);
-        mMaxSpanVolumeSlider->setEnabled(true);
-        mTabs->getTabContentComponent(1)->setEnabled(true);
-        mTabs->getTabContentComponent(3)->setEnabled(true);
+            mMaxSpanVolumeLabel->setEnabled(false);
+            mMaxSpanVolumeSlider->setEnabled(false);
+            mTabs->getTabContentComponent(1)->setEnabled(false);
+            mTabs->getTabContentComponent(3)->setEnabled(false);
+            mSurfaceOrPanSlider->setEnabled(false);
+            mSurfaceOrPanLabel->setEnabled(false);
+            mSurfaceOrPanLinkButton->setEnabled(false);
+            break;
+            
+        case kFreeVolumeMode :
+            mOscSpat1stSrcIdLabel->setVisible(false);
+            mOscSpat1stSrcIdTextEditor->setVisible(false);
+            mOscSpatPortLabel->setVisible(false);
+            mOscSpatPortTextEditor->setVisible(false);
+            mOscActiveButton->setVisible(false);
+            
+            mAzimSpanSlider->setEnabled(false);
+            mAzimSpanLabel->setEnabled(false);
+            mAzimSpanLinkButton->setEnabled(false);
+            mElevSpanSlider->setEnabled(false);
+            mElevSpanLabel->setEnabled(false);
+            mElevSpanLinkButton->setEnabled(false);
+            
+            mSpeakersBox->setEnabled(true);
+            mSmoothingLabel->setEnabled(true);
+            mSmoothingSlider->setEnabled(true);
+            
+            mMaxSpanVolumeLabel->setEnabled(false);
+            mMaxSpanVolumeSlider->setEnabled(false);
+            mTabs->getTabContentComponent(1)->setEnabled(false);
+            mTabs->getTabContentComponent(3)->setEnabled(true);
+            
+            mSurfaceOrPanSlider->setIsPanSpan(false);
+            mSurfaceOrPanLabel->setEnabled(true);
+            mSurfaceOrPanSlider->setEnabled(true);
+            mSurfaceOrPanLinkButton->setEnabled(true);
+            static_cast<Label*>(mSurfaceOrPanLabel)->setText("Surface", dontSendNotification);
+            break;
+            
+            
+        default:
+            mOscSpat1stSrcIdLabel->setVisible(false);
+            mOscSpat1stSrcIdTextEditor->setVisible(false);
+            mOscSpatPortLabel->setVisible(false);
+            mOscSpatPortTextEditor->setVisible(false);
+            mOscActiveButton->setVisible(false);
+            
+            mAzimSpanSlider->setEnabled(false);
+            mAzimSpanLabel->setEnabled(false);
+            mAzimSpanLinkButton->setEnabled(false);
+            mElevSpanSlider->setEnabled(false);
+            mElevSpanLabel->setEnabled(false);
+            mElevSpanLinkButton->setEnabled(false);
+            
+            mSpeakersBox->setEnabled(true);
+            mSmoothingLabel->setEnabled(true);
+            mSmoothingSlider->setEnabled(true);
+#if ALLOW_INTERNAL_WRITE
+            mRoutingModeCombo->setEnabled(true);
+            mRoutingModeLabel->setEnabled(true);
+#endif
+            mMaxSpanVolumeLabel->setEnabled(true);
+            mMaxSpanVolumeSlider->setEnabled(true);
+            mTabs->getTabContentComponent(1)->setEnabled(true);
+            mTabs->getTabContentComponent(3)->setEnabled(true);
+            mSurfaceOrPanLabel->setEnabled(true);
+            mSurfaceOrPanSlider->setIsPanSpan(true, false);
+            mSurfaceOrPanSlider->setEnabled(true);
+            mSurfaceOrPanLinkButton->setEnabled(true);
+            static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
+            
     }
+    
 #if ALLOW_PAN_MODE
     if (iSelectedMode == kPanMode){
         mSurfaceOrPanSlider->setEnabled(false);
@@ -1358,23 +1402,7 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
         mSurfaceOrPanSlider->valueChanged();
     }
 #endif
-    if (mFilter->getProcessMode() == kSpanMode){
-        mSurfaceOrPanLabel->setEnabled(true);
-        mSurfaceOrPanSlider->setIsPanSpan(true, false);
-        mSurfaceOrPanSlider->setEnabled(true);
-        mSurfaceOrPanLinkButton->setEnabled(true);
-        static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
-    } else if (mFilter->getProcessMode() == kFreeVolumeMode){
-        mSurfaceOrPanSlider->setIsPanSpan(false);
-        mSurfaceOrPanLabel->setEnabled(true);
-        mSurfaceOrPanSlider->setEnabled(true);
-        mSurfaceOrPanLinkButton->setEnabled(true);
-        static_cast<Label*>(mSurfaceOrPanLabel)->setText("Surface", dontSendNotification);
-    } else {
-        mSurfaceOrPanSlider->setEnabled(false);
-        mSurfaceOrPanLabel->setEnabled(false);
-        mSurfaceOrPanLinkButton->setEnabled(false);
-    }
+    
     mNeedRepaint = true;
     mFieldNeedRepaint = true;
 }
