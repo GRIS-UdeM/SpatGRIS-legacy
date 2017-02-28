@@ -58,7 +58,7 @@ using namespace std;
 #endif
 
 #ifndef OUTPUT_RAMPING
-#define OUTPUT_RAMPING 0
+#define OUTPUT_RAMPING 1
 #endif
 
 #ifndef TIME_PROCESS
@@ -396,7 +396,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes);
 
     //==============================================================================
-
+    bool getApplyOutRamp() const { return mApplyOutRamp; }
+    void setApplyOutRamp(bool s) { mApplyOutRamp = s; }
+    
 	bool getApplyFilter() const { return mApplyFilter; }
 	void setApplyFilter(bool s) { mApplyFilter = s; }
 	
@@ -831,6 +833,7 @@ private:
 	
 	bool mCalculateLevels;
 
+    bool mApplyOutRamp;
 	bool mApplyFilter;
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;

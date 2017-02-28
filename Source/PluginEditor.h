@@ -178,6 +178,7 @@ private:
     ToggleButton *mOscActiveButton;
     ToggleButton *mTrSeparateAutomationModeButton;
     ToggleButton *mApplyFilterButton;
+    ToggleButton *mApplyOutputRamping;
 	ComboBox *mMovementModeCombo;
     ComboBox *mInputOutputModeCombo;
     TextButton *mApplyInputOutputModeButton;

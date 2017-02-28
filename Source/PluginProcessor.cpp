@@ -1647,7 +1647,9 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
 
 #if OUTPUT_RAMPING
             //reset vSpeakersCurrentlyInUse
-            vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
+            if(mApplyOutRamp){
+                vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers,false);
+            }
 #endif
             
             //figure out current sample value and its Ray and Theta coordinates
@@ -1722,7 +1724,12 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
             Time timeVolume = Time::getCurrentTime();
 #endif
 #if OUTPUT_RAMPING
-            spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleTheta, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
+            if(mApplyOutRamp){
+                spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleTheta, fCurSampleR, &p_pfParamCopy, vSpeakersCurrentlyInUse, fOldValuesPortion);
+            }else{
+                vector<bool> empty;
+                spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleTheta, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
+            }
 #else
             vector<bool> empty;
             spatializeSample(fCurSampleValue, iSampleId, iCurSource, fCurSampleTheta, fCurSampleR, &p_pfParamCopy, empty, fOldValuesPortion);
@@ -1738,7 +1745,9 @@ void SpatGrisAudioProcessor::ProcessDataPan(float *p_pfParamCopy) {
 //                    setSpeakerVolume(iCurSource, 0, fOldValuesPortion, o, nullptr);
 //                }
 //            }
-            addToOutputs(iCurSource, fCurSampleValue, iSampleId);
+            if(mApplyOutRamp){
+                addToOutputs(iCurSource, fCurSampleValue, iSampleId);
+            }
 #endif
             
 #if TIME_PROCESS
@@ -1769,8 +1778,13 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             float vLeft = 1 - dLeft / dTotal;
             float vRight = 1 - dRight / dTotal;
 #if OUTPUT_RAMPING
-            setSpeakerVolume(p_iCurSource, vLeft,  fOldValuesPortion, left,  &vSpeakersCurrentlyInUse);
-            setSpeakerVolume(p_iCurSource, vRight, fOldValuesPortion, right, &vSpeakersCurrentlyInUse);
+            if(mApplyOutRamp){
+                setSpeakerVolume(p_iCurSource, vLeft,  fOldValuesPortion, left,  &vSpeakersCurrentlyInUse);
+                setSpeakerVolume(p_iCurSource, vRight, fOldValuesPortion, right, &vSpeakersCurrentlyInUse);
+            }else{
+                addToOutput(p_fCurSampleValue * vLeft,  left, p_iSampleId);
+                addToOutput(p_fCurSampleValue * vRight,  right, p_iSampleId);
+            }
 #else
             addToOutput(p_fCurSampleValue * vLeft,  left, p_iSampleId);
             addToOutput(p_fCurSampleValue * vRight,  right, p_iSampleId);
@@ -1780,7 +1794,11 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             int o = (left >= 0) ? left : right;
             jassert(o >= 0);
 #if OUTPUT_RAMPING
-            setSpeakerVolume(p_iCurSource, 1, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+             if(mApplyOutRamp){
+                 setSpeakerVolume(p_iCurSource, 1, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+             }else{
+                 addToOutput(p_fCurSampleValue, o, p_iSampleId);
+             }
 #else
             addToOutput(p_fCurSampleValue, o, p_iSampleId);
 #endif
@@ -1809,8 +1827,13 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             float vLeft = 1 - fFrontLeftSpAngle / dTotal;
             float vRight = 1 - fFrontRightSpAngle / dTotal;
 #if OUTPUT_RAMPING
-            setSpeakerVolume(p_iCurSource, vLeft * fFrontVol, fOldValuesPortion, iFrontLeftSpID, &vSpeakersCurrentlyInUse);
-            setSpeakerVolume(p_iCurSource, vRight * fFrontVol, fOldValuesPortion, iFrontRightSpId, &vSpeakersCurrentlyInUse);
+            if(mApplyOutRamp){
+                setSpeakerVolume(p_iCurSource, vLeft * fFrontVol, fOldValuesPortion, iFrontLeftSpID, &vSpeakersCurrentlyInUse);
+                setSpeakerVolume(p_iCurSource, vRight * fFrontVol, fOldValuesPortion, iFrontRightSpId, &vSpeakersCurrentlyInUse);
+            }else{
+                addToOutput(p_fCurSampleValue * vLeft * fFrontVol, iFrontLeftSpID, p_iSampleId);
+                addToOutput(p_fCurSampleValue * vRight * fFrontVol, iFrontRightSpId, p_iSampleId);
+            }
 #else
             addToOutput(p_fCurSampleValue * vLeft * fFrontVol, iFrontLeftSpID, p_iSampleId);
             addToOutput(p_fCurSampleValue * vRight * fFrontVol, iFrontRightSpId, p_iSampleId);
@@ -1820,7 +1843,11 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             int o = (iFrontLeftSpID >= 0) ? iFrontLeftSpID : iFrontRightSpId;
             jassert(o >= 0);
 #if OUTPUT_RAMPING
-            setSpeakerVolume(p_iCurSource, fFrontVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+            if(mApplyOutRamp){
+                setSpeakerVolume(p_iCurSource, fFrontVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+            }else{
+                addToOutput(p_fCurSampleValue * fFrontVol, o, p_iSampleId);
+            }
 #else
             addToOutput(p_fCurSampleValue * fFrontVol, o, p_iSampleId);
 #endif
@@ -1832,8 +1859,13 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             float vLeft  = 1 - dBackLeft / dTotal;
             float vRight = 1 - dBackRight / dTotal;
 #if OUTPUT_RAMPING
-            setSpeakerVolume(p_iCurSource, vLeft * fBackVol, fOldValuesPortion, iBackLeftSpID, &vSpeakersCurrentlyInUse);
-            setSpeakerVolume(p_iCurSource, vRight * fBackVol, fOldValuesPortion, iBackRightSpId, &vSpeakersCurrentlyInUse);
+            if(mApplyOutRamp){
+                setSpeakerVolume(p_iCurSource, vLeft * fBackVol, fOldValuesPortion, iBackLeftSpID, &vSpeakersCurrentlyInUse);
+                setSpeakerVolume(p_iCurSource, vRight * fBackVol, fOldValuesPortion, iBackRightSpId, &vSpeakersCurrentlyInUse);
+            }else{
+                addToOutput(p_fCurSampleValue * vLeft * fBackVol, iBackLeftSpID, p_iSampleId);
+                addToOutput(p_fCurSampleValue * vRight * fBackVol, iBackRightSpId, p_iSampleId);
+            }
 #else
             addToOutput(p_fCurSampleValue * vLeft * fBackVol, iBackLeftSpID, p_iSampleId);
             addToOutput(p_fCurSampleValue * vRight * fBackVol, iBackRightSpId, p_iSampleId);
@@ -1843,7 +1875,11 @@ void SpatGrisAudioProcessor::spatializeSample(const float &p_fCurSampleValue, co
             int o = (iBackLeftSpID >= 0) ? iBackLeftSpID : iBackRightSpId;
             jassert(o >= 0);
 #if OUTPUT_RAMPING
+            if(mApplyOutRamp){
             setSpeakerVolume(p_iCurSource, fBackVol, fOldValuesPortion, o, &vSpeakersCurrentlyInUse);
+            }else{
+                addToOutput(p_fCurSampleValue * fBackVol, o, p_iSampleId);
+            }
 #else
             addToOutput(p_fCurSampleValue * fBackVol, o, p_iSampleId);
 #endif
@@ -1916,8 +1952,11 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
         //------------------------------- FOR EACH SAMPLE ------------------------------------------
         for (unsigned int iCurSampleId = 0; iCurSampleId < m_iDawBufferSize; ++iCurSampleId) {
 #if OUTPUT_RAMPING
-            vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
+             if(mApplyOutRamp){
+                 vSpeakersCurrentlyInUse.assign(mNumberOfSpeakers, false);
+             }
 #endif
+            
             float s = input[iCurSampleId];
             float x = input_x[iCurSampleId];
             float y = input_y[iCurSampleId];
@@ -1944,6 +1983,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                 float distance;
                 if (r >= 1) distance = denormalize(params[kFilterMid], params[kFilterFar], (r - 1));
                 else distance = denormalize(params[kFilterNear], params[kFilterMid], r);
+                
                 s = mFilters[iCurSource].process(s, distance);
             }
             
@@ -1954,7 +1994,7 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             } else {
                 dbSource = denormalize(params[kVolumeNear], params[kVolumeMid], r);
             }
-            s *= dbToLinear(dbSource);
+            tv *= dbToLinear(dbSource);
             
             //lock angle when passing in center
             float t;
@@ -2013,10 +2053,21 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
             float adj = tv / total;
             
 #if OUTPUT_RAMPING
-            for (int o = 0; o < mNumberOfSpeakers; o++){
-                setSpeakerVolume(iCurSource, mOutFactors[o] * adj, fOldValuesPortion, o, NULL);
+            if(mApplyOutRamp){
+                for (int o = 0; o < mNumberOfSpeakers; o++){
+                    setSpeakerVolume(iCurSource, mOutFactors[o] * adj , fOldValuesPortion, o, NULL);
+                    /*if (mOutFactors[o]){
+                     addToOutput(s * mOutFactors[o] * adj, o, iCurSampleId);
+                     }*/
+                }
+                addToOutputs(iCurSource, s, iCurSampleId);
+            }else{
+                for (int o = 0; o < mNumberOfSpeakers; o++){
+                    if (mOutFactors[o]){
+                        addToOutput(s * mOutFactors[o] * adj, o, iCurSampleId);
+                    }
+                }
             }
-            addToOutputs(iCurSource, s, iCurSampleId);
 #else
             for (int o = 0; o < mNumberOfSpeakers; o++){
                 if (mOutFactors[o]){

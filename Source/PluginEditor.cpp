@@ -602,6 +602,10 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 4;
         }
         mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
+        y += dh + 4;
+        mApplyOutputRamping = addCheckbox("Output Ramping", mFilter->getApplyOutRamp(), x, y, w, dh, box);
+        mApplyOutputRamping->setTooltip("Warning : destroy performence");
+        
         
         //-----------------------------
         // start 2nd column
@@ -900,8 +904,7 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 4;
         }
         
-        mApplyFilterButton = addCheckbox("Apply Filter", mFilter->getApplyFilter(),
-                                   x, y, w, dh, box);
+        mApplyFilterButton = addCheckbox("Apply Filter", mFilter->getApplyFilter(), x, y, w, dh, box);
         y += dh + 4;
         
         //-----------------------------
@@ -929,7 +932,7 @@ AudioProcessorEditor (ownerFilter)
             mFilterMid = ds;
             y += dh + 4;
         }
-        
+
         //-----------------------------
         // start 3rd column
         y = kMargin;
@@ -1172,6 +1175,7 @@ AudioProcessorEditor (ownerFilter)
     addAndMakeVisible (m_pResizer = new ResizableCornerComponent (this, &m_oResizeLimits));
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
+ 
     startTimerHz (hertzRefresh);
     
 }
@@ -1991,6 +1995,9 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mApplyFilterButton) {
         mFilter->setApplyFilter(button->getToggleState());
     }
+    else if (button == mApplyOutputRamping) {
+        mFilter->setApplyOutRamp(button->getToggleState());
+    }
     
 #if USE_JOYSTICK
     //Changements lié a l'ajout de joystick à l'onglet interface
@@ -2525,6 +2532,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
     mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
     mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
+    mApplyOutputRamping->setToggleState(mFilter->getApplyOutRamp(),           dontSendNotification);
 }
 
 void SpatGrisAudioProcessorEditor::repaintTheStuff(){
