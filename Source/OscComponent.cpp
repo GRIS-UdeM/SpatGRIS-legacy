@@ -179,19 +179,15 @@ public:
                         addListener(this, "/Octo/Source6");
                         addListener(this, "/Octo/Source7");
                         addListener(this, "/Octo/Source8");
-                        mReceiveIp->setReadOnly(true);
-                        mReceivePort->setReadOnly(true);
-                        mReceiveIp->setEnabled(false);
-                        mReceivePort->setEnabled(false);
+                        changeStatusComp(mReceiveIp, false);
+                        changeStatusComp(mReceivePort, false);
                         
                     }
                 //trying to disconnect
                 } else {
                     if (disconnect()) {
-                        mReceiveIp->setReadOnly(false);
-                        mReceivePort->setReadOnly(false);
-                        mReceiveIp->setEnabled(true);
-                        mReceivePort->setEnabled(true);
+                        changeStatusComp(mReceiveIp);
+                        changeStatusComp(mReceivePort);
                     } else {
                         DBG("lo_server_thread_new failed (port in use ?)");
                     }
@@ -205,24 +201,19 @@ public:
                     if(!mOscSender.connect(mOscSendIpAddress, iSendPort)){
                         DBG("OSC cannot connect");
                         mSend->setToggleState(false, dontSendNotification);
-                        mSendIp->setReadOnly(false);
-                        mSendPort->setReadOnly(false);
-                        mSendIp->setEnabled(true);
-                        mSendPort->setEnabled(true);
+                        changeStatusComp(mSendIp);
+                        changeStatusComp(mSendPort);
+
                     } else {
                         mSourceXY = FPoint(-1, -1);
                         mSource = -1;
-                        mSendIp->setReadOnly(true);
-                        mSendPort->setReadOnly(true);
-                        mSendIp->setEnabled(false);
-                        mSendPort->setEnabled(false);
+                        changeStatusComp(mSendIp, false);
+                        changeStatusComp(mSendPort, false);
                     }
 
                 } else {
-                    mSendIp->setReadOnly(false);
-                    mSendPort->setReadOnly(false);
-                    mSendIp->setEnabled(true);
-                    mSendPort->setEnabled(true);
+                    changeStatusComp(mSendIp);
+                    changeStatusComp(mSendPort);
                 }
                 mFilter->setOscSendEnabled(mSend->getToggleState());
             } else {
@@ -290,6 +281,21 @@ public:
 	}
 
 private:
+    
+    void changeStatusComp(TextEditor *comp, bool enable = true){
+        if(enable){
+            comp->setColour (TextEditor::textColourId, juce::Colours::black);
+            comp->applyFontToAllText (mGrisFeel.getFont());
+            comp->setReadOnly(false);
+            comp->setEnabled(true);
+
+        }else{
+            comp->setColour (TextEditor::textColourId, juce::Colour::greyLevel(.35));
+            comp->applyFontToAllText (mGrisFeel.getFont());
+            comp->setReadOnly(true);
+            comp->setEnabled(false);
+        }
+    }
 	SpatGrisAudioProcessor *mFilter;
 	SpatGrisAudioProcessorEditor *mEditor;
 	
