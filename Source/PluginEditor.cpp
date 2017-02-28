@@ -601,12 +601,11 @@ AudioProcessorEditor (ownerFilter)
             mSmoothingSlider = ds;
             y += dh + 4;
         }
-        mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
-        y += dh + 4;
         mApplyOutputRamping = addCheckbox("Output Ramping", mFilter->getApplyOutRamp(), x, y, w, dh, box);
         mApplyOutputRamping->setTooltip("Warning : destroy performence");
-        
-        
+        y += dh + 4;
+        mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
+
         //-----------------------------
         // start 2nd column
         y = kMargin;

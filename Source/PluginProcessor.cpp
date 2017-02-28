@@ -236,6 +236,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
 	mCalculateLevels = false;
 	mApplyFilter = true;
+    mApplyOutRamp = false;
 	mLinkSurfaceOrPan = true;
     mLinkAzimSpan = false;
     mLinkElevSpan = false;
@@ -2230,6 +2231,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mOscSendIp", mOscSendIp);
     xml.setAttribute ("mProcessMode", mProcessMode);
     xml.setAttribute ("mApplyFilter", mApplyFilter);
+    xml.setAttribute ("mApplyOutRamp", mApplyOutRamp);
     xml.setAttribute ("mInputOutputMode", mInputOutputMode);
     xml.setAttribute ("mSrcPlacementMode", mSrcPlacementMode);
     xml.setAttribute ("mSpPlacementMode", mSpPlacementMode);
@@ -2327,6 +2329,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             setProcessMode(iProcessMode);
             
             mApplyFilter        = xmlState->getIntAttribute ("mApplyFilter", 1);
+            mApplyOutRamp       = xmlState->getIntAttribute ("mApplyOutRamp", 0);
             
             setInputOutputMode(xmlState->getIntAttribute ("mInputOutputMode", mInputOutputMode)+1);
             
