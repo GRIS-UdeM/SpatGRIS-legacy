@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$2" ]
+  then
+    echo "Need VERSION and MESSAGE"
+fi
+
 VERSION="$1"
 MESSAGE="$2"
 
