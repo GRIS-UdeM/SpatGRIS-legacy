@@ -393,7 +393,7 @@ AudioProcessorEditor (ownerFilter)
         Component *box = mTrajectoryBox->getContent();
         mTrajectoryBoxLabel = addLabel("Trajectories", 0,0, 150, dh, this);
         mTrajectoryBoxLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
-        box->setSize(500, 160);
+        box->setSize(520, 160);
         
         //---------- ROW 1 -------------
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
@@ -1569,7 +1569,7 @@ void SpatGrisAudioProcessorEditor::resized()
     mTrajectoryBoxLabel->setTopLeftPosition(x, 176);
     mTrajectoryBox->setBounds(x, 192 , w-(fieldSize + (iExtraSpace * 5)), 170);
 
-    mTabs->setBounds(x-1, 180+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 5)), h - (180+186 + iExtraSpace));
+    mTabs->setBounds(x-1, 180+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 4)), h - (180+186 + iExtraSpace));
 
     x += kCenterColumnWidth + kMargin + kMargin;
     mSpeakersBoxLabel->setTopLeftPosition(x, y);
