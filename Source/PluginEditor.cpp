@@ -1053,11 +1053,11 @@ AudioProcessorEditor (ownerFilter)
         int lw = 60;
         y += dh + 4;
         
-        addLabel("Ray", x, y, lw, dh, box);
+        mrayLab = addLabel("Ray", x, y, lw, dh, box);
         mSpR = addTextEditor("1", x + (w - selectw -25), y, 75, dh, box);
         mSpR->setExplicitFocusOrder(6);
         mSpR->addListener(this);
-        addLabel("(0 - 2)", x +(w - selectw+50), y, lw, dh, box);
+        mrayvalLab = addLabel("(0 - 2)", x +(w - selectw+50), y, lw, dh, box);
         y += dh + 4;
         
         addLabel("Angle", x, y, lw, dh, box);
@@ -1355,9 +1355,13 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mSurfaceOrPanSlider->setEnabled(true);
             mSurfaceOrPanLinkButton->setEnabled(true);
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Surface", dontSendNotification);
+            mrayLab->setEnabled(true);
+            mrayvalLab->setEnabled(true);
+            mSpR->setEnabled(true);
+            static_cast<Label*>(mrayvalLab)->setText("(0 - 2)", dontSendNotification);
             break;
             
-            
+            //SpanMode
         default:
             mOscSpat1stSrcIdLabel->setVisible(false);
             mOscSpat1stSrcIdTextEditor->setVisible(false);
@@ -1388,6 +1392,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mSurfaceOrPanSlider->setEnabled(true);
             mSurfaceOrPanLinkButton->setEnabled(true);
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
+            mrayLab->setEnabled(false);
+            mrayvalLab->setEnabled(false);
+            mSpR->setEnabled(false);
+            static_cast<Label*>(mrayvalLab)->setText("(1)", dontSendNotification);
             
     }
     

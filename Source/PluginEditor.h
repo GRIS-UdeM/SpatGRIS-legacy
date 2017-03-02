@@ -313,6 +313,8 @@ private:
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
     
+    Component * mrayLab;
+    Component * mrayvalLab;
     
 #if TIME_GUI
     int m_iGuiRefreshCounter = 0;
