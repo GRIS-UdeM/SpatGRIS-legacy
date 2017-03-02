@@ -561,10 +561,7 @@ AudioProcessorEditor (ownerFilter)
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
-        if(mFilter->getTrState() == kTrWriting){
-            updateTrajectoryStartComponent(kRunning);
-            mTrWriteButton->setToggleState(true, dontSendNotification);
-        }
+        
         
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
@@ -1176,7 +1173,11 @@ AudioProcessorEditor (ownerFilter)
     addAndMakeVisible (m_pResizer = new ResizableCornerComponent (this, &m_oResizeLimits));
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
- 
+    if(mFilter->getTrState() == kTrWriting){
+        updateTrajectoryStartComponent(kRunning);
+        mTrWriteButton->setToggleState(true, dontSendNotification);
+    }
+    
     startTimerHz (hertzRefresh);
     
 }
@@ -2388,6 +2389,8 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
     updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   isStarting);
     updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     isStarting);
     updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   isStarting);
+    updateSingleTrajectoryStartComponent(mInputOutputModeCombo,     isStarting);
+    updateSingleTrajectoryStartComponent(mApplyInputOutputModeButton,   isStarting);
 }
 
 //==============================================================================

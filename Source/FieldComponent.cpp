@@ -46,7 +46,10 @@ FieldComponent::~FieldComponent()
 
 
 void FieldComponent::clearTrajectoryPath(){
-    m_dqAllPathPoints.clear();
+    
+    if(m_dqAllPathPoints.size()>0){
+        m_dqAllPathPoints.clear();
+    }
 }
 
 void FieldComponent::updatePositionTrace(float p_fX, float p_fY){

@@ -54,9 +54,9 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->setIsRecordingAutomation(true);
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
-#if ALLOW_MVT_MODE_AUTOMATION
+
 //        mFilter->beginParameterChangeGesture(kMovementMode);
-#endif
+
 
         storeAllDownPositions();
     }
@@ -181,11 +181,11 @@ void SourceMover::end(MoverType mt, bool clearTrajectory) {
     } else if (mMoverType != kSourceThread){
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->endParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
-#if ALLOW_MVT_MODE_AUTOMATION
+
 //        mFilter->endParameterChangeGesture(kMovementMode);
-#endif
+
         mFilter->setIsRecordingAutomation(false);
-        if(clearTrajectory){
+        if(clearTrajectory && mFieldExists){
             mField->clearTrajectoryPath();
         }
     }
