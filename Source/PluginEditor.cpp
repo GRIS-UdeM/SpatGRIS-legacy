@@ -598,9 +598,11 @@ AudioProcessorEditor (ownerFilter)
             mSmoothingSlider = ds;
             y += dh + 4;
         }
+#if OUTPUT_RAMPING
         mApplyOutputRamping = addCheckbox("Output Ramping", mFilter->getApplyOutRamp(), x, y, w, dh, box);
         mApplyOutputRamping->setTooltip("Warning : destroy performence");
         y += dh + 4;
+#endif
         mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
 
         //-----------------------------
@@ -2033,10 +2035,11 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     else if (button == mApplyFilterButton) {
         mFilter->setApplyFilter(button->getToggleState());
     }
+    #if OUTPUT_RAMPING
     else if (button == mApplyOutputRamping) {
         mFilter->setApplyOutRamp(button->getToggleState());
     }
-    
+    #endif
 #if USE_JOYSTICK
     //Changements lié a l'ajout de joystick à l'onglet interface
     else if(button == mEnableJoystick) {
@@ -2572,7 +2575,9 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
     mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
     mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
+    #if OUTPUT_RAMPING
     mApplyOutputRamping->setToggleState(mFilter->getApplyOutRamp(),           dontSendNotification);
+    #endif
 }
 
 void SpatGrisAudioProcessorEditor::repaintTheStuff(){
