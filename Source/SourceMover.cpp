@@ -45,7 +45,9 @@ SourceMover::SourceMover(SpatGrisAudioProcessor *filter)
 }
 
 void SourceMover::begin(int s, MoverType mt) {
-	if (mMoverType != kVacant) return;
+    if (mMoverType != kVacant) {
+        return;
+    }
 	mMoverType = mt;
 	mSelectedSrc = s;
     mFilter->setSelectedSrc(s);
@@ -63,10 +65,9 @@ void SourceMover::begin(int s, MoverType mt) {
 }
 
 void SourceMover::storeAllDownPositions(){
-    int iNbrSrc = mFilter->getNumberOfSources();
-    for (int j = 0; j < iNbrSrc; j++) {
-        mSourcesDownRT.setUnchecked(j, mFilter->getSourceRT(j));
-        mSourcesDownXY.setUnchecked(j, mFilter->getSourceXY(j));
+    for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+        mSourcesDownRT.setUnchecked(i, mFilter->getSourceRT(i));
+        mSourcesDownXY.setUnchecked(i, mFilter->getSourceXY(i));
     }
 }
 
@@ -80,12 +81,12 @@ void SourceMover::storeDownPosition(int id, FPoint pointRT){
 
 //in kSourceThread, FPoint p is the current location of the selected source, as read on the automation, and we move only the non-selected sources based on location of selected source
 void SourceMover::move(FPoint pointXY01, MoverType mt) {
-    if (mMoverType != mt){
+    if (mMoverType != mt) {
         return;
     }
     
     //move selected source to pointXY01 only if not kSourceThread. In kSourceThread it is already being moved by automation
-    if (mMoverType != kSourceThread){
+    if (mMoverType != kSourceThread) {
         mFilter->setSourceXY01(mSelectedSrc, pointXY01);
         if (mFieldExists){
             mField->updatePositionTrace(pointXY01.x, pointXY01.y);
@@ -101,11 +102,11 @@ void SourceMover::move(FPoint pointXY01, MoverType mt) {
         FPoint newSelSrcPosRT = mFilter->getSourceRT(mSelectedSrc); //in kSourceThread, this will be the same as mFilter->convertXy012Rt(pointXY01)
         FPoint delSelSrcPosRT = newSelSrcPosRT - oldSelSrcPosRT;
         
-        if (delSelSrcPosRT.isOrigin()){
+        if (delSelSrcPosRT.isOrigin()) {
             return;     //return if delta is null
         }
         float vxo = pointXY01.x, vyo = pointXY01.y;
-        if (kSourceThread){
+        if (kSourceThread) {
             mFilter->setPreventSourceLocationUpdate(true);
         }
         

@@ -1435,12 +1435,11 @@ void SpatGrisAudioProcessor::processTrajectory(){
 
     if (mTrajectory) {
         if (m_bIsPlaying) {
-            mTrajectory->setSpeed(mSpeedTraject);
             double bps = cpi.bpm / 60;
             float seconds = m_iDawBufferSize / m_dSampleRate;
             float beats = seconds * bps;
             
-            bool done = mTrajectory->process(seconds, beats);
+            bool done = mTrajectory->process(seconds, beats, mSpeedTraject);
             if (done){
                 //mTrajectory.~ReferenceCountedObjectPtr();
                 mTrajectory = nullptr;

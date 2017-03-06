@@ -60,7 +60,8 @@ void Trajectory::start() {
 }
 
 //return true if the trajectory is finished, false otherwise
-bool Trajectory::process(float seconds, float beats) {
+bool Trajectory::process(float seconds, float beats, float speed) {
+    m_fSpeed = speed;
 	if (m_bStopped) return true;
     if (!m_bStarted) {
         start();
@@ -372,6 +373,7 @@ protected:
             fCurX01 = mStartPointXy01.x;
             fCurY01 = fCurStartY01 + fCurrentProgress;
         }
+
         //convert to RT to implement angular deviation
         FPoint pointRT = mFilter->convertXy012Rt(FPoint(fCurX01, fCurY01), false);
         //float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
@@ -583,20 +585,22 @@ protected:
     virtual void resetIfRandomTarget(){};
 
 	void childProcess(float duration, float seconds) {
-
+        float integralPart;
         bool bWriteAutomationForAllSources = mFilter->getIndependentMode();
-        
         float p =  m_fTimeDone / m_fDurationSingleTraj;
         int iSelectedSrc = mFilter->getSelectedSrc();
 		int cycle = (int)p;
-
+        
+        
         //reset stuff when we start a new cycle
+        float d  = abs(modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart)) ;
+       
 		if (mCycle != cycle) {
             if (m_bReturn){
                 resetIfRandomTarget();
             }
 			mCycle = cycle;
-			mSourcesOrigins.clearQuick();
+			mSourcesOrigins.clearQuick() ;
 			mSourcesDestinations.clearQuick();
             //get destinations for all sources
             for (int i = 0; i < mFilter->getNumberOfSources(); ++i){
@@ -606,13 +610,13 @@ protected:
             }
 		}
 
-        //do the trajectory
-		float d = fmodf(p, 1);
+        d = (1-cos(d * 2 * M_PI)) / 2;
         for (int i = 0; i < mFilter->getNumberOfSources(); ++i){
             if (bWriteAutomationForAllSources || iSelectedSrc == i) {
                 FPoint a = mSourcesOrigins.getUnchecked(i);
                 FPoint b = mSourcesDestinations.getUnchecked(i);
-                FPoint p = a + (b - a) * d;
+                FPoint p  = a + ((b - a) * d);
+                
                 bool bWriteAutomation = (bWriteAutomationForAllSources || iSelectedSrc == i);
                 if (bWriteAutomationForAllSources){
                     mFilter->setSourceXY(i, p, bWriteAutomation);

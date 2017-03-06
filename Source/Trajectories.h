@@ -84,18 +84,18 @@ public:
 public:
 	virtual ~Trajectory() {}
 	
-	bool process(float seconds, float beats);
+	bool process(float seconds, float beats, float speed);
 	float progress();
     int progressCycle();
 	void stop(bool clearTrajectory = true);
     
     float getSpeed(){ return m_fSpeed;}
-    void  setSpeed(float p_fSpeed){
+    /*void  setSpeed(float p_fSpeed){
         
         if (p_fSpeed >= -3.f && p_fSpeed <= 3.f){
             m_fSpeed = p_fSpeed;
         }
-    }
+    }*/
 	
 protected:
 	virtual void childProcess(float duration, float seconds) = 0;
