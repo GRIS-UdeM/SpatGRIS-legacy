@@ -2186,11 +2186,14 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
         bLevelUiLock = true;
         // make sure that it's actually our type of XML object..˝
         if (xmlState->hasTagName ("SPATGRIS_SETTINGS")) {
-            int version         = xmlState->getIntAttribute ("kDataVersion", 2);
-            if (version > kDataVersion){
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "SpatGRIS - Loading preset/state from newer version",
-                                                  "You are attempting to load SpatGRIS with a preset from a newer version.\nDefault values will be used for all parameters.", "OK");
-                return;
+            int version         = xmlState->getIntAttribute ("kDataVersion", 0);
+            if (version < kDataVersion){
+                int retV = AlertWindow::showYesNoCancelBox (AlertWindow::WarningIcon, "SpatGRIS - Loading preset/state from newer version",
+                                    "You are attempting to load SpatGRIS with a preset from a newer version!\n - Yes : Try to load preset.\n - No/Cancel : Use default values for all parameters.");
+                if(retV != 1){
+                    return;
+                }
+                
             }
             mShowGridLines      = xmlState->getIntAttribute ("mShowGridLines", 0);
             m_bOscActive        = xmlState->getIntAttribute ("m_bOscActive", 1);
