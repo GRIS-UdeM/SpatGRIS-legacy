@@ -2091,7 +2091,6 @@ void SpatGrisAudioProcessor::restoreCurrentLocations(int p_iLocToRestore){
     }
 }
 
-static const int kDataVersion = 2;
 void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     XmlElement xml ("SPATGRIS_SETTINGS");
@@ -2189,7 +2188,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             int version         = xmlState->getIntAttribute ("kDataVersion", 0);
             if (version < kDataVersion){
                 int retV = AlertWindow::showYesNoCancelBox (AlertWindow::WarningIcon, "SpatGRIS - Loading preset/state from newer version",
-                                    "You are attempting to load SpatGRIS with a preset from a newer version!\n - Yes : Try to load preset.\n - No/Cancel : Use default values for all parameters.");
+                                    "You are attempting to load SpatGRIS with a preset from a newer version!\n - Yes : Try to load preset (Not Safe).\n - No/Cancel : Use default values for all parameters.");
                 if(retV != 1){
                     return;
                 }

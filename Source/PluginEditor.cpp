@@ -1590,10 +1590,8 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
     
     //put new stuff
     int iCurSpeakers = mFilter->getNumberOfSpeakers();
-   	int dh = kDefaultLabelHeight, x = 0, y = 0, w = kRightColumnWidth;
-    
-    const int muteWidth = 50;
-    y += dh + 4;
+   	int dh = kDefaultLabelHeight;
+    int y = dh + 4;
 
     for (int i = 0; i < kMaxChannels; i++){
         if (i < iCurSpeakers){
@@ -1604,7 +1602,7 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
         } else {
             mLevelComponents[i]->setVisible(false);
             mMuteButtons[i]->setVisible(false);
-             mLabelSourceId[i]->setVisible(false);
+            mLabelSourceId[i]->setVisible(false);
         }
     }
     //ensure box height is not smaller than mRoutingVolumeSlider

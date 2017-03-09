@@ -258,6 +258,7 @@ static const int    kRightColumnWidth   = 340;
 static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 26;
 static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin + 26;
 
+static const int    kDataVersion = 2;
 //==============================================================================
 static inline float normalize(float min, float max, float value) {
 	return (value - min) / (max - min);
