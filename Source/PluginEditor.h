@@ -316,6 +316,12 @@ private:
     Component * mrayLab;
     Component * mrayvalLab;
     
+    
+    TextEditor *mSpeedStartAccel;
+    TextEditor *mSpeedEndtAccel;
+    TextEditor *mTimeStartAccel;
+    ComboBox *mTypeAccel;
+    
 #if TIME_GUI
     int m_iGuiRefreshCounter = 0;
 #endif

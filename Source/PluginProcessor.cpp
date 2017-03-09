@@ -662,6 +662,8 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
 
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     if(mTrajectory){
+        mfTRealTime = 0.0f;
+        mSpeedTraject = starSpeedS;
         mTrajectory->stop();
     }
     const MessageManagerLock mmLock;            //prevents gui from running
@@ -1439,10 +1441,43 @@ void SpatGrisAudioProcessor::processTrajectory(){
             float seconds = m_iDawBufferSize / m_dSampleRate;
             float beats = seconds * bps;
             
+            //comput accel
+            float duration = mTrajectory->useBeats() ? beats : seconds;
+            mfTRealTime += duration;
+            
+            //Acceleration---------------------------------
+            if(mfTRealTime < starSpeedT){
+                switch (typeAccel) {
+                    case Linear:
+                        mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
+                        break;
+                        
+                    case Expo:
+                        mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
+                        break;
+                        
+                    case Log:
+                        mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
+                        break;
+                    default:
+                        break;
+                }
+                
+            }
+            
+            //Deceleration------------------------------
+            if(! mTrajectory->isInfinite() &&  mTrajectory->getCurrentTime() > mTrajectory->getTotalDuration()-endSpeedT){
+                cout << "Decel"<< newLine;
+                if(mSpeedTraject >endSpeedE){
+                    mSpeedTraject -= 0.05f;
+                }
+            }
+            
             bool done = mTrajectory->process(seconds, beats, mSpeedTraject);
             if (done){
                 //mTrajectory.~ReferenceCountedObjectPtr();
                 mTrajectory = nullptr;
+                mfTRealTime = 0.0f;
             }
         }
     }
@@ -2286,6 +2321,8 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
 void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
     if(mTrajectory){
+        mfTRealTime = 0.0f;
+        mSpeedTraject = starSpeedS;
         mTrajectory->stop();
     }
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..

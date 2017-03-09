@@ -175,6 +175,14 @@ enum AllMovementModes {
     TotalNumberMovementModes
 };
 
+
+enum AllAccelerationModes {
+    Linear = 0,
+    Expo,
+    Log,
+    TotalNumberAccelerationtModes
+};
+
 JUCE_COMPILER_WARNING("Check Order InputOutputModes AND x12x")
 //because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
 enum InputOutputModes {
@@ -303,6 +311,17 @@ static bool areSameStepParameterValues(double a, double b, int iTotalSteps) {
     return fabs(a - b) < nearest;
 }
 
+static String getAccelerationName(int i) {
+    switch(i) {
+        case Linear: return "Linear";
+        case Expo: return "Expo";
+        case Log: return "Log";
+        
+        default:
+            jassertfalse;
+            return "";
+    }
+}
 typedef Point<float> FPoint;
 
 typedef struct
@@ -532,6 +551,20 @@ public:
     
     float getSpeedTraject() {return mSpeedTraject ;}
     void setSpeedTraject(float s){mSpeedTraject = s;}
+    
+    float getStarSpeedS() {return starSpeedS ;}
+    void setStarSpeedS(float s){starSpeedS = s;}
+    
+    float getEndSpeedS() {return starSpeedE ;}
+    void setEndSpeedS(float s){starSpeedE = s;}
+    
+    float getTimeSpeedS() {return starSpeedT ;}
+    void setTimeSpeedS(float s){starSpeedT = s;}
+    
+    
+    int getAccelMode() {return typeAccel ;}
+    void setAccelMode(int s){typeAccel = static_cast<AllAccelerationModes>(s);}
+
     
     /*float getTrajectorySpeed(){ return mTrajectory->getSpeed();}
     void setTrajectorySpeed(float v){ mTrajectory->setSpeed(v);}*/
@@ -765,6 +798,10 @@ public:
         
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
+        if(m_bIsRecordingAutomation){
+            mfTRealTime = 0.0f;
+            mSpeedTraject = starSpeedS;
+        }
         bypassOrNotSourceUpdateThread();
     }
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
@@ -981,6 +1018,16 @@ private:
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
     float mSpeedTraject = 1.0f;
+    
+    AllAccelerationModes typeAccel;
+    float starSpeedS = 0.001f;
+    float starSpeedE = 1.0f;
+    float starSpeedT = 1.0f;
+    float mfTRealTime= 0.0f;
+    
+    
+    float endSpeedE = 0.5f;
+    float endSpeedT = 2.0f;
     
     int m_iMovementMode;
 

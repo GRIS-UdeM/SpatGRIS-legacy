@@ -48,6 +48,19 @@ Trajectory::Trajectory(const TrajectoryProperties& properties)
     m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
 }
 
+bool Trajectory::useBeats(){
+    return m_bUseBeats;
+}
+bool Trajectory::isInfinite(){
+    return m_bInfLoopRepeats;
+}
+float Trajectory::getTotalDuration(){
+    return m_fTotalDuration;
+}
+float Trajectory::getCurrentTime(){
+    return m_fTimeDone;
+}
+
 void Trajectory::start() {
     //tell mover to start the automation, etc
     m_pMover->begin(mFilter->getSelectedSrc(), kTrajectory);
@@ -72,14 +85,15 @@ bool Trajectory::process(float seconds, float beats, float speed) {
 	}
 
 	float duration = m_bUseBeats ? beats : seconds;
-	childProcess(duration, seconds);
-	
+    childProcess(duration, seconds);
 	m_fTimeDone += (duration*m_fSpeed);
-    
+
+    cout << m_fSpeed << " << "<<m_fTimeDone <<newLine;
 	return false;
 }
 
 float Trajectory::progress() {
+    //progress bar
     if(m_bInfLoopRepeats){ return 1.0f; }
 	return  m_fSpeed * m_fTimeDone / m_fTotalDuration;
 }

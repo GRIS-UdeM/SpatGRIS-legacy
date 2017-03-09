@@ -84,7 +84,12 @@ public:
 public:
 	virtual ~Trajectory() {}
 	
+    
 	bool process(float seconds, float beats, float speed);
+    bool useBeats();
+    bool isInfinite();
+    float getTotalDuration();
+    float getCurrentTime();
 	float progress();
     int progressCycle();
 	void stop(bool clearTrajectory = true);

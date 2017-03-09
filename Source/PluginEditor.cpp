@@ -561,10 +561,44 @@ AudioProcessorEditor (ownerFilter)
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
+         x = 2*cbw + 2*kMargin + 40;
+        y -= (dh + 4)*2;
+        y += dh + 4;
         
+        mSpeedStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
+        mSpeedStartAccel->setTextToShowWhenEmpty("Start", juce::Colour::greyLevel(.6));
+        mSpeedStartAccel->addListener(this);
+        
+        y += dh + 4;
+        mSpeedEndtAccel = addTextEditor("", x, y, cbw/2, dh, box);
+        mSpeedEndtAccel->setTextToShowWhenEmpty("End", juce::Colour::greyLevel(.6));
+        mSpeedEndtAccel->addListener(this);
+        
+        x = 2*cbw + 2*kMargin+110;
+        y -= dh + 4;
+        mTimeStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
+        mTimeStartAccel->setTextToShowWhenEmpty("Duration", juce::Colour::greyLevel(.6));
+        mTimeStartAccel->addListener(this);
+        
+        y += dh + 4;
+        ComboBox *cb = new ComboBox();
+        int index = 1;
+        for (int i = 0; i < TotalNumberAccelerationtModes; i++){
+            cb->addItem(getAccelerationName(i), index++);
+        }
+        cb->setSelectedId(mFilter->getTrType());
+        cb->setSize(cbw/2, dh);
+        cb->setTopLeftPosition(x, y);
+        box->addAndMakeVisible(cb);
+        mComponents.add(cb);
+        
+        mTypeAccel = cb;
+        mTypeAccel->addListener(this);
         
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
+        
+        
         /*addLabel("Movements:", x, y, w-50, dh, box);
 
         mMovementModeCombo = new ComboBox();
@@ -1904,7 +1938,18 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
             mFilter->setEndLocationXY01(FPoint (endPoint.x, 1-endPoint.y));
         }
         updateEndLocationTextEditors();
-    } else {
+    }
+    else if (&textEditor == mSpeedStartAccel){
+        mFilter->setStarSpeedS(mSpeedStartAccel->getText().getFloatValue());
+    }
+    else if (&textEditor == mSpeedEndtAccel){
+        mFilter->setEndSpeedS(mSpeedEndtAccel->getText().getFloatValue());
+    }
+    else if (&textEditor == mTimeStartAccel){
+        mFilter->setTimeSpeedS(mTimeStartAccel->getText().getFloatValue());
+    }
+    
+    else {
         printf("unknown TextEditor clicked...\n");
     }
     
@@ -2310,6 +2355,11 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     {
         int iReturn = mTrReturnComboBox->getSelectedId()-1;
         mFilter->setTrReturn(iReturn);
+    }
+    else if (comboBox == mTypeAccel)
+    {
+        int type = mTypeAccel->getSelectedId();
+        mFilter->setAccelMode(type);
     }
     else
     {
