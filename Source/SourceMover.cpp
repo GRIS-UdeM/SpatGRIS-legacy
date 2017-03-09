@@ -33,9 +33,6 @@ SourceMover::SourceMover(SpatGrisAudioProcessor *filter)
  ,mMoverType(kVacant)
  ,mSelectedSrc(0)
 {
-//    JUCE_COMPILER_WARNING("at this point, mFilter is not constructed, so we can't call updateNumnerOfSources");
-////    updateNumberOfSources();
-//    
     int iNbrSrc = JucePlugin_MaxNumInputChannels;
     for (int j = 0; j < iNbrSrc; j++) {
         mSourcesDownXY.add(FPoint(0,0));
@@ -56,9 +53,6 @@ void SourceMover::begin(int s, MoverType mt) {
         mFilter->setIsRecordingAutomation(true);
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceX(mSelectedSrc));
         mFilter->beginParameterChangeGesture(mFilter->getParamForSourceY(mSelectedSrc));
-
-//        mFilter->beginParameterChangeGesture(kMovementMode);
-
 
         storeAllDownPositions();
     }
@@ -299,7 +293,6 @@ void SourceMover::setEqualRadiusAndAngles(){
         storeDownPosition(iCurSrc, curSrcRT);
         mFilter->setPreventSourceLocationUpdate(false);
     }
-
 }
 
 void SourceMover::setSymmetricX(){

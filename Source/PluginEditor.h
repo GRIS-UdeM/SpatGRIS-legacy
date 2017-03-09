@@ -27,10 +27,10 @@
 #define PLUGINEDITOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 #include "PluginProcessor.h"
 #include "LevelComponent.h"
 #include "SourceMover.h"
-#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 
 #if USE_LEAP
 #include "Leap.h"
@@ -166,12 +166,10 @@ private:
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
 
-#if USE_DB_METERS
     LevelComponent* mLevelComponents[kMaxChannels];
     ToggleButton*   mMuteButtons[kMaxChannels];
     Component*          mLabelSourceId[kMaxChannels];
-#endif
-    
+
     ToggleButton *mEnableJoystick;
     ToggleButton *mEnableLeap;
 	ToggleButton *mShowGridLines;
@@ -199,12 +197,6 @@ private:
     Label *mStateLeap;
     Label *mStateJoystick;
     Label *m_VersionLabel;
-	
-#if ALLOW_INTERNAL_WRITE
-	ComboBox *mRoutingModeCombo;
-    Component *mRoutingModeLabel;
-	Slider *mRoutingVolumeSlider;
-#endif
     
     ImageComponent m_logoImage;
 

@@ -25,6 +25,7 @@
  */
 
 #include <cstdio>
+#include <sstream>
 
 #include "FirFilter.h"
 
@@ -34,7 +35,7 @@
 #endif
 
 #include "_firs.h"
-#include <sstream>
+
 
 void FirFilter::reset()
 {

@@ -112,7 +112,4 @@ void LevelComponent::paint (Graphics& g)
             g.fillRect(0, 0, getWidth() ,(int)(getHeight()*(level/kMinLevel)));
         }
     }
-    
-	
- 
 }

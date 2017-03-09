@@ -46,7 +46,6 @@ FieldComponent::~FieldComponent()
 
 
 void FieldComponent::clearTrajectoryPath(){
-    
     if(m_dqAllPathPoints.size()>0){
         m_dqAllPathPoints.clear();
     }

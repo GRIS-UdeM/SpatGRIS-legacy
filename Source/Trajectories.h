@@ -28,10 +28,12 @@
 #define TRAJECTORIES_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-typedef Point<float> FPoint;
+
 #include <memory>
 
 #define N_DECIMAL_POINTS_PRECISION (1000)
+
+typedef Point<float> FPoint;
 
 class SpatGrisAudioProcessor;
 class SourceMover;
@@ -76,7 +78,6 @@ public:
 	static String GetTrajectoryName(int i);
 	static Trajectory::Ptr CreateTrajectory(const TrajectoryProperties& properties);
     
-    
     static std::unique_ptr<std::vector<String>> getAllPossibleDirections(int p_iTrajectory);
     static std::unique_ptr<AllTrajectoryDirections> getCurDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
     static std::unique_ptr<std::vector<String>> getAllPossibleReturns(int p_iTrajectory);
@@ -93,15 +94,7 @@ public:
 	float progress();
     int progressCycle();
 	void stop(bool clearTrajectory = true);
-    
-    float getSpeed(){ return m_fSpeed;}
-    /*void  setSpeed(float p_fSpeed){
-        
-        if (p_fSpeed >= -3.f && p_fSpeed <= 3.f){
-            m_fSpeed = p_fSpeed;
-        }
-    }*/
-	
+
 protected:
 	virtual void childProcess(float duration, float seconds) = 0;
     virtual void childInit() {}

@@ -27,10 +27,12 @@
 #ifndef FIELDCOMPONENT_H_INCLUDED
 #define FIELDCOMPONENT_H_INCLUDED
 
-#include "PluginProcessor.h"
+
 #include "../../GrisCommonFiles/GrisLookAndFeel.h"
+#include "PluginProcessor.h"
 #include "SourceMover.h"
-#include "deque"
+
+#include <deque>
 
 typedef enum
 {

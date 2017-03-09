@@ -6,7 +6,7 @@
  
  PluginProcessor.h
  
- Developers: Antoine Missout, Vincent Berthiaume
+ Developers: Antoine Missout, Vincent Berthiaume, Nicolas Masson
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -28,31 +28,19 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include <stdint.h>
-#include "FirFilter.h"
-#include "Trajectories.h"
 #include <memory>
 
-using namespace std;
-
 #include "Areas.h"
+#include "FirFilter.h"
+#include "Trajectories.h"
 
-#ifndef USE_DB_METERS
-#define USE_DB_METERS 1
-#endif
-
-#ifndef ALLOW_INTERNAL_WRITE
-#define ALLOW_INTERNAL_WRITE 0
-#endif
-
+using namespace std;
 
 
 #ifndef ALLOW_PAN_MODE
 #define ALLOW_PAN_MODE 0
-#endif
-
-#ifndef USE_VECTORS
-#define USE_VECTORS 1
 #endif
 
 #ifndef OUTPUT_RAMPING
@@ -195,21 +183,6 @@ enum ProcessModes{ kFreeVolumeMode = 0, kPanMode, kSpanMode, kOscSpatMode, kNumb
 enum ProcessModes{ kFreeVolumeMode = 0, kSpanMode, kOscSpatMode, kNumberOfModes };
 #endif
 
-enum RoutingModes{
-     kNormalRouting = 0
-    #if ALLOW_INTERNAL_WRITE
-    ,kInternalWrite
-    ,kInternalRead12
-    ,kInternalRead34
-    ,kInternalRead56
-    ,kInternalRead78
-    ,kInternalRead910
-    ,kInternalRead1112
-    ,kInternalRead1213
-    ,kInternalRead1314
-    ,kInternalRead1516
-    #endif
-};
 
 
 //==============================================================================
@@ -273,7 +246,6 @@ static const float kThetaLockRadius = 0.025;
 
 //static const float kThetaRampRadius = 0.25;
 //static const float kThetaLockRadius = 0.20;
-
 
 static const float kSourceDefaultRadius = 1.f;
 static const float kSpeedDefault = 1.0f;
@@ -443,17 +415,6 @@ public:
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
     
-#if ALLOW_INTERNAL_WRITE
-	int getRoutingMode() const { return mRoutingMode; }
-	void setRoutingMode(int s) {
-        mRoutingMode = s;
-        if (mRoutingMode == kInternalWrite){
-            updateRoutingTempAudioBuffer();
-        }
-    }
-	void updateRoutingTempAudioBuffer();
-#endif
-    
     int getGuiWidth() const{return mGuiWidth;}
     int getGuiHeight() const{return mGuiHeight;}
     
@@ -565,20 +526,10 @@ public:
     int getAccelMode() {return typeAccel ;}
     void setAccelMode(int s){typeAccel = static_cast<AllAccelerationModes>(s);}
 
-    
-    /*float getTrajectorySpeed(){ return mTrajectory->getSpeed();}
-    void setTrajectorySpeed(float v){ mTrajectory->setSpeed(v);}*/
-	
 	float getLevel(int index) const {
-#if USE_DB_METERS
-//        if(!mLevels[index]){
-//            return 0.0f;
-//        }
         return mLevels[index];
-#else
-        return -1.f;
-#endif
     }
+    
 	void setCalculateLevels(bool c);
 	
 	bool getIsAllowInputOutputModeSelection(){
@@ -926,7 +877,6 @@ private:
     bool bThetasPrinted = false;
     bool bLevelUiLock = false;
     
-#if USE_VECTORS
     vector<float> mInputsCopy[kMaxInputs];
     float* mOutputs[kMaxChannels];
     
@@ -934,23 +884,13 @@ private:
         Array<Array<float>> mSpeakerVolumes;
     #endif
     vector<vector<float>> mParameterRamps;
-#else
-    
-    float mInputsCopy[kMaxChannels][kMaxBufferSize];
-    float mParameterRamps[kNumberOfParameters][kMaxBufferSize];
-    
-    float* mOutputs[kMaxChannels];
-    #if OUTPUT_RAMPING
-        float mSpeakerVolumes[kMaxInputs][kMaxChannels];
-    #endif
-#endif
+
     Area mAllAreas[kMaxChannels * MAX_AREAS];
     float mOutFactors[kMaxChannels];
     FirFilter mFilters[kMaxInputs];
-#if USE_DB_METERS
-//    Array<float> mLevels;
+
     float mLevels[kMaxChannels];
-#endif
+
     
 #if TIME_PROCESS
 #define kTimeSlots (10)
