@@ -424,6 +424,13 @@ AudioProcessorEditor (ownerFilter)
         }
         
         {
+            Slider *ds = addParamSliderGRIS(kParamDirRandom, 2.0f, mFilter->getSpeedTraject(), x+cbw+5, y+2, w, dh-5, box);
+            ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
+            ds->setRange(0.0f, 1.0f);
+            mDirRandTrajectory = ds;
+        }
+        
+        {
             ComboBox *cb = new ComboBox();
             cb->setSize(cbw-40, dh);
             cb->setTopLeftPosition(x+2*(cbw+5), y);
@@ -1446,6 +1453,12 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
         mTrSeparateAutomationModeButton->setVisible(true);
     } else {
         mTrSeparateAutomationModeButton->setVisible(false);
+    }
+    
+    if(iSelectedTrajectory == RandomTrajectory){
+         mDirRandTrajectory->setVisible(true);
+    }else{
+        mDirRandTrajectory->setVisible(false);
     }
     
     unique_ptr<vector<String>> allDirections = Trajectory::getAllPossibleDirections(iSelectedTrajectory);
@@ -2542,6 +2555,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
     mSpeedTrajectory->      setValue(mFilter->getSpeedTraject());
+    mDirRandTrajectory->    setValue(mFilter->getDirRandomTraject());
     
 #if TIME_GUI
     Time timeSliders = Time::getCurrentTime();

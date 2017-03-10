@@ -56,6 +56,7 @@ enum paramTypes {
     kParamAzimSpan,
     kParamElevSpan,
     kParamTrajSpeed,
+    kParamDirRandom,
 };
 
 enum placement{
@@ -192,6 +193,7 @@ private:
 	Slider *mFilterNear;
 	Slider *mMaxSpanVolumeSlider;
     Slider *mSpeedTrajectory;
+    Slider *mDirRandTrajectory;
     Component *mMaxSpanVolumeLabel;
     //Label *mShowChange;
     Label *mStateLeap;

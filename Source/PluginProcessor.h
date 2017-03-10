@@ -249,6 +249,7 @@ static const float kThetaLockRadius = 0.025;
 
 static const float kSourceDefaultRadius = 1.f;
 static const float kSpeedDefault = 1.0f;
+static const float kDirRandDefault = 0.5f;
 
 static const int    kMargin             = 2;
 static const int    kCenterColumnWidth  = 180;
@@ -513,6 +514,9 @@ public:
     
     float getSpeedTraject() {return mSpeedTraject ;}
     void setSpeedTraject(float s){mSpeedTraject = s;}
+    
+    float getDirRandomTraject() {return mDirRandom ;}
+    void setDirRandomTraject(float s){mDirRandom = s;}
     
     float getStarSpeedS() {return starSpeedS ;}
     void setStarSpeedS(float s){starSpeedS = s;}
@@ -957,6 +961,7 @@ private:
 	unique_ptr<SourceMover> m_pMover;
     bool m_bIsPlaying;
     float mSpeedTraject = 1.0f;
+    float mDirRandom = 0.5f;
     
     AllAccelerationModes typeAccel;
     float starSpeedS = 0.001f;

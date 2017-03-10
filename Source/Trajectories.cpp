@@ -73,7 +73,7 @@ void Trajectory::start() {
 }
 
 //return true if the trajectory is finished, false otherwise
-bool Trajectory::process(float seconds, float beats, float speed) {
+bool Trajectory::process(float seconds, float beats, float speed, float speedRand) {
     m_fSpeed = speed;
 	if (m_bStopped) return true;
     if (!m_bStarted) {
@@ -85,7 +85,7 @@ bool Trajectory::process(float seconds, float beats, float speed) {
 	}
 
 	float duration = m_bUseBeats ? beats : seconds;
-    childProcess(duration, seconds);
+    childProcess(duration, seconds, speedRand);
 	m_fTimeDone += (duration*m_fSpeed);
 
     cout << m_fSpeed << " << "<<m_fTimeDone <<newLine;
@@ -122,10 +122,10 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleDirections(int p_iTraj
             vDirections->push_back("Counter Clockwise");
             break;
         case RandomTrajectory:
-            vDirections->push_back("Slow");
+            /*vDirections->push_back("Slow");
             vDirections->push_back("Mid");
             vDirections->push_back("Fast");
-            break;
+            break;*/
         case RandomTarget:
         case SymXTarget:
         case SymYTarget:
@@ -207,7 +207,7 @@ public:
     }
     
 protected:
-    void childProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds, float speedRand) {
         float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;
         
         //DeltaTheta = modf(fDeltaTheta/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
@@ -255,7 +255,7 @@ protected:
         //if start ray is bigger than end ray, we are going in
         m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
     }
-    void childProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds, float speedRand) {
         
         //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         //float fDeltaTheta, integralPart;
@@ -353,7 +353,7 @@ protected:
             m_fInitialLength = mEndPointXy01.y - mStartPointXy01.y;
         }
     }
-    void childProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds, float speedRand) {
         float fCurX01, fCurY01, integralPart;
         int iReturn = m_bRT ? 2:1;
         //calculate current progress and dampening
@@ -432,7 +432,7 @@ protected:
         mStartPointRT = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
     }
     
-	void childProcess(float duration, float seconds) {
+	void childProcess(float duration, float seconds, float speedRand) {
         //calculate delta theta
         float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
         
@@ -512,7 +512,7 @@ public:
 	: Trajectory(properties)
     , mClock(0)
     {
-        switch(*properties.direction){
+        /*switch(*properties.direction){
                 case Slow:
                     mSpeed = .02;
                     break;
@@ -525,17 +525,17 @@ public:
             default:
                 jassert(0);
                 return;
-        }
+        }*/
     }
 	
 protected:
-    void childProcess(float duration, float seconds){
+    void childProcess(float duration, float seconds, float speedRand){
         if (mFilter->getIndependentMode()){
             for (int iCurSrc = 0; iCurSrc < mFilter->getNumberOfSources(); ++iCurSrc){
                 if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                     mFilter->restoreCurrentLocations(iCurSrc);
                 }
-                mClock += seconds;
+                mClock += (speedRand*0.1f);
                 while(mClock > 0.01){
                     mClock -= 0.01;
                     
@@ -544,8 +544,8 @@ protected:
                     
                     FPoint p = mFilter->getSourceXY(iCurSrc);
                     
-                    p.x +=   (rand1 - 0.5) * mSpeed*2.0f;
-                    p.y +=  (rand2 - 0.5) * mSpeed*2.0f;
+                    p.x +=   (rand1 - 0.5) * m_fSpeed*0.1f;
+                    p.y +=  (rand2 - 0.5) * m_fSpeed*0.1f;
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
@@ -558,7 +558,7 @@ protected:
             if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                 mFilter->restoreCurrentLocations(mFilter->getSelectedSrc());
             }
-            mClock += seconds;
+            mClock += (speedRand*0.1f);
             while(mClock > 0.01){
                 mClock -= 0.01;
                 
@@ -567,8 +567,8 @@ protected:
                 
                 FPoint p = mFilter->getSourceXY(mFilter->getSelectedSrc());
                 
-                p.x += (rand1 - 0.5) * mSpeed*2.0f;
-                p.y += (rand2 - 0.5) * mSpeed*2.0f;
+                p.x += (rand1 - 0.5) * m_fSpeed*0.1f;
+                p.y += (rand2 - 0.5) * m_fSpeed*0.1f;
                 //convert ±radius range to 01 range
                 p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                 p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
@@ -580,7 +580,7 @@ protected:
 private:
     MTRand_int32 mRNG;
     float mClock;
-    float mSpeed;
+    //float mSpeed;
 };
 
 
@@ -598,7 +598,7 @@ protected:
 	virtual FPoint destinationForSource(int s, FPoint o) = 0;
     virtual void resetIfRandomTarget(){};
 
-	void childProcess(float duration, float seconds) {
+	void childProcess(float duration, float seconds, float speedRand) {
         float integralPart;
         bool bWriteAutomationForAllSources = mFilter->getIndependentMode();
         float p =  m_fTimeDone / m_fDurationSingleTraj;

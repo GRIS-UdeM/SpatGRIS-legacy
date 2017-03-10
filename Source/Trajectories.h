@@ -86,7 +86,7 @@ public:
 	virtual ~Trajectory() {}
 	
     
-	bool process(float seconds, float beats, float speed);
+	bool process(float seconds, float beats, float speed, float speedRand);
     bool useBeats();
     bool isInfinite();
     float getTotalDuration();
@@ -96,7 +96,7 @@ public:
 	void stop(bool clearTrajectory = true);
 
 protected:
-	virtual void childProcess(float duration, float seconds) = 0;
+	virtual void childProcess(float duration, float seconds,float speedRand = 0) = 0;
     virtual void childInit() {}
     Array<Point<float>> mSourcesInitialPositionRT;
 	

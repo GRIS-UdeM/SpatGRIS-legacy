@@ -86,6 +86,7 @@ public:
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
                 case kParamTrajSpeed:       newVal = 1.0f; break;
+                case kParamDirRandom:       newVal = 0.5f; break;
             }
             
             if (mParamType == kParamSource && mLinkButton->getToggleState()) {
@@ -202,6 +203,10 @@ public:
         else if (mParamType == kParamTrajSpeed) {
             mFilter->setSpeedTraject((float)getValue());
         }
+        else if (mParamType == kParamDirRandom) {
+            mFilter->setDirRandomTraject((float)getValue());
+        }
+        
         else {
             const float newVal = (float)getValue();
             if (mFilter->getParameter(mParamIndex) != newVal)
@@ -229,6 +234,7 @@ public:
             case kParamMaxSpanVolume: value = denormalize(kMaxSpanVolumeMin, kMaxSpanVolumeMax, value); break;
             case kParamRoutingVolume: value = denormalize(kRoutingVolumeMin, kRoutingVolumeMax, value); break;
             case kParamTrajSpeed : return String(value, 3);
+            case kParamDirRandom : return String(value, 3);
         }
         
         if (mParamType >= kParamSmooth || mParamType <= kParamRoutingVolume) return String(roundToInt(value));
