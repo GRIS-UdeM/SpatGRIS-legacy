@@ -2182,7 +2182,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr) {
-        bLevelUiLock = true;
         // make sure that it's actually our type of XML object..˝
         if (xmlState->hasTagName ("SPATGRIS_SETTINGS")) {
             int version         = xmlState->getIntAttribute ("kDataVersion", 0);
@@ -2285,7 +2284,6 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             }
         }
     }
-    bLevelUiLock = false;
     mHostChangedParameterProcessor++;
     mHostChangedPropertyProcessor++;
 }

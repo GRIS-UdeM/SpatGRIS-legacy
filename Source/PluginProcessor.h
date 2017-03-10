@@ -794,7 +794,6 @@ public:
     void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
     
     bool isPlaying(){ return m_bIsPlaying;}
-    bool isLevelUilcok(){ return bLevelUiLock; }
     void threadUpdateNonSelectedSourcePositions();
     void bypassOrNotSourceUpdateThread();
 	
@@ -876,7 +875,6 @@ private:
     vector<float> allSampleValues;
     
     bool bThetasPrinted = false;
-    bool bLevelUiLock = false;
     
     vector<float> mInputsCopy[kMaxInputs];
     float* mOutputs[kMaxChannels];
