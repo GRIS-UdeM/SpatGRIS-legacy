@@ -88,7 +88,7 @@ bool Trajectory::process(float seconds, float beats, float speed, float speedRan
     childProcess(duration, seconds, speedRand);
 	m_fTimeDone += (duration*m_fSpeed);
 
-    cout << m_fSpeed << " << "<<m_fTimeDone <<newLine;
+    //cout << m_fSpeed << " << "<<m_fTimeDone <<newLine;
 	return false;
 }
 
@@ -129,6 +129,7 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleDirections(int p_iTraj
         case RandomTarget:
         case SymXTarget:
         case SymYTarget:
+        case FreeDrawing:
         case ClosestSpeakerTarget:
             return nullptr;
             
@@ -160,6 +161,7 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedT
         case RandomTarget:
         case SymXTarget:
         case SymYTarget:
+        case FreeDrawing:
         case ClosestSpeakerTarget:
             *pDirection = None;
             break;
@@ -187,6 +189,7 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTraject
         case RandomTrajectory:
         case SymXTarget:
         case SymYTarget:
+        case FreeDrawing:
         case ClosestSpeakerTarget:
             return nullptr;
         default:
@@ -734,6 +737,50 @@ protected:
 };
 
 
+// ==============================================================================
+class FreeDrawTrajectory : public Trajectory
+{
+public:
+    FreeDrawTrajectory(const TrajectoryProperties& properties)
+    : Trajectory(properties)
+    , listPoints(properties.listPoints)
+    { }
+    
+protected:
+    void childInit(){
+        indexR = 0;
+    }
+    
+    void childProcess(float duration, float seconds, float speedRand) {
+        //calculate delta theta
+        float fDeltaTheta = (float)( m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
+        indexR = (int) (fDeltaTheta*listPoints.size());
+        double intpart;
+        double fractpart = modf (fDeltaTheta*listPoints.size() , &intpart);
+        if(listPoints.size() > indexR+1){
+            float curX = listPoints[indexR].x;
+            float curY = listPoints[indexR].y;
+
+            float nextX = listPoints[indexR+1].x;
+            float nextY = listPoints[indexR+1].y;
+            
+            FPoint curLoc(nextX + ((curX-nextX)*fractpart), nextY + ((curY- nextY)*fractpart));
+        
+            
+            //cout << curX << " // " << curY << " == "<< indexR << " /// " << fractpart <<newLine;
+            
+            m_pMover->move(listPoints[indexR], kTrajectory);
+
+            
+        }
+    }
+    
+private:
+    vector<FPoint> listPoints;
+    int indexR;
+};
+
+
 int Trajectory::NumberOfTrajectories() { return TotalNumberTrajectories-1; }
 
 String Trajectory::GetTrajectoryName(int i) {
@@ -746,6 +793,7 @@ String Trajectory::GetTrajectoryName(int i) {
         case RandomTarget: return "Random Target";
         case SymXTarget: return "Sym X Target";
         case SymYTarget: return "Sym Y Target";
+        case FreeDrawing: return "Free Drawing";
         case ClosestSpeakerTarget: return "Closest Speaker Target";
         default:
             jassertfalse;
@@ -764,6 +812,7 @@ Trajectory::Ptr Trajectory::CreateTrajectory(const TrajectoryProperties& propert
         case RandomTarget:               return new RandomTargetTrajectory          (properties);
         case SymXTarget:                 return new SymXTargetTrajectory            (properties);
         case SymYTarget:                 return new SymYTargetTrajectory            (properties);
+        case FreeDrawing:                return new FreeDrawTrajectory              (properties);
         case ClosestSpeakerTarget:       return new ClosestSpeakerTargetTrajectory  (properties);
     }
     jassert(0);

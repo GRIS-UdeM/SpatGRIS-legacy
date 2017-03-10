@@ -67,6 +67,7 @@ struct TrajectoryProperties {
     float                   turns;
     float                   width;
     FPoint                  endPoint;
+    std::vector<FPoint>     listPoints;
 };
 
 class Trajectory : public ReferenceCountedObject

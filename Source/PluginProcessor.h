@@ -147,6 +147,7 @@ enum AllTrajectoryTypes {
     RandomTarget,
     SymXTarget,
     SymYTarget,
+    FreeDrawing,
     ClosestSpeakerTarget,
     TotalNumberTrajectories
 };
@@ -526,6 +527,10 @@ public:
     
     float getTimeSpeedS() {return starSpeedT ;}
     void setTimeSpeedS(float s){starSpeedT = s;}
+    
+    vector<FPoint> getListPointFreeDraw() {return listPointFreeDraw ;}
+    void insertInLinstFreeDraw(FPoint po) { listPointFreeDraw.push_back(po);}
+    void clearLinstFreeDraw() { listPointFreeDraw.clear();}
     
     
     int getAccelMode() {return typeAccel ;}
@@ -974,7 +979,7 @@ private:
     float endSpeedT = 2.0f;
     
     int m_iMovementMode;
-
+    vector<FPoint> listPointFreeDraw;
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;

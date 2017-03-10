@@ -1359,12 +1359,12 @@ void SpatGrisAudioProcessor::processTrajectory(){
             }
             
             //Deceleration------------------------------
-            if(! mTrajectory->isInfinite() &&  mTrajectory->getCurrentTime() > mTrajectory->getTotalDuration()-endSpeedT){
+            /*if(! mTrajectory->isInfinite() &&  mTrajectory->getCurrentTime() > mTrajectory->getTotalDuration()-endSpeedT){
                 cout << "Decel"<< newLine;
                 if(mSpeedTraject >endSpeedE){
                     mSpeedTraject -= 0.05f;
                 }
-            }
+            }*/
             
             bool done = mTrajectory->process(seconds, beats, mSpeedTraject, mDirRandom);
             if (done){

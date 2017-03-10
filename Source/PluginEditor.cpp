@@ -1921,6 +1921,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             properties.turns        = mTrTurnsTextEditor->getText().getFloatValue();
             properties.width        = mTrEllipseWidthTextEditor->getText().getFloatValue();
             properties.endPoint     = mFilter->getEndLocationXY01();
+            properties.listPoints   = mFilter->getListPointFreeDraw();
             
             mFilter->setTrajectory(Trajectory::CreateTrajectory(properties));
             

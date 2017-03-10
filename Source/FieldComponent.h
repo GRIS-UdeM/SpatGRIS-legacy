@@ -93,6 +93,10 @@ private:
     std::deque<FPoint> m_dqAllPathPoints;
     bool m_bJustSelectedEndPoint;
     
+    Path pathFreeDraw;
+    vector<FPoint> listXYDrawFree;
+
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };
 
