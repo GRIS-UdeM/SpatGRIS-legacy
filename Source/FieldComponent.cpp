@@ -423,8 +423,11 @@ void FieldComponent::mouseDown(const MouseEvent &event)
         return;
     }
     
-    mFilter->clearLinstFreeDraw();
-    listXYDrawFree.clear();
+    if(event.mods.isRightButtonDown()){
+        mFilter->clearLinstFreeDraw();
+        listXYDrawFree.clear();
+    }
+
     
 	int fieldWidth = getWidth();
 	int fieldHeight = getHeight();
@@ -491,7 +494,7 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 	switch(mSelectionType)
 	{
 		case kNoSelection:
-            if(mFilter->getTrType()==FreeDrawing){
+            if(mFilter->getTrType()==FreeDrawing && event.mods.isLeftButtonDown()){
                 float vx = (mouseLocation.x - kSourceRadius) / (padSize - kSourceDiameter);
                 float vy = 1 - (mouseLocation.y - kSourceRadius) / (padSize - kSourceDiameter);
                 if (vx < 0) vx = 0; else if (vx > 1) vx = 1;
@@ -567,7 +570,7 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 			}
 			mLastKeys = event.mods;
             
-            if(mFilter->getTrType()==FreeDrawing){
+            if(mFilter->getTrType()==FreeDrawing && event.mods.isLeftButtonDown()){
                        listXYDrawFree.push_back(FPoint(event.x-3, event.y-3));
                 mFilter->insertInLinstFreeDraw(FPoint(vx, vy));
             }
