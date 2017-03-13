@@ -400,7 +400,7 @@ void FieldComponent::paint (Graphics& g)
     }
     
     
-    if(mFilter->getListPointFreeDraw().size()>1){
+    if(listXYDrawFree.size()>1){
         g.setColour(Colours::white);
         pathFreeDraw.clear();
         pathFreeDraw.startNewSubPath(listXYDrawFree[0].x, listXYDrawFree[0].y);

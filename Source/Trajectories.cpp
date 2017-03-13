@@ -744,7 +744,8 @@ public:
     FreeDrawTrajectory(const TrajectoryProperties& properties)
     : Trajectory(properties)
     , listPoints(properties.listPoints)
-    { }
+    {
+    }
     
 protected:
     void childInit(){
@@ -754,25 +755,32 @@ protected:
     void childProcess(float duration, float seconds, float speedRand) {
         //calculate delta theta
         float fDeltaTheta = (float)( m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
-        indexR = (int) (fDeltaTheta*listPoints.size());
-        double intpart;
-        double fractpart = modf (fDeltaTheta*listPoints.size() , &intpart);
-        if(listPoints.size() > indexR+1){
-            float curX = listPoints[indexR].x;
-            float curY = listPoints[indexR].y;
-
-            float nextX = listPoints[indexR+1].x;
-            float nextY = listPoints[indexR+1].y;
-            
-            FPoint curLoc(nextX + ((curX-nextX)*fractpart), nextY + ((curY- nextY)*fractpart));
         
-            
-            //cout << curX << " // " << curY << " == "<< indexR << " /// " << fractpart <<newLine;
-            
-            m_pMover->move(listPoints[indexR], kTrajectory);
-
-            
+        int listSize = listPoints.size()-1;
+        if(listSize<1){
+            return ;
         }
+        double intpart;
+        indexR = (int) (fDeltaTheta* listSize);
+        if(listSize-1  < indexR){
+            fDeltaTheta = modf (fDeltaTheta, &intpart);
+            indexR = (int) (fDeltaTheta*listSize);
+        }
+        
+        double fractpart = modf (fDeltaTheta*listSize , &intpart);
+        
+        float curX = listPoints[indexR].x;
+        float curY = listPoints[indexR].y;
+        
+        float nextX = listPoints[indexR+1].x;
+        float nextY = listPoints[indexR+1].y;
+        
+        FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+        
+        //cout << curX << " // " << curY << " <> "<< nextX << " // " << nextY <<newLine;
+        //cout << fDeltaTheta << " // " << listPoints.size() << " == "<< indexR << " /// " << m_fDurationSingleTraj <<newLine;
+        
+        m_pMover->move(curLoc, kTrajectory);
     }
     
 private:
