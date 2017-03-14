@@ -519,8 +519,8 @@ public:
     float getDirRandomTraject() {return mDirRandom ;}
     void setDirRandomTraject(float s){mDirRandom = s;}
     
-    float getStarSpeedS() {return starSpeedS ;}
-    void setStarSpeedS(float s){starSpeedS = s;}
+    //float getStarSpeedS() {return starSpeedS ;}
+    //void setStarSpeedS(float s){starSpeedS = s;}
     
     float getEndSpeedS() {return starSpeedE ;}
     void setEndSpeedS(float s){starSpeedE = s;}
@@ -533,8 +533,8 @@ public:
     void clearLinstFreeDraw() { listPointFreeDraw.clear();}
     
     
-    int getAccelMode() {return typeAccel ;}
-    void setAccelMode(int s){typeAccel = static_cast<AllAccelerationModes>(s);}
+    //int getAccelMode() {return typeAccel ;}
+    //void setAccelMode(int s){typeAccel = static_cast<AllAccelerationModes>(s);}
 
 	float getLevel(int index) const {
         return mLevels[index];
@@ -761,7 +761,7 @@ public:
         m_bIsRecordingAutomation = b;
         if(m_bIsRecordingAutomation){
             mfTRealTime = 0.0f;
-            mSpeedTraject = starSpeedS;
+            //mSpeedTraject = starSpeedS;
         }
         bypassOrNotSourceUpdateThread();
     }
@@ -968,8 +968,8 @@ private:
     float mSpeedTraject = 1.0f;
     float mDirRandom = 0.5f;
     
-    AllAccelerationModes typeAccel;
-    float starSpeedS = 0.001f;
+    //AllAccelerationModes typeAccel = Linear;
+    //float starSpeedS = 0.001f;
     float starSpeedE = 1.0f;
     float starSpeedT = 1.0f;
     float mfTRealTime= 0.0f;

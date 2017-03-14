@@ -184,12 +184,15 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTraject
             vReturns->push_back("Continuous");
             vReturns->push_back("Discontinuous");
             break;
+        case FreeDrawing:
+            vReturns->push_back("One Way");
+            vReturns->push_back("Return");
+            break;
         case Circle:
         case EllipseTr:
         case RandomTrajectory:
         case SymXTarget:
         case SymYTarget:
-        case FreeDrawing:
         case ClosestSpeakerTarget:
             return nullptr;
         default:
@@ -743,6 +746,7 @@ class FreeDrawTrajectory : public Trajectory
 public:
     FreeDrawTrajectory(const TrajectoryProperties& properties)
     : Trajectory(properties)
+    , returnloop(properties.bReturn)
     , listPoints(properties.listPoints)
     {
     }
@@ -761,11 +765,69 @@ protected:
             return ;
         }
         double intpart;
-        indexR = (int) (fDeltaTheta* listSize);
+    
+        indexR = (int) abs(fDeltaTheta* listSize);
+        
+        
+        if(returnloop){
+            if(fDeltaTheta < 0){
+                fDeltaTheta = abs(fDeltaTheta);
+            }
+            fDeltaTheta = modf (fDeltaTheta, &intpart);
+            if((int)intpart%2 != 0){
+                indexR = (int) abs(fDeltaTheta*listSize);
+                indexR = listSize-indexR;
+                double fractpart = modf (fDeltaTheta*listSize , &intpart);
+                
+                float curX = listPoints[indexR].x;
+                float curY = listPoints[indexR].y;
+                
+                float nextX = listPoints[indexR-1].x;
+                float nextY = listPoints[indexR-1].y;
+                
+                FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+                m_pMover->move(curLoc, kTrajectory);
+            
+                
+            }else{
+                indexR = (int) abs(fDeltaTheta*listSize);
+                double fractpart = modf (fDeltaTheta*listSize , &intpart);
+                
+                float curX = listPoints[indexR].x;
+                float curY = listPoints[indexR].y;
+                
+                float nextX = listPoints[indexR+1].x;
+                float nextY = listPoints[indexR+1].y;
+                
+                FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+                m_pMover->move(curLoc, kTrajectory);
+            }
+            return;
+        }
+        
+        
         if(listSize-1  < indexR){
             fDeltaTheta = modf (fDeltaTheta, &intpart);
-            indexR = (int) (fDeltaTheta*listSize);
+            indexR = (int) abs(fDeltaTheta*listSize);
         }
+        
+        if(fDeltaTheta < 0){
+            fDeltaTheta = abs(fDeltaTheta);
+            indexR = listSize-indexR;
+            double fractpart = modf (fDeltaTheta*listSize , &intpart);
+            
+            float curX = listPoints[indexR].x;
+            float curY = listPoints[indexR].y;
+            
+            float nextX = listPoints[indexR-1].x;
+            float nextY = listPoints[indexR-1].y;
+            
+            FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+            m_pMover->move(curLoc, kTrajectory);
+            return ;
+        }
+        
+        
         
         double fractpart = modf (fDeltaTheta*listSize , &intpart);
         
@@ -776,14 +838,14 @@ protected:
         float nextY = listPoints[indexR+1].y;
         
         FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
-        
         //cout << curX << " // " << curY << " <> "<< nextX << " // " << nextY <<newLine;
         //cout << fDeltaTheta << " // " << listPoints.size() << " == "<< indexR << " /// " << m_fDurationSingleTraj <<newLine;
-        
         m_pMover->move(curLoc, kTrajectory);
+        return ;
     }
     
 private:
+    bool returnloop;
     vector<FPoint> listPoints;
     int indexR;
 };

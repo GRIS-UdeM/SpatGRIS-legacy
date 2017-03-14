@@ -378,7 +378,7 @@ AudioProcessorEditor (ownerFilter)
         Component *box = mTrajectoryBox->getContent();
         mTrajectoryBoxLabel = addLabel("Trajectories", 0,0, 150, dh, this);
         mTrajectoryBoxLabel->setColour(Label::textColourId, mGrisFeel.getFontColour());
-        box->setSize(520, 160);
+        box->setSize(560, 160);
         
         //---------- ROW 1 -------------
         int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
@@ -553,26 +553,36 @@ AudioProcessorEditor (ownerFilter)
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
-         x = 2*cbw + 2*kMargin + 40;
+         x = 2*cbw + 2*kMargin + 140;
         y -= (dh + 4)*2;
+
+        addLabel("Acceleration:", x, y, cbw, dh, box);
+
         y += dh + 4;
         
-        mSpeedStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
+        
+        /*mSpeedStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
         mSpeedStartAccel->setTextToShowWhenEmpty("Start", juce::Colour::greyLevel(.6));
         mSpeedStartAccel->addListener(this);
         
-        y += dh + 4;
+        y += dh + 4;*/
+        addLabel("Speed", x+cbw/2, y, cbw/2, dh, box);
+
         mSpeedEndtAccel = addTextEditor("", x, y, cbw/2, dh, box);
         mSpeedEndtAccel->setTextToShowWhenEmpty("End", juce::Colour::greyLevel(.6));
         mSpeedEndtAccel->addListener(this);
         
-        x = 2*cbw + 2*kMargin+110;
-        y -= dh + 4;
+        
+
+        //x = 2*cbw + 2*kMargin+110;
+        y += dh + 4;
+        addLabel("Time (0 = Off)", x+cbw/2, y, cbw, dh, box);
         mTimeStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
         mTimeStartAccel->setTextToShowWhenEmpty("Duration", juce::Colour::greyLevel(.6));
         mTimeStartAccel->addListener(this);
         
-        y += dh + 4;
+        
+        /*y += dh + 4;
         ComboBox *cb = new ComboBox();
         int index = 1;
         for (int i = 0; i < TotalNumberAccelerationtModes; i++){
@@ -585,7 +595,7 @@ AudioProcessorEditor (ownerFilter)
         mComponents.add(cb);
         
         mTypeAccel = cb;
-        mTypeAccel->addListener(this);
+        mTypeAccel->addListener(this);*/
         
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
@@ -703,178 +713,7 @@ AudioProcessorEditor (ownerFilter)
         
     }
     
-    //--------------- TRAJECTORIES TAB ---------------- //
-    //box = mTabs->getTabContentComponent(1);
-    //{
-        /*
-        //---------- ROW 1 -------------
-        int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
-        
-        int cbw = 130;
-        {
-            ComboBox *cb = new ComboBox();
-            int index = 1;
-            for (int i = 1; i < Trajectory::NumberOfTrajectories(); i++){
-                cb->addItem(Trajectory::GetTrajectoryName(i), index++);
-            }
-            cb->setSelectedId(mFilter->getTrType());
-            cb->setSize(cbw, dh);
-            cb->setTopLeftPosition(x, y);
-            box->addAndMakeVisible(cb);
-            mComponents.add(cb);
-            
-            mTrTypeComboBox = cb;
-            mTrTypeComboBox->addListener(this);
-        }
-        
-        {
-            ComboBox *cb = new ComboBox();
-            cb->setSize(cbw, dh);
-            cb->setTopLeftPosition(x+cbw+5, y);
-            box->addAndMakeVisible(cb);
-            mComponents.add(cb);
-            
-            mTrDirectionComboBox = cb;
-            mTrDirectionComboBox->addListener(this);
-        }
-        
-        {
-            ComboBox *cb = new ComboBox();
-            cb->setSize(cbw-40, dh);
-            cb->setTopLeftPosition(x+2*(cbw+5), y);
-            box->addAndMakeVisible(cb);
-            mComponents.add(cb);
-            
-            mTrReturnComboBox = cb;
-            mTrReturnComboBox->addListener(this);
-        }
-        
-        
-        mTrSeparateAutomationModeButton = addCheckbox("Force separate automation", mFilter->getShowGridLines(), x+3*(cbw+5)-40, y, cbw+20, dh, box);
-        
-        int tewShort = 30;
-        int x2 = x+3*(cbw+5);
-        mTrDampeningTextEditor = addTextEditor(String(mFilter->getTrDampening()), x2, y, tewShort, dh, box);
-        mTrDampeningTextEditor->addListener(this);
-        mTrDampeningLabel = addLabel("dampening", x2 + tewShort, y, w, dh, box);
-        
-        mTrTurnsTextEditor = addTextEditor(String(mFilter->getTrTurns()), x2, y, tewShort, dh, box);
-        mTrTurnsTextEditor->addListener(this);
-        mTrTurnsLabel = addLabel("turn(s)", x2 + tewShort, y, w, dh, box);
-
-        
-        //---------- ROW 2 -------------
-        y += dh + 4;
-        x = kMargin;
-        int tew = 80;
-        
-        mTrDuration = addTextEditor(String(mFilter->getTrDuration()), x, y, tew, dh, box);
-        mTrDuration->addListener(this);
-        x += tew + kMargin;
-        {
-            ComboBox *cb = new ComboBox();
-            int index = 1;
-            cb->addItem("Beat(s)", index++);
-            cb->addItem("Second(s)", index++);
-            
-            cb->setSelectedId(mFilter->getTrUnits());
-            cb->setSize(tew, dh);
-            cb->setTopLeftPosition(x, y);
-            box->addAndMakeVisible(cb);
-            mComponents.add(cb);
-            
-            mTrUnits = cb;
-            mTrUnits->addListener(this);
-        }
-        x += tew + kMargin;
-        addLabel("per cycle", x, y, w, dh, box);
-        
-        mTrDeviationTextEditor = addTextEditor(String(mFilter->getTrDeviation()*360), x2, y, tewShort, dh, box);
-        mTrDeviationTextEditor->addListener(this);
-        mTrDeviationLabel = addLabel("deviation", x2 + tewShort, y, w, dh, box);
-        
-        
-        mTrEllipseWidthTextEditor = addTextEditor(String(mFilter->getTrEllipseWidth()*2), x2, y, tewShort, dh, box);
-        mTrEllipseWidthTextEditor->addListener(this);
-        mTrEllipseWidthLabel = addLabel("width factor", x2 + tewShort, y, w, dh, box);
-
-        
-        //---------- ROW 3 -------------
-        y += dh + 4;
-        x = kMargin;
-        
-        mTrRepeats = addTextEditor(String(mFilter->getTrRepeats()), x, y, tew, dh, box);
-        mTrRepeats->addListener(this);
-        x += tew + kMargin;
-        
-        addLabel("cycle(s)", x, y, w, dh, box);
-        
-        //---------- ROW 4 -------------
-        y += dh + 4;
-        x = kMargin;
-        
-        mTrEndPointButton = addButton("Set end point", x, y, cbw, dh, box);
-        mTrEndPointButton->setClickingTogglesState(true);
-        
-        x += cbw + kMargin;
-        m_pTrEndRayTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
-        m_pTrEndRayTextEditor->setTextToShowWhenEmpty("Ray", juce::Colour::greyLevel(.6));
-        m_pTrEndRayTextEditor->addListener(this);
-        
-        x += cbw/2 + kMargin;
-        m_pTrEndAngleTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
-        m_pTrEndAngleTextEditor->setTextToShowWhenEmpty("Angle", juce::Colour::greyLevel(.6));
-        m_pTrEndAngleTextEditor->addListener(this);
-        updateEndLocationTextEditors();
-
-        x += cbw/2 + kMargin;
-        m_pTrResetEndButton = addButton("Reset end point", x, y, cbw, dh, box);
-        
-        x = kMargin;
-        y += dh + 4;
-        
-        mTrWriteButton = addButton("Ready", x, y, cbw, dh, box);
-        mTrWriteButton->setClickingTogglesState(true);
-        
-        mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin-2, y-4, 300, dh, box);
-        mTrEndPointLabel->setVisible(false);
-        
-        y += dh + 4;
-        
-        mTrProgressBar = new MiniProgressBar();
-        mTrProgressBar->setSize(cbw , dh-5);//tew
-        mTrProgressBar->setTopLeftPosition(x, y);
-        mTrProgressBar->setVisible(false);
-        
-        x = 1*cbw + 2*kMargin;
-        
-        addLabel("Speed", x-4, y-14, w+10, dh, box);
-        
-        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, mFilter->getParameter(kTrajectorySpeed), x, y, w, dh-5, box);
-        ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
-        ds->setRange(-2.5f, 2.5f);
-        
-        //ds->setTextBoxStyle (Slider::TextBoxBelow, false, 90, 20);
-        mSpeedTrajectory = ds;
-
-        
-        box->addChildComponent(mTrProgressBar);
-        mComponents.add(mTrProgressBar);
-        
-        if(mFilter->getTrState() == kTrWriting){
-            updateTrajectoryStartComponent(kRunning);
-            mTrWriteButton->setToggleState(true, dontSendNotification);
-        }
-       
-        x = 2*cbw + 2*kMargin;
-        y = kMargin + dh + 5;
-        addLabel("Movements:", x, y, w-50, dh, box);
-        */
- 
-       
-        
-    //}
-    
+   
     //--------------- V & F TAB ---------------- //
     box = mTabs->getTabContentComponent(1);
     {
@@ -1179,6 +1018,7 @@ AudioProcessorEditor (ownerFilter)
         mTrWriteButton->setToggleState(true, dontSendNotification);
     }
     
+    propertyChanged();
     startTimerHz (hertzRefresh);
     
 }
@@ -1864,10 +1704,10 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         updateEndLocationTextEditors();
     }
-    else if (&textEditor == mSpeedStartAccel){
+    else /*if (&textEditor == mSpeedStartAccel){
         mFilter->setStarSpeedS(mSpeedStartAccel->getText().getFloatValue());
     }
-    else if (&textEditor == mSpeedEndtAccel){
+    else */if (&textEditor == mSpeedEndtAccel){
         mFilter->setEndSpeedS(mSpeedEndtAccel->getText().getFloatValue());
     }
     else if (&textEditor == mTimeStartAccel){
@@ -2275,11 +2115,11 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         int iReturn = mTrReturnComboBox->getSelectedId()-1;
         mFilter->setTrReturn(iReturn);
     }
-    else if (comboBox == mTypeAccel)
+    /*else if (comboBox == mTypeAccel)
     {
         int type = mTypeAccel->getSelectedId();
         mFilter->setAccelMode(type);
-    }
+    }*/
     else
     {
         printf("unknown combobox clicked...\n");
@@ -2522,6 +2362,10 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mTrTurnsTextEditor->        setText(String(mFilter->getTrTurns()));
     mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
     mOscSpatPortTextEditor->    setText(String(mFilter->getOscSpatPort()));
+    //mSpeedStartAccel->          setText(String(mFilter->getStarSpeedS()));
+    mSpeedEndtAccel->           setText(String(mFilter->getEndSpeedS()));
+    mTimeStartAccel->           setText(String(mFilter->getTimeSpeedS()));
+    //mTypeAccel->                setText(String(mFilter->getAccelMode()));
     
 #if USE_TOUCH_OSC
     updateOscComponent(mOsc);
@@ -2557,6 +2401,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
     mSpeedTrajectory->      setValue(mFilter->getSpeedTraject());
     mDirRandTrajectory->    setValue(mFilter->getDirRandomTraject());
+   
     
 #if TIME_GUI
     Time timeSliders = Time::getCurrentTime();

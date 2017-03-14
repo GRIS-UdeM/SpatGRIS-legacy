@@ -311,10 +311,10 @@ private:
     Component * mrayvalLab;
     
     
-    TextEditor *mSpeedStartAccel;
+    //TextEditor *mSpeedStartAccel;
     TextEditor *mSpeedEndtAccel;
     TextEditor *mTimeStartAccel;
-    ComboBox *mTypeAccel;
+    //ComboBox *mTypeAccel;
     
 #if TIME_GUI
     int m_iGuiRefreshCounter = 0;

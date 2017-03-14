@@ -659,7 +659,7 @@ void SpatGrisAudioProcessor::setMovementMode(int i, bool p_bNotifyHost) {
 void SpatGrisAudioProcessor::setInputOutputMode (int p_iInputOutputMode){
     if(mTrajectory){
         mfTRealTime = 0.0f;
-        mSpeedTraject = starSpeedS;
+        //mSpeedTraject = starSpeedS;
         mTrajectory->stop();
     }
     const MessageManagerLock mmLock;            //prevents gui from running
@@ -1340,7 +1340,8 @@ void SpatGrisAudioProcessor::processTrajectory(){
             
             //Acceleration---------------------------------
             if(mfTRealTime < starSpeedT){
-                switch (typeAccel) {
+                mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
+                /*switch (typeAccel) {
                     case Linear:
                         mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
                         break;
@@ -1354,7 +1355,7 @@ void SpatGrisAudioProcessor::processTrajectory(){
                         break;
                     default:
                         break;
-                }
+                }*/
                 
             }
             
@@ -2177,7 +2178,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes) {
     if(mTrajectory){
         mfTRealTime = 0.0f;
-        mSpeedTraject = starSpeedS;
+        //mSpeedTraject = starSpeedS;
         mTrajectory->stop();
     }
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
