@@ -260,6 +260,8 @@ static const int    kRightColumnWidth   = 340;
 static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 26;
 static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin + 26;
 
+static const float kSpeedMinMax = 2.5f;
+
 static const int    kDataVersion = 2;
 //==============================================================================
 static inline float normalize(float min, float max, float value) {
@@ -268,6 +270,12 @@ static inline float normalize(float min, float max, float value) {
 
 static inline float denormalize(float min, float max, float value) {
 	return min + value * (max - min);
+}
+
+static inline float paramRange(float min, float max, float value) {
+    if(value<=max && value>=min){ return value;}
+    if(value>max ){ return max;}
+    return min;
 }
 
 static inline float dbToLinear(float db) {
@@ -523,7 +531,7 @@ public:
     //void setStarSpeedS(float s){starSpeedS = s;}
     
     float getEndSpeedS() {return starSpeedE ;}
-    void setEndSpeedS(float s){starSpeedE = s;}
+    void setEndSpeedS(float s){starSpeedE = paramRange(-kSpeedMinMax, kSpeedMinMax, s);}
     
     float getTimeSpeedS() {return starSpeedT ;}
     void setTimeSpeedS(float s){starSpeedT = s;}

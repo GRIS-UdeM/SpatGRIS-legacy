@@ -1708,10 +1708,15 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         mFilter->setStarSpeedS(mSpeedStartAccel->getText().getFloatValue());
     }
     else */if (&textEditor == mSpeedEndtAccel){
-        mFilter->setEndSpeedS(mSpeedEndtAccel->getText().getFloatValue());
+        float speedE = paramRange(-kSpeedMinMax, kSpeedMinMax, mSpeedEndtAccel->getText().getFloatValue());
+        mFilter->setEndSpeedS(speedE);
+        mSpeedEndtAccel->setText(String(speedE));
+        
     }
     else if (&textEditor == mTimeStartAccel){
-        mFilter->setTimeSpeedS(mTimeStartAccel->getText().getFloatValue());
+        float timeEnd = paramRange(0, numeric_limits<float>::max(), mTimeStartAccel->getText().getFloatValue());
+        mFilter->setTimeSpeedS(timeEnd);
+        mTimeStartAccel->setText(String(timeEnd));
     }
     
     else {
