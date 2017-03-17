@@ -2149,6 +2149,8 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("m_iOscSpatPort", m_iOscSpatPort);
     xml.setAttribute ("kTrajectorySpeed", mSpeedTraject);
     xml.setAttribute ("kDirRandom", mDirRandom);
+    xml.setAttribute ("starSpeedE", starSpeedE);
+    xml.setAttribute ("starSpeedT", starSpeedT);
     
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; ++i) {
 		String srcX = "src" + to_string(i) + "x";
@@ -2252,6 +2254,8 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             //mParameters.set(kTrajectorySpeed,static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault)));
             mSpeedTraject =     static_cast<float>(xmlState->getDoubleAttribute("kTrajectorySpeed", kSpeedDefault));
             mDirRandom =     static_cast<float>(xmlState->getDoubleAttribute("kDirRandom", kDirRandDefault));
+            starSpeedE =     static_cast<float>(xmlState->getDoubleAttribute("starSpeedE", 1.0f));
+            starSpeedT =     static_cast<float>(xmlState->getDoubleAttribute("starSpeedT", 0.0f));
             m_iOscSpat1stSrcId  = xmlState->getIntAttribute("m_iOscSpat1stSrcId",   m_iOscSpat1stSrcId);
             m_iOscSpatPort      = xmlState->getIntAttribute("m_iOscSpatPort",       m_iOscSpatPort);
 //            int iMax = JucePlugin_MaxNumInputChannels;

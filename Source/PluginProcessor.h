@@ -979,7 +979,7 @@ private:
     //AllAccelerationModes typeAccel = Linear;
     //float starSpeedS = 0.001f;
     float starSpeedE = 1.0f;
-    float starSpeedT = 1.0f;
+    float starSpeedT = 0.0f;
     float mfTRealTime= 0.0f;
     
     
