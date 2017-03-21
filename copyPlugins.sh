@@ -3,6 +3,7 @@
 if [ -z "$2" ]
   then
     echo "Need VERSION and MESSAGE"
+    exit 1
 fi
 
 VERSION="$1"
