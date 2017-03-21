@@ -242,7 +242,7 @@ static const float kRadiusMax = 2;
 static const float kHalfCircle = M_PI;
 static const float kQuarterCircle = M_PI / 2;
 
-static const float kThetaRampRadius = 0.05;
+static const float kThetaRampRadius = 0.5;
 static const float kThetaLockRadius = 0.025;
 
 //static const float kThetaRampRadius = 0.25;
@@ -536,9 +536,10 @@ public:
     float getTimeSpeedS() {return starSpeedT ;}
     void setTimeSpeedS(float s){starSpeedT = s;}
     
-    vector<FPoint> getListPointFreeDraw() {return listPointFreeDraw ;}
-    void insertInLinstFreeDraw(FPoint po) { listPointFreeDraw.push_back(po);}
-    void clearLinstFreeDraw() { listPointFreeDraw.clear();}
+    vector<FPoint> *getListXYFreeDraw() {return &listXYFreeDraw; }
+    vector<FPoint> *getListPointFreeDraw() {return &listPointFreeDraw; }
+    //void insertInLinstFreeDraw(FPoint po) { listPointFreeDraw.push_back(po); }
+    //void clearLinstFreeDraw() { listPointFreeDraw.clear(); }
     
     
     //int getAccelMode() {return typeAccel ;}
@@ -988,6 +989,7 @@ private:
     
     int m_iMovementMode;
     vector<FPoint> listPointFreeDraw;
+    vector<FPoint> listXYFreeDraw;
     
     //debug for #72
 //    float previouslyLoudestVolume = -1.f;

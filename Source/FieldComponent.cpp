@@ -400,13 +400,13 @@ void FieldComponent::paint (Graphics& g)
     }
     
     
-    if(listXYDrawFree.size()>1){
+    if(mFilter->getListXYFreeDraw()->size()>1){
         g.setColour(Colours::white);
         pathFreeDraw.clear();
-        pathFreeDraw.startNewSubPath(listXYDrawFree[0].x, listXYDrawFree[0].y);
-        for(int i = 1; i< listXYDrawFree.size(); i++)
+        pathFreeDraw.startNewSubPath(mFilter->getListXYFreeDraw()->at(0).x, mFilter->getListXYFreeDraw()->at(0).y);
+        for(int i = 1; i< mFilter->getListXYFreeDraw()->size(); i++)
         {
-            pathFreeDraw.lineTo(listXYDrawFree[i].x, listXYDrawFree[i].y);
+            pathFreeDraw.lineTo(mFilter->getListXYFreeDraw()->at(i).x, mFilter->getListXYFreeDraw()->at(i).y);
         }
         g.strokePath (pathFreeDraw, PathStrokeType (1.0f, PathStrokeType::JointStyle::curved));
     }
@@ -424,8 +424,8 @@ void FieldComponent::mouseDown(const MouseEvent &event)
     }
     
     if(event.mods.isRightButtonDown()){
-        mFilter->clearLinstFreeDraw();
-        listXYDrawFree.clear();
+        mFilter->getListPointFreeDraw()->clear();
+        mFilter->getListXYFreeDraw()->clear();
     }
 
     
@@ -526,8 +526,8 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
                     p = mFilter->convertRt2Xy01(mSavedValue, p.y * kThetaMax);
                     vx = p.x; vy = p.y;
                 }
-                listXYDrawFree.push_back(FPoint(event.x-3, event.y-3));
-                mFilter->insertInLinstFreeDraw(FPoint(vx, vy));
+                mFilter->getListXYFreeDraw()->push_back(FPoint(event.x-3, event.y-3));
+                mFilter->getListPointFreeDraw()->push_back(FPoint(vx, vy));
                 repaint();
                 break;
             }
@@ -571,8 +571,8 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 			mLastKeys = event.mods;
             
             if(mFilter->getTrType()==FreeDrawing && event.mods.isLeftButtonDown()){
-                       listXYDrawFree.push_back(FPoint(event.x-3, event.y-3));
-                mFilter->insertInLinstFreeDraw(FPoint(vx, vy));
+                       mFilter->getListXYFreeDraw()->push_back(FPoint(event.x-3, event.y-3));
+                mFilter->getListPointFreeDraw()->push_back(FPoint(vx, vy));
             }
 			m_pMover->move(FPoint(vx, vy), kField);
 			break;

@@ -1337,10 +1337,10 @@ void SpatGrisAudioProcessor::processTrajectory(){
             //comput accel
             float duration = mTrajectory->useBeats() ? beats : seconds;
             mfTRealTime += duration;
-            
+            float curSpeed = mSpeedTraject;
             //Acceleration---------------------------------
-            if(mfTRealTime < starSpeedT){
-                mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
+            if(mfTRealTime <= starSpeedT){
+                curSpeed = mfTRealTime/(starSpeedT/starSpeedE);
                 /*switch (typeAccel) {
                     case Linear:
                         mSpeedTraject = mfTRealTime/(starSpeedT/starSpeedE);
@@ -1366,8 +1366,8 @@ void SpatGrisAudioProcessor::processTrajectory(){
                     mSpeedTraject -= 0.05f;
                 }
             }*/
-            
-            bool done = mTrajectory->process(seconds, beats, mSpeedTraject, mDirRandom);
+            mSpeedTraject = curSpeed;
+            bool done = mTrajectory->process(seconds, beats, mSpeedTraject , mDirRandom);
             if (done){
                 //mTrajectory.~ReferenceCountedObjectPtr();
                 mTrajectory = nullptr;
@@ -1898,6 +1898,8 @@ void SpatGrisAudioProcessor::ProcessDataSpan(float *params) {
                     mLockedThetas.setUnchecked(iCurSource, it);
                 }
             } else {
+      
+ 
                 float c = (r >= kThetaLockRadius) ? ((r - kThetaLockRadius) / (kThetaRampRadius - kThetaLockRadius)) : 0;
                 float lt = kThetaLockRadius;
                 if(!mLockedThetas.isEmpty()){
@@ -2191,7 +2193,7 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
             int version         = xmlState->getIntAttribute ("kDataVersion", 0);
             if (version < kDataVersion){
                 int retV = AlertWindow::showYesNoCancelBox (AlertWindow::WarningIcon, "SpatGRIS - Loading preset/state from newer version",
-                                    "You are attempting to load SpatGRIS with a preset from a newer version!\n - Yes : Try to load preset (Not Safe).\n - No/Cancel : Use default values for all parameters.");
+                                    "You are attempting to load SpatGRIS with a preset from a newer version!\n - Yes : Try to load preset (Not Safe).\n - No/Cancel : Use default values for all parameters (Bugs can appear).");
                 if(retV != 1){
                     return;
                 }
