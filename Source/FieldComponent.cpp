@@ -46,7 +46,6 @@ FieldComponent::~FieldComponent()
 
 
 void FieldComponent::clearTrajectoryPath(){
-    
     if(m_dqAllPathPoints.size()>0){
         m_dqAllPathPoints.clear();
     }
@@ -399,6 +398,22 @@ void FieldComponent::paint (Graphics& g)
     while (m_dqAllPathPoints.size() > m_iMaxPathLines){
         m_dqAllPathPoints.pop_front();
     }
+    
+    
+    if(mFilter->getListXYFreeDraw()->size()>1){
+        g.setColour(Colours::white);
+        pathFreeDraw.clear();
+        pathFreeDraw.startNewSubPath(mFilter->getListXYFreeDraw()->at(0).x, mFilter->getListXYFreeDraw()->at(0).y);
+        for(int i = 1; i< mFilter->getListXYFreeDraw()->size(); i++)
+        {
+            pathFreeDraw.lineTo(mFilter->getListXYFreeDraw()->at(i).x, mFilter->getListXYFreeDraw()->at(i).y);
+        }
+        g.strokePath (pathFreeDraw, PathStrokeType (1.0f, PathStrokeType::JointStyle::curved));
+    }
+
+    
+    
+    
 }
 
 void FieldComponent::mouseDown(const MouseEvent &event)
@@ -407,6 +422,12 @@ void FieldComponent::mouseDown(const MouseEvent &event)
     if (mFilter->getTrState() == kTrWriting) {
         return;
     }
+    
+    if(event.mods.isRightButtonDown()){
+        mFilter->getListPointFreeDraw()->clear();
+        mFilter->getListXYFreeDraw()->clear();
+    }
+
     
 	int fieldWidth = getWidth();
 	int fieldHeight = getHeight();
@@ -458,10 +479,12 @@ void FieldComponent::mouseDown(const MouseEvent &event)
 			return;
 		}
 	}
+
 }
 
 void FieldComponent::mouseDrag(const MouseEvent &event)
 {
+    
 	Point<int> mouseLocation(event.x, event.y);
 	
      //printf("x : %d  y : %d \n",ml.x,ml.y );
@@ -471,10 +494,49 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 	switch(mSelectionType)
 	{
 		case kNoSelection:
+            if(mFilter->getTrType()==FreeDrawing && event.mods.isLeftButtonDown()){
+                float vx = (mouseLocation.x - kSourceRadius) / (padSize - kSourceDiameter);
+                float vy = 1 - (mouseLocation.y - kSourceRadius) / (padSize - kSourceDiameter);
+                if (vx < 0) vx = 0; else if (vx > 1) vx = 1;
+                if (vy < 0) vy = 0; else if (vy > 1) vy = 1;
+                
+                if (event.mods.isShiftDown())
+                {
+                    if (!mLastKeys.isShiftDown())
+                        mSavedValue = mFilter->getSourceRT(mSelectedItem).y;
+                    
+                    FPoint point(vx - 0.5f, vy - 0.5f);
+                    FPoint line(cosf(mSavedValue), sinf(mSavedValue));
+                    
+                    float c = (line.x * point.x + line.y * point.y) / (line.x * line.x + line.y * line.y);
+                    vx = c * line.x;
+                    vy = c * line.y;
+                    
+                    vx += 0.5f; vy += 0.5f;
+                    if (vx < 0) vx = 0; else if (vx > 1) vx = 1;
+                    if (vy < 0) vy = 0; else if (vy > 1) vy = 1;
+                }
+                else if (event.mods.isAltDown())
+                {
+                    if (!mLastKeys.isAltDown())
+                        mSavedValue = mFilter->getSourceRT(mSelectedItem).x;
+                    
+                    // force fixed radius
+                    FPoint p = mFilter->convertXy012Rt01(FPoint(vx, vy));
+                    p = mFilter->convertRt2Xy01(mSavedValue, p.y * kThetaMax);
+                    vx = p.x; vy = p.y;
+                }
+                mFilter->getListXYFreeDraw()->push_back(FPoint(event.x-3, event.y-3));
+                mFilter->getListPointFreeDraw()->push_back(FPoint(vx, vy));
+                repaint();
+                break;
+            }
 			return;
 			
 		case kSelectedSource:
 		{
+            
+            
 			float vx = (mouseLocation.x - kSourceRadius) / (padSize - kSourceDiameter);
 			float vy = 1 - (mouseLocation.y - kSourceRadius) / (padSize - kSourceDiameter);
 			if (vx < 0) vx = 0; else if (vx > 1) vx = 1;
@@ -507,7 +569,11 @@ void FieldComponent::mouseDrag(const MouseEvent &event)
 				vx = p.x; vy = p.y;
 			}
 			mLastKeys = event.mods;
-           
+            
+            if(mFilter->getTrType()==FreeDrawing && event.mods.isLeftButtonDown()){
+                       mFilter->getListXYFreeDraw()->push_back(FPoint(event.x-3, event.y-3));
+                mFilter->getListPointFreeDraw()->push_back(FPoint(vx, vy));
+            }
 			m_pMover->move(FPoint(vx, vy), kField);
 			break;
 		}

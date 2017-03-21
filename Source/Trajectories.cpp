@@ -48,6 +48,19 @@ Trajectory::Trajectory(const TrajectoryProperties& properties)
     m_fTotalDuration = m_fDurationSingleTraj * fRepeats;
 }
 
+bool Trajectory::useBeats(){
+    return m_bUseBeats;
+}
+bool Trajectory::isInfinite(){
+    return m_bInfLoopRepeats;
+}
+float Trajectory::getTotalDuration(){
+    return m_fTotalDuration;
+}
+float Trajectory::getCurrentTime(){
+    return m_fTimeDone;
+}
+
 void Trajectory::start() {
     //tell mover to start the automation, etc
     m_pMover->begin(mFilter->getSelectedSrc(), kTrajectory);
@@ -60,7 +73,8 @@ void Trajectory::start() {
 }
 
 //return true if the trajectory is finished, false otherwise
-bool Trajectory::process(float seconds, float beats) {
+bool Trajectory::process(float seconds, float beats, float speed, float speedRand) {
+    m_fSpeed = speed;
 	if (m_bStopped) return true;
     if (!m_bStarted) {
         start();
@@ -71,14 +85,15 @@ bool Trajectory::process(float seconds, float beats) {
 	}
 
 	float duration = m_bUseBeats ? beats : seconds;
-	childProcess(duration, seconds);
-	
+    childProcess(duration, seconds, speedRand);
 	m_fTimeDone += (duration*m_fSpeed);
-    
+
+    //cout << m_fSpeed << " << "<<m_fTimeDone <<newLine;
 	return false;
 }
 
 float Trajectory::progress() {
+    //progress bar
     if(m_bInfLoopRepeats){ return 1.0f; }
 	return  m_fSpeed * m_fTimeDone / m_fTotalDuration;
 }
@@ -107,13 +122,14 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleDirections(int p_iTraj
             vDirections->push_back("Counter Clockwise");
             break;
         case RandomTrajectory:
-            vDirections->push_back("Slow");
+            /*vDirections->push_back("Slow");
             vDirections->push_back("Mid");
             vDirections->push_back("Fast");
-            break;
+            break;*/
         case RandomTarget:
         case SymXTarget:
         case SymYTarget:
+        case FreeDrawing:
         case ClosestSpeakerTarget:
             return nullptr;
             
@@ -145,6 +161,7 @@ unique_ptr<AllTrajectoryDirections> Trajectory::getCurDirection(int p_iSelectedT
         case RandomTarget:
         case SymXTarget:
         case SymYTarget:
+        case FreeDrawing:
         case ClosestSpeakerTarget:
             *pDirection = None;
             break;
@@ -166,6 +183,10 @@ std::unique_ptr<vector<String>> Trajectory::getAllPossibleReturns(int p_iTraject
         case RandomTarget:
             vReturns->push_back("Continuous");
             vReturns->push_back("Discontinuous");
+            break;
+        case FreeDrawing:
+            vReturns->push_back("One Way");
+            vReturns->push_back("Return");
             break;
         case Circle:
         case EllipseTr:
@@ -192,7 +213,7 @@ public:
     }
     
 protected:
-    void childProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds, float speedRand) {
         float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;
         
         //DeltaTheta = modf(fDeltaTheta/m_fTurns, & integralPart) * m_fTurns;      //the modf makes da cycle back to 0 when it reaches m_fTurn, then we multiply it back by m_fTurn to undo the modification
@@ -240,7 +261,7 @@ protected:
         //if start ray is bigger than end ray, we are going in
         m_bGoingIn = (mStartPointRt.x > mEndPointRt.x) ? true : false;
     }
-    void childProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds, float speedRand) {
         
         //figure out delta theta, which will go [0, m_fTurns*2*pi] or [0, m_fTurns*4*pi] for return spiral
         //float fDeltaTheta, integralPart;
@@ -338,7 +359,7 @@ protected:
             m_fInitialLength = mEndPointXy01.y - mStartPointXy01.y;
         }
     }
-    void childProcess(float duration, float seconds) {
+    void childProcess(float duration, float seconds, float speedRand) {
         float fCurX01, fCurY01, integralPart;
         int iReturn = m_bRT ? 2:1;
         //calculate current progress and dampening
@@ -372,6 +393,7 @@ protected:
             fCurX01 = mStartPointXy01.x;
             fCurY01 = fCurStartY01 + fCurrentProgress;
         }
+
         //convert to RT to implement angular deviation
         FPoint pointRT = mFilter->convertXy012Rt(FPoint(fCurX01, fCurY01), false);
         //float deviationAngle = modf(m_fTimeDone / m_fTotalDuration, &integralPart) * 2 * M_PI * m_fDeviation;
@@ -416,7 +438,7 @@ protected:
         mStartPointRT = mSourcesInitialPositionRT.getUnchecked(mFilter->getSelectedSrc());
     }
     
-	void childProcess(float duration, float seconds) {
+	void childProcess(float duration, float seconds, float speedRand) {
         //calculate delta theta
         float fDeltaTheta = (float)(m_fTurns * m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
         
@@ -496,7 +518,7 @@ public:
 	: Trajectory(properties)
     , mClock(0)
     {
-        switch(*properties.direction){
+        /*switch(*properties.direction){
                 case Slow:
                     mSpeed = .02;
                     break;
@@ -509,17 +531,17 @@ public:
             default:
                 jassert(0);
                 return;
-        }
+        }*/
     }
 	
 protected:
-    void childProcess(float duration, float seconds){
+    void childProcess(float duration, float seconds, float speedRand){
         if (mFilter->getIndependentMode()){
             for (int iCurSrc = 0; iCurSrc < mFilter->getNumberOfSources(); ++iCurSrc){
                 if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                     mFilter->restoreCurrentLocations(iCurSrc);
                 }
-                mClock += seconds;
+                mClock += (speedRand*0.1f);
                 while(mClock > 0.01){
                     mClock -= 0.01;
                     
@@ -528,8 +550,8 @@ protected:
                     
                     FPoint p = mFilter->getSourceXY(iCurSrc);
                     
-                    p.x +=   (rand1 - 0.5) * mSpeed*2.0f;
-                    p.y +=  (rand2 - 0.5) * mSpeed*2.0f;
+                    p.x +=   (rand1 - 0.5) * m_fSpeed*0.1f;
+                    p.y +=  (rand2 - 0.5) * m_fSpeed*0.1f;
                     //convert ±radius range to 01 range
                     p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                     p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
@@ -542,7 +564,7 @@ protected:
             if (fmodf(m_fTimeDone, m_fDurationSingleTraj) < 0.01){
                 mFilter->restoreCurrentLocations(mFilter->getSelectedSrc());
             }
-            mClock += seconds;
+            mClock += (speedRand*0.1f);
             while(mClock > 0.01){
                 mClock -= 0.01;
                 
@@ -551,8 +573,8 @@ protected:
                 
                 FPoint p = mFilter->getSourceXY(mFilter->getSelectedSrc());
                 
-                p.x += (rand1 - 0.5) * mSpeed*2.0f;
-                p.y += (rand2 - 0.5) * mSpeed*2.0f;
+                p.x += (rand1 - 0.5) * m_fSpeed*0.1f;
+                p.y += (rand2 - 0.5) * m_fSpeed*0.1f;
                 //convert ±radius range to 01 range
                 p.x = (p.x + kRadiusMax) / (2*kRadiusMax);
                 p.y = (p.y + kRadiusMax) / (2*kRadiusMax);
@@ -564,7 +586,7 @@ protected:
 private:
     MTRand_int32 mRNG;
     float mClock;
-    float mSpeed;
+    //float mSpeed;
 };
 
 
@@ -582,21 +604,23 @@ protected:
 	virtual FPoint destinationForSource(int s, FPoint o) = 0;
     virtual void resetIfRandomTarget(){};
 
-	void childProcess(float duration, float seconds) {
-
+	void childProcess(float duration, float seconds, float speedRand) {
+        float integralPart;
         bool bWriteAutomationForAllSources = mFilter->getIndependentMode();
-        
         float p =  m_fTimeDone / m_fDurationSingleTraj;
         int iSelectedSrc = mFilter->getSelectedSrc();
 		int cycle = (int)p;
-
+        
+        
         //reset stuff when we start a new cycle
+        float d  = abs(modf(m_fTimeDone / m_fDurationSingleTraj, &integralPart)) ;
+       
 		if (mCycle != cycle) {
             if (m_bReturn){
                 resetIfRandomTarget();
             }
 			mCycle = cycle;
-			mSourcesOrigins.clearQuick();
+			mSourcesOrigins.clearQuick() ;
 			mSourcesDestinations.clearQuick();
             //get destinations for all sources
             for (int i = 0; i < mFilter->getNumberOfSources(); ++i){
@@ -606,13 +630,13 @@ protected:
             }
 		}
 
-        //do the trajectory
-		float d = fmodf(p, 1);
+        d = (1-cos(d * 2 * M_PI)) / 2;
         for (int i = 0; i < mFilter->getNumberOfSources(); ++i){
             if (bWriteAutomationForAllSources || iSelectedSrc == i) {
                 FPoint a = mSourcesOrigins.getUnchecked(i);
                 FPoint b = mSourcesDestinations.getUnchecked(i);
-                FPoint p = a + (b - a) * d;
+                FPoint p  = a + ((b - a) * d);
+                
                 bool bWriteAutomation = (bWriteAutomationForAllSources || iSelectedSrc == i);
                 if (bWriteAutomationForAllSources){
                     mFilter->setSourceXY(i, p, bWriteAutomation);
@@ -716,6 +740,117 @@ protected:
 };
 
 
+// ==============================================================================
+class FreeDrawTrajectory : public Trajectory
+{
+public:
+    FreeDrawTrajectory(const TrajectoryProperties& properties)
+    : Trajectory(properties)
+    , returnloop(properties.bReturn)
+    , listPoints(properties.listPoints)
+    {
+    }
+    
+protected:
+    void childInit(){
+        indexR = 0;
+    }
+    
+    void childProcess(float duration, float seconds, float speedRand) {
+        //calculate delta theta
+        float fDeltaTheta = (float)( m_fTimeDone / ((m_fDurationSingleTraj))) ;//* (float)m_fSpeed;
+        
+        int listSize = listPoints.size()-1;
+        if(listSize<1){
+            return ;
+        }
+        double intpart;
+    
+        indexR = (int) abs(fDeltaTheta* listSize);
+        
+        
+        if(returnloop){
+            if(fDeltaTheta < 0){
+                fDeltaTheta = abs(fDeltaTheta);
+            }
+            fDeltaTheta = modf (fDeltaTheta, &intpart);
+            if((int)intpart%2 != 0){
+                indexR = (int) abs(fDeltaTheta*listSize);
+                indexR = listSize-indexR;
+                double fractpart = modf (fDeltaTheta*listSize , &intpart);
+                
+                float curX = listPoints[indexR].x;
+                float curY = listPoints[indexR].y;
+                
+                float nextX = listPoints[indexR-1].x;
+                float nextY = listPoints[indexR-1].y;
+                
+                FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+                m_pMover->move(curLoc, kTrajectory);
+            
+                
+            }else{
+                indexR = (int) abs(fDeltaTheta*listSize);
+                double fractpart = modf (fDeltaTheta*listSize , &intpart);
+                
+                float curX = listPoints[indexR].x;
+                float curY = listPoints[indexR].y;
+                
+                float nextX = listPoints[indexR+1].x;
+                float nextY = listPoints[indexR+1].y;
+                
+                FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+                m_pMover->move(curLoc, kTrajectory);
+            }
+            return;
+        }
+        
+        
+        if(listSize-1  < indexR){
+            fDeltaTheta = modf (fDeltaTheta, &intpart);
+            indexR = (int) abs(fDeltaTheta*listSize);
+        }
+        
+        if(fDeltaTheta < 0){
+            fDeltaTheta = abs(fDeltaTheta);
+            indexR = listSize-indexR;
+            double fractpart = modf (fDeltaTheta*listSize , &intpart);
+            
+            float curX = listPoints[indexR].x;
+            float curY = listPoints[indexR].y;
+            
+            float nextX = listPoints[indexR-1].x;
+            float nextY = listPoints[indexR-1].y;
+            
+            FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+            m_pMover->move(curLoc, kTrajectory);
+            return ;
+        }
+        
+        
+        
+        double fractpart = modf (fDeltaTheta*listSize , &intpart);
+        
+        float curX = listPoints[indexR].x;
+        float curY = listPoints[indexR].y;
+        
+        float nextX = listPoints[indexR+1].x;
+        float nextY = listPoints[indexR+1].y;
+        
+        FPoint curLoc(curX + ((nextX-curX)*fractpart), curY + ((nextY- curY)*fractpart));
+        //cout << curX << " // " << curY << " <> "<< nextX << " // " << nextY <<newLine;
+        //cout << fDeltaTheta << " // " << listPoints.size() << " == "<< indexR << " /// " << m_fDurationSingleTraj <<newLine;
+        m_pMover->move(curLoc, kTrajectory);
+        return ;
+    }
+    
+private:
+    bool returnloop;
+    vector<FPoint> listPoints;
+    int indexR;
+};
+
+
 int Trajectory::NumberOfTrajectories() { return TotalNumberTrajectories-1; }
 
 String Trajectory::GetTrajectoryName(int i) {
@@ -728,6 +863,7 @@ String Trajectory::GetTrajectoryName(int i) {
         case RandomTarget: return "Random Target";
         case SymXTarget: return "Sym X Target";
         case SymYTarget: return "Sym Y Target";
+        case FreeDrawing: return "Free Drawing";
         case ClosestSpeakerTarget: return "Closest Speaker Target";
         default:
             jassertfalse;
@@ -746,6 +882,7 @@ Trajectory::Ptr Trajectory::CreateTrajectory(const TrajectoryProperties& propert
         case RandomTarget:               return new RandomTargetTrajectory          (properties);
         case SymXTarget:                 return new SymXTargetTrajectory            (properties);
         case SymYTarget:                 return new SymYTargetTrajectory            (properties);
+        case FreeDrawing:                return new FreeDrawTrajectory              (properties);
         case ClosestSpeakerTarget:       return new ClosestSpeakerTargetTrajectory  (properties);
     }
     jassert(0);

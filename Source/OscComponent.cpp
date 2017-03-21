@@ -151,15 +151,40 @@ public:
         mEditor->getMover()->end(kOsc);
     }
 	
-	void textEditorTextChanged (TextEditor &te) override{
-		if (&te == mReceivePort) {
-			mFilter->setOscReceivePort(mReceivePort->getText().getIntValue());
-		} else if (&te == mSendPort) {
-			mFilter->setOscSendPort(mSendPort->getText().getIntValue());
-		} else if (&te == mSendIp){
-			mFilter->setOscSendIp(mSendIp->getText());
-		}
-	}
+    void textEditorFocusLost (TextEditor &textEditor)override
+    {
+        if (&textEditor == mReceivePort) {
+            mFilter->setOscReceivePort(mReceivePort->getText().getIntValue());
+        } else if (&textEditor == mSendPort) {
+            mFilter->setOscSendPort(mSendPort->getText().getIntValue());
+        } else if (&textEditor == mSendIp){
+            mFilter->setOscSendIp(mSendIp->getText());
+        }
+    }
+    void textEditorTextChanged (TextEditor &textEditor) override{
+        if (&textEditor == mReceivePort) {
+            mFilter->setOscReceivePort(mReceivePort->getText().getIntValue());
+        } else if (&textEditor == mSendPort) {
+            mFilter->setOscSendPort(mSendPort->getText().getIntValue());
+        } else if (&textEditor == mSendIp){
+            mFilter->setOscSendIp(mSendIp->getText());
+        }
+        textEditor.grabKeyboardFocus();
+        //grabKeyboardFocus
+    }
+    void returnPressed(TextEditor &textEditor) {
+        if (&textEditor == mReceivePort) {
+            mFilter->setOscReceivePort(mReceivePort->getText().getIntValue());
+        } else if (&textEditor == mSendPort) {
+            mFilter->setOscSendPort(mSendPort->getText().getIntValue());
+        } else if (&textEditor == mSendIp){
+            mFilter->setOscSendIp(mSendIp->getText());
+        }
+        textEditor.grabKeyboardFocus();
+
+    }
+    
+	
 	
     void buttonClicked (Button *button) override{
         try {

@@ -27,10 +27,12 @@
 #ifndef FIELDCOMPONENT_H_INCLUDED
 #define FIELDCOMPONENT_H_INCLUDED
 
-#include "PluginProcessor.h"
+
 #include "../../GrisCommonFiles/GrisLookAndFeel.h"
+#include "PluginProcessor.h"
 #include "SourceMover.h"
-#include "deque"
+
+#include <deque>
 
 typedef enum
 {
@@ -90,6 +92,10 @@ private:
     int m_iMaxPathLines;
     std::deque<FPoint> m_dqAllPathPoints;
     bool m_bJustSelectedEndPoint;
+    
+    Path pathFreeDraw;
+   
+
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

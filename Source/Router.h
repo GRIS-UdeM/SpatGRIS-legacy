@@ -30,13 +30,6 @@
 
 class Router
 {
-private:
-	Router();
-	~Router();
-
-    AudioBuffer<float> mOutputBuffers;
-	SpinLock mLock;
-
 public:
 	static Router & instance();
 	
@@ -45,6 +38,13 @@ public:
 	void clear(int channel) { mOutputBuffers.clear(channel, 0, mOutputBuffers.getNumSamples()); }
 	
 	float ** outputBuffers(int frames);
+    
+private:
+    Router();
+    ~Router();
+    
+    AudioBuffer<float> mOutputBuffers;
+    SpinLock mLock;
 };
 
 #endif  // ROUTING_H_INCLUDED
