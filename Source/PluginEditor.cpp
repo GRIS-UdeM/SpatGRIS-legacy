@@ -424,7 +424,7 @@ AudioProcessorEditor (ownerFilter)
         }
         
         {
-            Slider *ds = addParamSliderGRIS(kParamDirRandom, 2.0f, mFilter->getSpeedTraject(), x+cbw+5, y+2, w, dh-5, box);
+            Slider *ds = addParamSliderGRIS(kParamDirRandom, -1, mFilter->getSpeedTraject(), x+cbw+5, y+2, w, dh-5, box);
             ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
             ds->setRange(0.0f, 1.0f);
             mDirRandTrajectory = ds;
@@ -542,7 +542,7 @@ AudioProcessorEditor (ownerFilter)
         
         addLabel("Speed", x-4, y-14, w+10, dh, box);
         
-        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, 2.5f, mFilter->getSpeedTraject(), x, y, w, dh-5, box);
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, -1, mFilter->getSpeedTraject(), x, y, w, dh-5, box);
         ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
         ds->setRange(-2.5f, 2.5f);
         

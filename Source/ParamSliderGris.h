@@ -85,8 +85,16 @@ public:
                 case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
-                case kParamTrajSpeed:       newVal = 1.0f; break;
-                case kParamDirRandom:       newVal = 0.5f; break;
+                case kParamTrajSpeed:
+                    newVal = 1.0f;
+                    mFilter->setSpeedTraject(newVal);
+                    this->setValue(newVal);
+                    return;
+                case kParamDirRandom:
+                    newVal = 0.5f;
+                    mFilter->setDirRandomTraject(newVal);
+                    this->setValue(newVal);
+                    return;
             }
             
             if (mParamType == kParamSource && mLinkButton->getToggleState()) {
@@ -136,7 +144,9 @@ public:
                     mFilter->endParameterChangeGesture(paramIndex);
                 }
             } else {
-                mFilter->endParameterChangeGesture(mParamIndex);
+                if(mParamIndex>=0){
+                    mFilter->endParameterChangeGesture(mParamIndex);
+                }
             }
         }
         
@@ -154,7 +164,9 @@ public:
                     mFilter->beginParameterChangeGesture(paramIndex);
                 }
             } else {
-                mFilter->beginParameterChangeGesture(mParamIndex);
+                if(mParamIndex>=0){
+                    mFilter->beginParameterChangeGesture(mParamIndex);
+                }
             }
             
             mBeganGesture = true;
