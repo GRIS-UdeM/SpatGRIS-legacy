@@ -257,12 +257,12 @@ static const int    kCenterColumnWidth  = 180;
 static const int    kDefaultFieldSize   = 500;
 static const int    kMinFieldSize       = 300;
 static const int    kRightColumnWidth   = 340;
-static const int    kDefaultWidth       = kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 26;
+static const int    kDefaultWidth       = 1090;//kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 106;
 static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin + 26;
 
 static const float kSpeedMinMax = 2.5f;
 
-static const int    kDataVersion = 2;
+static const int    kDataVersion = 3;
 //==============================================================================
 static inline float normalize(float min, float max, float value) {
 	return (value - min) / (max - min);
@@ -836,7 +836,7 @@ private:
 	bool mShowGridLines;
     bool m_bOscActive;
     bool mTrSeparateAutomationMode;
-    int mGuiWidth;
+    int mGuiWidth = kDefaultWidth;
     int mGuiHeight;
     int mInputOutputMode;
     int mSrcPlacementMode;

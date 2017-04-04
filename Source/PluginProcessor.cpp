@@ -245,8 +245,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mShowGridLines  = false;
     m_bOscActive    = true;
 	mTrSeparateAutomationMode = false;
-    mGuiWidth = kDefaultWidth,
-    mGuiHeight = kDefaultHeight,
+    mGuiWidth = kDefaultWidth;
+    mGuiHeight = kDefaultHeight;
 	mHostChangedParameterProcessor = 0;
 	mHostChangedPropertyProcessor = 0;
     setGuiTab(0);
