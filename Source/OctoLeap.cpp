@@ -28,7 +28,7 @@
 #include "OctoLeap.h"
 
 #if USE_LEAP
-
+/*
 int gIsLeapConnected = NULL;
 
 OctoLeap::OctoLeap(SpatGrisAudioProcessor *filter, SpatGrisAudioProcessorEditor *editor):
@@ -117,5 +117,5 @@ Component * CreateLeapComponent(SpatGrisAudioProcessor *filter, SpatGrisAudioPro
 {
     // not implemented yet on windows
     return NULL;
-}
+}*/
 #endif

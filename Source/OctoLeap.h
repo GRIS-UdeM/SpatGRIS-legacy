@@ -27,7 +27,7 @@
 #ifndef OCTOLEAP_H_INCLUDED
 #define OCTOLEAP_H_INCLUDED
 #include "PluginEditor.h"
-
+/*
 extern int gIsLeapConnected;
 
 #if USE_LEAP
@@ -70,5 +70,5 @@ private:
 };
 
 #endif
-
+*/
 #endif  // OCTOLEAP_H_INCLUDED

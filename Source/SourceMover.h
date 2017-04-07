@@ -30,56 +30,6 @@
 
 #include "PluginProcessor.h"
 
-class FieldComponent;
-
-typedef enum
-{
-	kVacant,
-	kField,
-	kOsc,
-	kLeap,
-    kHID,
-    kSourceThread,
-    kTrajectory
-} MoverType;
-
-class SourceMover
-{
-public:
-    
-	SourceMover(SpatGrisAudioProcessor *filter);
-    void updateNumberOfSources();
-	
-	void begin(int s, MoverType mt);
-    void sortAngles();
-    void setEqualRadius();
-    void setEqualAngles();
-    void setEqualRadiusAndAngles();
-    void setSymmetricX();
-    void setSymmetricY();
-	void move(FPoint p, MoverType mt);
-    void storeAllDownPositions();
-    void storeDownPosition(int id, FPoint pointRT);
-	void end(MoverType mt, bool clearTrajectory = true);
-    void setFieldExists(bool v){ mFieldExists = v; }
-    
-    void setFieldComponent(FieldComponent* field){
-        mFieldExists = true;
-        mField = field;
-    }
-	
-private:
-	SpatGrisAudioProcessor *mFilter;
-	MoverType mMoverType;
-	int mSelectedSrc;
-    bool mFieldExists;
-	
-	Array<FPoint> mSourcesDownXY;
-	Array<FPoint> mSourcesDownRT;
-	Array<float> mSourcesAngularOrder;
-    FieldComponent* mField;
-};
-
 
 
 

@@ -29,35 +29,47 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include <stdint.h>
-#include <memory>
+#include "Speaker.h"
+#include "Source.h"
 
-#include "Areas.h"
-#include "FirFilter.h"
-#include "Trajectories.h"
+#if JUCE_MSVC
+#include <sstream>
+#include <string>
+#include <windows.h>
 
-using namespace std;
+size_t strlcpy(char * dst, const char * src, size_t dstsize);
 
+template<class T>
+string toString(const T &value) {
+    ostringstream os;
+    os << value;
+    return os.str();
+}
 
-#ifndef ALLOW_PAN_MODE
-#define ALLOW_PAN_MODE 0
+// from https://github.com/objectx/strlcpy/blob/master/strlcpy/strlcpy.c
+size_t strlcpy(char * dst, const char * src, size_t dstsize)
+{
+    if (dst == 0 || dstsize == 0) {
+        return 0;
+    }
+    if (src == 0) {
+        dst [0] = 0;
+        return 0;
+    } else {
+        size_t	src_len = strlen (src);
+        size_t	dstlimit = dstsize - 1;
+        
+        if (dstlimit < src_len) {
+            src_len = dstlimit;
+        }
+        memcpy (dst, src, src_len);
+        dst [src_len] = 0;
+        return src_len;
+    }
+}
+
 #endif
 
-#ifndef OUTPUT_RAMPING
-#define OUTPUT_RAMPING 0
-#endif
-
-#ifndef TIME_PROCESS
-#define TIME_PROCESS 0
-#endif
-
-#ifndef TIME_GUI
-#define TIME_GUI 0
-#endif
-
-#ifndef USE_TOUCH_OSC
-    #define USE_TOUCH_OSC 1
-#endif
 
 #if WIN32
     #define M_PI 3.14159265358979323846264338327950288
@@ -72,251 +84,10 @@ using namespace std;
 #endif
 
 
-#if JUCE_MSVC
-    size_t strlcpy(char * dst, const char * src, size_t dstsize);
-#endif
 
-//==============================================================================
-
-static PluginHostType host;
-
-// x, y, distance
-enum sourceParameters{
-    kSourceX = 0,
-    kSourceY,
-    kSourceD,
-    kSourceAzimSpan,
-    kSourceElevSpan,
-    kParamsPerSource
-};
-
-// x, y, attenuation, mute
-enum speakerParameters{
-    kSpeakerX = 0,
-    kSpeakerY,
-    kSpeakerM,
-    kSpeakerUnused1,
-    kSpeakerUnused2,
-    kParamsPerSpeakers
-};
-
-//the JucePlugin values are from the introjucer:   8           * 5                + 16                              * 5 = 120
-#define kNonConstantParameters (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
-
-enum constantParameters{
-	kSmooth =				0 + kNonConstantParameters,
-	kVolumeNear =			1 + kNonConstantParameters,
-	kVolumeMid =			2 + kNonConstantParameters,
-	kVolumeFar =			3 + kNonConstantParameters,
-	kFilterNear =			4 + kNonConstantParameters,
-	kFilterMid =			5 + kNonConstantParameters,
-	kFilterFar =			6 + kNonConstantParameters,
-	kMaxSpanVolume =		7 + kNonConstantParameters,
-	kRoutingVolume =		8 + kNonConstantParameters,
-    kMovementMode =         9 + kNonConstantParameters,
-    kConstantParameters =   10
-
-    
-};
-
-JUCE_COMPILER_WARNING("make sure these are applied everywhere. could even use the max given by juce")
-#define kMaxInputs      (8)
-#define kMaxChannels    (16)
-#define kMaxBufferSize  (4096)
-
-#define kNumberOfParameters (kNonConstantParameters + kConstantParameters)
-
-//==============================================================================
-static const float kSourceRadius = 10;
-static const float kSourceDiameter = kSourceRadius * 2;
-static const float kSpeakerRadius = 10;
-static const float kSpeakerDiameter = kSpeakerRadius * 2;
-//==============================================================================
-enum
-{
-    kTrReady = 0,
-    kTrWriting
-};
-
-enum AllTrajectoryTypes {
-    Circle = 1,
-    EllipseTr, //Ellipse was clashing with some random windows class...
-    Spiral,
-    Pendulum,
-    RandomTrajectory,
-    RandomTarget,
-    SymXTarget,
-    SymYTarget,
-    FreeDrawing,
-    ClosestSpeakerTarget,
-    TotalNumberTrajectories
-};
-
-enum AllMovementModes {
-    Independent = 0,
-    Circular,
-    CircularFixedRadius,
-    CircularFixedAngle,
-    CircularFullyFixed,
-    DeltaLock,
-    SymmetricX,
-    SymmetricY,
-    TotalNumberMovementModes
-};
+using namespace std;
 
 
-enum AllAccelerationModes {
-    Linear = 0,
-    Expo,
-    Log,
-    TotalNumberAccelerationtModes
-};
-
-JUCE_COMPILER_WARNING("Check Order InputOutputModes AND x12x")
-//because of backwards-compatibility, these have to start at 0, and the o12 options need to be at the end
-enum InputOutputModes {
-    i1o1 = 0, i1o2, i1o4, i1o6, i1o8, i1o16, i2o2, i2o4, i2o6, i2o8, i2o16, i4o4, i4o6, i4o8, i4o16, i6o6, i6o8, i6o16, i8o8, i8o16, i1o12, i2o12, i4o12, i6o12, i8o12,// i12o12,i16o16
-};
-
-#if ALLOW_PAN_MODE
-enum ProcessModes{ kFreeVolumeMode = 0, kPanMode, kSpanMode, kOscSpatMode, kNumberOfModes };
-#else
-enum ProcessModes{ kFreeVolumeMode = 0, kSpanMode, kOscSpatMode, kNumberOfModes };
-#endif
-
-
-
-//==============================================================================
-// these must be normalized/denormalized for processing
-static const float kSourceMinDistance = 2.5 * 0.5;
-static const float kSourceMaxDistance = 20 * 0.5;
-static const float kSourceDefaultDistance = kSourceMinDistance;
-
-static const float kSmoothMin = 1;
-static const float kSmoothMax = 1000;
-static const float kSmoothDefault = 50;
-
-static const float kVolumeNearMin = -10;
-static const float kVolumeNearMax = 30;
-static const float kVolumeNearDefault = 6;
-
-static const float kVolumeMidMin = -30;
-static const float kVolumeMidMax = 10;
-static const float kVolumeMidDefault = 0;
-
-static const float kVolumeFarMin = -120;
-static const float kVolumeFarMax = 0;
-static const float kVolumeFarDefault = -36;
-
-static const float kMaxDistance = 2000;
-
-static const float kFilterNearMin = kMaxDistance;
-static const float kFilterNearMax = 0;
-static const float kFilterNearDefault = 0;
-
-static const float kFilterMidMin = kMaxDistance;
-static const float kFilterMidMax = 0;
-static const float kFilterMidDefault = kMaxDistance / 10;
-
-static const float kFilterFarMin = kMaxDistance;
-static const float kFilterFarMax = 0;
-static const float kFilterFarDefault = kMaxDistance / 2;
-
-static const float kMaxSpanVolumeMin = 0;
-static const float kMaxSpanVolumeMax = 20;
-static const float kMaxSpanVolumeDefault = 0;
-
-static const float kRoutingVolumeMin = -120;
-static const float kRoutingVolumeMax = 6;
-static const float kRoutingVolumeDefault = 0;
-
-static const float kMovementModeMin = Independent;
-static const float kMovementModeMax = SymmetricY;
-static const float kMovementModeDefault = 0;
-
-static const float kSpanMin = 0;
-static const float kSpanMax = 2;
-static const float kSpanDefault = 0;
-
-static const float kRadiusMax = 2;
-static const float kHalfCircle = M_PI;
-static const float kQuarterCircle = M_PI / 2;
-
-static const float kThetaRampRadius = 0.5;
-static const float kThetaLockRadius = 0.025;
-
-//static const float kThetaRampRadius = 0.25;
-//static const float kThetaLockRadius = 0.20;
-
-static const float kSourceDefaultRadius = 1.f;
-static const float kSpeedDefault = 1.0f;
-static const float kDirRandDefault = 0.5f;
-
-static const int    kMargin             = 2;
-static const int    kCenterColumnWidth  = 180;
-static const int    kDefaultFieldSize   = 500;
-static const int    kMinFieldSize       = 300;
-static const int    kRightColumnWidth   = 340;
-static const int    kDefaultWidth       = 1090;//kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 106;
-static const int    kDefaultHeight      = kMargin + kDefaultFieldSize + kMargin + 26;
-
-static const float kSpeedMinMax = 2.5f;
-
-static const int    kDataVersion = 3;
-//==============================================================================
-static inline float normalize(float min, float max, float value) {
-	return (value - min) / (max - min);
-}
-
-static inline float denormalize(float min, float max, float value) {
-	return min + value * (max - min);
-}
-
-static inline float paramRange(float min, float max, float value) {
-    if(value<=max && value>=min){ return value;}
-    if(value>max ){ return max;}
-    return min;
-}
-
-static inline float dbToLinear(float db) {
-	return powf(10.f, (db) * 0.05f);
-}
-
-static inline float linearToDb(float linear) {
-	return log10f(linear) * 20.f;
-}
-static bool areSame(double a, double b) {
-    return fabs(a - b) < .0001;
-}
-
-static bool areSameStepParameterValues(double a, double b, int iTotalSteps) {
-    float nearest = roundf(1.f/iTotalSteps * 10) / 10;
-    return fabs(a - b) < nearest;
-}
-
-static String getAccelerationName(int i) {
-    switch(i) {
-        case Linear: return "Linear";
-        case Expo: return "Expo";
-        case Log: return "Log";
-        
-        default:
-            jassertfalse;
-            return "";
-    }
-}
-typedef Point<float> FPoint;
-
-typedef struct
-{
-	int i;
-	float a;
-} IndexedAngle;
-int IndexedAngleCompare(const void *a, const void *b);
-
-class OscSpatThread;
-class SourceUpdateThread;
-class SourceMover;
 
 //==============================================================================
 class SpatGrisAudioProcessor : public AudioProcessor
@@ -326,677 +97,46 @@ public:
     SpatGrisAudioProcessor();
     ~SpatGrisAudioProcessor();
 
+    const String getName() const;
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     void releaseResources();
 
     void processBlock (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
-	void processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
-
+    void processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
     //==============================================================================
     AudioProcessorEditor* createEditor();
     bool hasEditor() const;
 
     //==============================================================================
-    const String getName() const;
-
-    void setParameter (int index, float newValue);
-    void setParameterInternal (const int &index, const float &newValue);
-    void setParameterNotifyingHost (int index, float newValue);
-    bool isSourceLocationParameter(const int &index);
-
-    
-    int             getNumParameters();
-    float           getParameter (int index);
-    int             getParameterNumSteps (int index);
-    const String    getParameterName (int index);
-    const String    getParameterText (int index);
-
-    String GetMovementModeName(int i) {
-        switch(i) {
-            case Independent: return "Independent";
-            case Circular: return "Circular";
-            case CircularFixedRadius: return "CircularFixedRadius";
-            case CircularFixedAngle: return "CircularFixedAngle";
-            case CircularFullyFixed: return "CircularFullyFixed";
-            case DeltaLock: return "DeltaLock";
-            case SymmetricX: return "SymmetricX";
-            case SymmetricY: return "SymmetricY";
-            default:
-                jassertfalse;
-                return "";
-        }
-        
-    }
-
-
-    const String getInputChannelName (int channelIndex) const;
-    const String getOutputChannelName (int channelIndex) const;
-    bool isInputChannelStereoPair (int index) const;
-    bool isOutputChannelStereoPair (int index) const;
-
+    double getTailLengthSeconds() const;
     bool acceptsMidi() const;
     bool producesMidi() const;
-    bool silenceInProducesSilenceOut() const;
-    double getTailLengthSeconds() const;
-
-    //==============================================================================
     int getNumPrograms();
     int getCurrentProgram();
     void setCurrentProgram (int index);
     const String getProgramName (int index);
     void changeProgramName (int index, const String& newName);
-
     //==============================================================================
     void getStateInformation (MemoryBlock& destData);
     void setStateInformation (const void* data, int sizeInBytes);
-
     //==============================================================================
-    bool getApplyOutRamp() const { return mApplyOutRamp; }
-    void setApplyOutRamp(bool s) { mApplyOutRamp = s; }
     
-	bool getApplyFilter() const { return mApplyFilter; }
-	void setApplyFilter(bool s) { mApplyFilter = s; }
-	
-	bool getShowGridLines() const { return mShowGridLines; }
-	void setShowGridLines(bool s) { mShowGridLines = s; }
+    unsigned int getNumSourceUsed() { return this->numSourceUsed;   }
+    unsigned int getNumSpeakerUsed(){ return this->numSpeakerUsed;  }
     
-    bool getOscActive() const { return m_bOscActive; }
-    void setOscActive(bool s) { m_bOscActive = s; }
-    
-    bool getIndependentMode() const { return mTrSeparateAutomationMode; }
-    void setIndependentMode(bool b) { mTrSeparateAutomationMode = b; }
+    float getPosXSource(int idS){ return *this->listSources[idS]->getX(); }
+    float getPosYSource(int idS){ return *this->listSources[idS]->getY(); }
+    void  setPosXYSource(int idS, float x, float y){ *(this->listSources[idS]->getX()) = x; *(this->listSources[idS]->getY()) = y ;}
+    //==============================================================================
 
-    bool isNewMovementMode(float v);
-	int getMovementMode() {
-		return static_cast<int>(round(denormalize(kMovementModeMin, kMovementModeMax, getParameter(kMovementMode))));
-	}
-    void setMovementMode(int i, bool p_bNotifyHost = true);
-    
-    
-	bool getLinkSurfaceOrPan() const { return mLinkSurfaceOrPan; }
-	void setLinkSurfaceOrPan(bool s) { mLinkSurfaceOrPan = s; }
-
-    bool getLinkAzimSpan() const { return mLinkAzimSpan; }
-    void setLinkAzimSpan(bool s) { mLinkAzimSpan = s; }
-
-    bool getLinkElevSpan() const { return mLinkElevSpan; }
-    void setLinkElevSpan(bool s) { mLinkElevSpan = s; }
-    
-	int getProcessMode() const { return mProcessMode; }
-    void setProcessMode(int s) ;
-    
-    int getGuiWidth() const{return mGuiWidth;}
-    int getGuiHeight() const{return mGuiHeight;}
-    
-    void setGuiWidth(int w) {mGuiWidth = w;}
-    void setGuiHeight(int h) {mGuiHeight = h;}
-
-    int getInputOutputMode() const {return mInputOutputMode+1;}
-    void setInputOutputMode(int i);
-    void updateInputOutputMode();
-    
-    int getSrcPlacementMode() const {return mSrcPlacementMode;}
-    void setSrcPlacementMode(int i);
-
-    int getSpPlacementMode() const {return mSpPlacementMode;}
-    void setSpPlacementMode(int i);
-
-    int getTrType() const {return m_iTrType+1;}
-    void setTrType(int i){m_iTrType = i-1;}
-    
-    int getTrDirection() const {return m_iTrDirection;}
-    void setTrDirection(int i){m_iTrDirection = i;}
-    
-    int getTrReturn() const {return m_iTrReturn;}
-    void setTrReturn(int i){m_iTrReturn = i;}
-
-    int getTrSrcSelect() const {return m_iTrSrcSelect;}
-    void setTrSrcSelect(int i){m_iTrSrcSelect = i;}
-
-    float getTrDuration() const {return m_fTrDuration;}
-    void setTrDuration(float i){m_fTrDuration = i;}
-    
-    int getTrUnits() const {return m_iTrUnits + 1;}
-    void setTrUnits(int i){m_iTrUnits = i - 1;}
-
-    float getTrRepeats() const {return m_fTrRepeats;}
-    void setTrRepeats(float f){m_fTrRepeats = f;}
-
-    float getTrDampening() const {return m_fTrDampening;}
-    void setTrDampening(float f){m_fTrDampening = f;}
-    
-    int getOscSpat1stSrcId() const{return m_iOscSpat1stSrcId;}
-    void setOscSpat1stSrcId(int i){m_iOscSpat1stSrcId = i;}
-    
-    int getOscSpatPort() const{return m_iOscSpatPort;}
-    void setOscSpatPort(int i){m_iOscSpatPort = i;}
-
-    float getTrDeviation() const {return m_fTrDeviation;}
-    void setTrDeviation(float i){m_fTrDeviation = i;}
-
-    float getTrEllipseWidth() const {return m_fTrEllipseWidth;}
-    void setTrEllipseWidth(float i){m_fTrEllipseWidth = i;}
-    
-    float getTrTurns() const {return m_fTrTurns;}
-    void setTrTurns(float i){m_fTrTurns = i;}
-    
-    int getTrState() const {return mTrState;}
-    void setTrState(int tr) {mTrState = tr;}
-    
-	int getGuiTab() const { return mGuiTab; }
-	void setGuiTab(int s) {
-        mGuiTab = s;
-        ++mHostChangedPropertyProcessor;
-    }
-
-    void sendOscSpatValues();
-    void connectOscSpat();
-    void disconnectOscSpat();
-    
-    int getIsJoystickEnabled() const { return mJoystickEnabled; }
-    void setIsJoystickEnabled(int s) { mJoystickEnabled = s; }
-    
-    int getOscJoystickSource() const { return mOscJoystickSource; }
-    void setOscJoystickSource(int s) { mOscJoystickSource = s; }
-    
-    int getIsLeapEnabled() const { return mLeapEnabled; }
-    void setIsLeapEnabled(int s) { mLeapEnabled = s; }
-	
-	int getOscLeapSource() const { return mOscLeapSource; }
-	void setOscLeapSource(int s) { mOscLeapSource = s; }
-	
-	int getOscReceiveEnabled() const { return mOscReceiveEnabled; }
-	void setOscReceiveEnabled(int s) { mOscReceiveEnabled = s; }
-	
-	int getOscReceivePort() const { return mOscReceivePort; }
-	void setOscReceivePort(int s) { mOscReceivePort = s; }
-	
-	int getOscSendEnabled() const { return mOscSendEnabled; }
-	void setOscSendEnabled(int s) { mOscSendEnabled = s; }
-	
-	int getOscSendPort() const { return mOscSendPort; }
-	void setOscSendPort(int s) { mOscSendPort = s; }
-    
-	const String getOscSendIp() const { return mOscSendIp; }
-	void setOscSendIp(String s) { mOscSendIp = s;}
-    
-    float getSpeedTraject() {return mSpeedTraject ;}
-    void setSpeedTraject(float s){mSpeedTraject = s;}
-    
-    float getDirRandomTraject() {return mDirRandom ;}
-    void setDirRandomTraject(float s){mDirRandom = s;}
-    
-    //float getStarSpeedS() {return starSpeedS ;}
-    //void setStarSpeedS(float s){starSpeedS = s;}
-    
-    float getEndSpeedS() {return starSpeedE ;}
-    void setEndSpeedS(float s){starSpeedE = paramRange(-kSpeedMinMax, kSpeedMinMax, s);}
-    
-    float getTimeSpeedS() {return starSpeedT ;}
-    void setTimeSpeedS(float s){starSpeedT = s;}
-    
-    vector<FPoint> *getListXYFreeDraw() {return &listXYFreeDraw; }
-    vector<FPoint> *getListPointFreeDraw() {return &listPointFreeDraw; }
-    //void insertInLinstFreeDraw(FPoint po) { listPointFreeDraw.push_back(po); }
-    //void clearLinstFreeDraw() { listPointFreeDraw.clear(); }
-    
-    
-    //int getAccelMode() {return typeAccel ;}
-    //void setAccelMode(int s){typeAccel = static_cast<AllAccelerationModes>(s);}
-
-	float getLevel(int index) const {
-        return mLevels[index];
-    }
-    
-	void setCalculateLevels(bool c);
-	
-	bool getIsAllowInputOutputModeSelection(){
-		return m_bAllowInputOutputModeSelection;
-	}
-
-	uint64_t getHostChangedParameter() { return mHostChangedParameterProcessor; }
-	uint64_t getHostChangedProperty() { return mHostChangedPropertyProcessor; }
-	uint64_t getProcessCounter() { return mProcessCounter; }
-	
-    int getNumberOfSources() const { return mNumberOfSources; }
-    int getParamForSourceX(int index) const { return kSourceX + index * kParamsPerSource; }
-    int getParamForSourceY(int index) const { return kSourceY + index * kParamsPerSource; }
-    int getParamForSourceD(int index) const { return kSourceD + index * kParamsPerSource; }
-    int getParamForSourceAzimSpan(int index) const { return kSourceAzimSpan + index * kParamsPerSource; }
-    int getParamForSourceElevSpan(int index) const { return kSourceElevSpan + index * kParamsPerSource; }
-    
-    float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
-    float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
-    float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
-    float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
-    float getSourceAzimSpan01(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
-    float getSourceElevSpan01(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
-    
-    float getSmoothing() const { return mParameters.getUnchecked(kSmooth); }
-    
-    int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
-    
-    inline int getParamForSpeakerX(int index) const { return kSpeakerX + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    inline int getParamForSpeakerY(int index) const { return kSpeakerY + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    inline int getParamForSpeakerM(int index) const { return kSpeakerM + JucePlugin_MaxNumInputChannels * kParamsPerSource + index * kParamsPerSpeakers; }
-    
-    float getSpeakerX(int index) const { return mParameters.getUnchecked(getParamForSpeakerX(index)); }
-    float getSpeakerY(int index) const { return mParameters.getUnchecked(getParamForSpeakerY(index)); }
-    float getSpeakerM(int index) const { return mParameters.getUnchecked(getParamForSpeakerM(index)); }
-    
-	// convenience functions for gui:
-	//01 here means that the output is normalized to [0,1]
-	FPoint getSourceXY01(int i)	{
-		float x = getSourceX(i);
-		float y = getSourceY(i);
-		return FPoint(x, y);
-	}
-
-	// these return in the interval [-kRadiusMax .. kRadiusMax]
-	FPoint getSourceXY(int i) {
-		float x = getSourceX(i) * (2*kRadiusMax) - kRadiusMax;
-		float y = getSourceY(i) * (2*kRadiusMax) - kRadiusMax;
-		return FPoint(x, y);
-	}
-
-	FPoint getSpeakerXY(int i) {
-		float x = getSpeakerX(i) * (2*kRadiusMax) - kRadiusMax;
-		float y = getSpeakerY(i) * (2*kRadiusMax) - kRadiusMax;
-		if (mProcessMode != kFreeVolumeMode) {
-			// force radius to 1
-			float r = hypotf(x, y);
-			if (r == 0) return FPoint(1, 0);
-			x /= r;
-			y /= r;
-		}
-		return FPoint(x, y);
-	}
-
-	FPoint getSpeakerRT(int i) {
-		FPoint p = getSpeakerXY(i);
-		float r = hypotf(p.x, p.y);
-		float t = atan2f(p.y, p.x);
-		if (t < 0) t += kThetaMax;
-		return FPoint(r, t);
-	}
-
-	FPoint getSourceRT(int i) {
-		FPoint p = getSourceXY(i);
-		float r = hypotf(p.x, p.y);
-		float t = atan2f(p.y, p.x);
-		if (t < 0) t += kThetaMax;
-		return FPoint(r, t);
-	}
-    
-    void setFieldWidth(float fieldWidth){ m_fFieldWidth = fieldWidth;}
-    
-    FPoint getSourceAzimElev(int i, bool bUseCosElev = false) {
-        //get source position in [-kRadiusMax, kRadiusMax]
-        FPoint pXY = getSourceXY(i);
-
-        //calculate azim in range [0,1], and negate it because zirkonium wants -1 on right side
-        float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
-        
-        //calculate xy distance from origin, and clamp it to 2 (ie ignore outside of circle)
-        float hypo = hypotf(pXY.x, pXY.y);
-        if (hypo > kRadiusMax){
-            hypo = kRadiusMax;
-        }
-        
-        float fElev;
-        if (bUseCosElev){
-            fElev = acosf(hypo/kRadiusMax);   //fElev is elevation in radian, [0,pi/2)
-            fElev /= (M_PI/2);                      //making range [0,1]
-            fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
-        } else {
-            fElev = (kRadiusMax-hypo)/4;
-        }
-
-        return FPoint(fAzim, fElev);
-    }
-    
-    FPoint convertRt2Xy(FPoint p) {
-        float x = p.x * cosf(p.y);
-        float y = p.x * sinf(p.y);
-        return FPoint(x, y);
-    }
-    
-    //01 here means that the output is normalized to [0,1]
-    FPoint convertRt2Xy01(float r, float t) {
-        float x = r * cosf(t);
-        float y = r * sinf(t);
-        return FPoint((x + kRadiusMax)/(kRadiusMax*2), (y + kRadiusMax)/(kRadiusMax*2));
-    }
-	
-	FPoint convertXy2Rt01(FPoint p) {
-		float vx = p.x;
-		float vy = p.y;
-		float r = sqrtf(vx*vx + vy*vy) / kRadiusMax;
-		if (r > 1) r = 1;
-		float t = atan2f(vy, vx);
-		if (t < 0) t += kThetaMax;
-		t /= kThetaMax;
-		return FPoint(r, t);
-	}
-
-    FPoint convertXy012Rt01(FPoint p) {
-        return convertXy2Rt01(FPoint(p.x * (kRadiusMax*2) - kRadiusMax, p.y * (kRadiusMax*2) - kRadiusMax));
-    }
-    
-    FPoint convertXy2Rt(FPoint p, bool p_bLimitR = true) {
-        float vx = p.x;
-        float vy = p.y;
-        float r = sqrtf(vx*vx + vy*vy);
-        if (p_bLimitR && r > 1) r = 1;
-        float t = atan2f(vy, vx);
-        if (t < 0) t += kThetaMax;
-        return FPoint(r, t);
-    }
-    
-    FPoint convertXy012Rt(FPoint p, bool p_bLimitR = true) {
-        return convertXy2Rt(FPoint(p.x * (kRadiusMax*2) - kRadiusMax, p.y * (kRadiusMax*2) - kRadiusMax), p_bLimitR);
-    }
-
-	FPoint clampRadius01(FPoint p) {
-		float dx = p.x - 0.5f;
-		float dy = p.y - 0.5f;
-		float r = hypotf(dx, dy);
-		if (r > 0.5f)
-		{
-			float c = 0.5f / r;
-			dx *= c;
-			dy *= c;
-			p.x = dx + 0.5f;
-			p.y = dy + 0.5f;
-		}
-		return p;
-	}
-
-	void setSourceXY01(int i, FPoint p, bool p_bNotifyHost = true) {
-		p = clampRadius01(p);
-        if (p_bNotifyHost){
-            setParameterNotifyingHost(getParamForSourceX(i), p.x);
-            setParameterNotifyingHost(getParamForSourceY(i), p.y);
-        } else {
-            setParameterInternal(getParamForSourceX(i), p.x);
-            setParameterInternal(getParamForSourceY(i), p.y);
-        }
-	}
-
-	void setSourceXY(int i, FPoint p, bool p_bNotifyHost = true) {
-		float r = hypotf(p.x, p.y);
-		if (r > kRadiusMax)
-		{
-			float c = kRadiusMax / r;
-			p.x *= c;
-			p.y *= c;
-		}
-		p.x = (p.x + kRadiusMax) / (kRadiusMax*2);
-		p.y = (p.y + kRadiusMax) / (kRadiusMax*2);
-        if (p_bNotifyHost){
-            setParameterNotifyingHost(getParamForSourceX(i), p.x);
-            setParameterNotifyingHost(getParamForSourceY(i), p.y);
-        } else {
-            setParameterInternal(getParamForSourceX(i), p.x);
-            setParameterInternal(getParamForSourceY(i), p.y);
-        }
-	}
-
-	void setSourceRT(int i, FPoint p, bool p_bNotifyHost = true) {
-		float x = p.x * cosf(p.y);
-		float y = p.x * sinf(p.y);
-		setSourceXY(i, FPoint(x, y), p_bNotifyHost);
-	}
- 
-	void setSpeakerXY01(int i, FPoint p) {
-		p = clampRadius01(p);
-        setParameterInternal(getParamForSpeakerX(i), p.x);
-        setParameterInternal(getParamForSpeakerY(i), p.y);
-	}
-
-	void setSpeakerRT(int i, FPoint p) {
-		float x = p.x * cosf(p.y);
-		float y = p.x * sinf(p.y);
-        setParameterInternal(getParamForSpeakerX(i), (x + kRadiusMax) / (kRadiusMax*2));
-        setParameterInternal(getParamForSpeakerY(i), (y + kRadiusMax) / (kRadiusMax*2));
-    }
-	
-	Trajectory::Ptr getTrajectory() { return mTrajectory; }
-	void setTrajectory(Trajectory::Ptr t) { mTrajectory = t; }
-    
-        
-    void setIsRecordingAutomation(bool b)   {
-        m_bIsRecordingAutomation = b;
-        if(m_bIsRecordingAutomation){
-            mfTRealTime = 0.0f;
-            //mSpeedTraject = starSpeedS;
-        }
-        bypassOrNotSourceUpdateThread();
-    }
-    bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
-
-    void setSourceLocationChanged(int i)    {  m_iSourceLocationChanged = i;    }
-    int  getSourceLocationChanged()         { return m_iSourceLocationChanged;  }
-    
-    void setSourceAzimSpanChanged(int i)    {  m_iSourceAzimSpanChanged = i;    }
-    int  getSourceAzimSpanChanged()         { return m_iSourceAzimSpanChanged;  }
-
-    void setSourceElevSpanChanged(int i)    {  m_iSourceElevSpanChanged = i;    }
-    int  getSourceElevSpanChanged()         { return m_iSourceElevSpanChanged;  }
-    
-    
-    int getSelectedSrc() const {return mSelectedSrc;}
-    int getSpSelected() const  {return mSpSelected;}
-    
-    void setSelectedSrc(int p_i){
-    	mSelectedSrc = p_i;
-        mHostChangedParameterProcessor++;
-	}
-
-	void setSpSelected(int p_i){ mSpSelected = p_i; }
-
-    void setPreventSourceLocationUpdate(bool b){ m_bPreventSourceLocationUpdate = b; }
-    void setPreventSourceAzimElevSpanUpdate(bool b){ m_bPreventSourceAzimElevSpanUpdate = b; }
-    
-    void setIsSettingEndPoint(bool isSetting){ m_bIsSettingEndPoint = isSetting; }
-    bool isSettingEndPoint(){ return m_bIsSettingEndPoint; }
-    
-    FPoint getEndLocationXY01(){ return m_fEndLocationXY01; }
-    void setEndLocationXY01(FPoint point){ m_fEndLocationXY01 = point; }
-    
-    void storeCurrentLocations();
-    void restoreCurrentLocations(int p_iLocToRestore);
-	void reset();
-    
-    void updateSpeakerLocation(bool p_bAlternate, bool p_bStartAtTop, bool p_bClockwise);
-    
-    bool isPlaying(){ return m_bIsPlaying;}
-    void threadUpdateNonSelectedSourcePositions();
-    void bypassOrNotSourceUpdateThread();
-	
 private:
-    
-    bool isKnownHost();
-    void updateInputOutputRampsSizes();
 
-	bool m_bAllowInputOutputModeSelection;
-	Trajectory::Ptr mTrajectory;
+    Array<Source *>   listSources;
+    Array<Speaker *>  listSpeakers;
+    unsigned int numSourceUsed;
+    unsigned int numSpeakerUsed;
     
-	Array<float> mParameters;
-	
-	bool mCalculateLevels;
-
-    bool mApplyOutRamp;
-	bool mApplyFilter;
-	bool mLinkSurfaceOrPan;
-    bool mLinkAzimSpan;
-    bool mLinkElevSpan;
-//	int m_iMovementMode;
-	bool mShowGridLines;
-    bool m_bOscActive;
-    bool mTrSeparateAutomationMode;
-    int mGuiWidth = kDefaultWidth;
-    int mGuiHeight;
-    int mInputOutputMode;
-    int mSrcPlacementMode;
-    int mSelectedSrc;
-    int mSpPlacementMode;
-    int mSpSelected;
-    int m_iTrType;
-    
-    int m_iTrDirection;
-    int m_iTrReturn;
-    
-    int     m_iTrSrcSelect;
-    float   m_fTrDuration;
-    int     m_iTrUnits; //0 = beats, 1 = seconds
-    float   m_fTrRepeats;
-    float   m_fTrDampening;
-    float   m_fTrTurns;
-    float   m_fTrDeviation;
-    float   m_fTrEllipseWidth;
-    int     mTrState;
-    float   m_iOscSpat1stSrcId;
-    int     m_iOscSpatPort;
-    String  m_sOscIpAddress;
-    
-    int mGuiTab;
-    int mJoystickEnabled;
-    int mOscJoystickSource;
-    int mLeapEnabled;
-	int mOscLeapSource;
-	int mOscReceiveEnabled;
-	int mOscReceivePort;
-	int mOscSendEnabled;
-	int mOscSendPort;
-    String mOscSendIp;
-
-	uint64_t mHostChangedParameterProcessor;
-	uint64_t mHostChangedPropertyProcessor;
-	uint64_t mProcessCounter;
-	
-	int mProcessMode;
-	int mRoutingMode;
-	AudioSampleBuffer mRoutingTempAudioBuffer;
-	
-	Array<float> mSmoothedParameters;
-    
-	Array<float> mLockedThetas;
-    
-    Array<float> mPrevRs;
-    Array<float> mPrevTs;
-    
-    vector<float> allThetas;
-    vector<float> allRs;
-    vector<float> allFRs;
-    vector<float> allSampleValues;
-    
-    bool bThetasPrinted = false;
-    
-    vector<float> mInputsCopy[kMaxInputs];
-    float* mOutputs[kMaxChannels];
-    
-    #if OUTPUT_RAMPING
-        Array<Array<float>> mSpeakerVolumes;
-    #endif
-    vector<vector<float>> mParameterRamps;
-
-    Area mAllAreas[kMaxChannels * MAX_AREAS];
-    float mOutFactors[kMaxChannels];
-    FirFilter mFilters[kMaxInputs];
-
-    float mLevels[kMaxChannels];
-
-    
-#if TIME_PROCESS
-#define kTimeSlots (10)
-    float mAvgTime [kTimeSlots] = {0};
-    float timeAvgParamRamp  = 0.f;
-    float timeAvgFilter     = 0.f;
-    float timeAvgVolume     = 0.f;
-    float timeAvgSpatial    = 0.f;
-    float timeAvgOutputs    = 0.f;
-#endif
-    
-    float mBufferSrcLocX[JucePlugin_MaxNumInputChannels];
-    float mBufferSrcLocY[JucePlugin_MaxNumInputChannels];
-    float mBufferSrcLocD[JucePlugin_MaxNumInputChannels];
-    float mBufferSrcLocAS[JucePlugin_MaxNumInputChannels];
-    float mBufferSrcLocES[JucePlugin_MaxNumInputChannels];
-    
-    float mBufferSpLocX[JucePlugin_MaxNumOutputChannels];
-    float mBufferSpLocY[JucePlugin_MaxNumOutputChannels];
-    float mBufferSpLocM[JucePlugin_MaxNumOutputChannels];
-    
-    void setNumberOfSources(int p_iNewNumberOfSources, bool bUseDefaultValues);
-    void setNumberOfSpeakers(int p_iNewNumberOfSpeakers, bool bUseDefaultValues);
-	
-	void findLeftAndRightSpeakers(float t, float *params, int &left, int &right, float &dLeft, float &dRight, int skip = -1);
-#if OUTPUT_RAMPING
-    void setSpeakerVolume(const int &source, const float &volume, const float &sm_o, const int &o, vector<bool> *p_pvSpeakersCurrentlyInUse);
-    void addToOutputs(const int &source, const float &sample, const int &f);
-#endif
-    void addToOutput (const float &sample, const int &speaker, const int &f);
-    void spatializeSample(const float &fCurSampleValue, const int &pISampleId, const int &iCurSource, const float &fCurSampleT, const float &fCurSampleR, float **p_pfParams, vector<bool> &vSpeakersCurrentlyInUse, const float &fOldValuesPortion);
-    
-    void createParameterRamps(float *p_pfParams, const float &fOldValuesPortion);
-    void ProcessData                (float *params);
-    void ProcessDataFree  (float *params);
-#if ALLOW_PAN_MODE
-    void ProcessDataPan   (float *params);
-#endif
-    void ProcessDataSpan     (float *params);
-    void processTrajectory();
-    
-    int mNumberOfSources;
-    int mNumberOfSpeakers;
-
-    bool m_bIsRecordingAutomation;
-    int m_iSourceLocationChanged;
-    int m_iSourceAzimSpanChanged;
-    int m_iSourceElevSpanChanged;
-    
-    bool m_bPreventSourceLocationUpdate;
-    bool m_bPreventSourceAzimElevSpanUpdate;
-    bool m_bIsSettingEndPoint;
-    FPoint m_fEndLocationXY01;
-    
-    double m_dSampleRate;
-    int m_iDawBufferSize;
-
-    OSCSender mOscSpatSender;
-    bool m_bOscSpatSenderIsConnected;
-    OscSpatThread*      m_pOscSpatThread;
-    SourceUpdateThread* m_pSourceUpdateThread;
-    OwnedArray<Thread>  m_OwnedThreads;
-    float m_fFieldWidth;
-
-	unique_ptr<SourceMover> m_pMover;
-    bool m_bIsPlaying;
-    float mSpeedTraject = 1.0f;
-    float mDirRandom = 0.5f;
-    
-    //AllAccelerationModes typeAccel = Linear;
-    //float starSpeedS = 0.001f;
-    float starSpeedE = 1.0f;
-    float starSpeedT = 0.0f;
-    float mfTRealTime= 0.0f;
-    
-    
-    float endSpeedE = 0.5f;
-    float endSpeedT = 2.0f;
-    
-    int m_iMovementMode;
-    vector<FPoint> listPointFreeDraw;
-    vector<FPoint> listXYFreeDraw;
-    
-    //debug for #72
-//    float previouslyLoudestVolume = -1.f;
-//    int loudestSpeaker = -1;
-    
-    
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };
 

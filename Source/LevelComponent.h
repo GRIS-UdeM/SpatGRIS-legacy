@@ -28,38 +28,63 @@
 #define LEVELCOMPONENT_H_INCLUDED
 
 #include "PluginProcessor.h"
-#include "../../GrisCommonFiles/GrisLookAndFeel.h"
+#include "GrisLookAndFeel.h"
 
-static const float kMinLevel = -60.f;
-static const float kMaxLevel = 1.f;
-static const float kMaxMin = kMaxLevel - kMinLevel;
+class LevelComponent;
 
-//==============================================================================
-/*
-*/
-class LevelComponent : public Component
+static const float MinLevelComp  = -60.f;
+static const float MaxLevelComp  = 1.f;
+static const float MaxMinLevComp = MaxLevelComp - MinLevelComp;
+static const int   WidthRect     = 2;
+
+//======================================= LevelBox ===================================
+class LevelBox : public Component
 {
 public:
-    LevelComponent(SpatGrisAudioProcessor* filter, int index);
+    LevelBox(LevelComponent* parent, GrisLookAndFeel *feel);
+    ~LevelBox();
+    
+    void setBounds(const Rectangle<int> &newBounds);
+    void paint (Graphics& g);
+    
+private:
+    LevelComponent *mainParent;
+    GrisLookAndFeel *grisFeel;
+    ColourGradient colorGrad;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelBox)
+};
+
+//====================================================================================
+class LevelComponent :  public Component,
+                        public ToggleButton::Listener
+{
+public:
+    LevelComponent(SpatGrisAudioProcessor * filt, GrisLookAndFeel *feel, int index);
     ~LevelComponent();
     
-    void setMute(bool b);
-    void paint (Graphics&);
+    
+    void buttonClicked(Button *button) override;
     void setBounds(const Rectangle<int> &newBounds);
-    //void refreshIfNeeded();
-	
+    
+    void update();
+    bool isMuted();
+    float getLevel();
+
+    
 private:
-	SpatGrisAudioProcessor *mFilter;
-	int mIndex;
-    bool muted;
-    ColourGradient colorGrad;
-	/*float mLevelAdjustment;
-	float mShowLevel;
-	uint64_t mLastProcessCounter;*/
-    GrisLookAndFeel mLookAndFeel;
+    SpatGrisAudioProcessor* filter;
+    GrisLookAndFeel * grisFeel;
+    LevelBox * levelBox;
+    Label * labId;
+    ToggleButton * muteToggleBut;
+
+    float level = MinLevelComp;
+    int indexLev;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelComponent)
 };
+
 
 
 #endif  // LEVELCOMPONENT_H_INCLUDED

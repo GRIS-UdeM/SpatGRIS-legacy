@@ -28,88 +28,121 @@
 #include "LevelComponent.h"
 
 
-
-//==============================================================================
-LevelComponent::LevelComponent(SpatGrisAudioProcessor* filter, int index)
-:
-	mFilter(filter),
-	mIndex(index),
-	/*mLevelAdjustment(1),
-	mShowLevel(0),
-	mLastProcessCounter(0),*/
-    muted(false)
+//======================================= LevelBox =====================================================================
+LevelBox::LevelBox(LevelComponent * parent, GrisLookAndFeel *feel):
+mainParent(parent),
+grisFeel(feel)
 {
     
 }
 
-LevelComponent::~LevelComponent()
-{
-	
+LevelBox::~LevelBox(){
+    
 }
 
-void LevelComponent::setBounds(const Rectangle<int> &newBounds){
-    this->juce::Component::setBounds(newBounds); 
+
+void LevelBox::setBounds(const Rectangle<int> &newBounds){
+    this->juce::Component::setBounds(newBounds);
     colorGrad = ColourGradient(Colours::red, 0.f, 0.f, Colour::fromRGB(17, 255, 159), 0.f, getHeight(), false);
     colorGrad.addColour(0.1, Colours::yellow);
 }
 
-void LevelComponent::setMute(bool b){
-    muted = b;
-}
-/*
-void LevelComponent::refreshIfNeeded(){
-    float level;
-    uint64_t processCounter = mFilter->getProcessCounter();
-    if (mLastProcessCounter != processCounter) {
-        mLastProcessCounter = processCounter;
-        mLevelAdjustment = 1;
-        level = mFilter->getLevel(mIndex);
-    } else {
-        mLevelAdjustment *= 0.8;
-        level = mLevelAdjustment * mFilter->getLevel(mIndex);
+void LevelBox::paint (Graphics& g){
+    if(this->mainParent->isMuted()){
+        g.fillAll (grisFeel->getWinBackgroundColour());
     }
-    
-    if (mShowLevel != level) {
-        mShowLevel = level;
-        repaint();
-    }
-}*/
-
-void LevelComponent::paint (Graphics& g)
-{
-    /*
-	const float yellowStart = -6;
-	float hue;
-	if (level > 0)
-        hue = 0;
-	else if (level < yellowStart)
-        hue = 1 / 3.f;
-	else
-	{
-		float p = (level - yellowStart) / (-yellowStart); // 0 .. 1
-		hue = (1 - p) / 3.f;
-	}*/
-	//fprintf(stderr, "speaker %d linear: %.3f dB: %.1f hue: %.3f\n", mIndex, mLastLevel, level, hue);
-
-    if(muted){
-        g.fillAll (mLookAndFeel.getWinBackgroundColour());
-        
-    }else{
-        float level = linearToDb(mFilter->getLevel(mIndex));
-        /*if (isnan(level)){
-            level = 0;
-        }*/
-        
+    else{
+        float level = this->mainParent->getLevel();
         g.setGradientFill(colorGrad);
         g.fillRect(0, 0, getWidth() ,getHeight());
         
-        if (level < kMinLevel){
-            level = kMinLevel;
+        if (level < MinLevelComp){
+            level = MinLevelComp;
         }
         if (level < 0.9f){
             level = -abs(level);
-            g.setColour(mLookAndFeel.getDarkColour());
-            g.fillRect(0, 0, getWidth() ,(int)(getHeight()*(level/kMinLevel)));
+            g.setColour(grisFeel->getDarkColour());
+            g.fillRect(0, 0, getWidth() ,(int)(getHeight()*(level/MinLevelComp)));
         }
     }
 }
+
+//==============================================================================
+LevelComponent::LevelComponent(SpatGrisAudioProcessor * filt, GrisLookAndFeel *feel, int index)
+:
+filter(filt),
+grisFeel(feel),
+indexLev(index)
+
+{
+    this->labId = new Label();
+    this->labId->setText(String(indexLev), NotificationType::dontSendNotification);
+    this->labId->setTooltip (String(indexLev));
+    this->labId->setJustificationType(Justification::centred);
+    this->labId->setFont(feel->getFont());
+    this->labId->setLookAndFeel(feel);
+    this->labId->setColour(Label::textColourId, this->grisFeel->getFontColour());
+    this->labId->setBounds(0, 0, 16, 16);
+    this->addAndMakeVisible(this->labId);
+    
+    //ToggleButton=========================================================
+    this->muteToggleBut = new ToggleButton();
+    this->muteToggleBut->setButtonText("M");
+    this->muteToggleBut->setSize(16, 16);
+    this->muteToggleBut->setTooltip ("Mute "+String(indexLev));
+    this->muteToggleBut->addListener(this);
+    this->muteToggleBut->setToggleState(false, dontSendNotification);
+    this->muteToggleBut->setLookAndFeel(this->grisFeel);
+    this->muteToggleBut->setColour(ToggleButton::textColourId, this->grisFeel->getFontColour());
+    this->addAndMakeVisible(this->muteToggleBut);
+    
+    this->levelBox = new LevelBox(this, this->grisFeel);
+    this->addAndMakeVisible(this->levelBox);
+
+}
+
+LevelComponent::~LevelComponent()
+{
+    delete this->labId;
+    delete this->muteToggleBut;
+    delete this->levelBox;
+}
+
+
+void LevelComponent::buttonClicked(Button *button){
+    if (button == this->muteToggleBut) {
+        //this->mainParent->setMuted(this->muteToggleBut->getToggleState());
+        this->levelBox->repaint();
+    }
+}
+
+void LevelComponent::setBounds(const Rectangle<int> &newBounds){
+    this->juce::Component::setBounds(newBounds);
+    
+    juce::Rectangle<int> labRect(WidthRect/2, 0, newBounds.getWidth()-WidthRect, this->labId->getHeight());
+    this->labId->setBounds(labRect);
+
+    this->muteToggleBut->setBounds((newBounds.getWidth()/2)-6, getHeight()-22, this->muteToggleBut->getWidth(), this->muteToggleBut->getHeight());
+ 
+    juce::Rectangle<int> level(WidthRect/2, 16, newBounds.getWidth()-WidthRect, getHeight()-40 );
+    this->levelBox->setBounds(level);
+}
+
+float LevelComponent::getLevel(){
+    return this->level;
+}
+
+void LevelComponent::update(){
+    float l = -30.0f;// this->filter->getLevel(indexLev);
+    if(isnan(l)){ return; }
+    if(!this->muteToggleBut->getToggleState() && this->level != l){
+        this->repaint();
+    }
+    this->level = l;
+}
+
+bool LevelComponent::isMuted(){
+    return this->muteToggleBut->getToggleState();
+}
+
+

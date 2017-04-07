@@ -27,300 +27,84 @@
 #define PLUGINEDITOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "../../GrisCommonFiles/GrisLookAndFeel.h"
-#include "PluginProcessor.h"
+#include "GrisLookAndFeel.h"
+#include "DefaultParam.h"
+
+#include "SpatComponent.h"
+#include "UiComponent.h"
 #include "LevelComponent.h"
-#include "SourceMover.h"
 
-#if USE_LEAP
-#include "Leap.h"
-#endif
+using namespace std;
 
-class FieldComponent;
-class SourceUpdateThread;
-//class JoystickUpdateThread;
-class Box;
+class SpatGrisAudioProcessor;
 
-enum paramTypes {
-	kParamSource,
-	kParamUnused,
-	kParamSmooth,
-	kParamVolumeFar,
-	kParamVolumeMid,
-	kParamVolumeNear,
-	kParamFilterFar,
-	kParamFilterMid,
-	kParamFilterNear,
-	kParamMaxSpanVolume,
-	kParamRoutingVolume,
-    kParamAzimSpan,
-    kParamElevSpan,
-    kParamTrajSpeed,
-    kParamDirRandom,
-};
-
-enum placement{
-    kLeftAlternate = 1,
-    kLeftClockwise,
-    kLeftCounterClockWise,
-    kTopClockwise,
-    kTopCounterClockwise,
-
-};
-
-enum trajectoryStatus{
-    kSetOn = 0,
-    kSetOff,
-    kRunning,
-};
-
-class MiniProgressBar;
-class ParamSliderGRIS;
-class OctTabbedComponent;
-class HIDDelegate;
-class OctoLeap;
-
-class HeartbeatComponent : public Component
+class SpatGrisAudioProcessorEditor :    public AudioProcessorEditor,
+                                        public Button::Listener,
+                                        public TextEditor::Listener,
+                                        public Slider::Listener,
+                                        private Timer
 {
-public:
-	virtual void heartbeat() {}
-};
-
-//==============================================================================
-class SpatGrisAudioProcessorEditor  : public AudioProcessorEditor,
-									  public Button::Listener,
-									  public ComboBox::Listener,
-                                      public TextEditor::Listener,
-									  private AudioProcessorListener,
-									  private Timer
-{
-public:
-    SpatGrisAudioProcessorEditor (SpatGrisAudioProcessor* ownerFilter, SourceMover *mover);
-    ~SpatGrisAudioProcessorEditor();
-
+    
+public :
     //==============================================================================
-    void paint(Graphics& g);
-	void resized();
-	
-    //! Method called by button listener when a button is clicked
-	void buttonClicked (Button *button);
-    //! Method called by button listener when a combobox is changed
-	void comboBoxChanged (ComboBox* comboBox);
-    void textEditorFocusLost (TextEditor &textEditor);
-    void textEditorReturnKeyPressed(TextEditor &textEditor);
-	
-    //! 30Hz refresh (see hertzRefresh)
-	void timerCallback();
-    void propertyChanged();
-    void updateTrajectoryStuff();
-    void repaintTheStuff();
-	void audioProcessorChanged (AudioProcessor* processor);
-	void audioProcessorParameterChanged (AudioProcessor* processor, int parameterIndex, float newValue);
-				
-	//void refreshSize();
-	void fieldChanged() { mFieldNeedRepaint = true; }
-	
-    //! Return the number of the source selected for the Leap Motion
-	int getOscLeapSource() { return mFilter->getOscLeapSource(); }
-    //! Set the number of the source selected for the Leap Motion
-	void setOscLeapSource(int s);
-	SourceMover * getMover() { return m_pMover; }
-    Label * getmStateLeap() {return mStateLeap;}
-    
-#if USE_JOYSTICK
-    HIDDelegate * getHIDDel() {return mJoystick;};
-#endif    
-    //! Method unchecking the joystick check box
-    void uncheckJoystickButton();
-    //! Return the number of sources form the processor
-    int getNbSources();
-    
-    void setDefaultPendulumEndpoint();
-    
-private:
-	SpatGrisAudioProcessor *mFilter;
+    SpatGrisAudioProcessorEditor(SpatGrisAudioProcessor * filter = nullptr);
+    ~SpatGrisAudioProcessorEditor();
+    //==============================================================================
 
-    GrisLookAndFeel mGrisFeel;
     
-	SourceMover *m_pMover;
-	
-	// for memory management:
-	OwnedArray<Component> mComponents;
-	
-	// for interactions:
-	bool mNeedRepaint;
-	bool mFieldNeedRepaint;
-    bool m_bIsReturnKeyPressedCalledFromFocusLost;
-    bool m_bLoadingPreset;
-    uint64_t mHostChangedParameterEditor;
-	uint64_t mHostChangedPropertyEditor;
+    //==============================================================================
+    void buttonClicked (Button *button) override;
+    void sliderValueChanged (Slider *slider) override;
+    void textEditorFocusLost (TextEditor &textEditor) override;
+    void textEditorReturnKeyPressed (TextEditor &textEditor) override;
     
-    ParamSliderGRIS          *mSurfaceOrPanSlider;
-    ToggleButton    *mSurfaceOrPanLinkButton;
-    Component       *mSurfaceOrPanLabel;
-   
-    ParamSliderGRIS          *mAzimSpanSlider;
-    ToggleButton    *mAzimSpanLinkButton;
-    Component       *mAzimSpanLabel;
+    void timerCallback() override;
+    void paint (Graphics& g) override;
+    void resized() override;
+    //==============================================================================
     
-    ParamSliderGRIS          *mElevSpanSlider;
-    ToggleButton    *mElevSpanLinkButton;
-    Component       *mElevSpanLabel;
-
-    LevelComponent* mLevelComponents[kMaxChannels];
-    ToggleButton*   mMuteButtons[kMaxChannels];
-    Component*          mLabelSourceId[kMaxChannels];
-
-    ToggleButton *mEnableJoystick;
-    ToggleButton *mEnableLeap;
-	ToggleButton *mShowGridLines;
-    ToggleButton *mOscActiveButton;
-    ToggleButton *mTrSeparateAutomationModeButton;
-    ToggleButton *mApplyFilterButton;
-    ToggleButton *mApplyOutputRamping;
-	ComboBox *mMovementModeCombo;
-    ComboBox *mInputOutputModeCombo;
-    TextButton *mApplyInputOutputModeButton;
-	ComboBox *mProcessModeCombo;
-	OctTabbedComponent *mTabs;
-	Slider *mSmoothingSlider;
-    Component *mSmoothingLabel;
-	Slider *mVolumeFar;
-	Slider *mVolumeMid;
-	Slider *mVolumeNear;
-	Slider *mFilterFar;
-	Slider *mFilterMid;
-	Slider *mFilterNear;
-	Slider *mMaxSpanVolumeSlider;
-    Slider *mSpeedTrajectory;
-    Slider *mDirRandTrajectory;
-    Component *mMaxSpanVolumeLabel;
-    //Label *mShowChange;
-    Label *mStateLeap;
-    Label *mStateJoystick;
-    Label *m_VersionLabel;
+private :
+    //==============================================================================
+    Label*          addLabel(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
+    TextButton*     addButton(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
+    ToggleButton*   addToggleButton(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, bool toggle = false);
+    TextEditor*     addTextEditor(const String &s, const String &emptyS, const String &stooltip, int x, int y, int w, int h, Component *into, int wLab = 80);
+    Slider*         addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, juce::Slider::TextEntryBoxPosition tebp = juce::Slider::TextEntryBoxPosition::NoTextBox);
+    //==============================================================================
     
-    ImageComponent m_logoImage;
-
-#if USE_LEAP
-    ScopedPointer<Leap::Controller> mController;
-    Leap::Listener leapList;
-#endif
-    // sources
-    TextButton *mApplySrcPlacementButton;
-    TextEditor *mSrcR, *mSrcT;
-    ComboBox *mSrcSelectCombo, *mSrcPlacementCombo;
+    SpatGrisAudioProcessor  * filter;
     
-    // speakers
-    TextButton *mApplySpPlacementButton;
-	TextEditor *mSpR, *mSpT;
-	ComboBox *mSpSelectCombo, *mSpPlacementCombo;
-
-	// trajectories
-	ComboBox *mTrTypeComboBox;
-    ComboBox* mTrDirectionComboBox;
-    ComboBox* mTrReturnComboBox;
+    GrisLookAndFeel grisFeel;
+    TooltipWindow tooltipWindow;
+    //Window Resizer---------------------------------
+    ComponentBoundsConstrainer resizeWindow;
+    ScopedPointer<ResizableCornerComponent> resizer;
     
-	TextEditor *mTrDuration;
-	ComboBox   *mTrUnits;
-	TextEditor *mTrRepeats;
-    TextEditor *mTrDampeningTextEditor;
-    Component  *mTrDampeningLabel;
+    //
+    SpatComponent   * spatFieldComp;
     
-    TextEditor *mTrDeviationTextEditor;
-    Component  *mTrDeviationLabel;
+    Box             * boxSourceParam;
+    Box             * boxOutputParam;
+    Box             * boxTrajectory;
     
-    TextEditor *mTrEllipseWidthTextEditor;
-    Component  *mTrEllipseWidthLabel;
+    OctTabbedComponent  * octTab;
     
-    TextEditor *mTrTurnsTextEditor;
-    Component  *mTrTurnsLabel;
+    //Component------------------------------------
+    //For Source param
+    Label           * labSurfaceOrPan;
+    ToggleButton    * togLinkSurfaceOrPan;
+    Slider          * sliSurfaceOrPan;
     
-	TextButton *mTrWriteButton;
-	MiniProgressBar *mTrProgressBar;
+    Label           * labAzimSpan;
+    ToggleButton    * togLinkAzimSpan;
+    Slider          * sliAzimSpan;
     
-    TextButton *mTrEndPointButton;
-    TextEditor* m_pTrEndRayTextEditor;
-    TextEditor* m_pTrEndAngleTextEditor;
-    TextButton* m_pTrResetEndButton;
-    Component*  mTrEndPointLabel;
-
-    int mTrStateEditor;
-    void setTrStateEditor(int p_iState){
-        mTrStateEditor = p_iState;
-        mFilter->setTrState(mTrStateEditor);
-    }
+    Label           * labElevSpan;
+    ToggleButton    * togLinkElevSpan;
+    Slider          * sliAElevSpann;
     
-    int mTrCycleCount;
-	
-	// osc, leap
-	ComboBox *mOscLeapSourceCb;
-#if USE_LEAP    
-	//leap
-    ReferenceCountedObjectPtr<OctoLeap> mleap;
-#endif
-#if USE_JOYSTICK
-	ReferenceCountedObjectPtr<HIDDelegate>  mJoystick;
-#endif
-	HeartbeatComponent *mOsc;
-
-	// for resizing/repaint:
-    FieldComponent *mField;
-    Component *mSourcesBoxLabel;
-	Box *mSourcesBox;
-	Component *mSpeakersBoxLabel;
-	Box *mSpeakersBox;
-    Box *mTrajectoryBox;
-    Component *mTrajectoryBoxLabel;
-    void updateEditorSources(bool p_bCalledFromConstructor);
-    void updateEditorSpeakers(bool p_bCalledFromConstructor);
-    void updateSourceLocationTextEditor(bool p_bUpdateFilter);
-    void updateSpeakerLocationTextEditor();
-    void updateMovementModeCombo();
-    void updateTrajectoryTypeComponents();
-    void updateTrajectoryStartComponent(trajectoryStatus p_bIsStarting);
-    void updateSingleTrajectoryStartComponent(Component* p_oComponent, bool p_bIsStarting);
-    void updateEndLocationTextEditors();
-    void updateInputOutputCombo();
-    void updateMovementModeComboPosition();
-    void updateProcessModeComponents();
-    void updateRoutingModeComponents();
-	
-	Component* addLabel(const String &s, int x, int y, int w, int h, Component *into);
-	ToggleButton* addCheckbox(const String &s, bool v, int x, int y, int w, int h, Component *into);
-	TextButton* addButton(const String &s, int x, int y, int w, int h, Component *into);
-    TextEditor* addTextEditor(const String &s, int x, int y, int w, int h, Component *into);
-	ParamSliderGRIS* addParamSliderGRIS(paramTypes paramType, int si, float v, int x, int y, int w, int h, Component *into);
-    
-//    JoystickUpdateThread*   m_pJoystickUpdateThread;
-    
-    //! Bounds of the resizable window
-    ComponentBoundsConstrainer m_oResizeLimits;
-    ScopedPointer<ResizableCornerComponent> m_pResizer;
-    
-    Component  *mOscSpat1stSrcIdLabel;
-    TextEditor *mOscSpat1stSrcIdTextEditor;
-    
-    Component  *mOscSpatPortLabel;
-    TextEditor *mOscSpatPortTextEditor;
-    
-    void applyCurrentSrcPlacement();
-    void applyCurrentSpkPlacement();
-    
-    Component * mrayLab;
-    Component * mrayvalLab;
-    
-    
-    //TextEditor *mSpeedStartAccel;
-    TextEditor *mSpeedEndtAccel;
-    TextEditor *mTimeStartAccel;
-    //ComboBox *mTypeAccel;
-    
-#if TIME_GUI
-    int m_iGuiRefreshCounter = 0;
-#endif
-    
-    int m_iSelectedSrcEditor;
+    //For Outputs param
+    vector<LevelComponent *> vecLevelOut;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

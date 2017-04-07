@@ -31,7 +31,7 @@
 
 #include <iostream>
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "FieldComponent.h"
+//#include "FieldComponent.h"
 
 //==============================================================================
 
@@ -69,8 +69,8 @@ void HIDDelegate::Handle_DeviceRemovalCallback(void *inContext, IOReturn inResul
 #pragma unused (  inContext, inResult, inSender )
     
 //    printf("(context: %p, result: 0x%08X, sender: %p, device: %p).\n", inContext, inResult, inSender, (void *) inIOHIDDeviceRef);
-    SpatGrisAudioProcessorEditor * tempEditor = (SpatGrisAudioProcessorEditor*) inContext;
-    tempEditor->uncheckJoystickButton();
+    //SpatGrisAudioProcessorEditor * tempEditor = (SpatGrisAudioProcessorEditor*) inContext;
+    //tempEditor->uncheckJoystickButton();
     
     //what to do when a joystick get unplugged
 }
@@ -92,7 +92,7 @@ void HIDDelegate::joystickPositionCallback(
         double max          = IOHIDElementGetPhysicalMax(tIOHIDElementRef);
         
         double value = IOHIDValueGetScaledValue(inIOHIDValueRef, kIOHIDValueScaleTypePhysical);
-        SpatGrisAudioProcessorEditor* tempEditor = (SpatGrisAudioProcessorEditor*) inContext;  //we get the editor from the context
+        /*SpatGrisAudioProcessorEditor* tempEditor = (SpatGrisAudioProcessorEditor*) inContext;  //we get the editor from the context
         if(tempEditor->getHIDDel() != NULL) {
             if(usagePage==1) {   //axis
                 tempEditor->getHIDDel()->JoystickUsed(usage, value,min,max);  //calling Joystick used the function that will modify the source position
@@ -121,7 +121,7 @@ void HIDDelegate::joystickPositionCallback(
             if (length > sizeof(double_t)) {
                 break;                                                              // (no)
             }
-        }
+        }*/
     }
     while (false);
 }
@@ -305,7 +305,7 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
             continue;
         }
         //smoothing values
-        const float smooth = denormalize(kSmoothMin, kSmoothMax, mFilter->getSmoothing()); // milliseconds
+        const float smooth = 0;// denormalize(kSmoothMin, kSmoothMax, mFilter->getSmoothing()); // milliseconds
         const float fOldValuesPortion = powf(0.01f, 1000.f / smooth);
         
         //Switch to detect what part of the device is being used
@@ -323,8 +323,8 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
                     }
                 
                     if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5)) <= 1.26) {
-                        FPoint newPosition(m_fCurX01, m_fCurY01);
-                        mEditor->getMover()->move(newPosition, kHID);
+                        //FPoint newPosition(m_fCurX01, m_fCurY01);
+                        //mEditor->getMover()->move(newPosition, kHID);
                     }
                 }
                 break;
@@ -339,8 +339,8 @@ void HIDDelegate::JoystickUsed(uint32_t usage, float scaledValue, double minValu
                     }
                 
                     if(((m_fCurX01-0.5)*(m_fCurX01-0.5))+((m_fCurY01-0.5)*(m_fCurY01-0.5))<=1.26) {
-                        FPoint newPoint(m_fCurX01, m_fCurY01);
-                        mEditor->getMover()->move(newPoint, kHID);
+                        //FPoint newPoint(m_fCurX01, m_fCurY01);
+                        //mEditor->getMover()->move(newPoint, kHID);
                     }
                 }
                 break;
