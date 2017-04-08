@@ -27,7 +27,7 @@
 #define PLUGINEDITOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 #include "DefaultParam.h"
 
 #include "SpatComponent.h"

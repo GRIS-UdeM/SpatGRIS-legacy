@@ -10,7 +10,7 @@
 #define UiComponent_h
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 
 
 using namespace std;

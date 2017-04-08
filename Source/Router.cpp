@@ -34,7 +34,7 @@ Router & Router::instance()
 
 Router::Router()
 :
-	mOutputBuffers(MaxSpeakers, MaxBufferSize)
+mOutputBuffers(MaxSpeakers, MaxBufferSize)
 {
 }
 

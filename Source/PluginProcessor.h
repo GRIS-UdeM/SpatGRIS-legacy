@@ -27,18 +27,14 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
-
-#include "Speaker.h"
-#include "Source.h"
 
 #if JUCE_MSVC
-#include <sstream>
+
+/*#include <sstream>
 #include <string>
-#include <windows.h>
+#include <windows.h>*/
 
-size_t strlcpy(char * dst, const char * src, size_t dstsize);
-
+/*
 template<class T>
 string toString(const T &value) {
     ostringstream os;
@@ -67,9 +63,8 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
         return src_len;
     }
 }
-
+*/
 #endif
-
 
 #if WIN32
     #define M_PI 3.14159265358979323846264338327950288
@@ -84,6 +79,11 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 #endif
 
 
+
+#include "../JuceLibraryCode/JuceHeader.h"
+
+#include "Speaker.h"
+#include "Source.h"
 
 using namespace std;
 

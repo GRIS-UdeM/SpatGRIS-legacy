@@ -9,6 +9,10 @@
 #ifndef DefaultParam_h
 #define DefaultParam_h
 
+#if JUCE_MSVC
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 static const int    MaxSources  = 8;
 static const int    MaxSpeakers = 16;
 static const int    MaxBufferSize = 4096;
@@ -88,7 +92,7 @@ static const int    RightColumnWidth   = 340;
 static const int    DefaultUItWidth       = 1090;
 static const int    DefaultUIHeight      = 540;
 
-static const int    SizeWidthLevelComp = 20;
+static const int    SizeWidthLevelComp = 22;
 static const int    DefaultLabHeight = 18;
 static const int    ParamBoxHeight = 165;
 static const int    hertzRefresh = 30;

@@ -32,7 +32,7 @@
 #define STRING(x) STRING2(x)
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 
 #include "DefaultParam.h"
 
