@@ -114,8 +114,10 @@ void SpatComponent::paint(Graphics &g)
     
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
        
-        Point<float> sourceP = Point<float>(this->filter->getPosXSource(i), this->filter->getPosYSource(i));
-        sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
+		float xs = *(this->filter->getListSource().at(i)->getX());
+		float ys = *(this->filter->getListSource().at(i)->getY());
+		Point<float> sourceP = Point<float>(xs, ys); 
+		sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
         sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
 
         g.setColour(this->getColor(i));
@@ -157,7 +159,9 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     this->selectItem.selecType = NoSelection;
     
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
-        Point<float> sourceP = Point<float>(this->filter->getPosXSource(i), this->filter->getPosYSource(i));
+		float xs = *(this->filter->getListSource().at(i)->getX());
+		float ys = *(this->filter->getListSource().at(i)->getY());
+        Point<float> sourceP = Point<float>(xs, ys);
         sourceP.x = ((w) + ((w/2.0f)*sourceP.x))+SourceRadius;
         sourceP.y = ((w) - ((w/2.0f)*sourceP.y))+SourceRadius;
         float dx = mouseP.x - sourceP.x;

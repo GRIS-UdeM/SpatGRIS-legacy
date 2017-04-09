@@ -125,15 +125,15 @@ public:
     unsigned int getNumSourceUsed() { return this->numSourceUsed;   }
     unsigned int getNumSpeakerUsed(){ return this->numSpeakerUsed;  }
     
-    float getPosXSource(int idS){ return *this->listSources[idS]->getX(); }
-    float getPosYSource(int idS){ return *this->listSources[idS]->getY(); }
+	vector<Source *>  getListSource() { return this->listSources;  }
+	vector<Speaker *> getListSpeaker() { return this->listSpeakers; }
     void  setPosXYSource(int idS, float x, float y){ *(this->listSources[idS]->getX()) = x; *(this->listSources[idS]->getY()) = y ;}
     //==============================================================================
 
 private:
 
-    Array<Source *>   listSources;
-    Array<Speaker *>  listSpeakers;
+    vector<Source *>   listSources;
+    vector<Speaker *>  listSpeakers;
     unsigned int numSourceUsed;
     unsigned int numSpeakerUsed;
     

@@ -111,6 +111,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->resizeWindow.setSizeLimits (MinFieldSize + (2*Margin), MinFieldSize + (2*Margin), 1920, 1080);
     this->addAndMakeVisible (this->resizer = new ResizableCornerComponent (this, &this->resizeWindow));
     this->setSize(DefaultUItWidth, DefaultUIHeight);
+
+	this->startTimerHz(HertzRefresh);
 }
 
 SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
@@ -227,6 +229,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed (TextEditor &textE
 
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
+	this->spatFieldComp->repaint();
 }
 
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)

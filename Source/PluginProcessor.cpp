@@ -29,19 +29,19 @@
 //==============================================================================
 SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 {
-    this->listSources.resize(8);
-    this->listSpeakers.resize(16);
+	this->listSources = vector<Source *>();
+	this->listSpeakers = vector<Speaker *>();
     
     for(int iSour = 0; iSour < MaxSources; iSour++){
         Source * newS = new Source(this, iSour+1);
-        this->listSources.set(iSour, newS);
+        this->listSources.push_back(newS);
     }
     
     for(int iSpeak = 0; iSpeak < MaxSpeakers; iSpeak++){
         Speaker * newS = new Speaker(this, iSpeak+1);
-        this->listSpeakers.set(iSpeak, newS);
+        this->listSpeakers.push_back(newS);
     }
-    
+	float t = *this->getListSource().at(0)->getX();
     this->numSourceUsed = 4;
     this->numSpeakerUsed = 2;
 }

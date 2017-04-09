@@ -95,7 +95,7 @@ static const int    DefaultUIHeight      = 540;
 static const int    SizeWidthLevelComp = 22;
 static const int    DefaultLabHeight = 18;
 static const int    ParamBoxHeight = 165;
-static const int    hertzRefresh = 30;
+static const int    HertzRefresh = 30;
 
 static const float  SpeedMinMax = 2.5f;
 
