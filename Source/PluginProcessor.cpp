@@ -29,8 +29,12 @@
 //==============================================================================
 SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 {
+    this->selectItem = new SelectItem();
+    this->selectItem->selectID = 1;
+    
 	this->listSources = vector<Source *>();
 	this->listSpeakers = vector<Speaker *>();
+
     
     for(int iSour = 0; iSour < MaxSources; iSour++){
         Source * newS = new Source(this, iSour+1);
@@ -41,9 +45,11 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
         Speaker * newS = new Speaker(this, iSpeak+1);
         this->listSpeakers.push_back(newS);
     }
-	float t = *this->getListSource().at(0)->getX();
-    this->numSourceUsed = 4;
-    this->numSpeakerUsed = 2;
+	
+    this->numSourceUsed = MaxSources;
+    this->numSpeakerUsed = MaxSpeakers;
+    
+
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor()

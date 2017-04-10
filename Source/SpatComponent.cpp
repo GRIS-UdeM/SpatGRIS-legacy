@@ -64,7 +64,7 @@ void SpatComponent::paint(Graphics &g)
     g.fillAll(this->grisFeel->getBackgroundColour());
     
     // - - - - - - - - - - - -
-    // draw grid
+    // draw line and light circle
     // - - - - - - - - - - - -
     g.setColour(this->grisFeel->getLightColour().withBrightness(0.5));
     w = (fieldWH - SourceDiameter) / 1.3f;
@@ -85,17 +85,26 @@ void SpatComponent::paint(Graphics &g)
 
     
     // - - - - - - - - - - - -
-    // draw big background circles
+    // draw big background circle
     // - - - - - - - - - - - -
     g.setColour(this->grisFeel->getLightColour());
     g.drawEllipse(x, x, w, w, 1);
     
     // - - - - - - - - - - - -
-    // draw little background circles
+    // draw little background circle
     // - - - - - - - - - - - -
     w = (fieldWH - SourceDiameter) / 2.0f;
     x = (fieldWH - w) / 2.0f;
     g.drawEllipse(x, x, w, w, 1);
+    
+    // - - - - - - - - - - - -
+    // draw fill center cirlce
+    // - - - - - - - - - - - -
+    g.setColour(this->grisFeel->getBackgroundColour());
+    w = (fieldWH - SourceDiameter) / 4.0f;
+    w -= 2;
+    x = (fieldWH - w) / 2.0f;
+    g.fillEllipse(x, x, w, w);
     
     
     // - - - - - - - - - - - -
@@ -110,31 +119,39 @@ void SpatComponent::paint(Graphics &g)
     // - - - - - - - - - - - -
     String stringVal;
     w = (fieldWH - SourceDiameter);
-    float hueSele;
     
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
-       
-		float xs = *(this->filter->getListSource().at(i)->getX());
-		float ys = *(this->filter->getListSource().at(i)->getY());
-		Point<float> sourceP = Point<float>(xs, ys); 
+
+		FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
 		sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
         sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
-
+        
+        // - - - - - - - - - - - -
+        // draw Select Source
+        // - - - - - - - - - - - -
+        if(this->filter->getSelectItem()->selectID == i ){
+            g.setColour(this->grisFeel->getLightColour());
+            g.drawEllipse(sourceP.x-2 , sourceP.y-2 , SourceDiameter+4, SourceDiameter+4,1);
+        }
+        
         g.setColour(this->getColor(i));
         g.fillEllipse(sourceP.x , sourceP.y , SourceDiameter, SourceDiameter);
         
         stringVal.clear();
-        
         stringVal << i+1;
         
         g.setColour(Colours::black);
         g.setFont(this->grisFeel->getFont());
-        g.drawText(stringVal, sourceP.x+1 , sourceP.y + 1, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
         
+        int tx = sourceP.x;
+        int ty = sourceP.y;
+        g.drawText(stringVal, tx+1 , ty+1, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
         g.setColour(Colours::white);
-        g.drawText(stringVal, sourceP.x , sourceP.y, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+        g.drawText(stringVal, tx, ty, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
 
     }
+    
+   
     
     
 }
@@ -151,27 +168,26 @@ void SpatComponent::resized(int fieldSize)
 void SpatComponent::mouseDown(const MouseEvent &event)
 {
     const int fieldWH = getWidth();
-    const Point<int> mouseP(event.x, event.y);
+    FPoint mouseP(event.x, event.y);
     
     const float w = (fieldWH - SourceDiameter) /2.0f;
     
-    this->selectItem.selectID = -1;
-    this->selectItem.selecType = NoSelection;
+    this->filter->getSelectItem()->selectID = -1;
+    this->filter->getSelectItem()->selecType = NoSelection;
     
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
-		float xs = *(this->filter->getListSource().at(i)->getX());
-		float ys = *(this->filter->getListSource().at(i)->getY());
-        Point<float> sourceP = Point<float>(xs, ys);
+
+        FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
         sourceP.x = ((w) + ((w/2.0f)*sourceP.x))+SourceRadius;
         sourceP.y = ((w) - ((w/2.0f)*sourceP.y))+SourceRadius;
+        
         float dx = mouseP.x - sourceP.x;
         float dy = mouseP.y - sourceP.y;
         float distanceSquared = dx*dx + dy*dy;
         if(distanceSquared < SourceRadius*SourceRadius){
             
-            this->selectItem.selectID = i;
-            this->selectItem.selecType = SelectedSource;
- 
+            this->filter->getSelectItem()->selectID = i;
+            this->filter->getSelectItem()->selecType = SelectedSource;
         }
     }
 }
@@ -179,13 +195,13 @@ void SpatComponent::mouseDown(const MouseEvent &event)
 void SpatComponent::mouseDrag(const MouseEvent &event)
 {
     const int fieldWH = getWidth();
-    const Point<int> mouseP(event.x, event.y);
+    FPoint mouseP(event.x, event.y);
     
     const float w = (fieldWH - SourceDiameter)/2.0f;
     const float x = (fieldWH - w) / 2.0f;
 
     
-    switch(this->selectItem.selecType)
+    switch(this->filter->getSelectItem()->selecType)
     {
         case SelectedSource:
 
@@ -200,7 +216,7 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
             dist = dist/(w/2.0f);
             if(dist > 2.0f){ dist = 2.0f; }
 
-            this->filter->setPosXYSource(this->selectItem.selectID, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
+            this->filter->setPosXYSource(this->filter->getSelectItem()->selectID, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
 
             break;
     }
@@ -215,7 +231,7 @@ void SpatComponent::mouseUp(const MouseEvent &event)
 //=============================================================
 
 Colour SpatComponent::getColor(int i) {
-    float hueSelect = (float)i / this->filter->getNumSourceUsed() + 0.577251;
+    float hueSelect = (float)i / this->filter->getNumSourceUsed() + +0.577251;
     if (hueSelect > 1){
         hueSelect -= 1;
     }

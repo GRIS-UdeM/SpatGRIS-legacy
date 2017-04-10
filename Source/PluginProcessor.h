@@ -87,6 +87,18 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 
 using namespace std;
 
+typedef Point<float> FPoint;
+
+typedef enum {
+    NoSelection,
+    SelectedSource,
+    SelectedSpeaker
+} SelectionType;
+struct SelectItem {
+    int selectID;
+    SelectionType selecType;
+};
+
 
 
 //==============================================================================
@@ -127,7 +139,9 @@ public:
     
 	vector<Source *>  getListSource() { return this->listSources;  }
 	vector<Speaker *> getListSpeaker() { return this->listSpeakers; }
-    void  setPosXYSource(int idS, float x, float y){ *(this->listSources[idS]->getX()) = x; *(this->listSources[idS]->getY()) = y ;}
+    void  setPosXYSource(int idS, float x, float y){ *(this->listSources[idS]->getX()) = x; *(this->listSources[idS]->getY()) = y; }
+    
+    SelectItem * getSelectItem() { return this->selectItem; }
     //==============================================================================
 
 private:
@@ -136,6 +150,8 @@ private:
     vector<Speaker *>  listSpeakers;
     unsigned int numSourceUsed;
     unsigned int numSpeakerUsed;
+    
+    SelectItem * selectItem;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

@@ -40,17 +40,6 @@ using namespace std;
 
 class SpatGrisAudioProcessor;
 
-typedef enum
-{
-    NoSelection,
-    SelectedSource,
-    SelectedSpeaker
-} SelectionType;
-
-struct SelectItem{
-    int selectID;
-    SelectionType selecType;
-};
 
 static float angleInCircle(double abx, double aby ) {
     return  -atan2(( - aby * 2.0f), (abx * 2.0f ));
@@ -79,6 +68,6 @@ private:
     ImageComponent logoImg;
     Label       labVersion;
     
-    SelectItem selectItem;
+    
 };
 #endif  // SPATCOMPONENT_H_INCLUDED
