@@ -47,7 +47,7 @@ public:
     
     String getMouvementModeName(MouvementMode i);
     MouvementMode getMouvementMode(){ return this->mouvementModeSelect; }
-    void setMouvementMode(MouvementMode i){ this->mouvementModeSelect = i; }
+    void setMouvementMode(MouvementMode m);
     
     /*void begin(int s, MoverType mt);
     void sortAngles();
@@ -70,6 +70,8 @@ public:
 private:
     SpatGrisAudioProcessor * filter;
     MouvementMode   mouvementModeSelect;
+    StringArray listMouvement;
+    //AudioParameterChoice * mouvementChoiceAuto;
     /*MoverType mMoverType;
     int mSelectedSrc;
     bool mFieldExists;

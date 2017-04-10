@@ -25,13 +25,17 @@
  */
 
 #include "SourceMover.h"
-
+#include "PluginProcessor.h"
 
 
 SourceMover::SourceMover(SpatGrisAudioProcessor *filt):
 filter(filt)
 {
-
+    for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
+        listMouvement.add(getMouvementModeName((MouvementMode)i));
+    }
+    //this->mouvementChoiceAuto = new AudioParameterChoice("Mouvement","Mouv Trajectory", listMouvement,1);
+    //this->filter->addParameter(this->mouvementChoiceAuto);
 }
 SourceMover::~SourceMover()
 {
@@ -55,3 +59,8 @@ String SourceMover::getMouvementModeName(MouvementMode i)
     }
 }
 
+void SourceMover::setMouvementMode(MouvementMode m)
+{
+    this->mouvementModeSelect = m;
+    //*this->mouvementChoiceAuto = (int)m;
+}

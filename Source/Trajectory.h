@@ -62,6 +62,8 @@ public:
     Trajectory();
     ~Trajectory();
     
+    //Getter
+    bool   getProcessTrajectory(){ return this->processTrajectory; };
     String getTrajectoryName(TrajectoryType i);
     TrajectoryType getTrajectoryType(){ return this->typeSelect; }
   
@@ -82,7 +84,8 @@ public:
     bool  getRandSeparate(){ return this->randSeparate; }
     vector<FPoint>  getListPointsFreeDraw(){ return this->listPointsFreeDraw; }
     
-    
+    //Setter
+    void setProcessTrajectory(bool b){ this->processTrajectory = b; };
     void setTrajectoryType(TrajectoryType i){ this->typeSelect = i; }
     void setTimeDuration(float t){ this->timeDuration = t; }
     void setInSeconds(bool b){ this->inSeconds = b; }
@@ -102,6 +105,8 @@ public:
     void setListPointsFreeDraw(vector<FPoint> vfp){ this->listPointsFreeDraw = vfp; }
 
 private:
+    bool    processTrajectory = false;
+    
     TrajectoryType  typeSelect;
     float           timeDuration = 1.f;
     bool            inSeconds = true;      //Second(true) or beat(false)

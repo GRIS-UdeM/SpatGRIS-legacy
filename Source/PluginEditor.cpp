@@ -96,8 +96,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     //Trajectories
     //-----------------------------
-    this->labMouvement      = addLabel("Mouvements :", "Mouvement with other sources", 0, 0, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->comMouvement      = addComboBox("", "Mouvement with other sources", 90, 0, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->labMouvement      = addLabel("Mouvements :", "Mouvement with other sources", 0, 4, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->comMouvement      = addComboBox("", "Mouvement with other sources", 90, 4, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
     this->labTypeTrajectory = addLabel("Types :", "Types of trajectories", 0, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTypeTrajectory = addComboBox("", "Types of trajectories", 60, 30, DefaultLabWidth+30, DefaultLabHeight, this->boxTrajectory->getContent());
@@ -361,6 +361,27 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
     this->sliTrajRandSpeed->setValue(this->filter->getTrajectory()->getRandSpeed());
     this->togTrajRandSepare->setToggleState(this->filter->getTrajectory()->getRandSeparate(),dontSendNotification);
     
+    if(!(this->filter->getTrajectory()->getProcessTrajectory())){   //Start ready...
+        for (auto&& it : this->listLockCompTrajectory)
+        {
+            it->setEnabled(false);
+        }
+        
+        this->progressBarTraject->setVisible(true);
+        this->filter->getTrajectory()->setProcessTrajectory(true);
+        
+    }else{
+        for (auto&& it : this->listLockCompTrajectory)
+        {
+            it->setEnabled(true);
+        }
+        
+        this->progressBarTraject->setVisible(false);
+        this->filter->getTrajectory()->setProcessTrajectory(false);
+    }
+    
+    this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
+
 }
 //==============================================================================
 
@@ -383,10 +404,8 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
         
     }
     else if(this->butReadyTrajectory == button){
-        for (auto&& it : this->listLockCompTrajectory)
-        {
-            it->setEnabled(false);
-        }
+        this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
+        this->updateTrajectoryParam();
     }
     
     else {
