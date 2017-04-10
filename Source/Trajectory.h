@@ -29,26 +29,16 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "DefaultParam.h"
+
 using namespace std;
 
 typedef Point<float> FPoint;
 
 
-typedef enum {
-    Circle = 0,
-    Ellipse,
-    Spiral,
-    Pendulum,
-    RandomTraj,
-    RandomTarget,
-    SymXTarget,
-    SymYTarget,
-    FreeDrawing,
-    SIZE_TT
-} TrajectoryType;
 
 
-struct TrajectoryProperties {
+/*struct TrajectoryProperties {
     int                     type;
     //SpatGrisAudioProcessor* filter;
     //SourceMover*            mover;
@@ -63,10 +53,75 @@ struct TrajectoryProperties {
     float                   width;
     FPoint                  endPoint;
     vector<FPoint>          listPoints;
-};
+};*/
 
 class SpatGrisAudioProcessor;
+class Trajectory
+{
+public:
+    Trajectory();
+    ~Trajectory();
+    
+    String getTrajectoryName(TrajectoryType i);
+    TrajectoryType getTrajectoryType(){ return this->typeSelect; }
+  
+    float getTimeDuration(){ return this->timeDuration; }
+    bool  getInSeconds(){ return this->inSeconds; }
+    float getCycle(){ return this->cycle; }
+    float getSpeed(){ return this->speed; }
+    
+    float getEllipseWidth(){ return this->ellipseWidth; }
+    bool  getInOneWay(){ return this->inOneWay; }
+    float getRadiusEnd(){ return this->radiusEnd; }
+    float getAngleEnd(){ return this->angleEnd; }
+    
+    float getPendDampening(){ return this->pendDampening; }
+    float getPendDeviation(){ return this->pendDeviation; }
+    
+    float getRandSpeed(){ return this->randSpeed; }
+    bool  getRandSeparate(){ return this->randSeparate; }
+    vector<FPoint>  getListPointsFreeDraw(){ return this->listPointsFreeDraw; }
+    
+    
+    void setTrajectoryType(TrajectoryType i){ this->typeSelect = i; }
+    void setTimeDuration(float t){ this->timeDuration = t; }
+    void setInSeconds(bool b){ this->inSeconds = b; }
+    void setCycle(float c){ this->cycle = c; }
+    void setSpeed(float s){ this->speed = s; }
+    
+    void setEllipseWidth(float w){ this->ellipseWidth = w; }
+    void setInOneWay(bool o){ this->inOneWay = o; }
+    void setRadiusEnd(float r){ this->radiusEnd = r; }
+    void setAngleEnd(float a){ this->angleEnd = a; }
+    
+    void setPendDampening(float d){ this->pendDampening = d; }
+    void setPendDeviation(float d){ this->pendDeviation = d; }
+    
+    void setRandSpeed(float s){ this->randSpeed = s; }
+    void setRandSeparate(bool s){ this->randSeparate = s; }
+    void setListPointsFreeDraw(vector<FPoint> vfp){ this->listPointsFreeDraw = vfp; }
 
+private:
+    TrajectoryType  typeSelect;
+    float           timeDuration = 1.f;
+    bool            inSeconds = true;      //Second(true) or beat(false)
+    float           cycle = 1.f;
+    float           speed = 1.f;
+    
+    float           ellipseWidth = 0.f;
+    bool            inOneWay = true;       //OneWay(true) or Return(false)
+    float           radiusEnd = 0.f;
+    float           angleEnd = 0.f;
+    
+    float           pendDampening = 0.f;
+    float           pendDeviation = 0.f;
+    
+    float           randSpeed = 1.f;
+    bool            randSeparate = false;
+    vector<FPoint>  listPointsFreeDraw;
+};
+
+/*
 class Trajectory : public ReferenceCountedObject
 {
 public:
@@ -111,5 +166,5 @@ protected:
     bool  m_bUseBeats;
     float m_fSpeed;
     bool m_bInfLoopRepeats;
-};
+};*/
 #endif  // TRAJECTORY_H_INCLUDED

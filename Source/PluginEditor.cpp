@@ -32,6 +32,7 @@
 SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcessor * filter) :
     AudioProcessorEditor (filter)
 {
+    
     LookAndFeel::setDefaultLookAndFeel(&this->grisFeel);
     this->filter = filter;
 
@@ -101,7 +102,7 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->labTypeTrajectory = addLabel("Types :", "Types of trajectories", 0, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTypeTrajectory = addComboBox("", "Types of trajectories", 60, 30, DefaultLabWidth+30, DefaultLabHeight, this->boxTrajectory->getContent());
     for(int i = 0; i  < TrajectoryType::SIZE_TT; i++){
-        this->comTypeTrajectory->addItem(Trajectory::GetTrajectoryName((TrajectoryType)i), i+1);
+        this->comTypeTrajectory->addItem(this->filter->getTrajectory()->getTrajectoryName((TrajectoryType)i), i+1);
     }
     this->comTypeTrajectory->setSelectedId(1);
     
@@ -121,10 +122,11 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->progressBarTraject = new ProgressBarTraj();
     this->progressBarTraject->setBounds(60, 124, DefaultLabWidth+30, DefaultLabHeight);
     this->boxTrajectory->getContent()->addAndMakeVisible(this->progressBarTraject);
+    this->progressBarTraject->setVisible(false);
     
     this->sliSpeedTrajectory = addSlider("Speed :", "Speed of trajectory", 14, 150, 204, DefaultLabHeight, this->boxTrajectory->getContent(), MinSpeedTrajectory, MaxSpeedTrajectory,  0.001f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
     
-    //Other param Trajectories hided
+    //Other param Trajectories hided---
     int rowX = 260;
     
     this->labTrajEllipseWidth = addLabel("Width :", "Width of ellipse", rowX, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
@@ -152,6 +154,26 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->sliTrajRandSpeed = addSlider("Speed :", "Speed Random", rowX+48, 30, 160, DefaultLabHeight, this->boxTrajectory->getContent(), MinTrajRandomSpeed, MaxTrajRandomSpeed,  0.01f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
     this->togTrajRandSepare = addToggleButton("Separate sources :", "Force separate automation sources", rowX, 50, DefaultLabWidth, DefaultLabHeight,  this->boxTrajectory->getContent());
 
+    //Add in list for lock
+    this->listLockCompTrajectory.push_back(this->comTypeTrajectory);
+    this->listLockCompTrajectory.push_back(this->texTimeTrajectory);
+    this->listLockCompTrajectory.push_back(this->comTimeTrajectory);
+    this->listLockCompTrajectory.push_back(this->texCycleTrajectory);
+    
+    this->listLockCompTrajectory.push_back(this->texTrajEllipseWidth);
+    this->listLockCompTrajectory.push_back(this->comTrajOneWayReturn);
+    
+    this->listLockCompTrajectory.push_back(this->texTrajRadiusEnd);
+    this->listLockCompTrajectory.push_back(this->texTrajAngleEnd);
+    
+    this->listLockCompTrajectory.push_back(this->butTrajSetEnd);
+    this->listLockCompTrajectory.push_back(this->butTrajResetEnd);
+    
+    this->listLockCompTrajectory.push_back(this->texTrajPendDampe);
+    this->listLockCompTrajectory.push_back(this->texTrajPendDevia);
+    
+    this->listLockCompTrajectory.push_back(this->sliTrajRandSpeed);
+    this->listLockCompTrajectory.push_back(this->togTrajRandSepare);
     
     //OctTabbedComponent-----------------------
     
@@ -169,6 +191,7 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     this->updateComMouvement();
     this->updateSourceParam();
+    this->updateTrajectoryParam();
     
 	this->startTimerHz(HertzRefresh);
 }
@@ -309,14 +332,35 @@ void SpatGrisAudioProcessorEditor::updateComMouvement()
     for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
         if(((MouvementMode)i == MouvementMode::SymmetricX || (MouvementMode)i == MouvementMode::SymmetricY)){
             if (this->filter->getNumSourceUsed() == 2){
-                this->comMouvement->addItem(this->sourceMover->getMouvementModeName((MouvementMode)i), i+1);
+                this->comMouvement->addItem(this->filter->getSourceMover()->getMouvementModeName((MouvementMode)i), i+1);
             }
         }
         else{
-            this->comMouvement->addItem(this->sourceMover->getMouvementModeName((MouvementMode)i), i+1);
+            this->comMouvement->addItem(this->filter->getSourceMover()->getMouvementModeName((MouvementMode)i), i+1);
         }
     }
-    this->comMouvement->setSelectedId(1);
+    this->comMouvement->setSelectedId(this->filter->getSourceMover()->getMouvementMode()+1);
+}
+
+void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
+{
+    this->comTypeTrajectory->setSelectedId(this->filter->getTrajectory()->getTrajectoryType()+1);
+    this->texTimeTrajectory->setText(String(this->filter->getTrajectory()->getTimeDuration()));
+    this->comTimeTrajectory->setSelectedId(this->filter->getTrajectory()->getInSeconds() ? 1 : 2);
+    this->texCycleTrajectory->setText(String(this->filter->getTrajectory()->getCycle()));
+    this->sliSpeedTrajectory->setValue(this->filter->getTrajectory()->getSpeed());
+    
+    this->texTrajEllipseWidth->setText(String(this->filter->getTrajectory()->getEllipseWidth()));
+    this->comTrajOneWayReturn->setSelectedId(this->filter->getTrajectory()->getInOneWay() ? 1 : 2);
+    this->texTrajRadiusEnd->setText(String(this->filter->getTrajectory()->getRadiusEnd()));
+    this->texTrajAngleEnd->setText(String(this->filter->getTrajectory()->getAngleEnd()));
+    
+    this->texTrajPendDampe->setText(String(this->filter->getTrajectory()->getPendDampening()));
+    this->texTrajPendDevia->setText(String(this->filter->getTrajectory()->getPendDeviation()));
+    
+    this->sliTrajRandSpeed->setValue(this->filter->getTrajectory()->getRandSpeed());
+    this->togTrajRandSepare->setToggleState(this->filter->getTrajectory()->getRandSeparate(),dontSendNotification);
+    
 }
 //==============================================================================
 
@@ -325,13 +369,27 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
     if(this->togLinkSurfaceOrPan == button){
         this->filter->setLinkSurface(this->togLinkSurfaceOrPan->getToggleState());
         
-    }else if(this->togLinkAzimSpan == button){
+    }
+    else if(this->togLinkAzimSpan == button){
         this->filter->setAzimuthValue(this->togLinkAzimSpan->getToggleState());
         
-    }else if(this->togLinkElevSpan == button){
+    }
+    else if(this->togLinkElevSpan == button){
         this->filter->setElevationValue(this->togLinkElevSpan->getToggleState());
         
-    }else {
+    }
+    else if(this->togTrajRandSepare == button){
+        this->filter->getTrajectory()->setRandSeparate(this->togTrajRandSepare->getToggleState());
+        
+    }
+    else if(this->butReadyTrajectory == button){
+        for (auto&& it : this->listLockCompTrajectory)
+        {
+            it->setEnabled(false);
+        }
+    }
+    
+    else {
         cout << "buttonClicked not found !" << newLine;
     }
 }
@@ -342,21 +400,36 @@ void SpatGrisAudioProcessorEditor::sliderValueChanged (Slider *slider)
         this->filter->setSurfaceValue(this->sliSurfaceOrPan->getValue());
         this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
         
-    }else if(this->sliAzimSpan == slider){
+    }
+    else if(this->sliAzimSpan == slider){
         this->filter->setAzimuthValue(this->sliAzimSpan->getValue());
         this->sliAzimSpan->setTooltip("A:"+String(this->sliAzimSpan->getValue(),2));
         
-    }else if(this->sliAElevSpann == slider){
+    }
+    else if(this->sliAElevSpann == slider){
         this->filter->setElevationValue(this->sliAElevSpann->getValue());
         this->sliAElevSpann->setTooltip("E:"+String(this->sliAElevSpann->getValue(),2));
         
-    }else {
+    }
+    else if(this->sliSpeedTrajectory == slider){
+        this->filter->getTrajectory()->setSpeed(this->sliSpeedTrajectory->getValue());
+        
+    }
+    else if(this->sliTrajRandSpeed == slider){
+        this->filter->getTrajectory()->setRandSpeed(this->sliTrajRandSpeed->getValue());
+        
+    }
+    else {
         cout << "sliderValueChanged not found !" << newLine;
     }
 }
 void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
-    if(this->comTypeTrajectory == comboBox){
+    if(this->comMouvement == comboBox){
+        this->filter->getSourceMover()->setMouvementMode((MouvementMode)this->comMouvement->getSelectedItemIndex());
+        
+        
+    }else if(this->comTypeTrajectory == comboBox){
 
         this->labTrajEllipseWidth->setVisible(false);
         this->texTrajEllipseWidth->setVisible(false);
@@ -422,14 +495,43 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             default:
                 break;
         }
+        this->filter->getTrajectory()->setTrajectoryType((TrajectoryType)this->comTypeTrajectory->getSelectedItemIndex());
         
+    }else if(this->comTimeTrajectory == comboBox){
+        this->filter->getTrajectory()->setInSeconds(!(this->comTimeTrajectory->getSelectedItemIndex()==1));
+        
+    }else if(this->comTrajOneWayReturn == comboBox){
+        this->filter->getTrajectory()->setInOneWay(!(this->comTrajOneWayReturn->getSelectedItemIndex()==1));
     }
 }
+
 void SpatGrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor)
 {
+    textEditorReturnKeyPressed(textEditor);
 }
 void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed (TextEditor &textEditor)
 {
+    if(this->texTimeTrajectory == &textEditor){
+        this->filter->getTrajectory()->setTimeDuration(this->texTimeTrajectory->getText().getFloatValue());
+        
+    }else if(this->texCycleTrajectory == &textEditor){
+        this->filter->getTrajectory()->setCycle(this->texCycleTrajectory->getText().getFloatValue());
+        
+    }else if(this->texTrajEllipseWidth == &textEditor){
+        this->filter->getTrajectory()->setEllipseWidth(this->texTrajEllipseWidth->getText().getFloatValue());
+        
+    }else if(this->texTrajRadiusEnd == &textEditor){
+        this->filter->getTrajectory()->setRadiusEnd(this->texTrajRadiusEnd->getText().getFloatValue());
+    }
+    else if(this->texTrajAngleEnd == &textEditor){
+        this->filter->getTrajectory()->setAngleEnd(this->texTrajAngleEnd->getText().getFloatValue());
+    }
+    else if(this->texTrajPendDampe == &textEditor){
+        this->filter->getTrajectory()->setPendDampening(this->texTrajPendDampe->getText().getFloatValue());
+    }
+    else if(this->texTrajPendDevia == &textEditor){
+        this->filter->getTrajectory()->setPendDeviation(this->texTrajPendDevia->getText().getFloatValue());
+    }
 }
 
 void SpatGrisAudioProcessorEditor::timerCallback()

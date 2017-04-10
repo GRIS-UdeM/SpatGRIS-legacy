@@ -26,7 +26,14 @@
 
 #include "Trajectory.h"
 
-String Trajectory::GetTrajectoryName(TrajectoryType i)
+Trajectory::Trajectory()
+{
+}
+Trajectory::~Trajectory()
+{
+}
+
+String Trajectory::getTrajectoryName(TrajectoryType i)
 {
     switch(i) {
         case Circle:        return "Circle";

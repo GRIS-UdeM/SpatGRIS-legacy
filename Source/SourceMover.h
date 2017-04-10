@@ -30,24 +30,13 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "PluginProcessor.h"
 
+#include "DefaultParam.h"
 
 using namespace std;
 
-typedef Point<float> FPoint;
 
-typedef enum {
-    Independent = 0,
-    Circular,
-    CircularFixRad,
-    CircularFixAng,
-    CircularFullyFix,
-    DeltaLock,
-    SymmetricX,
-    SymmetricY,
-    SIZE_MM
-} MouvementMode;
+class SpatGrisAudioProcessor;
 
 class SourceMover
 {
@@ -57,6 +46,8 @@ public:
     ~SourceMover();
     
     String getMouvementModeName(MouvementMode i);
+    MouvementMode getMouvementMode(){ return this->mouvementModeSelect; }
+    void setMouvementMode(MouvementMode i){ this->mouvementModeSelect = i; }
     
     /*void begin(int s, MoverType mt);
     void sortAngles();
@@ -78,6 +69,7 @@ public:
     
 private:
     SpatGrisAudioProcessor * filter;
+    MouvementMode   mouvementModeSelect;
     /*MoverType mMoverType;
     int mSelectedSrc;
     bool mFieldExists;

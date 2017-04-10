@@ -13,6 +13,45 @@
 #define M_PI 3.14159265358979323846264338327950288
 #endif
 
+
+typedef Point<float> FPoint;
+
+typedef enum {
+    NoSelection,
+    SelectedSource,
+    SelectedSpeaker
+} SelectionType;
+struct SelectItem {
+    unsigned int selectID;
+    SelectionType selecType;
+};
+
+typedef enum {
+    Independent = 0,
+    Circular,
+    CircularFixRad,
+    CircularFixAng,
+    CircularFullyFix,
+    DeltaLock,
+    SymmetricX,
+    SymmetricY,
+    SIZE_MM
+} MouvementMode;
+
+
+typedef enum {
+    Circle = 0,
+    Ellipse,
+    Spiral,
+    Pendulum,
+    RandomTraj,
+    RandomTarget,
+    SymXTarget,
+    SymYTarget,
+    FreeDrawing,
+    SIZE_TT
+} TrajectoryType;
+
 static const int    MaxSources      = 8;
 static const int    MaxSpeakers     = 16;
 static const int    MaxBufferSize   = 4096;

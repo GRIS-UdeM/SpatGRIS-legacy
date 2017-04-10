@@ -29,6 +29,9 @@
 //==============================================================================
 SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 {
+    this->sourceMover = new SourceMover(this);
+    this->trajectory = new Trajectory();
+    
     this->selectItem = new SelectItem();
     this->selectItem->selectID = 1;
     
@@ -49,12 +52,13 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     this->numSourceUsed = MaxSources;
     this->numSpeakerUsed = MaxSpeakers;
     
-
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor()
 {
-   
+    delete this->selectItem;
+    delete this->sourceMover;
+    delete this->trajectory;
 }
 //==============================================================================
 const String SpatGrisAudioProcessor::getName() const {

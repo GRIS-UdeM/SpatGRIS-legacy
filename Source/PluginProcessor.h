@@ -84,21 +84,13 @@ size_t strlcpy(char * dst, const char * src, size_t dstsize)
 
 #include "Speaker.h"
 #include "Source.h"
+#include "DefaultParam.h"
+#include "SourceMover.h"
+#include "Trajectory.h"
 
 using namespace std;
 
 typedef Point<float> FPoint;
-
-typedef enum {
-    NoSelection,
-    SelectedSource,
-    SelectedSpeaker
-} SelectionType;
-struct SelectItem {
-    unsigned int selectID;
-    SelectionType selecType;
-};
-
 
 
 //==============================================================================
@@ -133,6 +125,9 @@ public:
     
     
     //==============================================================================
+    SourceMover * getSourceMover()  { return this->sourceMover; }
+    Trajectory * getTrajectory()    { return this->trajectory; }
+    
     unsigned int getNumSourceUsed() { return this->numSourceUsed;   }
     unsigned int getNumSpeakerUsed(){ return this->numSpeakerUsed;  }
     
@@ -177,6 +172,13 @@ private:
     bool linkSurface;
     bool linkAzimuth;
     bool linkElevation;
+    
+    //Trajectory param========================
+    SourceMover     * sourceMover;
+    Trajectory      * trajectory;
+    
+    
+    //========================================
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

@@ -69,6 +69,7 @@ public :
     
     void updateSourceParam();
     void updateComMouvement();
+    void updateTrajectoryParam();
     
 private :
 
@@ -82,7 +83,6 @@ private :
     //==============================================================================
     
     SpatGrisAudioProcessor  * filter;
-    SourceMover             * sourceMover;
     
     GrisLookAndFeel grisFeel;
     TooltipWindow tooltipWindow;
@@ -153,7 +153,9 @@ private :
     Label       * labTrajRandSpeed;
     Slider      * sliTrajRandSpeed;
     ToggleButton* togTrajRandSepare;
-    ComboBox    * comTrajRandTConti;
+
+    
+    vector<Component *> listLockCompTrajectory;
 
 };
 
