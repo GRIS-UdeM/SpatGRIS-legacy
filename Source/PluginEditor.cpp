@@ -35,7 +35,7 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     LookAndFeel::setDefaultLookAndFeel(&this->grisFeel);
     this->filter = filter;
 
-    this->spatFieldComp = new SpatComponent(this->filter, &this->grisFeel);
+    this->spatFieldComp = new SpatComponent(this, this->filter, &this->grisFeel);
     this->addAndMakeVisible(this->spatFieldComp);
     
     //BOX-----------------------------------------------------------------
@@ -65,15 +65,15 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     //Source param
     this->labSurfaceOrPan       = addLabel("Surface", "Surface Master Soutce", 0, 0, CenterColumnWidth, DefaultLabHeight, this->boxSourceParam->getContent());
     this->togLinkSurfaceOrPan   = addToggleButton("Link", "Link other sources", 0, 20, CenterColumnWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliSurfaceOrPan       = addSlider("", "", 50, 18, 130, DefaultLabHeight, this->boxSourceParam->getContent());
+    this->sliSurfaceOrPan       = addSlider("", "", 50, 18, 130, DefaultLabHeight, this->boxSourceParam->getContent(), MinSurfSource, MaxSurfSource, DefSurfSource);
     
     this->labAzimSpan           = addLabel("Azimuth Span", "Azimuth Span Master Soutce", 0, 50, CenterColumnWidth, DefaultLabHeight, this->boxSourceParam->getContent());
     this->togLinkAzimSpan       = addToggleButton("Link", "Link other sources", 0, 70, CenterColumnWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliSurfaceOrPan       = addSlider("", "", 50, 68, 130, DefaultLabHeight, this->boxSourceParam->getContent());
+    this->sliAzimSpan           = addSlider("", "", 50, 68, 130, DefaultLabHeight, this->boxSourceParam->getContent(), MinAzimSource, MaxAzimSource, DefAzimSource);
     
     this->labElevSpan           = addLabel("Elevation Span", "Elevation Span Master Soutce", 0, 100, CenterColumnWidth, DefaultLabHeight, this->boxSourceParam->getContent());
     this->togLinkElevSpan       = addToggleButton("Link", "Link other sources", 0, 120, CenterColumnWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliSurfaceOrPan       = addSlider("", "", 50, 118, 130, DefaultLabHeight, this->boxSourceParam->getContent());
+    this->sliAElevSpann         = addSlider("", "", 50, 118, 130, DefaultLabHeight, this->boxSourceParam->getContent(), MinElevSource, MaxElevSource, DefElevSource);
     //-----------------------------
     
     
@@ -111,7 +111,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->resizeWindow.setSizeLimits (MinFieldSize + (2*Margin), MinFieldSize + (2*Margin), 1920, 1080);
     this->addAndMakeVisible (this->resizer = new ResizableCornerComponent (this, &this->resizeWindow));
     this->setSize(DefaultUItWidth, DefaultUIHeight);
-
+    
+    this->updateValuesFromGris();
 	this->startTimerHz(HertzRefresh);
 }
 
@@ -194,13 +195,14 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, const S
     return te;
 }
 
-Slider* SpatGrisAudioProcessorEditor::addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, juce::Slider::TextEntryBoxPosition tebp)
+Slider* SpatGrisAudioProcessorEditor::addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, juce::Slider::TextEntryBoxPosition tebp)
 {
     Slider *sd = new Slider();
     sd->setTooltip (stooltip);
     //sd->setTextValueSuffix(s);
     sd->setSize(w, h);
     sd->setTopLeftPosition(x, y);
+    sd->setRange(minF, maxF, defF);
     //sd->setSliderStyle(Slider::Rotary);
     //sd->setRotaryParameters(M_PI * 1.3f, M_PI * 2.7f, true);
     sd->setTextBoxStyle (tebp, false, 60, 20);
@@ -210,15 +212,54 @@ Slider* SpatGrisAudioProcessorEditor::addSlider(const String &s, const String &s
     into->addAndMakeVisible(sd);
     return sd;
 }
-
+//==============================================================================
+void SpatGrisAudioProcessorEditor::updateValuesFromGris()
+{
+    this->togLinkSurfaceOrPan->setToggleState(this->filter->getLinkSurface(),   dontSendNotification);
+    this->togLinkAzimSpan->setToggleState(this->filter->getLinkAzimuth(),       dontSendNotification);
+    this->togLinkElevSpan->setToggleState(this->filter->getLinkElevation(),     dontSendNotification);
+    
+    const int idS = this->filter->getSelectItem()->selectID;
+    this->sliSurfaceOrPan->setValue(*(this->filter->getListSource().at(idS)->getSurf()),sendNotification);
+    this->sliAzimSpan->setValue(*(this->filter->getListSource().at(idS)->getAzim()),    sendNotification);
+    this->sliAElevSpann->setValue(*(this->filter->getListSource().at(idS)->getElev()),  sendNotification);
+}
 
 //==============================================================================
 
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
 {
+    if(this->togLinkSurfaceOrPan == button){
+        this->filter->setLinkSurface(this->togLinkSurfaceOrPan->getToggleState());
+        
+    }else if(this->togLinkAzimSpan == button){
+        this->filter->setAzimuthValue(this->togLinkAzimSpan->getToggleState());
+        
+    }else if(this->togLinkElevSpan == button){
+        this->filter->setElevationValue(this->togLinkElevSpan->getToggleState());
+        
+    }else {
+        cout << "buttonClicked not found !" << newLine;
+    }
 }
 void SpatGrisAudioProcessorEditor::sliderValueChanged (Slider *slider)
 {
+    
+    if(this->sliSurfaceOrPan == slider){
+        this->filter->setSurfaceValue(this->sliSurfaceOrPan->getValue());
+        this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
+        
+    }else if(this->sliAzimSpan == slider){
+        this->filter->setAzimuthValue(this->sliAzimSpan->getValue());
+        this->sliAzimSpan->setTooltip("A:"+String(this->sliAzimSpan->getValue(),2));
+        
+    }else if(this->sliAElevSpann == slider){
+        this->filter->setElevationValue(this->sliAElevSpann->getValue());
+        this->sliAElevSpann->setTooltip("E:"+String(this->sliAElevSpann->getValue(),2));
+        
+    }else {
+        cout << "sliderValueChanged not found !" << newLine;
+    }
 }
 void SpatGrisAudioProcessorEditor::textEditorFocusLost (TextEditor &textEditor)
 {
@@ -260,15 +301,15 @@ void SpatGrisAudioProcessorEditor::resized()
     this->boxSourceParam->correctSize(CenterColumnWidth, 140);
     
     x += CenterColumnWidth + Margin + Margin;
-    this->boxOutputParam->setBounds(x, y, w-(fieldSize+ CenterColumnWidth + (2 * 7)), 160);
+    this->boxOutputParam->setBounds(x, y, w-(fieldSize+ CenterColumnWidth + (Margin * 7)), 160);
     this->boxOutputParam->correctSize(((unsigned int )this->vecLevelOut.size()*(SizeWidthLevelComp))+4, 130);
     
     x = Margin + fieldSize + Margin + Margin;
-    this->boxTrajectory->setBounds(x, 170, w-(fieldSize + (2 * 5)), 200);
-    this->boxTrajectory->correctSize(w-(fieldSize + (2 * 5)), 170);
+    this->boxTrajectory->setBounds(x, 170, w-(fieldSize + (Margin * 5)), 200);
+    this->boxTrajectory->correctSize(w-(fieldSize + (Margin * 5)), 170);
     
     //OctTabbedComponent-----------------------
-    this->octTab->setBounds(x, 170+210, w-(fieldSize + (2 * 4)), h - (170+200+(2*6)) );
+    this->octTab->setBounds(x, 170+210, w-(fieldSize + (Margin * 4)), h - (170+200+(Margin*6)) );
 
     
     this->resizer->setBounds (w - 16, h - 16, 16, 16);

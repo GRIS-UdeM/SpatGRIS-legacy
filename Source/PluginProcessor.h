@@ -95,7 +95,7 @@ typedef enum {
     SelectedSpeaker
 } SelectionType;
 struct SelectItem {
-    int selectID;
+    unsigned int selectID;
     SelectionType selecType;
 };
 
@@ -130,10 +130,9 @@ public:
     const String getProgramName (int index);
     void changeProgramName (int index, const String& newName);
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData);
-    void setStateInformation (const void* data, int sizeInBytes);
-    //==============================================================================
     
+    
+    //==============================================================================
     unsigned int getNumSourceUsed() { return this->numSourceUsed;   }
     unsigned int getNumSpeakerUsed(){ return this->numSpeakerUsed;  }
     
@@ -142,6 +141,28 @@ public:
     void  setPosXYSource(int idS, float x, float y){ *(this->listSources[idS]->getX()) = x; *(this->listSources[idS]->getY()) = y; }
     
     SelectItem * getSelectItem() { return this->selectItem; }
+    
+    bool getLinkSurface()   { return this->linkSurface; }
+    bool getLinkAzimuth()   { return this->linkAzimuth; }
+    bool getLinkElevation() { return this->linkElevation; }
+    
+    void setLinkSurface(bool v)     { this->linkSurface = v; }
+    void setLinkAzimuth(bool v)     { this->linkAzimuth = v; }
+    void setLinkElevation(bool v)   { this->linkElevation = v; }
+    //==============================================================================
+    
+    
+    //==============================================================================
+    void setSurfaceValue(float surf);
+    void setAzimuthValue(float azim);
+    void setElevationValue(float elev);
+    
+    //==============================================================================
+    
+    
+    //==============================================================================
+    void getStateInformation (MemoryBlock& destData);
+    void setStateInformation (const void* data, int sizeInBytes);
     //==============================================================================
 
 private:
@@ -152,6 +173,10 @@ private:
     unsigned int numSpeakerUsed;
     
     SelectItem * selectItem;
+    
+    bool linkSurface;
+    bool linkAzimuth;
+    bool linkElevation;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

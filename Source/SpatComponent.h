@@ -39,7 +39,7 @@
 using namespace std;
 
 class SpatGrisAudioProcessor;
-
+class SpatGrisAudioProcessorEditor;
 
 static float angleInCircle(double abx, double aby ) {
     return  -atan2(( - aby * 2.0f), (abx * 2.0f ));
@@ -48,7 +48,7 @@ static float angleInCircle(double abx, double aby ) {
 class SpatComponent :   public Component
 {
 public:
-    SpatComponent(SpatGrisAudioProcessor * filt, GrisLookAndFeel *feel);
+    SpatComponent(SpatGrisAudioProcessorEditor * edit, SpatGrisAudioProcessor * filt, GrisLookAndFeel *feel);
     ~SpatComponent();
     
     //======================================================
@@ -63,6 +63,7 @@ public:
 private:
     Colour getColor(int i);
     
+    SpatGrisAudioProcessorEditor * editor;
     SpatGrisAudioProcessor * filter;
     GrisLookAndFeel *grisFeel;
     ImageComponent logoImg;

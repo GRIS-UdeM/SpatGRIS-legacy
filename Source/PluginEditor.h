@@ -63,13 +63,16 @@ public :
     void resized() override;
     //==============================================================================
     
+    void updateValuesFromGris();
+    
 private :
+
     //==============================================================================
     Label*          addLabel(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
     TextButton*     addButton(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
     ToggleButton*   addToggleButton(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, bool toggle = false);
     TextEditor*     addTextEditor(const String &s, const String &emptyS, const String &stooltip, int x, int y, int w, int h, Component *into, int wLab = 80);
-    Slider*         addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, juce::Slider::TextEntryBoxPosition tebp = juce::Slider::TextEntryBoxPosition::NoTextBox);
+    Slider*         addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, juce::Slider::TextEntryBoxPosition tebp = juce::Slider::TextEntryBoxPosition::NoTextBox);
     //==============================================================================
     
     SpatGrisAudioProcessor  * filter;

@@ -27,8 +27,10 @@
 
 #include "SpatComponent.h"
 #include "PluginProcessor.h"
+#include "PluginEditor.h"
 
-SpatComponent::SpatComponent(SpatGrisAudioProcessor * filt,GrisLookAndFeel *feel):
+SpatComponent::SpatComponent(SpatGrisAudioProcessorEditor * edit, SpatGrisAudioProcessor * filt,GrisLookAndFeel *feel):
+editor(edit),
 filter(filt),
 grisFeel(feel)
 {
@@ -172,7 +174,7 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     
     const float w = (fieldWH - SourceDiameter) /2.0f;
     
-    this->filter->getSelectItem()->selectID = -1;
+    this->filter->getSelectItem()->selectID = 0;
     this->filter->getSelectItem()->selecType = NoSelection;
     
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
@@ -190,6 +192,8 @@ void SpatComponent::mouseDown(const MouseEvent &event)
             this->filter->getSelectItem()->selecType = SelectedSource;
         }
     }
+    
+    this->editor->updateValuesFromGris();
 }
 
 void SpatComponent::mouseDrag(const MouseEvent &event)

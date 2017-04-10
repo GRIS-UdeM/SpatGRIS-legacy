@@ -142,6 +142,44 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 {
 }
 //==============================================================================
+
+
+//==============================================================================
+void SpatGrisAudioProcessor::setSurfaceValue(float surf)
+{
+    if(this->linkSurface){
+        for(int iSour = 0; iSour < this->numSourceUsed; iSour++){
+            *(this->listSources.at(iSour)->getSurf()) = surf;
+        }
+    }else{
+        *(this->listSources.at(this->selectItem->selectID)->getSurf()) = surf;
+    }
+}
+
+void SpatGrisAudioProcessor::setAzimuthValue(float azim)
+{
+    if(this->linkAzimuth){
+        for(int iSour = 0; iSour < this->numSourceUsed; iSour++){
+            *(this->listSources.at(iSour)->getAzim()) = azim;
+        }
+    }else{
+        *(this->listSources.at(this->selectItem->selectID)->getAzim()) = azim;
+    }
+}
+
+void SpatGrisAudioProcessor::setElevationValue(float elev)
+{
+    if(this->linkElevation){
+        for(int iSour = 0; iSour < this->numSourceUsed; iSour++){
+            *(this->listSources.at(iSour)->getElev()) = elev;
+        }
+    }else{
+        *(this->listSources.at(this->selectItem->selectID)->getElev()) = elev;
+    }
+}
+
+
+//==============================================================================
 void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
 
