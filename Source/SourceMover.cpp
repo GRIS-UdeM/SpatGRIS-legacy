@@ -28,7 +28,30 @@
 
 
 
+SourceMover::SourceMover(SpatGrisAudioProcessor *filt):
+filter(filt)
+{
 
+}
+SourceMover::~SourceMover()
+{
+}
 
+String SourceMover::getMouvementModeName(MouvementMode i)
+{
+    switch(i) {
+        case Independent:       return "Independent";
+        case Circular:          return "Circular";
+        case CircularFixRad:    return "Circular Fixed Radius";
+        case CircularFixAng:    return "Circular Fixed Angle";
+        case CircularFullyFix:  return "Circular Fully Fixed";
+        case DeltaLock:         return "Delta Lock";
+        case SymmetricX:        return "Symmetric X";
+        case SymmetricY:        return "Symmetric Y";
 
+        default:
+            jassertfalse;
+            return "";
+    }
+}
 

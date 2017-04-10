@@ -24,4 +24,22 @@
  ==============================================================================
  */
 
-#include "Trajectories.h"
+#include "Trajectory.h"
+
+String Trajectory::GetTrajectoryName(TrajectoryType i)
+{
+    switch(i) {
+        case Circle:        return "Circle";
+        case Ellipse:       return "Ellipse";
+        case Spiral:        return "Spiral";
+        case Pendulum:      return "Pendulum";
+        case RandomTraj:    return "Random";
+        case RandomTarget:  return "Random Target";
+        case SymXTarget:    return "Sym X Target";
+        case SymYTarget:    return "Sym Y Target";
+        case FreeDrawing:   return "Free Drawing";
+        default:
+            jassertfalse;
+            return "";
+    }
+}

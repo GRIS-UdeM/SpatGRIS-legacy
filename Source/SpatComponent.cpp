@@ -193,7 +193,7 @@ void SpatComponent::mouseDown(const MouseEvent &event)
         }
     }
     
-    this->editor->updateValuesFromGris();
+    this->editor->updateSourceParam();
 }
 
 void SpatComponent::mouseDrag(const MouseEvent &event)

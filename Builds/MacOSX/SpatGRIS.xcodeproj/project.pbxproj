@@ -85,7 +85,7 @@
 		E9DEE12322A6A8770039A6C6 /* DiscRecording.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83A95F380B22F118FC90550 /* DiscRecording.framework */; };
 		ECA1D290C4035F6BCAC563B0 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5DD1591E1C47A84136CC5D6 /* QuartzCore.framework */; };
 		F153D4D2DEB9691DBD8AC5D8 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35936CCA2ECAA78CF2CE397F /* IOKit.framework */; };
-		F3B3611A9086A4FFA03544EE /* Trajectories.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CD5FCE049486FBB737BF8460 /* Trajectories.cpp */; };
+		F3B3611A9086A4FFA03544EE /* Trajectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CD5FCE049486FBB737BF8460 /* Trajectory.cpp */; };
 		F55AF54A4E418A9C9C2E31C1 /* OscComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32245EAF81307F1BCDAA96A4 /* OscComponent.cpp */; };
 		F6128EBABB0ED22924352E99 /* juce_audio_plugin_client_AU.r in Rez */ = {isa = PBXBuildFile; fileRef = 05AE3344C3C930A4AE3AE3ED /* juce_audio_plugin_client_AU.r */; };
 		F69AF11ADE7161CDF02E803F /* HID_Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AF464D04B65762BF08B0227C /* HID_Utilities.cpp */; };
@@ -1009,7 +1009,7 @@
 		A594E2AEC1255ADC4F3984FD /* juce_ToggleButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ToggleButton.h; path = ../../JuceLibraryCode/modules/juce_gui_basics/buttons/juce_ToggleButton.h; sourceTree = SOURCE_ROOT; };
 		A5B21B80A9C78E9323B355FF /* juce_gui_extra.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_gui_extra.h; path = ../../JuceLibraryCode/modules/juce_gui_extra/juce_gui_extra.h; sourceTree = SOURCE_ROOT; };
 		A5C4AFC4CFA0FD46D91BFC12 /* pngrtran.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = pngrtran.c; path = ../../JuceLibraryCode/modules/juce_graphics/image_formats/pnglib/pngrtran.c; sourceTree = SOURCE_ROOT; };
-		A5E64476E68FFA24159EBE0C /* Trajectories.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Trajectories.h; path = ../../Source/Trajectories.h; sourceTree = SOURCE_ROOT; };
+		A5E64476E68FFA24159EBE0C /* Trajectory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Trajectory.h; path = ../../Source/Trajectory.h; sourceTree = SOURCE_ROOT; };
 		A63E2DF058A2E8194CD6051F /* HID_Utilities_External.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = HID_Utilities_External.h; path = ../../HIDManager/HID_Utilities_External.h; sourceTree = SOURCE_ROOT; };
 		A6EF34FA29A8253411B27A4F /* juce_ValueTree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ValueTree.h; path = ../../JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTree.h; sourceTree = SOURCE_ROOT; };
 		A734C0CEED9577D26F368954 /* juce_ChoicePropertyComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ChoicePropertyComponent.h; path = ../../JuceLibraryCode/modules/juce_gui_basics/properties/juce_ChoicePropertyComponent.h; sourceTree = SOURCE_ROOT; };
@@ -1206,7 +1206,7 @@
 		CCB257B85825945996005141 /* pnginfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pnginfo.h; path = ../../JuceLibraryCode/modules/juce_graphics/image_formats/pnglib/pnginfo.h; sourceTree = SOURCE_ROOT; };
 		CCC33FF9B5B492504DEC4927 /* setup_11.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = setup_11.h; path = "../../JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_11.h"; sourceTree = SOURCE_ROOT; };
 		CD3992A710C26FFEC6A67E86 /* HID_Queue_Utilities.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HID_Queue_Utilities.cpp; path = ../../HIDManager/HID_Queue_Utilities.cpp; sourceTree = SOURCE_ROOT; };
-		CD5FCE049486FBB737BF8460 /* Trajectories.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Trajectories.cpp; path = ../../Source/Trajectories.cpp; sourceTree = SOURCE_ROOT; };
+		CD5FCE049486FBB737BF8460 /* Trajectory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Trajectory.cpp; path = ../../Source/Trajectory.cpp; sourceTree = SOURCE_ROOT; };
 		CD79F0F09A3BC2275CCABCD9 /* juce_FillType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_FillType.h; path = ../../JuceLibraryCode/modules/juce_graphics/colour/juce_FillType.h; sourceTree = SOURCE_ROOT; };
 		CDFE1833EBB77904553ADA67 /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		CE1DE26D37689ABA0082E56E /* juce_CallOutBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CallOutBox.cpp; path = ../../JuceLibraryCode/modules/juce_gui_basics/windows/juce_CallOutBox.cpp; sourceTree = SOURCE_ROOT; };
@@ -3083,8 +3083,8 @@
 				909075DA220617081982445F /* PluginEditor.h */,
 				351ED414B7D7027BC011357F /* SourceMover.cpp */,
 				C1B41602EE64733F923B664F /* SourceMover.h */,
-				CD5FCE049486FBB737BF8460 /* Trajectories.cpp */,
-				A5E64476E68FFA24159EBE0C /* Trajectories.h */,
+				CD5FCE049486FBB737BF8460 /* Trajectory.cpp */,
+				A5E64476E68FFA24159EBE0C /* Trajectory.h */,
 				0D14C2121E959D93006734D9 /* DefaultParam.h */,
 				0DC616CB1E96D2640035E9ED /* UiComponent.cpp */,
 				0DC616CC1E96D2640035E9ED /* UiComponent.h */,
@@ -4046,7 +4046,7 @@
 				9FB34A514441E85BE09A9F84 /* PluginProcessor.cpp in Sources */,
 				ADE606E9654B3EF899191559 /* PluginEditor.cpp in Sources */,
 				1D5DB0C471235F0DC99EDB1D /* SourceMover.cpp in Sources */,
-				F3B3611A9086A4FFA03544EE /* Trajectories.cpp in Sources */,
+				F3B3611A9086A4FFA03544EE /* Trajectory.cpp in Sources */,
 				C9673FE8792B651B5A809812 /* BinaryData.cpp in Sources */,
 				B5F6394E35320619218C4CD6 /* juce_audio_basics.mm in Sources */,
 				BC14352A4D9768013133E0FB /* juce_audio_devices.mm in Sources */,

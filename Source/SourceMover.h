@@ -28,9 +28,64 @@
 #ifndef SOURCEMOVER_H_INCLUDED
 #define SOURCEMOVER_H_INCLUDED
 
+#include "../JuceLibraryCode/JuceHeader.h"
+
 #include "PluginProcessor.h"
 
 
+using namespace std;
 
+typedef Point<float> FPoint;
+
+typedef enum {
+    Independent = 0,
+    Circular,
+    CircularFixRad,
+    CircularFixAng,
+    CircularFullyFix,
+    DeltaLock,
+    SymmetricX,
+    SymmetricY,
+    SIZE_MM
+} MouvementMode;
+
+class SourceMover
+{
+public:
+    
+    SourceMover(SpatGrisAudioProcessor *filt);
+    ~SourceMover();
+    
+    String getMouvementModeName(MouvementMode i);
+    
+    /*void begin(int s, MoverType mt);
+    void sortAngles();
+    void setEqualRadius();
+    void setEqualAngles();
+    void setEqualRadiusAndAngles();
+    void setSymmetricX();
+    void setSymmetricY();
+    void move(FPoint p, MoverType mt);
+    void storeAllDownPositions();
+    void storeDownPosition(int id, FPoint pointRT);
+    void end(MoverType mt, bool clearTrajectory = true);
+    void setFieldExists(bool v){ mFieldExists = v; }
+    
+    void setFieldComponent(FieldComponent* field){
+        mFieldExists = true;
+        mField = field;
+    }*/
+    
+private:
+    SpatGrisAudioProcessor * filter;
+    /*MoverType mMoverType;
+    int mSelectedSrc;
+    bool mFieldExists;
+    
+    Array<FPoint> mSourcesDownXY;
+    Array<FPoint> mSourcesDownRT;
+    Array<float> mSourcesAngularOrder;
+    FieldComponent* mField;*/
+};
 
 #endif  // SOURCEMOVER_H_INCLUDED

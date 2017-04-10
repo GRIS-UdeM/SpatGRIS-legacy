@@ -42,9 +42,23 @@ static const float  MinElevSource   = 0.f;
 static const float  MaxElevSource   = 0.5f;
 static const float  DefElevSource   = 0.f;
 
+
+//--------------------------------------------------
+//Trajectory Param
+//--------------------------------------------------
+static const float  MinSpeedTrajectory   = -3.f;
+static const float  MaxSpeedTrajectory   = 3.f;
+static const float  DefSpeedTrajectory   = 1.f;
+
+static const float  MinTrajRandomSpeed   = 0.f;
+static const float  MaxTrajRandomSpeed   = 1.f;
+static const float  DefTrajRandomSpeed   = 0.5f;
+
 //--------------------------------------------------
 //UI Param
 //--------------------------------------------------
+static const float  DefaultSliderInter   = 0.00001f;
+
 static const int    Margin             = 2;
 static const int    CenterColumnWidth  = 180;
 static const int    MinFieldSize       = 300;
@@ -54,8 +68,11 @@ static const int    SizeWidthLevelComp = 22;
 static const int    DefaultUItWidth     = 1090;
 static const int    DefaultUIHeight     = 540;
 
-
+static const int    DefaultTexWidth     = 60;
+static const int    DefaultLabWidth     = 120;
 static const int    DefaultLabHeight    = 18;
+
 static const int    HertzRefresh        = 30;
+
 
 #endif /* DefaultParam_h */

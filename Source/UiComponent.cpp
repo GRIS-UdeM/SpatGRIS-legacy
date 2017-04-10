@@ -95,3 +95,27 @@ void OctTabbedComponent::initDone(){
 }
 
 //=================================================================================================================
+
+
+//================================== ProgressBarTrajec ==============================
+ProgressBarTraj::ProgressBarTraj():
+value(0.f)
+{
+}
+void ProgressBarTraj::paint(Graphics &g)
+{
+    juce::Rectangle<int> box = getLocalBounds();
+    
+    g.setColour(Colours::black);
+    g.fillRect(box);
+    
+    g.setColour(Colour::fromRGB(17, 255, 159));
+    box.setWidth(box.getWidth() * this->value);
+    g.fillRect(box);
+}
+void ProgressBarTraj::setValue(float v)
+{
+    this->value = v;
+    this->repaint();
+}
+//=================================================================================================================

@@ -53,4 +53,16 @@ private:
     bool mInited;
 };
 
+
+//================================== ProgressBarTrajec ==============================
+class ProgressBarTraj : public Component
+{
+public:
+    ProgressBarTraj();
+    void paint(Graphics &g);
+    void setValue(float v);
+private:
+    float value;
+};
+
 #endif /* UiComponent_hpp */
