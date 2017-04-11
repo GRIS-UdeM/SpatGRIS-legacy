@@ -41,8 +41,8 @@ using namespace std;
 class SpatGrisAudioProcessor;
 class SpatGrisAudioProcessorEditor;
 
-static float AngleInCircle(double abx, double aby ) {
-    return  -atan2(( - aby * 2.0f), (abx * 2.0f ));
+static float AngleInCircle(FPoint p) {
+    return  -atan2(( - p.y * 2.0f), (p.x * 2.0f ));
 }
 static float DegreeToRadian (float degree){
     return ((degree * M_PI ) / 180.0f) ;
@@ -51,11 +51,20 @@ static float RadianToDegree (float radian){
     return ((radian * 180.0f ) / M_PI);
 }
 
-static Point <float> DegreeToXy (Point <float> p, int p_iFieldWidth){
+static void NormalizeXYSourceWithScreen(FPoint &p, float w){
+    p.x = ((w) + ((w/2.0f)*p.x))+SourceRadius;
+    p.y = ((w) - ((w/2.0f)*p.y))+SourceRadius;
+}
+static void NormalizeScreenWithSpat(FPoint &p, float w){
+    p.x = (p.x - SourceRadius - w) / (w/2.0f);
+    p.y = -(p.y - SourceRadius - w) / (w/2.0f);
+}
+
+static FPoint DegreeToXy (FPoint p, int FieldWidth){
     float x,y;
-    x = -((p_iFieldWidth - SourceDiameter)/2) * sinf(DegreeToRadian(p.getX())) * cosf(DegreeToRadian(p.getY()));
-    y = -((p_iFieldWidth - SourceDiameter)/2) * cosf(DegreeToRadian(p.getX())) * cosf(DegreeToRadian(p.getY()));
-    return Point <float> (x, y);
+    x = -((FieldWidth - SourceDiameter)/2) * sinf(DegreeToRadian(p.x)) * cosf(DegreeToRadian(p.y));
+    y = -((FieldWidth - SourceDiameter)/2) * cosf(DegreeToRadian(p.x)) * cosf(DegreeToRadian(p.y));
+    return FPoint(x, y);
 }
 
 static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false) {
@@ -72,10 +81,10 @@ static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false) {
     float fElev;
     if (bUseCosElev){
         fElev = acosf(hypo/RadiusMax);   //fElev is elevation in radian, [0,pi/2)
-        fElev /= (M_PI/2);                      //making range [0,1]
-        fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
+        fElev /= (M_PI/2.f);                      //making range [0,1]
+        fElev /= 2.f;                            //making range [0,.5] because that's what the zirkonium wants
     } else {
-        fElev = (RadiusMax-hypo)/4;
+        fElev = (RadiusMax-hypo)/4.0f;
     }
     
     return FPoint(fAzim, fElev);
@@ -98,6 +107,8 @@ public:
     
 private:
     Colour getColor(int i);
+    
+    void drawAzimElevSource(Graphics &g, const int i, const int fieldWH, const int fieldCenter);
     
     SpatGrisAudioProcessorEditor * editor;
     SpatGrisAudioProcessor * filter;

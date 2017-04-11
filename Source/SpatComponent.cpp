@@ -60,9 +60,10 @@ SpatComponent::~SpatComponent()
 //======================================================================================================================
 void SpatComponent::paint(Graphics &g)
 {
-    const int fieldWH = getWidth(); //Same getHeight
+    const int fieldWH = getWidth();     //Same getHeight
+    const int fieldCenter = fieldWH/2;
     float w,x;
-    float fieldCenter = fieldWH/2;
+
     
     g.fillAll(this->grisFeel->getBackgroundColour());
     
@@ -117,16 +118,25 @@ void SpatComponent::paint(Graphics &g)
         
     }
     
+    
+    
+    // - - - - - - - - - - - -
+    // draw translucid circles (mode)
+    // - - - - - - - - - - - -
+    for (int i = 0; i < filter->getNumSourceUsed(); ++i) {
+        drawAzimElevSource(g, i, fieldWH, fieldCenter);
+    }
+    
     // - - - - - - - - - - - -
     // draw Source
     // - - - - - - - - - - - -
     String stringVal;
     w = (fieldWH - SourceDiameter);
-   
+    
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
-
-		FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
-		sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
+        
+        FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
+        sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
         sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
         
         // - - - - - - - - - - - -
@@ -134,13 +144,12 @@ void SpatComponent::paint(Graphics &g)
         // - - - - - - - - - - - -
         if(this->filter->getSelectItem()->selectID == i ){
             
-            
             g.setColour(this->getColor(i));
             float Radius = SourceDiameter/2;
-            g.drawLine   (fieldCenter, fieldCenter,  sourceP.x+Radius , sourceP.y+Radius , 1.5);
+            g.drawLine   (fieldCenter, fieldCenter,  sourceP.x+Radius , sourceP.y+Radius , 1);
             
             g.setColour(this->grisFeel->getLightColour());
-            g.drawEllipse(sourceP.x-2 , sourceP.y-2 , SourceDiameter+4, SourceDiameter+4,1);
+            g.drawEllipse(sourceP.x-2 , sourceP.y-2 , SourceDiameter+4, SourceDiameter+4, 1);
         }
         
         g.setColour(this->getColor(i));
@@ -157,75 +166,8 @@ void SpatComponent::paint(Graphics &g)
         g.drawText(stringVal, tx+1 , ty+1, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
         g.setColour(Colours::white);
         g.drawText(stringVal, tx, ty, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
-
+        
     }
-    
-    // - - - - - - - - - - - -
-    // draw translucid circles (mode)
-    // - - - - - - - - - - - -
-    for (int i = 0; i < filter->getNumSourceUsed(); ++i) {
-        g.setColour(this->getColor(i));
-        
-        FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
-        FPoint azimElev = GetSourceAzimElev(sourceP, true);
-        
-        sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
-        sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
- 
-        
-        float HRAzimSpan = 180 *(*this->filter->getListSource().at(i)->getAzim());  //in zirkosc, this is [0,360]
-        float HRElevSpan = 180 *(*this->filter->getListSource().at(i)->getElev());  //in zirkosc, this is [0,90]
-        
-
-        float HRAzim = azimElev.x * 180;    //in zirkosc [-180,180]
-        float HRElev = azimElev.y * 180;    //in zirkosc [0,89.9999]
-        
-        
-        //calculate max and min elevation in degrees
-        Point<float> maxElev = {HRAzim, HRElev+HRElevSpan/2};
-        Point<float> minElev = {HRAzim, HRElev-HRElevSpan/2};
-        
-        if(minElev.getY() < 0){
-            maxElev.setY(maxElev.getY() - minElev.getY());
-            minElev.setY(0);
-        }
-        
-        //convert max min elev to xy
-        Point<float> screenMaxElev = DegreeToXy(maxElev, fieldWH);
-        Point<float> screenMinElev = DegreeToXy(minElev, fieldWH);
-        
-        //form minmax elev, calculate minmax radius
-        float maxRadius = sqrtf(screenMaxElev.getX()*screenMaxElev.getX() + screenMaxElev.getY()*screenMaxElev.getY());
-        float minRadius = sqrtf(screenMinElev.getX()*screenMinElev.getX() + screenMinElev.getY()*screenMinElev.getY());
-        
-        //drawing the path for spanning
-        Path myPath;
-        float x = screenMinElev.getX();
-        float y = screenMinElev.getY();
-        
-        myPath.startNewSubPath(fieldCenter+x,fieldCenter+y);
-       //half first arc center
-
-        myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0, DegreeToRadian(-HRAzim),             DegreeToRadian(-HRAzim + HRAzimSpan/2 ));
-        
-        if (maxElev.getY() > 90.f) { // if we are over the top of the dome we draw the adjacent angle
-            myPath.addCentredArc(fieldCenter, fieldCenter, maxRadius, maxRadius, 0.0,   M_PI+DegreeToRadian(-HRAzim + HRAzimSpan/2),  M_PI+DegreeToRadian(-HRAzim - HRAzimSpan/2));
-        }else {
-        myPath.addCentredArc(fieldCenter, fieldCenter, maxRadius, maxRadius, 0.0, DegreeToRadian(-HRAzim + HRAzimSpan/2), DegreeToRadian(-HRAzim - HRAzimSpan/2));
-        }
-        myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0, DegreeToRadian(-HRAzim - HRAzimSpan/2), DegreeToRadian(-HRAzim));
-        
-        myPath.closeSubPath();
-        
-        g.setColour(this->getColor(i).withAlpha(0.1f));
-        g.fillPath(myPath);
-        
-        g.setColour(this->getColor(i).withAlpha(0.5f));
-        PathStrokeType strokeType = PathStrokeType(2.5);
-        g.strokePath(myPath, strokeType);
-    }
-    
-    
 }
 
 void SpatComponent::resized(int fieldSize)
@@ -250,8 +192,7 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
 
         FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
-        sourceP.x = ((w) + ((w/2.0f)*sourceP.x))+SourceRadius;
-        sourceP.y = ((w) - ((w/2.0f)*sourceP.y))+SourceRadius;
+        NormalizeXYSourceWithScreen(sourceP, w);
         
         float dx = mouseP.x - sourceP.x;
         float dy = mouseP.y - sourceP.y;
@@ -277,15 +218,15 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
     
     switch(this->filter->getSelectItem()->selecType)
     {
+        
         case SelectedSource:
 
             float dx =  (x+(w/2.0f)) - mouseP.x;
             float dy =  (x+(w/2.0f)) - mouseP.y;
             float dist = sqrt(dx*dx + dy*dy);
             
-            float vx =  (mouseP.x - SourceRadius - w) / (w/2.0f);//-2 and 2
-            float vy = -(mouseP.y - SourceRadius - w) / (w/2.0f);
-            float ang = AngleInCircle(vx,vy);
+            NormalizeScreenWithSpat(mouseP, w);
+            float ang = AngleInCircle(mouseP);
             
             dist = dist/(w/2.0f);
             if(dist > 2.0f){ dist = 2.0f; }
@@ -293,6 +234,13 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
             this->filter->setPosXYSource(this->filter->getSelectItem()->selectID, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
 
             break;
+            
+        /*case SelectedSpeaker:
+            
+            break;
+        
+        case NoSelection:
+            break;*/
     }
     this->repaint();
 }
@@ -303,6 +251,58 @@ void SpatComponent::mouseUp(const MouseEvent &event)
 }
 
 //=============================================================
+
+void SpatComponent::drawAzimElevSource(Graphics &g, int i, const int fieldWH, const int fieldCenter){
+    g.setColour(this->getColor(i));
+    
+    FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
+    FPoint azimElev = GetSourceAzimElev(sourceP, true);
+    
+    float HRAzimSpan = 180.0f *(*this->filter->getListSource().at(i)->getAzim());  //in zirkosc, this is [0,360]
+    float HRElevSpan = 180.0f *(*this->filter->getListSource().at(i)->getElev());  //in zirkosc, this is [0,90]
+    
+    float HRAzim = azimElev.x * 180.0f;    //in zirkosc [-180,180]
+    float HRElev = azimElev.y * 180.0f;    //in zirkosc [0,89.9999]
+    
+    
+    //calculate max and min elevation in degrees
+    FPoint maxElev = {HRAzim, HRElev+HRElevSpan/2.0f};
+    FPoint minElev = {HRAzim, HRElev-HRElevSpan/2.0f};
+    
+    if(minElev.y < 0){
+        maxElev.y = (maxElev.y - minElev.y);
+        minElev.y = 0.0f;
+    }
+    
+    //convert max min elev to xy
+    FPoint screenMaxElev = DegreeToXy(maxElev, fieldWH);
+    FPoint screenMinElev = DegreeToXy(minElev, fieldWH);
+    
+    //form minmax elev, calculate minmax radius
+    float maxRadius = sqrtf(screenMaxElev.x * screenMaxElev.x + screenMaxElev.y *screenMaxElev.y);
+    float minRadius = sqrtf(screenMinElev.x * screenMinElev.x + screenMinElev.y *screenMinElev.y);
+    
+    //drawing the path for spanning
+    Path myPath;
+    myPath.startNewSubPath(fieldCenter+screenMaxElev.x, fieldCenter+screenMaxElev.y);
+    //half first arc center
+    myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0, DegreeToRadian(-HRAzim),             DegreeToRadian(-HRAzim + HRAzimSpan/2 ));
+    
+    if (maxElev.getY() > 90.f) { // if we are over the top of the dome we draw the adjacent angle
+        myPath.addCentredArc(fieldCenter, fieldCenter, maxRadius, maxRadius, 0.0,   M_PI+DegreeToRadian(-HRAzim + HRAzimSpan/2),  M_PI+DegreeToRadian(-HRAzim - HRAzimSpan/2));
+    }else {
+        myPath.addCentredArc(fieldCenter, fieldCenter, maxRadius, maxRadius, 0.0, DegreeToRadian(-HRAzim + HRAzimSpan/2), DegreeToRadian(-HRAzim - HRAzimSpan/2));
+    }
+    myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0, DegreeToRadian(-HRAzim - HRAzimSpan/2), DegreeToRadian(-HRAzim));
+    
+    myPath.closeSubPath();
+    
+    g.setColour(this->getColor(i).withAlpha(0.2f));
+    g.fillPath(myPath);
+    
+    g.setColour(this->getColor(i).withAlpha(0.6f));
+    g.strokePath(myPath, PathStrokeType(0.5));
+}
 
 Colour SpatComponent::getColor(int i) {
     float hueSelect = (float)i / this->filter->getNumSourceUsed() + +0.577251;
