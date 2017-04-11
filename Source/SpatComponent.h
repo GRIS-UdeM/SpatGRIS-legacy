@@ -41,8 +41,44 @@ using namespace std;
 class SpatGrisAudioProcessor;
 class SpatGrisAudioProcessorEditor;
 
-static float angleInCircle(double abx, double aby ) {
+static float AngleInCircle(double abx, double aby ) {
     return  -atan2(( - aby * 2.0f), (abx * 2.0f ));
+}
+static float DegreeToRadian (float degree){
+    return ((degree * M_PI ) / 180.0f) ;
+}
+static float RadianToDegree (float radian){
+    return ((radian * 180.0f ) / M_PI);
+}
+
+static Point <float> DegreeToXy (Point <float> p, int p_iFieldWidth){
+    float x,y;
+    x = -((p_iFieldWidth - SourceDiameter)/2) * sinf(DegreeToRadian(p.getX())) * cosf(DegreeToRadian(p.getY()));
+    y = -((p_iFieldWidth - SourceDiameter)/2) * cosf(DegreeToRadian(p.getX())) * cosf(DegreeToRadian(p.getY()));
+    return Point <float> (x, y);
+}
+
+static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false) {
+
+    //calculate azim in range [0,1], and negate it because zirkonium wants -1 on right side
+    float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
+    
+    //calculate xy distance from origin, and clamp it to 2 (ie ignore outside of circle)
+    float hypo = hypotf(pXY.x, pXY.y);
+    if (hypo > RadiusMax){
+        hypo = RadiusMax;
+    }
+    
+    float fElev;
+    if (bUseCosElev){
+        fElev = acosf(hypo/RadiusMax);   //fElev is elevation in radian, [0,pi/2)
+        fElev /= (M_PI/2);                      //making range [0,1]
+        fElev /= 2.;                            //making range [0,.5] because that's what the zirkonium wants
+    } else {
+        fElev = (RadiusMax-hypo)/4;
+    }
+    
+    return FPoint(fAzim, fElev);
 }
 
 class SpatComponent :   public Component

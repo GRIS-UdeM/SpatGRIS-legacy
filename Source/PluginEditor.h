@@ -134,6 +134,7 @@ private :
     ProgressBarTraj * progressBarTraject;
     Slider          * sliSpeedTrajectory;
     
+    //Other Traj param
     Label       * labTrajEllipseWidth;
     TextEditor  * texTrajEllipseWidth;
     

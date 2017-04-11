@@ -392,11 +392,11 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
         
     }
     else if(this->togLinkAzimSpan == button){
-        this->filter->setAzimuthValue(this->togLinkAzimSpan->getToggleState());
+        this->filter->setLinkAzimuth(this->togLinkAzimSpan->getToggleState());
         
     }
     else if(this->togLinkElevSpan == button){
-        this->filter->setElevationValue(this->togLinkElevSpan->getToggleState());
+        this->filter->setLinkElevation(this->togLinkElevSpan->getToggleState());
         
     }
     else if(this->togTrajRandSepare == button){
@@ -565,11 +565,11 @@ void SpatGrisAudioProcessorEditor::paint (Graphics& g)
 
 void SpatGrisAudioProcessorEditor::resized()
 {
-    int w = getWidth();
-    int h = getHeight();
+    const int w = getWidth();
+    const int h = getHeight();
     
-    int fieldWidth = w - (Margin + Margin + CenterColumnWidth + Margin + RightColumnWidth + Margin);
-    int fieldHeight = h - (Margin + Margin);
+    const int fieldWidth = w - (Margin + Margin + CenterColumnWidth + Margin + RightColumnWidth + Margin);
+    const int fieldHeight = h - (Margin + Margin);
     int fieldSize = jmin(fieldWidth, fieldHeight);
     if (fieldSize < MinFieldSize){
         fieldSize = MinFieldSize;
@@ -591,7 +591,7 @@ void SpatGrisAudioProcessorEditor::resized()
     
     x = Margin + fieldSize + Margin + Margin;
     this->boxTrajectory->setBounds(x, 170, w-(fieldSize + (Margin * 5)), 200);
-    this->boxTrajectory->correctSize(w-(fieldSize + (Margin * 5)), 170);
+    this->boxTrajectory->correctSize(510, 170);    //w-(fieldSize + (Margin * 5))
     
     //OctTabbedComponent-----------------------
     this->octTab->setBounds(x, 170+210, w-(fieldSize + (Margin * 4)), h - (170+200+(Margin*6)) );
