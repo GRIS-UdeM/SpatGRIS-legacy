@@ -199,8 +199,13 @@ void SpatComponent::mouseDown(const MouseEvent &event)
         float distanceSquared = dx*dx + dy*dy;
         if(distanceSquared < SourceRadius*SourceRadius){
             
+            this->clickedMouseP = mouseP;
+            NormalizeScreenWithSpat(this->clickedMouseP,w);
+            
             this->filter->getSelectItem()->selectID = i;
             this->filter->getSelectItem()->selecType = SelectedSource;
+            
+            this->filter->getSourceMover()->beginMouvement();
         }
     }
     
@@ -227,7 +232,6 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
             
             NormalizeScreenWithSpat(mouseP, w);
             float ang = AngleInCircle(mouseP);
-            
             dist = dist/(w/2.0f);
             if(dist > 2.0f){ dist = 2.0f; }
 
@@ -247,7 +251,7 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
 
 void SpatComponent::mouseUp(const MouseEvent &event)
 {
-    
+
 }
 
 //=============================================================

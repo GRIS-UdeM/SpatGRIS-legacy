@@ -31,6 +31,7 @@
 SourceMover::SourceMover(SpatGrisAudioProcessor *filt):
 filter(filt)
 {
+    this->listSourceRayAng.resize(MaxSources);
     for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
         listMouvement.add(getMouvementModeName((MouvementMode)i));
     }
@@ -63,4 +64,66 @@ void SourceMover::setMouvementMode(MouvementMode m)
 {
     this->mouvementModeSelect = m;
     //*this->mouvementChoiceAuto = (int)m;
+}
+//============================================================================
+void SourceMover::setSourcesPosition()
+{
+    for (int i = 0; i < this->filter->getNumSourceUsed(); ++i) {
+        
+        FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
+        float ray = GetRaySpat(sourceP.x, sourceP.y);
+        float ang = GetAngleSpat(sourceP.x, sourceP.y);
+            
+        ray = 1;
+        ang = (i*0.3f);
+            
+        FPoint xy = GetXYFromRayAng(ray, ang);
+        *(this->filter->getListSource().at(i)->getX()) = xy.x;
+        *(this->filter->getListSource().at(i)->getY()) = xy.y;
+            
+        
+    }
+}
+
+void SourceMover::beginMouvement()
+{
+    for (int i = 0; i < this->filter->getNumSourceUsed(); i++) {
+        this->listSourceRayAng.setUnchecked(i, this->filter->getRayAngleSource(i));
+    }
+}
+
+//============================================================================
+void SourceMover::updateSourcesPosition(int iSource, float x, float y)
+{
+
+    //deltaMasterPos = NewRayAnl - OldRayAng
+    FPoint deltaMasterPos = FPoint(GetRaySpat(x, y), GetAngleSpat(x, y)) - this->listSourceRayAng[iSource];
+    
+    if (deltaMasterPos.isOrigin() || isnan(deltaMasterPos.x)|| isnan(deltaMasterPos.y)) {
+        return;     //return if delta is null
+    }
+    
+
+    for (int i = 0; i < this->filter->getNumSourceUsed(); ++i) {
+        
+        //newCurSrcPosRT = Old + delta
+        FPoint newCurSrcPosRT = this->listSourceRayAng[i] + deltaMasterPos;
+        
+        if (newCurSrcPosRT.x < 0.0f){
+            newCurSrcPosRT.x = 0.0f;
+        }
+        if (newCurSrcPosRT.x > RadiusMax){
+            newCurSrcPosRT.x = RadiusMax;
+        }
+        if (newCurSrcPosRT.y < 0.0f){
+            newCurSrcPosRT.y += ThetaMax;
+        }
+        if (newCurSrcPosRT.y > ThetaMax){
+            newCurSrcPosRT.y -= ThetaMax;
+        }
+        
+        FPoint xy = GetXYFromRayAng(newCurSrcPosRT.x, newCurSrcPosRT.y);
+        this->filter->setPosXYSource(i, xy.x, xy.y, false);
+        
+    }
 }

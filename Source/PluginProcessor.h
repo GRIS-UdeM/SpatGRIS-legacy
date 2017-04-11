@@ -133,8 +133,7 @@ public:
     
 	vector<Source *>  getListSource() { return this->listSources;  }
 	vector<Speaker *> getListSpeaker() { return this->listSpeakers; }
-    void  setPosXYSource(int idS, float x, float y){ *(this->listSources[idS]->getX()) = x; *(this->listSources[idS]->getY()) = y; }
-    
+
     SelectItem * getSelectItem() { return this->selectItem; }
     
     bool getLinkSurface()   { return this->linkSurface; }
@@ -148,6 +147,9 @@ public:
     
     
     //==============================================================================
+    void setPosXYSource(int idS, float x, float y, bool updateAll = true);
+    FPoint getRayAngleSource(int idS);
+    
     void setSurfaceValue(float surf);
     void setAzimuthValue(float azim);
     void setElevationValue(float elev);

@@ -49,6 +49,14 @@ public:
     MouvementMode getMouvementMode(){ return this->mouvementModeSelect; }
     void setMouvementMode(MouvementMode m);
     
+    //==================================================
+    void setSourcesPosition();
+    void beginMouvement();
+    
+    //==================================================
+    void updateSourcesPosition(int iSource, float x, float y);
+    
+    
     /*void begin(int s, MoverType mt);
     void sortAngles();
     void setEqualRadius();
@@ -70,13 +78,15 @@ public:
 private:
     SpatGrisAudioProcessor * filter;
     MouvementMode   mouvementModeSelect;
-    StringArray listMouvement;
+    StringArray     listMouvement;
+    
+    Array<FPoint>   listSourceRayAng;
     //AudioParameterChoice * mouvementChoiceAuto;
     /*MoverType mMoverType;
     int mSelectedSrc;
     bool mFieldExists;
     
-    Array<FPoint> mSourcesDownXY;
+    
     Array<FPoint> mSourcesDownRT;
     Array<float> mSourcesAngularOrder;
     FieldComponent* mField;*/

@@ -52,6 +52,10 @@ typedef enum {
     SIZE_TT
 } TrajectoryType;
 
+
+//--------------------------------------------------
+//Param
+//--------------------------------------------------
 static const int    MaxSources      = 8;
 static const int    MaxSpeakers     = 16;
 static const int    MaxBufferSize   = 4096;
@@ -60,6 +64,7 @@ static const int    MaxBufferSize   = 4096;
 static const float RadiusMax        = 2.f;
 static const float HalfCircle       = M_PI;
 static const float QuarterCircle    = M_PI / 2.f;
+static const float ThetaMax         = M_PI * 2.f;
 
 
 //--------------------------------------------------
@@ -113,5 +118,71 @@ static const int    DefaultLabHeight    = 18;
 
 static const int    HertzRefresh        = 30;
 
+
+//--------------------------------------------------
+//static funct
+//--------------------------------------------------
+static float GetRaySpat(float x, float y){
+    return sqrtf((x*x)+ (y*y));
+}
+static float GetAngleSpat(float x, float y){
+    if(x < 0){
+        return atanf(y/x)+M_PI;
+    }else{
+        return atanf(y/x);
+    }
+}
+static FPoint GetXYFromRayAng(float r, float a){
+    return FPoint((r * cosf(a)),(r * sinf(a)));
+}
+
+static float AngleInCircle(FPoint p) {
+    return  -atan2(( - p.y * 2.0f), (p.x * 2.0f ));
+}
+static float DegreeToRadian (float degree){
+    return ((degree * M_PI ) / 180.0f) ;
+}
+static float RadianToDegree (float radian){
+    return ((radian * 180.0f ) / M_PI);
+}
+
+static void NormalizeXYSourceWithScreen(FPoint &p, float w){
+    p.x = ((w) + ((w/2.0f)*p.x))+SourceRadius;
+    p.y = ((w) - ((w/2.0f)*p.y))+SourceRadius;
+}
+static void NormalizeScreenWithSpat(FPoint &p, float w){
+    p.x = (p.x - SourceRadius - w) / (w/2.0f);
+    p.y = -(p.y - SourceRadius - w) / (w/2.0f);
+}
+
+static FPoint DegreeToXy (FPoint p, int FieldWidth){
+    float x,y;
+    x = -((FieldWidth - SourceDiameter)/2) * sinf(DegreeToRadian(p.x)) * cosf(DegreeToRadian(p.y));
+    y = -((FieldWidth - SourceDiameter)/2) * cosf(DegreeToRadian(p.x)) * cosf(DegreeToRadian(p.y));
+    return FPoint(x, y);
+}
+
+static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false) {
+    
+    //calculate azim in range [0,1], and negate it because zirkonium wants -1 on right side
+    float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
+    
+    //calculate xy distance from origin, and clamp it to 2 (ie ignore outside of circle)
+    float hypo = hypotf(pXY.x, pXY.y);
+    if (hypo > RadiusMax){
+        hypo = RadiusMax;
+    }
+    
+    float fElev;
+    if (bUseCosElev){
+        fElev = acosf(hypo/RadiusMax);   //fElev is elevation in radian, [0,pi/2)
+        fElev /= (M_PI/2.f);                      //making range [0,1]
+        fElev /= 2.f;                            //making range [0,.5] because that's what the zirkonium wants
+    } else {
+        fElev = (RadiusMax-hypo)/4.0f;
+    }
+    
+    return FPoint(fAzim, fElev);
+}
 
 #endif /* DefaultParam_h */

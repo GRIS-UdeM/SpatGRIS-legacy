@@ -52,6 +52,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     this->numSourceUsed = MaxSources;
     this->numSpeakerUsed = MaxSpeakers;
     
+    this->sourceMover->setSourcesPosition();
 }
 
 SpatGrisAudioProcessor::~SpatGrisAudioProcessor()
@@ -149,6 +150,23 @@ void SpatGrisAudioProcessor::changeProgramName (int index, const String& newName
 
 
 //==============================================================================
+
+void SpatGrisAudioProcessor::setPosXYSource(int idS, float x, float y, bool updateAll)
+{
+    *(this->listSources[idS]->getX()) = x;
+    *(this->listSources[idS]->getY()) = y;
+    
+    if(updateAll){
+        this->sourceMover->updateSourcesPosition(idS, x, y);
+    }
+}
+FPoint SpatGrisAudioProcessor::getRayAngleSource(int idS)
+{
+    float x = *(this->listSources.at(idS)->getX());
+    float y = *(this->listSources.at(idS)->getY());
+    return FPoint(GetRaySpat(x, y), GetAngleSpat(x, y));
+}
+
 void SpatGrisAudioProcessor::setSurfaceValue(float surf)
 {
     if(this->linkSurface){
