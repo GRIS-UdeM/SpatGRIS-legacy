@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.2.2"
+<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.3.0"
               bundleIdentifier="com.UdeM.SpatGRIS" includeBinaryInAppConfig="1"
               buildVST="1" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="SpatGris" pluginDesc="SpatGris" pluginManufacturer="UdeM"
@@ -56,6 +56,18 @@
       <FILE id="ebGlDe" name="IOHIDLib_.h" compile="0" resource="1" file="HIDManager/IOHIDLib_.h"/>
     </GROUP>
     <GROUP id="{89B00B3D-3E60-2792-C7A4-D570AF057C40}" name="Source">
+      <FILE id="rIIOui" name="DefaultParam.h" compile="0" resource="0" file="Source/DefaultParam.h"/>
+      <FILE id="Qyoyqq" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
+      <FILE id="p5FAkF" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
+      <FILE id="d6ZV7D" name="SpatComponent.cpp" compile="1" resource="0"
+            file="Source/SpatComponent.cpp"/>
+      <FILE id="GGQpW0" name="SpatComponent.h" compile="0" resource="0" file="Source/SpatComponent.h"/>
+      <FILE id="LKhEke" name="Speaker.cpp" compile="1" resource="0" file="Source/Speaker.cpp"/>
+      <FILE id="Anw6ut" name="Speaker.h" compile="0" resource="0" file="Source/Speaker.h"/>
+      <FILE id="WTOpfx" name="Trajectory.cpp" compile="1" resource="0" file="Source/Trajectory.cpp"/>
+      <FILE id="LMFk8s" name="Trajectory.h" compile="0" resource="0" file="Source/Trajectory.h"/>
+      <FILE id="YZPwu8" name="UiComponent.cpp" compile="1" resource="0" file="Source/UiComponent.cpp"/>
+      <FILE id="OH2ttx" name="UiComponent.h" compile="0" resource="0" file="Source/UiComponent.h"/>
       <FILE id="d1Wbzp" name="Router.cpp" compile="1" resource="0" file="Source/Router.cpp"/>
       <FILE id="upyF1w" name="Router.h" compile="0" resource="0" file="Source/Router.h"/>
       <FILE id="CeUFNu" name="Areas.h" compile="0" resource="0" file="Source/Areas.h"/>
@@ -64,10 +76,6 @@
       <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>
       <FILE id="QwSZHu" name="HIDDelegate.h" compile="0" resource="0" file="Source/HIDDelegate.h"/>
       <FILE id="iDZlup" name="_firs.h" compile="0" resource="0" file="Source/_firs.h"/>
-      <FILE id="dqxZV5" name="FieldComponent.cpp" compile="1" resource="0"
-            file="Source/FieldComponent.cpp"/>
-      <FILE id="S23HIf" name="FieldComponent.h" compile="0" resource="0"
-            file="Source/FieldComponent.h"/>
       <FILE id="HUCESA" name="FirFilter.cpp" compile="1" resource="0" file="Source/FirFilter.cpp"/>
       <FILE id="Dxarr9" name="FirFilter.h" compile="0" resource="0" file="Source/FirFilter.h"/>
       <FILE id="Amo7KP" name="LevelComponent.cpp" compile="1" resource="0"
@@ -88,9 +96,6 @@
       <FILE id="HICz75" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
       <FILE id="rZP6xp" name="SourceMover.cpp" compile="1" resource="0" file="Source/SourceMover.cpp"/>
       <FILE id="ppYknM" name="SourceMover.h" compile="0" resource="0" file="Source/SourceMover.h"/>
-      <FILE id="y4THbS" name="Trajectories.cpp" compile="1" resource="0"
-            file="Source/Trajectories.cpp"/>
-      <FILE id="tjT8To" name="Trajectories.h" compile="0" resource="0" file="Source/Trajectories.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -123,17 +128,17 @@
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
             vst3Folder="C:\Users\barth\Documents\sdks\steinberg\3.6.5\VST3 SDK"
-            externalLibraries="Leap.lib">
+            externalLibraries="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86"/>
+                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath=""
+                       libraryPath=""/>
         <CONFIGURATION name="Release_x86" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x86" useRuntimeLibDLL="0"/>
+                       isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath=""
+                       libraryPath="" useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Release_x64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       optimisation="3" targetName="SpatGRIS" headerPath="C:\Users\barth\Documents\sdks\LeapSDK\include"
-                       libraryPath="C:\Users\barth\Documents\sdks\LeapSDK\lib\x64" useRuntimeLibDLL="0"/>
+                       optimisation="3" targetName="SpatGRIS" headerPath="" libraryPath=""
+                       useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../sdks/JUCE-4.1.0/modules"/>

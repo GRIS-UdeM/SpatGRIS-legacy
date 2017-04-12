@@ -187,9 +187,11 @@ private :
     
     Label       * labSourceSelectRay;
     TextEditor  * comSourceSelectRay;
+    Label       * labSourceInfoRay;
     
     Label       * labSourceSelectAngle;
     TextEditor  * comSourceSelectAngle;
+    Label       * labSourceInfoAngle;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

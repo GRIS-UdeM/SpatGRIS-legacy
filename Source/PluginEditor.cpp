@@ -180,16 +180,16 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     //Settings
     //-----------------------------
     Component * settingsBox = this->octTab->getTabContentComponent(0);
-    this->labTypeProcess = addLabel("Mode :", "Process mode", 0, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->comTypeProcess = addComboBox("", "Process mode", 60, 4, DefaultLabWidth+30, DefaultLabHeight, settingsBox);
+    this->labTypeProcess    = addLabel("Mode :", "Process mode", 0, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comTypeProcess    = addComboBox("", "Process mode", 60, 4, DefaultLabWidth+30, DefaultLabHeight, settingsBox);
     for(int i = 0; i  < ProcessType::SIZE_PT; i++){
         this->comTypeProcess->addItem(GetProcessTypeName((ProcessType)i), i+1);
     }
     this->comTypeProcess->setSelectedId(1);
     
-    this->labInOutMode = addLabel("Input/Output :", "Input/Output mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->comInOutMode = addComboBox("", "Input/Output mode", 90, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->butInOutMode = addButton("Apply", "Apply Input/Output mode", 214, 30, 60, DefaultLabHeight, settingsBox);
+    this->labInOutMode      = addLabel("Input/Output :", "Input/Output mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comInOutMode      = addComboBox("", "Input/Output mode", 90, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->butInOutMode      = addButton("Apply", "Apply Input/Output mode", 214, 30, 60, DefaultLabHeight, settingsBox);
     
     
     this->togOSCActive      = addToggleButton("OSC On/Off", "OSC Active (On/Off)", 280, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
@@ -208,21 +208,27 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     //Sources
     //-----------------------------
     Component * sourcesBox = this->octTab->getTabContentComponent(2);
-    this->labSourcePos = addLabel("Source position :", "Source position", 0, 4, DefaultLabWidth, DefaultLabHeight, sourcesBox);
-    this->comSourcePos = addComboBox("", "Source position", 110, 4, DefaultLabWidth+20, DefaultLabHeight, sourcesBox);
-    this->butSourcePos = addButton("Apply", "Apply Source position", 254, 4, 60, DefaultLabHeight, sourcesBox);
+    this->labSourcePos          = addLabel("Source position :", "Source position", 0, 4, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourcePos          = addComboBox("", "Source position", 110, 4, DefaultLabWidth+20, DefaultLabHeight, sourcesBox);
+    for(int i = 0; i  < PositionSourceSpeaker::SIZE_PSS; i++){
+        this->comSourcePos->addItem(GetPositionSourceSpeakerName((PositionSourceSpeaker)i), i+1);
+    }
+    this->comSourcePos->setSelectedId(1);
+    
+    this->butSourcePos          = addButton("Apply", "Apply Source position", 254, 4, 60, DefaultLabHeight, sourcesBox);
     
     
-    this->labSourceSelectPos = addLabel("Source Selected :", "Source Selected", 0, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
-    this->comSourceSelectPos = addComboBox("", "Source Selected", 110, 30, 40, DefaultLabHeight, sourcesBox);
     
-    this->labSourceSelectRay = addLabel("Ray :", "Ray (0 - 2)", 160, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
-    this->comSourceSelectRay = addTextEditor("","", "Ray (0 - 2)", 210, 30, 60, DefaultLabHeight, sourcesBox);
-    addLabel("(0 - 2)", "", 270, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->labSourceSelectPos    = addLabel("Selected :", "Source Selected", 0, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectPos    = addComboBox("", "Source Selected", 80, 30, 40, DefaultLabHeight, sourcesBox);
     
-    this->labSourceSelectAngle = addLabel("Angle :", "Angle (0 - 360)", 160, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
-    this->comSourceSelectAngle = addTextEditor("","", "Angle (0 - 360)", 210, 50, 60, DefaultLabHeight, sourcesBox);
-    addLabel("(0 - 360)", "", 270, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->labSourceSelectRay    = addLabel("Ray :", "Ray (0 - 2)", 0, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectRay    = addTextEditor("","", "Ray (0 - 2)", 50, 50, 70, DefaultLabHeight, sourcesBox);
+    this->labSourceInfoRay      = addLabel("(0 - 2)", "", 120, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    
+    this->labSourceSelectAngle  = addLabel("Angle :", "Angle (0 - 360)", 0, 70, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectAngle  = addTextEditor("","", "Angle (0 - 360)", 50, 70, 70, DefaultLabHeight, sourcesBox);
+    this->labSourceInfoAngle    = addLabel("(0 - 360)", "", 120, 70, DefaultLabWidth, DefaultLabHeight, sourcesBox);
     
     
     //Speakers

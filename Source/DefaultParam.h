@@ -59,6 +59,15 @@ typedef enum {
     SIZE_PT
 } ProcessType;
 
+typedef enum {
+    LeftAlternate = 0,
+    LeftClockW,
+    LeftCounterClockW,
+    TopClockW,
+    TopCounterClockW,
+    SIZE_PSS
+} PositionSourceSpeaker;
+
 //--------------------------------------------------
 //Param
 //--------------------------------------------------
@@ -151,7 +160,11 @@ static float DegreeToRadian (float degree){
     return ((degree * M_PI ) / 180.0f) ;
 }
 static float RadianToDegree (float radian){
-    return ((radian * 180.0f ) / M_PI);
+    float degree = ((radian * 180.0f ) / M_PI) ;
+    if(degree<0.0f){
+        degree += 360.0f;
+    }
+    return degree;
 }
 
 static void NormalizeXYSourceWithScreen(FPoint &p, float w)
@@ -244,4 +257,20 @@ static String GetProcessTypeName(ProcessType i)
             return "";
     }
 }
+
+static String GetPositionSourceSpeakerName(PositionSourceSpeaker i)
+{
+    switch(i) {
+        case LeftAlternate:     return "Left Alternate";
+        case LeftClockW:        return "Left Clockwise";
+        case LeftCounterClockW: return "Left Counter Clockwise";
+        case TopClockW:         return "Top Clockwise";
+        case TopCounterClockW:  return "Top Counter Clockwise";
+            
+        default:
+            jassertfalse;
+            return "";
+    }
+}
+
 #endif /* DefaultParam_h */
