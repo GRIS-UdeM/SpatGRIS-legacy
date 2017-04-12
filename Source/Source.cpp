@@ -38,4 +38,5 @@ filter(filt),id(idS)
     nrfEl.interval = 0.00001f;
     this->audPElev = new AudioParameterFloat(ss+"Elev", ss+"E", nrfEl, DefElevSource);
     this->filter->addParameter(this->audPElev);
+
 }

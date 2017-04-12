@@ -78,10 +78,8 @@ void SourceMover::setSourcesPosition()
         ang = (i*0.3f);
             
         FPoint xy = GetXYFromRayAng(ray, ang);
-        *(this->filter->getListSource().at(i)->getX()) = xy.x;
-        *(this->filter->getListSource().at(i)->getY()) = xy.y;
-            
-        
+        this->filter->setPosXYSource(i, xy.x, xy.y, false);
+
     }
 }
 

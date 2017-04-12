@@ -108,7 +108,7 @@ void SpatComponent::paint(Graphics &g)
     w = (fieldWH - SourceDiameter) / 4.0f;
     w -= 2;
     x = (fieldWH - w) / 2.0f;
-    //g.fillEllipse(x, x, w, w);
+    g.fillEllipse(x, x, w, w);
     
     
     // - - - - - - - - - - - -
