@@ -142,7 +142,7 @@ void SpatComponent::paint(Graphics &g)
         // - - - - - - - - - - - -
         // draw Select Source
         // - - - - - - - - - - - -
-        if(this->filter->getSelectItem()->selectID == i ){
+        if(this->filter->getSelectItem()->selectID == i && this->filter->getSelectItem()->selecType == SelectedSource){
             
             g.setColour(this->getColor(i));
             float Radius = SourceDiameter/2;
@@ -185,9 +185,6 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     FPoint mouseP(event.x, event.y);
     
     const float w = (fieldWH - SourceDiameter) /2.0f;
-    
-    //this->filter->getSelectItem()->selectID = 0;
-    this->filter->getSelectItem()->selecType = NoSelection;
     
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
 
@@ -236,7 +233,7 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
             if(dist > 2.0f){ dist = 2.0f; }
 
             this->filter->setPosXYSource(this->filter->getSelectItem()->selectID, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
-
+            this->editor->updateSelectSource();
             break;
             
         /*case SelectedSpeaker:

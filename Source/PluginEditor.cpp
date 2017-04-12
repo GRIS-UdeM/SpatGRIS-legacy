@@ -180,12 +180,61 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     //Settings
     //-----------------------------
     Component * settingsBox = this->octTab->getTabContentComponent(0);
-    this->labTypeProcess = addLabel("Process :", "Process mode", 0, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->comTypeProcess = addComboBox("", "Process mode", 70, 4, DefaultLabWidth+40, DefaultLabHeight, settingsBox);
+    this->labTypeProcess = addLabel("Mode :", "Process mode", 0, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comTypeProcess = addComboBox("", "Process mode", 60, 4, DefaultLabWidth+30, DefaultLabHeight, settingsBox);
     for(int i = 0; i  < ProcessType::SIZE_PT; i++){
         this->comTypeProcess->addItem(GetProcessTypeName((ProcessType)i), i+1);
     }
     this->comTypeProcess->setSelectedId(1);
+    
+    this->labInOutMode = addLabel("Input/Output :", "Input/Output mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comInOutMode = addComboBox("", "Input/Output mode", 90, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->butInOutMode = addButton("Apply", "Apply Input/Output mode", 214, 30, 60, DefaultLabHeight, settingsBox);
+    
+    
+    this->togOSCActive      = addToggleButton("OSC On/Off", "OSC Active (On/Off)", 280, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->labOSCSourceIDF   = addLabel("OSC 1er ID :", "OSC 1er Source ID", 280, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->texOSCSourceIDF   = addTextEditor("", "", "OSC 1er Source ID", 360, 30, 60, DefaultLabHeight, settingsBox);
+    
+    this->labOSCPort        = addLabel("OSC Port :", "OSC Port", 280, 50, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->texOSCPort        = addTextEditor("", "", "OSC Port", 360, 50, 60, DefaultLabHeight, settingsBox);
+    
+    //Volume and Filter
+    //-----------------------------
+    Component * volumeFBox = this->octTab->getTabContentComponent(1);
+    addLabel("Comming soon...", "", 0, 4, DefaultLabWidth, DefaultLabHeight, volumeFBox);
+    
+    
+    //Sources
+    //-----------------------------
+    Component * sourcesBox = this->octTab->getTabContentComponent(2);
+    this->labSourcePos = addLabel("Source position :", "Source position", 0, 4, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourcePos = addComboBox("", "Source position", 110, 4, DefaultLabWidth+20, DefaultLabHeight, sourcesBox);
+    this->butSourcePos = addButton("Apply", "Apply Source position", 254, 4, 60, DefaultLabHeight, sourcesBox);
+    
+    
+    this->labSourceSelectPos = addLabel("Source Selected :", "Source Selected", 0, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectPos = addComboBox("", "Source Selected", 110, 30, 40, DefaultLabHeight, sourcesBox);
+    
+    this->labSourceSelectRay = addLabel("Ray :", "Ray (0 - 2)", 160, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectRay = addTextEditor("","", "Ray (0 - 2)", 210, 30, 60, DefaultLabHeight, sourcesBox);
+    addLabel("(0 - 2)", "", 270, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    
+    this->labSourceSelectAngle = addLabel("Angle :", "Angle (0 - 360)", 160, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectAngle = addTextEditor("","", "Angle (0 - 360)", 210, 50, 60, DefaultLabHeight, sourcesBox);
+    addLabel("(0 - 360)", "", 270, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
+    
+    
+    //Speakers
+    //-----------------------------
+    Component * speakersBox = this->octTab->getTabContentComponent(3);
+    addLabel("Comming soon...", "", 0, 4, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    
+    
+    //Interfaces
+    //-----------------------------
+    Component * interfaceBox = this->octTab->getTabContentComponent(4);
+    addLabel("Comming soon...", "", 0, 4, DefaultLabWidth, DefaultLabHeight, interfaceBox);
     //------------------------------------------------------------------------------------------------------
     
     
@@ -198,6 +247,9 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->updateComMouvement();
     this->updateSourceParam();
     this->updateTrajectoryParam();
+    this->updateInputOutputMode();
+    this->comInOutMode->setSelectedId(1);
+    this->updateSelectSource();
     
 	this->startTimerHz(HertzRefresh);
 }
@@ -389,6 +441,58 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
     this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
 
 }
+
+void SpatGrisAudioProcessorEditor::updateInputOutputMode()
+{
+    int iMaxSources = this->filter->getTotalNumInputChannels();
+    int iMaxSpeakers  = this->filter->getTotalNumOutputChannels();
+    
+    
+    if (iMaxSpeakers >=1)  { this->comInOutMode->addItem("1x1",  1);  }
+    if (iMaxSpeakers >=2)  { this->comInOutMode->addItem("1x2",  2);  }
+    if (iMaxSpeakers >=4)  { this->comInOutMode->addItem("1x4",  3);  }
+    if (iMaxSpeakers >=6)  { this->comInOutMode->addItem("1x6",  4);  }
+    if (iMaxSpeakers >=8)  { this->comInOutMode->addItem("1x8",  5);  }
+    if (iMaxSpeakers >=12) { this->comInOutMode->addItem("1x12", 7); }
+    if (iMaxSpeakers >=16) { this->comInOutMode->addItem("1x16", 8); }
+    
+    if (iMaxSources >=2 && iMaxSpeakers >=2)  { this->comInOutMode->addItem("2x2",  9);  }  //the id here cannot be 0
+    if (iMaxSources >=2 && iMaxSpeakers >=4)  { this->comInOutMode->addItem("2x4",  10);  }
+    if (iMaxSources >=2 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("2x6",  11);  }
+    if (iMaxSources >=2 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("2x8",  12);  }
+    if (iMaxSources >=2 && iMaxSpeakers >=12) { this->comInOutMode->addItem("2x12", 13); }
+    if (iMaxSources >=2 && iMaxSpeakers >=16) { this->comInOutMode->addItem("2x16", 14); }
+    
+    if (iMaxSources >=4 && iMaxSpeakers >=4)  { this->comInOutMode->addItem("4x4",  15);  }
+    if (iMaxSources >=4 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("4x6",  16);  }
+    if (iMaxSources >=4 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("4x8",  17);  }
+    if (iMaxSources >=4 && iMaxSpeakers >=12) { this->comInOutMode->addItem("4x12", 18); }
+    if (iMaxSources >=4 && iMaxSpeakers >=16) { this->comInOutMode->addItem("4x16", 19); }
+    
+    if (iMaxSources >=6 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("6x6",  20);  }
+    if (iMaxSources >=6 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("6x8",  21);  }
+    if (iMaxSources >=6 && iMaxSpeakers >=12) { this->comInOutMode->addItem("6x12", 22); }
+    if (iMaxSources >=6 && iMaxSpeakers >=16) { this->comInOutMode->addItem("6x16", 23); }
+    
+    if (iMaxSources >=8 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("8x8",  24);  }
+    if (iMaxSources >=8 && iMaxSpeakers >=12) { this->comInOutMode->addItem("8x12", 25); }
+    if (iMaxSources >=8 && iMaxSpeakers >=16) { this->comInOutMode->addItem("8x16", 26); }
+    
+    this->comSourceSelectPos->clear();
+    for(int i = 0; i  < this->filter->getNumSourceUsed(); i++){
+        this->comSourceSelectPos->addItem(String(i+1), i+1);
+    }
+    
+}
+
+void SpatGrisAudioProcessorEditor::updateSelectSource()
+{
+    this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectID+1, dontSendNotification);
+    FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
+    this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+    this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+}
+
 //==============================================================================
 
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
@@ -454,7 +558,8 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         this->filter->getSourceMover()->setMouvementMode((MouvementMode)this->comMouvement->getSelectedItemIndex());
         
         
-    }else if(this->comTypeTrajectory == comboBox){
+    }
+    else if(this->comTypeTrajectory == comboBox){
 
         this->labTrajEllipseWidth->setVisible(false);
         this->texTrajEllipseWidth->setVisible(false);
@@ -522,11 +627,17 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         }
         this->filter->getTrajectory()->setTrajectoryType((TrajectoryType)this->comTypeTrajectory->getSelectedItemIndex());
         
-    }else if(this->comTimeTrajectory == comboBox){
+    }
+    else if(this->comTimeTrajectory == comboBox){
         this->filter->getTrajectory()->setInSeconds(!(this->comTimeTrajectory->getSelectedItemIndex()==1));
         
-    }else if(this->comTrajOneWayReturn == comboBox){
+    }
+    else if(this->comTrajOneWayReturn == comboBox){
         this->filter->getTrajectory()->setInOneWay(!(this->comTrajOneWayReturn->getSelectedItemIndex()==1));
+    }
+    else if(this->comSourceSelectPos == comboBox){
+        this->filter->getSelectItem()->selecType = SelectedSource;
+        this->filter->getSelectItem()->selectID = this->comSourceSelectPos->getSelectedId()-1;
     }
 }
 

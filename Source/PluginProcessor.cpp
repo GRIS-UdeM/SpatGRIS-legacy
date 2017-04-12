@@ -34,6 +34,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
     this->selectItem = new SelectItem();
     this->selectItem->selectID = 1;
+    this->selectItem->selecType = SelectedSource;
     
 	this->listSources = vector<Source *>();
 	this->listSpeakers = vector<Speaker *>();

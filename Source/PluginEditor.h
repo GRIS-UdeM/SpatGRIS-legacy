@@ -71,7 +71,9 @@ public :
     void updateSourceParam();
     void updateComMouvement();
     void updateTrajectoryParam();
+    void updateInputOutputMode();
     
+    void updateSelectSource();
 private :
 
     //==============================================================================
@@ -162,6 +164,32 @@ private :
     //Settings-----------------
     Label       * labTypeProcess;
     ComboBox    * comTypeProcess;
+    
+    Label       * labInOutMode;
+    ComboBox    * comInOutMode;
+    TextButton  * butInOutMode;
+    
+    ToggleButton    * togOSCActive;
+    
+    Label           * labOSCSourceIDF;
+    TextEditor      * texOSCSourceIDF;
+    
+    Label           * labOSCPort;
+    TextEditor      * texOSCPort;
+    
+    //Source-----------------
+    Label       * labSourcePos;
+    ComboBox    * comSourcePos;
+    TextButton  * butSourcePos;
+    
+    Label       * labSourceSelectPos;
+    ComboBox    * comSourceSelectPos;
+    
+    Label       * labSourceSelectRay;
+    TextEditor  * comSourceSelectRay;
+    
+    Label       * labSourceSelectAngle;
+    TextEditor  * comSourceSelectAngle;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED
