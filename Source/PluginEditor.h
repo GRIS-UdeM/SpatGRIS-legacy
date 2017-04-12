@@ -312,8 +312,8 @@ private:
     
     
     //TextEditor *mSpeedStartAccel;
-    TextEditor *mSpeedEndtAccel;
-    TextEditor *mTimeStartAccel;
+    //TextEditor *mSpeedEndtAccel;
+    //TextEditor *mTimeStartAccel;
     //ComboBox *mTypeAccel;
     
 #if TIME_GUI

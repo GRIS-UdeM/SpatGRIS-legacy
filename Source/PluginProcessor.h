@@ -530,11 +530,11 @@ public:
     //float getStarSpeedS() {return starSpeedS ;}
     //void setStarSpeedS(float s){starSpeedS = s;}
     
-    float getEndSpeedS() {return starSpeedE ;}
+    /*float getEndSpeedS() {return starSpeedE ;}
     void setEndSpeedS(float s){starSpeedE = paramRange(-kSpeedMinMax, kSpeedMinMax, s);}
     
     float getTimeSpeedS() {return starSpeedT ;}
-    void setTimeSpeedS(float s){starSpeedT = s;}
+    void setTimeSpeedS(float s){starSpeedT = s;}*/
     
     vector<FPoint> *getListXYFreeDraw() {return &listXYFreeDraw; }
     vector<FPoint> *getListPointFreeDraw() {return &listPointFreeDraw; }
@@ -768,10 +768,10 @@ public:
         
     void setIsRecordingAutomation(bool b)   {
         m_bIsRecordingAutomation = b;
-        if(m_bIsRecordingAutomation){
-            mfTRealTime = 0.0f;
+        /*if(m_bIsRecordingAutomation){
+            //mfTRealTime = 0.0f;
             //mSpeedTraject = starSpeedS;
-        }
+        }*/
         bypassOrNotSourceUpdateThread();
     }
     bool getIsRecordingAutomation()         { return m_bIsRecordingAutomation;  }
@@ -979,13 +979,13 @@ private:
     
     //AllAccelerationModes typeAccel = Linear;
     //float starSpeedS = 0.001f;
-    float starSpeedE = 1.0f;
+    /*float starSpeedE = 1.0f;
     float starSpeedT = 0.0f;
     float mfTRealTime= 0.0f;
     
     
     float endSpeedE = 0.5f;
-    float endSpeedT = 2.0f;
+    float endSpeedT = 2.0f;*/
     
     int m_iMovementMode;
     vector<FPoint> listPointFreeDraw;

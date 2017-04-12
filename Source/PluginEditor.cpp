@@ -556,7 +556,7 @@ AudioProcessorEditor (ownerFilter)
          x = 2*cbw + 2*kMargin + 140;
         y -= (dh + 4)*2;
 
-        addLabel("Acceleration:", x, y, cbw, dh, box);
+        //addLabel("Acceleration:", x, y, cbw, dh, box);
 
         y += dh + 4;
         
@@ -566,20 +566,20 @@ AudioProcessorEditor (ownerFilter)
         mSpeedStartAccel->addListener(this);
         
         y += dh + 4;*/
-        addLabel("Speed", x+cbw/2, y, cbw/2, dh, box);
+        /*addLabel("Speed", x+cbw/2, y, cbw/2, dh, box);
 
         mSpeedEndtAccel = addTextEditor("", x, y, cbw/2, dh, box);
         mSpeedEndtAccel->setTextToShowWhenEmpty("End", juce::Colour::greyLevel(.6));
-        mSpeedEndtAccel->addListener(this);
+        mSpeedEndtAccel->addListener(this);*/
         
         
 
         //x = 2*cbw + 2*kMargin+110;
-        y += dh + 4;
+        /*y += dh + 4;
         addLabel("Time (0 = Off)", x+cbw/2, y, cbw, dh, box);
         mTimeStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
         mTimeStartAccel->setTextToShowWhenEmpty("Duration", juce::Colour::greyLevel(.6));
-        mTimeStartAccel->addListener(this);
+        mTimeStartAccel->addListener(this);*/
         
         
         /*y += dh + 4;
@@ -1704,10 +1704,10 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         }
         updateEndLocationTextEditors();
     }
-    else /*if (&textEditor == mSpeedStartAccel){
+    /*else /*if (&textEditor == mSpeedStartAccel){
         mFilter->setStarSpeedS(mSpeedStartAccel->getText().getFloatValue());
     }
-    else */if (&textEditor == mSpeedEndtAccel){
+    else if (&textEditor == mSpeedEndtAccel){
         float speedE = paramRange(-kSpeedMinMax, kSpeedMinMax, mSpeedEndtAccel->getText().getFloatValue());
         mFilter->setEndSpeedS(speedE);
         mSpeedEndtAccel->setText(String(speedE));
@@ -1717,7 +1717,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
         float timeEnd = paramRange(0, numeric_limits<float>::max(), mTimeStartAccel->getText().getFloatValue());
         mFilter->setTimeSpeedS(timeEnd);
         mTimeStartAccel->setText(String(timeEnd));
-    }
+    }*/
     
     else {
         printf("unknown TextEditor clicked...\n");
@@ -2368,8 +2368,8 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
     mOscSpatPortTextEditor->    setText(String(mFilter->getOscSpatPort()));
     //mSpeedStartAccel->          setText(String(mFilter->getStarSpeedS()));
-    mSpeedEndtAccel->           setText(String(mFilter->getEndSpeedS()));
-    mTimeStartAccel->           setText(String(mFilter->getTimeSpeedS()));
+    //mSpeedEndtAccel->           setText(String(mFilter->getEndSpeedS()));
+    //mTimeStartAccel->           setText(String(mFilter->getTimeSpeedS()));
     //mTypeAccel->                setText(String(mFilter->getAccelMode()));
     
 #if USE_TOUCH_OSC
