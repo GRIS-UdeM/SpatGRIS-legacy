@@ -33,31 +33,13 @@ filter(filt)
 {
     this->listSourceRayAng.resize(MaxSources);
     for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
-        listMouvement.add(getMouvementModeName((MouvementMode)i));
+        listMouvement.add(GetMouvementModeName((MouvementMode)i));
     }
     //this->mouvementChoiceAuto = new AudioParameterChoice("Mouvement","Mouv Trajectory", listMouvement,1);
     //this->filter->addParameter(this->mouvementChoiceAuto);
 }
 SourceMover::~SourceMover()
 {
-}
-
-String SourceMover::getMouvementModeName(MouvementMode i)
-{
-    switch(i) {
-        case Independent:       return "Independent";
-        case Circular:          return "Circular";
-        case CircularFixRad:    return "Circular Fixed Radius";
-        case CircularFixAng:    return "Circular Fixed Angle";
-        case CircularFullyFix:  return "Circular Fully Fixed";
-        case DeltaLock:         return "Delta Lock";
-        case SymmetricX:        return "Symmetric X";
-        case SymmetricY:        return "Symmetric Y";
-
-        default:
-            jassertfalse;
-            return "";
-    }
 }
 
 void SourceMover::setMouvementMode(MouvementMode m)

@@ -45,7 +45,6 @@ public:
     SourceMover(SpatGrisAudioProcessor *filt);
     ~SourceMover();
     
-    String getMouvementModeName(MouvementMode i);
     MouvementMode getMouvementMode(){ return this->mouvementModeSelect; }
     void setMouvementMode(MouvementMode m);
     

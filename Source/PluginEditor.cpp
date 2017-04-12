@@ -102,7 +102,7 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->labTypeTrajectory = addLabel("Types :", "Types of trajectories", 0, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTypeTrajectory = addComboBox("", "Types of trajectories", 60, 30, DefaultLabWidth+30, DefaultLabHeight, this->boxTrajectory->getContent());
     for(int i = 0; i  < TrajectoryType::SIZE_TT; i++){
-        this->comTypeTrajectory->addItem(this->filter->getTrajectory()->getTrajectoryName((TrajectoryType)i), i+1);
+        this->comTypeTrajectory->addItem(GetTrajectoryName((TrajectoryType)i), i+1);
     }
     this->comTypeTrajectory->setSelectedId(1);
     
@@ -179,7 +179,13 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     //Settings
     //-----------------------------
-    
+    Component * settingsBox = this->octTab->getTabContentComponent(0);
+    this->labTypeProcess = addLabel("Process :", "Process mode", 0, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comTypeProcess = addComboBox("", "Process mode", 70, 4, DefaultLabWidth+40, DefaultLabHeight, settingsBox);
+    for(int i = 0; i  < ProcessType::SIZE_PT; i++){
+        this->comTypeProcess->addItem(GetProcessTypeName((ProcessType)i), i+1);
+    }
+    this->comTypeProcess->setSelectedId(1);
     //------------------------------------------------------------------------------------------------------
     
     
@@ -332,11 +338,11 @@ void SpatGrisAudioProcessorEditor::updateComMouvement()
     for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
         if(((MouvementMode)i == MouvementMode::SymmetricX || (MouvementMode)i == MouvementMode::SymmetricY)){
             if (this->filter->getNumSourceUsed() == 2){
-                this->comMouvement->addItem(this->filter->getSourceMover()->getMouvementModeName((MouvementMode)i), i+1);
+                this->comMouvement->addItem(GetMouvementModeName((MouvementMode)i), i+1);
             }
         }
         else{
-            this->comMouvement->addItem(this->filter->getSourceMover()->getMouvementModeName((MouvementMode)i), i+1);
+            this->comMouvement->addItem(GetMouvementModeName((MouvementMode)i), i+1);
         }
     }
     this->comMouvement->setSelectedId(this->filter->getSourceMover()->getMouvementMode()+1);

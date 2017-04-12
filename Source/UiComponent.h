@@ -45,6 +45,7 @@ class OctTabbedComponent : public TabbedComponent
 {
 public:
     OctTabbedComponent(GrisLookAndFeel *feel, TabbedButtonBar::Orientation orientation, SpatGrisAudioProcessor *filter);
+    ~OctTabbedComponent();
     void currentTabChanged (int newCurrentTabIndex, const String& newCurrentTabName) override;
     void initDone();
     

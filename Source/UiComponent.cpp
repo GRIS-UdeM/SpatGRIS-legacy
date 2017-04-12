@@ -83,6 +83,13 @@ filter(filter)
     this->setLookAndFeel(feel);
 }
 
+OctTabbedComponent::~OctTabbedComponent()
+{
+    for(int i = 0; i < this->getNumTabs(); i++){
+        this->getTabContentComponent(i)->deleteAllChildren();
+    }
+}
+
 void OctTabbedComponent::currentTabChanged (int newCurrentTabIndex, const String& newCurrentTabName) {
     if (!mInited) {
         return;

@@ -53,6 +53,12 @@ typedef enum {
 } TrajectoryType;
 
 
+typedef enum {
+    OSCSpatServer = 0,
+    OSCZirkonium,
+    SIZE_PT
+} ProcessType;
+
 //--------------------------------------------------
 //Param
 //--------------------------------------------------
@@ -125,7 +131,8 @@ static const int    HertzRefresh        = 30;
 static float GetRaySpat(float x, float y){
     return sqrtf((x*x)+ (y*y));
 }
-static float GetAngleSpat(float x, float y){
+static float GetAngleSpat(float x, float y)
+{
     if(x < 0){
         return atanf(y/x)+M_PI;
     }else{
@@ -139,6 +146,7 @@ static FPoint GetXYFromRayAng(float r, float a){
 static float AngleInCircle(FPoint p) {
     return  -atan2(( - p.y * 2.0f), (p.x * 2.0f ));
 }
+
 static float DegreeToRadian (float degree){
     return ((degree * M_PI ) / 180.0f) ;
 }
@@ -146,24 +154,27 @@ static float RadianToDegree (float radian){
     return ((radian * 180.0f ) / M_PI);
 }
 
-static void NormalizeXYSourceWithScreen(FPoint &p, float w){
+static void NormalizeXYSourceWithScreen(FPoint &p, float w)
+{
     p.x = ((w) + ((w/2.0f)*p.x))+SourceRadius;
     p.y = ((w) - ((w/2.0f)*p.y))+SourceRadius;
 }
-static void NormalizeScreenWithSpat(FPoint &p, float w){
+static void NormalizeScreenWithSpat(FPoint &p, float w)
+{
     p.x = (p.x - SourceRadius - w) / (w/2.0f);
     p.y = -(p.y - SourceRadius - w) / (w/2.0f);
 }
 
-static FPoint DegreeToXy (FPoint p, int FieldWidth){
+static FPoint DegreeToXy (FPoint p, int FieldWidth)
+{
     float x,y;
     x = -((FieldWidth - SourceDiameter)/2) * sinf(DegreeToRadian(p.x)) * cosf(DegreeToRadian(p.y));
     y = -((FieldWidth - SourceDiameter)/2) * cosf(DegreeToRadian(p.x)) * cosf(DegreeToRadian(p.y));
     return FPoint(x, y);
 }
 
-static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false) {
-    
+static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false)
+{
     //calculate azim in range [0,1], and negate it because zirkonium wants -1 on right side
     float fAzim = -atan2f(pXY.x, pXY.y)/M_PI;
     
@@ -185,4 +196,52 @@ static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false) {
     return FPoint(fAzim, fElev);
 }
 
+static String GetMouvementModeName(MouvementMode i)
+{
+    switch(i) {
+        case Independent:       return "Independent";
+        case Circular:          return "Circular";
+        case CircularFixRad:    return "Circular Fixed Radius";
+        case CircularFixAng:    return "Circular Fixed Angle";
+        case CircularFullyFix:  return "Circular Fully Fixed";
+        case DeltaLock:         return "Delta Lock";
+        case SymmetricX:        return "Symmetric X";
+        case SymmetricY:        return "Symmetric Y";
+            
+        default:
+            jassertfalse;
+            return "";
+    }
+}
+
+static String GetTrajectoryName(TrajectoryType i)
+{
+    switch(i) {
+        case Circle:        return "Circle";
+        case Ellipse:       return "Ellipse";
+        case Spiral:        return "Spiral";
+        case Pendulum:      return "Pendulum";
+        case RandomTraj:    return "Random";
+        case RandomTarget:  return "Random Target";
+        case SymXTarget:    return "Sym X Target";
+        case SymYTarget:    return "Sym Y Target";
+        case FreeDrawing:   return "Free Drawing";
+        default:
+            jassertfalse;
+            return "";
+    }
+}
+
+
+static String GetProcessTypeName(ProcessType i)
+{
+    switch(i) {
+        case OSCSpatServer:     return "OSC SpatGrisServer";
+        case OSCZirkonium:      return "OSC Zirkonium";
+            
+        default:
+            jassertfalse;
+            return "";
+    }
+}
 #endif /* DefaultParam_h */

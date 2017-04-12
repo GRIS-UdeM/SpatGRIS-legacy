@@ -28,6 +28,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../../GrisCommonFiles/GrisLookAndFeel.h"
+
 #include "DefaultParam.h"
 
 #include "SpatComponent.h"
@@ -100,7 +101,7 @@ private :
     OctTabbedComponent  * octTab;
     
     //Component------------------------------------
-    //For Source param
+    //For Source param-----------------
     Label           * labSurfaceOrPan;
     ToggleButton    * togLinkSurfaceOrPan;
     Slider          * sliSurfaceOrPan;
@@ -116,7 +117,7 @@ private :
     //For Outputs param
     vector<LevelComponent *> vecLevelOut;
     
-    //For Trajectories
+    //For Trajectories--------------
     Label       * labMouvement;
     ComboBox    * comMouvement;
     
@@ -134,7 +135,7 @@ private :
     ProgressBarTraj * progressBarTraject;
     Slider          * sliSpeedTrajectory;
     
-    //Other Traj param
+    //Other Traj param--------------
     Label       * labTrajEllipseWidth;
     TextEditor  * texTrajEllipseWidth;
     
@@ -155,9 +156,12 @@ private :
     Slider      * sliTrajRandSpeed;
     ToggleButton* togTrajRandSepare;
 
-    
     vector<Component *> listLockCompTrajectory;
-
+    
+    //OctTabbed-----------------------
+    //Settings-----------------
+    Label       * labTypeProcess;
+    ComboBox    * comTypeProcess;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

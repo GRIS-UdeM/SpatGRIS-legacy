@@ -64,7 +64,6 @@ public:
     
     //Getter
     bool   getProcessTrajectory(){ return this->processTrajectory; };
-    String getTrajectoryName(TrajectoryType i);
     TrajectoryType getTrajectoryType(){ return this->typeSelect; }
   
     float getTimeDuration(){ return this->timeDuration; }
