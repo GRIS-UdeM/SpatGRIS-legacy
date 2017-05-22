@@ -85,7 +85,10 @@ public:
                 case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
-                case kParamTrajSpeed:       newVal = 1.0f; break;
+                case kParamTrajSpeed:       newVal = 1.0f;
+                    mFilter->setSpeedTraject(newVal);
+                    this->setValue(newVal);
+                    return;
             }
             
             if (mParamType == kParamSource && mLinkButton->getToggleState()) {
