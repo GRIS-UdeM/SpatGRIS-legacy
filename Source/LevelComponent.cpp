@@ -111,7 +111,7 @@ LevelComponent::~LevelComponent()
 
 void LevelComponent::buttonClicked(Button *button){
     if (button == this->muteToggleBut) {
-        //this->mainParent->setMuted(this->muteToggleBut->getToggleState());
+        this->filter->getListSpeaker()[this->indexLev]->setMuted(this->muteToggleBut->getToggleState());
         this->levelBox->repaint();
     }
 }

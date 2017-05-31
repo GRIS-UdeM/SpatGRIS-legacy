@@ -21,9 +21,11 @@ typedef enum {
     SelectedSource,
     SelectedSpeaker
 } SelectionType;
+
 struct SelectItem {
     unsigned int selectID;
     SelectionType selecType;
+    bool mouseOver;
 };
 
 typedef enum {
@@ -54,7 +56,9 @@ typedef enum {
 
 
 typedef enum {
-    OSCSpatServer = 0,
+    FreeVolum = 0,
+    PanSpan,
+    OSCSpatServer,
     OSCZirkonium,
     SIZE_PT
 } ProcessType;
@@ -68,6 +72,13 @@ typedef enum {
     SIZE_PSS
 } PositionSourceSpeaker;
 
+
+typedef struct {
+    int     i;
+    float   a;
+} IndexedAngle;
+
+
 //--------------------------------------------------
 //Param
 //--------------------------------------------------
@@ -75,8 +86,13 @@ static const int    MaxSources      = 8;
 static const int    MaxSpeakers     = 16;
 static const int    MaxBufferSize   = 4096;
 
+static const int    OscTimerHz      = 30;
+static const int    OscMinPort      = 0;
+static const int    OscMaxPort      = 65535;
+static const int    OscDefPort      = 18032;
 
 static const float RadiusMax        = 2.f;
+static const float AngleDegMax      = 360.f;
 static const float HalfCircle       = M_PI;
 static const float QuarterCircle    = M_PI / 2.f;
 static const float ThetaMax         = M_PI * 2.f;
@@ -88,10 +104,7 @@ static const float ThetaMax         = M_PI * 2.f;
 static const float  SourceRadius    = 10.f;
 static const float  SourceDiameter  = SourceRadius * 2.f;
 static const float  SpeakerRadius   = 10.f;
-//Surface
-static const float  MinSurfSource   = 0.f;
-static const float  MaxSurfSource   = 1.f;
-static const float  DefSurfSource   = 0.f;
+
 //Azim
 static const float  MinAzimSource   = 0.f;
 static const float  MaxAzimSource   = 2.f;
@@ -100,7 +113,10 @@ static const float  DefAzimSource   = 0.f;
 static const float  MinElevSource   = 0.f;
 static const float  MaxElevSource   = 0.5f;
 static const float  DefElevSource   = 0.f;
-
+//Height - Surface
+static const float  MinHeigSource   = 0.f;
+static const float  MaxHeigSource   = 1.f;
+static const float  DefHeigSource   = 0.f;
 
 //--------------------------------------------------
 //Trajectory Param
@@ -113,19 +129,28 @@ static const float  MinTrajRandomSpeed   = 0.f;
 static const float  MaxTrajRandomSpeed   = 1.f;
 static const float  DefTrajRandomSpeed   = 0.5f;
 
+static const float  MinTrajWidthEllipse   = 0.1f;
+static const float  MaxTrajWidthEllipse   = 5.f;
+static const float  DefTrajWidthEllipse   = 0.5f;
+
+static const float  MinCyclePercent   = 0.f;
+static const float  MaxCyclePercent   = 100.f;
+static const float  DefCyclePercent   = 100.f;
+
 //--------------------------------------------------
 //UI Param
 //--------------------------------------------------
-static const float  DefaultSliderInter   = 0.00001f;
+static const float  DefaultSliderInter  = 0.00001f;
+static const float  ShowSliderInter     = 0.001f;
 
 static const int    Margin             = 2;
 static const int    CenterColumnWidth  = 180;
-static const int    MinFieldSize       = 300;
+static const int    MinFieldSize       = 400;
 static const int    RightColumnWidth   = 340;
 static const int    SizeWidthLevelComp = 22;
 
-static const int    DefaultUItWidth     = 1090;
-static const int    DefaultUIHeight     = 540;
+static const int    DefaultUItWidth     = 1050;
+static const int    DefaultUIHeight     = 500;
 
 static const int    DefaultTexWidth     = 60;
 static const int    DefaultLabWidth     = 120;
@@ -142,11 +167,16 @@ static float GetRaySpat(float x, float y){
 }
 static float GetAngleSpat(float x, float y)
 {
-    if(x < 0){
-        return atanf(y/x)+M_PI;
+    float r;
+    if(x < 0.0f){
+        r = atanf(y/x)+M_PI;
     }else{
-        return atanf(y/x);
+        r = atanf(y/x);
     }
+    if(isnan(r)){
+        return 0.0f;
+    }
+    return r;
 }
 static FPoint GetXYFromRayAng(float r, float a){
     return FPoint((r * cosf(a)),(r * sinf(a)));
@@ -178,6 +208,32 @@ static void NormalizeScreenWithSpat(FPoint &p, float w)
     p.y = -(p.y - SourceRadius - w) / (w/2.0f);
 }
 
+static void NormalizeSourceMoverRayAng(FPoint &newCurSrcPosRT)
+{
+    if (newCurSrcPosRT.x < 0.0f){
+        newCurSrcPosRT.x = 0.0f;
+    }
+    if (newCurSrcPosRT.x > RadiusMax){
+        newCurSrcPosRT.x = RadiusMax;
+    }
+    if (newCurSrcPosRT.y < 0.0f){
+        newCurSrcPosRT.y += ThetaMax;
+    }
+    if (newCurSrcPosRT.y > ThetaMax){
+        newCurSrcPosRT.y -= ThetaMax;
+    }
+}
+
+static void NormalizeSourceMoverXY(FPoint &newCurSrcPosRT)
+{
+    FPoint correctedRA =  FPoint(GetRaySpat(newCurSrcPosRT.x,newCurSrcPosRT.y), GetAngleSpat(newCurSrcPosRT.x,newCurSrcPosRT.y));
+    NormalizeSourceMoverRayAng(correctedRA);
+    correctedRA = GetXYFromRayAng(correctedRA.x, correctedRA.y);
+    newCurSrcPosRT.x = correctedRA.getX();
+    newCurSrcPosRT.y = correctedRA.getY();
+}
+
+
 static FPoint DegreeToXy (FPoint p, int FieldWidth)
 {
     float x,y;
@@ -208,6 +264,23 @@ static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false)
     
     return FPoint(fAzim, fElev);
 }
+
+
+static int IndexedAngleCompare(const void *a, const void *b)
+{
+    IndexedAngle *ia = (IndexedAngle*)a;
+    IndexedAngle *ib = (IndexedAngle*)b;
+    return (ia->a < ib->a) ? -1 : ((ia->a > ib->a) ? 1 : 0);
+}
+
+static float GetValueInRange(float value, float min, float max)
+{
+    if(value < min){ return min; }
+    if(value > max){ return max; }
+    return value;
+}
+
+//Get Name===============================================================
 
 static String GetMouvementModeName(MouvementMode i)
 {
@@ -249,6 +322,8 @@ static String GetTrajectoryName(TrajectoryType i)
 static String GetProcessTypeName(ProcessType i)
 {
     switch(i) {
+        case FreeVolum:         return "Free Volume";
+        case PanSpan:           return "Pan Span";
         case OSCSpatServer:     return "OSC SpatGrisServer";
         case OSCZirkonium:      return "OSC Zirkonium";
             

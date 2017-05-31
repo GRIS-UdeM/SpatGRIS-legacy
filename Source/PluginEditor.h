@@ -74,6 +74,7 @@ public :
     void updateInputOutputMode();
     
     void updateSelectSource();
+    void updateSelectSpeaker();
 private :
 
     //==============================================================================
@@ -81,7 +82,7 @@ private :
     TextButton*     addButton(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
     ToggleButton*   addToggleButton(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, bool toggle = false);
     TextEditor*     addTextEditor(const String &s, const String &emptyS, const String &stooltip, int x, int y, int w, int h, Component *into, int wLab = 80);
-    Slider*         addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, juce::Slider::TextEntryBoxPosition tebp = juce::Slider::TextEntryBoxPosition::NoTextBox);
+    Slider*         addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, juce::Slider::TextEntryBoxPosition tebp = juce::Slider::TextEntryBoxPosition::TextBoxLeft);
     ComboBox*       addComboBox(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
     //==============================================================================
     
@@ -138,6 +139,9 @@ private :
     Slider          * sliSpeedTrajectory;
     
     //Other Traj param--------------
+    Label       * labCyclePercent;
+    Slider      * sliCyclePercent;
+    
     Label       * labTrajEllipseWidth;
     TextEditor  * texTrajEllipseWidth;
     
@@ -192,6 +196,22 @@ private :
     Label       * labSourceSelectAngle;
     TextEditor  * comSourceSelectAngle;
     Label       * labSourceInfoAngle;
+    
+    //Speaker-----------------
+    Label       * labSpeakerPos;
+    ComboBox    * comSpeakerPos;
+    TextButton  * butSpeakerPos;
+    
+    Label       * labSpeakerSelectPos;
+    ComboBox    * comSpeakerSelectPos;
+    
+    Label       * labSpeakerSelectRay;
+    TextEditor  * comSpeakerSelectRay;
+    Label       * labSpeakerInfoRay;
+    
+    Label       * labSpeakerSelectAngle;
+    TextEditor  * comSpeakerSelectAngle;
+    Label       * labSpeakerInfoAngle;
 };
 
 #endif  // PLUGINEDITOR_H_INCLUDED

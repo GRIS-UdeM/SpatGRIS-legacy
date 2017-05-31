@@ -18,9 +18,9 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.3.0</string>
+    <string>1.0.1</string>
     <key>CFBundleVersion</key>
-    <string>0.3.0</string>
+    <string>1.0.1</string>
     <key>NSHumanReadableCopyright</key>
     <string>UdeM</string>
     <key>NSHighResolutionCapable</key>
@@ -41,7 +41,7 @@
         <key>subtype</key>
         <string>Spat</string>
         <key>version</key>
-        <integer>768</integer>
+        <integer>65537</integer>
       </dict>
     </array>
   </dict>

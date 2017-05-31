@@ -65,16 +65,16 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     //Source param
     this->labSurfaceOrPan       = addLabel("Surface", "Surface Master Soutce", 0, 0, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
-    this->togLinkSurfaceOrPan   = addToggleButton("Link", "Link other sources", 0, 20, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliSurfaceOrPan       = addSlider("", "", 50, 18, 130, DefaultLabHeight, this->boxSourceParam->getContent(), MinSurfSource, MaxSurfSource, DefaultSliderInter);
+    this->togLinkSurfaceOrPan   = addToggleButton("Link", "Link other sources", 90, 0, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
+    this->sliSurfaceOrPan       = addSlider("", "", 4, 18, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinHeigSource, MaxHeigSource, ShowSliderInter);
     
-    this->labAzimSpan           = addLabel("Azimuth Span", "Azimuth Span Master Soutce", 0, 50, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
-    this->togLinkAzimSpan       = addToggleButton("Link", "Link other sources", 0, 70, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliAzimSpan           = addSlider("", "", 50, 68, 130, DefaultLabHeight, this->boxSourceParam->getContent(), MinAzimSource, MaxAzimSource, DefaultSliderInter);
+    this->labAzimSpan           = addLabel("Azimuth Span", "Azimuth Span Selected Source", 0, 50, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
+    this->togLinkAzimSpan       = addToggleButton("Link", "Link other sources", 90, 50, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
+    this->sliAzimSpan           = addSlider("", "", 4, 68, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinAzimSource, MaxAzimSource, ShowSliderInter);
     
-    this->labElevSpan           = addLabel("Elevation Span", "Elevation Span Master Soutce", 0, 100, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
-    this->togLinkElevSpan       = addToggleButton("Link", "Link other sources", 0, 120, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliAElevSpann         = addSlider("", "", 50, 118, 130, DefaultLabHeight, this->boxSourceParam->getContent(), MinElevSource, MaxElevSource, DefaultSliderInter);
+    this->labElevSpan           = addLabel("Elevation Span", "Elevation Span Selected Source", 0, 100, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
+    this->togLinkElevSpan       = addToggleButton("Link", "Link other sources", 90, 100, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
+    this->sliAElevSpann         = addSlider("", "", 4, 118, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinElevSource, MaxElevSource, ShowSliderInter);
     //-----------------------------
     
     
@@ -125,36 +125,41 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->progressBarTraject->setVisible(false);
     
     this->sliSpeedTrajectory = addSlider("Speed :", "Speed of trajectory", 14, 150, 204, DefaultLabHeight, this->boxTrajectory->getContent(), MinSpeedTrajectory, MaxSpeedTrajectory,  0.001f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
+    addLabel("Speed", "", 10, 134, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
     //Other param Trajectories hided---
     int rowX = 260;
     
-    this->labTrajEllipseWidth = addLabel("Width :", "Width of ellipse", rowX, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajEllipseWidth = addTextEditor("", "", "Width of ellipse", rowX+50, 30, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->labCyclePercent = addLabel("% cycle", "", rowX, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->sliCyclePercent = addSlider("% :", "", rowX+50, 30, 180, DefaultLabHeight, this->boxTrajectory->getContent(), MinCyclePercent, MaxCyclePercent,  1.0f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
+
+    this->labTrajEllipseWidth = addLabel("Width :", "Width of ellipse", rowX,       50, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajEllipseWidth = addTextEditor("", "", "Width of ellipse", rowX+50,  50, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
-    this->comTrajOneWayReturn = addComboBox("", "Trajectory cycle", rowX, 30, DefaultLabWidth-30, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->comTrajOneWayReturn = addComboBox("", "Trajectory cycle", rowX,           50, DefaultLabWidth-30, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTrajOneWayReturn->addItem("One Way", 1);
     this->comTrajOneWayReturn->addItem("Return", 2);
     this->comTrajOneWayReturn->setSelectedId(1);
 
-    this->labTrajRadAngEnd = addLabel("Radius / Angle of end point :", "Radius and angle end point", rowX-5, 50, 200, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajRadiusEnd = addTextEditor("", "", "Radius (0-2)", rowX, 70, 40, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajAngleEnd = addTextEditor("", "", "Angle (0-360)", rowX+50, 70, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->labTrajRadAngEnd = addLabel("Radius / Angle of end point :", "Radius and angle end point", rowX-5, 70, 200, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajRadiusEnd = addTextEditor("", "", "Radius (0-2)", rowX, 90, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajAngleEnd = addTextEditor("", "", "Angle (0-360)", rowX+50, 90, 40, DefaultLabHeight, this->boxTrajectory->getContent());
 
-    this->butTrajSetEnd = addButton("Set", "Set end point", rowX+100, 70, 70, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->butTrajResetEnd = addButton("Reset", "Reset end point", rowX+180, 70, 70, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->butTrajSetEnd = addButton("Set", "Set end point", rowX+100, 90, 70, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->butTrajResetEnd = addButton("Reset", "Reset end point", rowX+180, 90, 70, DefaultLabHeight, this->boxTrajectory->getContent());
 
-    this->labTrajPendDampe = addLabel("Dampening :", "Dampening (0-1)", rowX-5, 94, 80, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajPendDampe = addTextEditor("", "", "Dampening (0-1)", rowX+80, 94, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->labTrajPendDampe = addLabel("Dampening :", "Dampening (0-1)", rowX-5, 114, 80, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajPendDampe = addTextEditor("", "", "Dampening (0-1)", rowX+80,114, 40, DefaultLabHeight, this->boxTrajectory->getContent());
 
-    this->labTrajPendDevia = addLabel("Deviation :", "Deviation (0-360)", rowX-5, 114, 80, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajPendDevia = addTextEditor("", "", "Deviation (0-360)", rowX+80, 114, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->labTrajPendDevia = addLabel("Deviation :", "Deviation (0-360)", rowX-5, 134, 80, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajPendDevia = addTextEditor("", "", "Deviation (0-360)", rowX+80, 134, 40, DefaultLabHeight, this->boxTrajectory->getContent());
     
-    this->labTrajRandSpeed = addLabel("Speed :", "Speed Random", rowX-5, 30, 80, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->sliTrajRandSpeed = addSlider("Speed :", "Speed Random", rowX+48, 30, 160, DefaultLabHeight, this->boxTrajectory->getContent(), MinTrajRandomSpeed, MaxTrajRandomSpeed,  0.01f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
-    this->togTrajRandSepare = addToggleButton("Separate sources :", "Force separate automation sources", rowX, 50, DefaultLabWidth, DefaultLabHeight,  this->boxTrajectory->getContent());
+    this->labTrajRandSpeed = addLabel("Speed :", "Speed Random", rowX-5, 50, 80, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->sliTrajRandSpeed = addSlider("Speed :", "Speed Random", rowX+48, 50, 160, DefaultLabHeight, this->boxTrajectory->getContent(), MinTrajRandomSpeed, MaxTrajRandomSpeed,  0.01f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
+    this->togTrajRandSepare = addToggleButton("Separate sources :", "Force separate automation sources", rowX, 30, DefaultLabWidth, DefaultLabHeight,  this->boxTrajectory->getContent());
 
     //Add in list for lock
+    this->listLockCompTrajectory.push_back(this->sliCyclePercent);
     this->listLockCompTrajectory.push_back(this->comTypeTrajectory);
     this->listLockCompTrajectory.push_back(this->texTimeTrajectory);
     this->listLockCompTrajectory.push_back(this->comTimeTrajectory);
@@ -187,17 +192,21 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     }
     this->comTypeProcess->setSelectedId(1);
     
-    this->labInOutMode      = addLabel("Input/Output :", "Input/Output mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->comInOutMode      = addComboBox("", "Input/Output mode", 90, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->butInOutMode      = addButton("Apply", "Apply Input/Output mode", 214, 30, 60, DefaultLabHeight, settingsBox);
+    this->labInOutMode      = addLabel("Input :", "Input mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comInOutMode      = addComboBox("", "Input mode", 60, 30, DefaultLabWidth-40, DefaultLabHeight, settingsBox);
+    this->butInOutMode      = addButton("Apply", "Apply Input/Output mode", 150, 30, 60, DefaultLabHeight, settingsBox);
     
+    //OSC Param
+    this->togOSCActive      = addToggleButton("OSC On/Off", "OSC Active (On/Off)", 240, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->togOSCActive->setToggleState(this->filter->getOscOn(), dontSendNotification);
     
-    this->togOSCActive      = addToggleButton("OSC On/Off", "OSC Active (On/Off)", 280, 4, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->labOSCSourceIDF   = addLabel("OSC 1er ID :", "OSC 1er Source ID", 280, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->texOSCSourceIDF   = addTextEditor("", "", "OSC 1er Source ID", 360, 30, 60, DefaultLabHeight, settingsBox);
+    this->labOSCSourceIDF   = addLabel("OSC 1er ID :", "OSC 1er Source ID", 240, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->texOSCSourceIDF   = addTextEditor("", "", "OSC 1er Source ID", 320, 30, 60, DefaultLabHeight, settingsBox);
+    this->texOSCSourceIDF->setText(String(this->filter->getOscFirstIdSource()));
     
-    this->labOSCPort        = addLabel("OSC Port :", "OSC Port", 280, 50, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->texOSCPort        = addTextEditor("", "", "OSC Port", 360, 50, 60, DefaultLabHeight, settingsBox);
+    this->labOSCPort        = addLabel("OSC Port :", "OSC Port", 240, 50, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->texOSCPort        = addTextEditor("", "", "OSC Port", 320, 50, 60, DefaultLabHeight, settingsBox);
+    this->texOSCPort->setText(String(this->filter->getOscPort()));
     
     //Volume and Filter
     //-----------------------------
@@ -234,7 +243,27 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     //Speakers
     //-----------------------------
     Component * speakersBox = this->octTab->getTabContentComponent(3);
-    addLabel("Comming soon...", "", 0, 4, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    this->labSpeakerPos          = addLabel("Speaker position :", "Speaker position", 0, 4, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    this->comSpeakerPos          = addComboBox("", "Speaker position", 110, 4, DefaultLabWidth+20, DefaultLabHeight, speakersBox);
+    for(int i = 0; i  < PositionSourceSpeaker::SIZE_PSS; i++){
+        this->comSpeakerPos->addItem(GetPositionSourceSpeakerName((PositionSourceSpeaker)i), i+1);
+    }
+    this->comSpeakerPos->setSelectedId(1);
+    
+    this->butSpeakerPos          = addButton("Apply", "Apply Speaker position", 254, 4, 60, DefaultLabHeight, speakersBox);
+    
+    
+    
+    this->labSpeakerSelectPos    = addLabel("Selected :", "Speaker Selected", 0, 30, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    this->comSpeakerSelectPos    = addComboBox("", "Speaker Selected", 80, 30, 40, DefaultLabHeight, speakersBox);
+    
+    this->labSpeakerSelectRay    = addLabel("Ray :", "Ray (0 - 2)", 0, 50, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    this->comSpeakerSelectRay    = addTextEditor("","", "Ray (0 - 2)", 50, 50, 70, DefaultLabHeight, speakersBox);
+    this->labSpeakerInfoRay      = addLabel("(0 - 2)", "", 120, 50, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    
+    this->labSpeakerSelectAngle  = addLabel("Angle :", "Angle (0 - 360)", 0, 70, DefaultLabWidth, DefaultLabHeight, speakersBox);
+    this->comSpeakerSelectAngle  = addTextEditor("","", "Angle (0 - 360)", 50, 70, 70, DefaultLabHeight, speakersBox);
+    this->labSpeakerInfoAngle    = addLabel("(0 - 360)", "", 120, 70, DefaultLabWidth, DefaultLabHeight, speakersBox);
     
     
     //Interfaces
@@ -255,7 +284,9 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->updateTrajectoryParam();
     this->updateInputOutputMode();
     this->comInOutMode->setSelectedId(1);
+    
     this->updateSelectSource();
+    this->updateSelectSpeaker();
     
 	this->startTimerHz(HertzRefresh);
 }
@@ -374,19 +405,21 @@ ComboBox* SpatGrisAudioProcessorEditor::addComboBox(const String &s, const Strin
 //==============================================================================
 void SpatGrisAudioProcessorEditor::updateSourceParam()
 {
-    this->togLinkSurfaceOrPan->setToggleState(this->filter->getLinkSurface(),   dontSendNotification);
+    this->togLinkSurfaceOrPan->setToggleState(this->filter->getLinkHeight(),   dontSendNotification);
     this->togLinkAzimSpan->setToggleState(this->filter->getLinkAzimuth(),       dontSendNotification);
     this->togLinkElevSpan->setToggleState(this->filter->getLinkElevation(),     dontSendNotification);
     
-    const int idS = this->filter->getSelectItem()->selectID;
-    this->sliSurfaceOrPan->setValue(*(this->filter->getListSource().at(idS)->getSurf()),dontSendNotification);
-    this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
-    
-    this->sliAzimSpan->setValue(*(this->filter->getListSource().at(idS)->getAzim()),    dontSendNotification);
-    this->sliAzimSpan->setTooltip("A:"+String(this->sliAzimSpan->getValue(),2));
-    
-    this->sliAElevSpann->setValue(*(this->filter->getListSource().at(idS)->getElev()),  dontSendNotification);
-    this->sliAElevSpann->setTooltip("E:"+String(this->sliAElevSpann->getValue(),2));
+    if(this->filter->getSelectItem()->selecType == SelectedSource){
+        const int idS = this->filter->getSelectItem()->selectID;
+        this->sliSurfaceOrPan->setValue(*(this->filter->getListSource()[idS]->getHeigt()),dontSendNotification);
+        this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
+        
+        this->sliAzimSpan->setValue(*(this->filter->getListSource()[idS]->getAzim()),    dontSendNotification);
+        this->sliAzimSpan->setTooltip("A:"+String(this->sliAzimSpan->getValue(),2));
+        
+        this->sliAElevSpann->setValue(*(this->filter->getListSource()[idS]->getElev()),  dontSendNotification);
+        this->sliAElevSpann->setTooltip("E:"+String(this->sliAElevSpann->getValue(),2));
+    }
 }
 
 
@@ -489,31 +522,62 @@ void SpatGrisAudioProcessorEditor::updateInputOutputMode()
         this->comSourceSelectPos->addItem(String(i+1), i+1);
     }
     
+    this->comSpeakerSelectPos->clear();
+    for(int i = 0; i  < this->filter->getNumSpeakerUsed(); i++){
+        this->comSpeakerSelectPos->addItem(String(i+1), i+1);
+    }
+    
 }
 
 void SpatGrisAudioProcessorEditor::updateSelectSource()
 {
-    this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectID+1, dontSendNotification);
-    FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
-    this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
-    this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    if(this->filter->getSelectItem()->selecType == SelectedSource){
+        this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectID+1, dontSendNotification);
+        FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
+        this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+        this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    }else{
+        this->comSourceSelectPos->setSelectedId(1, dontSendNotification);
+        FPoint rayAngleS = this->filter->getRayAngleSource(0);
+        this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+        this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    }
+}
+
+void SpatGrisAudioProcessorEditor::updateSelectSpeaker()
+{
+    if(this->filter->getSelectItem()->selecType == SelectedSpeaker){
+        this->comSpeakerSelectPos->setSelectedId(this->filter->getSelectItem()->selectID+1, dontSendNotification);
+        FPoint xyS = this->filter->getListSpeaker()[this->filter->getSelectItem()->selectID]->getPosXY();
+        
+        FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
+        this->comSpeakerSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+        this->comSpeakerSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    }
+    else{
+        this->comSpeakerSelectPos->setSelectedId(1, dontSendNotification);
+        FPoint xyS = this->filter->getListSpeaker()[0]->getPosXY();
+        
+        FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
+        this->comSpeakerSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+        this->comSpeakerSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    }
 }
 
 //==============================================================================
 
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
 {
-    if(this->togLinkSurfaceOrPan == button){
-        this->filter->setLinkSurface(this->togLinkSurfaceOrPan->getToggleState());
-        
-    }
-    else if(this->togLinkAzimSpan == button){
+    if(this->togLinkAzimSpan == button){
         this->filter->setLinkAzimuth(this->togLinkAzimSpan->getToggleState());
         
     }
     else if(this->togLinkElevSpan == button){
         this->filter->setLinkElevation(this->togLinkElevSpan->getToggleState());
         
+    }
+    else if(this->togLinkSurfaceOrPan == button){
+        this->filter->setLinkHeight(this->togLinkSurfaceOrPan->getToggleState());
     }
     else if(this->togTrajRandSepare == button){
         this->filter->getTrajectory()->setRandSeparate(this->togTrajRandSepare->getToggleState());
@@ -523,7 +587,17 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
         this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
         this->updateTrajectoryParam();
     }
-    
+    else if(this->butSourcePos == button){
+        this->filter->getSourceMover()->setSourcesPosition((PositionSourceSpeaker)this->comSourcePos->getSelectedItemIndex());
+        this->updateSelectSource();
+    }
+    else if(this->butSpeakerPos == button){
+        this->filter->getSourceMover()->setSpeakersPosition((PositionSourceSpeaker)this->comSpeakerPos->getSelectedItemIndex());
+        this->updateSelectSpeaker();
+    }
+    else if(this->togOSCActive == button){
+        this->filter->setOscOn(this->togOSCActive->getToggleState());
+    }
     else {
         cout << "buttonClicked not found !" << newLine;
     }
@@ -532,7 +606,7 @@ void SpatGrisAudioProcessorEditor::sliderValueChanged (Slider *slider)
 {
     
     if(this->sliSurfaceOrPan == slider){
-        this->filter->setSurfaceValue(this->sliSurfaceOrPan->getValue());
+        this->filter->setHeightSValue(this->sliSurfaceOrPan->getValue());
         this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
         
     }
@@ -552,6 +626,10 @@ void SpatGrisAudioProcessorEditor::sliderValueChanged (Slider *slider)
     }
     else if(this->sliTrajRandSpeed == slider){
         this->filter->getTrajectory()->setRandSpeed(this->sliTrajRandSpeed->getValue());
+
+    }
+    else if(this->sliCyclePercent == slider){
+        this->filter->getTrajectory()->setCyclePercent(this->sliCyclePercent->getValue());
         
     }
     else {
@@ -563,10 +641,11 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     if(this->comMouvement == comboBox){
         this->filter->getSourceMover()->setMouvementMode((MouvementMode)this->comMouvement->getSelectedItemIndex());
         
-        
     }
     else if(this->comTypeTrajectory == comboBox){
-
+        
+        this->labCyclePercent->setVisible(false);
+        this->sliCyclePercent->setVisible(false);
         this->labTrajEllipseWidth->setVisible(false);
         this->texTrajEllipseWidth->setVisible(false);
         this->comTrajOneWayReturn->setVisible(false);
@@ -584,13 +663,20 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         this->togTrajRandSepare->setVisible(false);
         
         switch ((TrajectoryType)this->comTypeTrajectory->getSelectedItemIndex()) {
+            case Circle:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
                 
             case Ellipse:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
                 this->labTrajEllipseWidth->setVisible(true);
                 this->texTrajEllipseWidth->setVisible(true);
                 break;
                 
             case Spiral:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
                 this->comTrajOneWayReturn->setVisible(true);
                 this->labTrajRadAngEnd->setVisible(true);
                 this->texTrajRadiusEnd->setVisible(true);
@@ -600,6 +686,8 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 break;
                 
             case Pendulum:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
                 this->comTrajOneWayReturn->setVisible(true);
                 this->labTrajRadAngEnd->setVisible(true);
                 this->texTrajRadiusEnd->setVisible(true);
@@ -618,13 +706,25 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 this->sliTrajRandSpeed->setVisible(true);
                 this->togTrajRandSepare->setVisible(true);
                 break;
-            
+                
             case RandomTarget:
                 this->comTrajOneWayReturn->setVisible(true);
                 this->togTrajRandSepare->setVisible(true);
                 break;
             
+            case SymXTarget:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
+                break;
+                
+            case SymYTarget:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
+                break;
+                
             case FreeDrawing:
+                this->labCyclePercent->setVisible(true);
+                this->sliCyclePercent->setVisible(true);
                 this->comTrajOneWayReturn->setVisible(true);
                 break;
                 
@@ -644,6 +744,124 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
     else if(this->comSourceSelectPos == comboBox){
         this->filter->getSelectItem()->selecType = SelectedSource;
         this->filter->getSelectItem()->selectID = this->comSourceSelectPos->getSelectedId()-1;
+        this->updateSelectSource();
+    }
+    else if(this->comSpeakerSelectPos == comboBox){
+        this->filter->getSelectItem()->selecType = SelectedSpeaker;
+        this->filter->getSelectItem()->selectID = this->comSpeakerSelectPos->getSelectedId()-1;
+        this->updateSelectSpeaker();
+    }
+    
+    else if(this->comTypeProcess == comboBox){
+
+        switch ((ProcessType)this->comTypeProcess->getSelectedItemIndex()) {
+                
+            case FreeVolum:
+                this->labSurfaceOrPan->setEnabled(true);
+                this->labSurfaceOrPan->setText("Surface", dontSendNotification);
+                this->togLinkSurfaceOrPan->setEnabled(true);
+                this->sliSurfaceOrPan->setEnabled(true);
+                
+                this->labAzimSpan->setEnabled(false);
+                this->togLinkAzimSpan->setEnabled(false);
+                this->sliAzimSpan->setEnabled(false);
+                
+                this->labElevSpan->setEnabled(false);
+                this->togLinkElevSpan->setEnabled(false);
+                this->sliAElevSpann->setEnabled(false);
+                
+                this->boxOutputParam->setEnabled(true);
+                
+                //Filter
+                this->octTab->getTabContentComponent(1)->setEnabled(false);
+                //Speakers
+                this->octTab->getTabContentComponent(3)->setEnabled(true);
+                this->labSpeakerSelectRay->setEnabled(true);
+                this->comSpeakerSelectRay->setEnabled(true);
+                this->labSpeakerInfoRay->setText("(0 - 2)", dontSendNotification);
+                this->labSpeakerInfoRay->setEnabled(true);
+                
+                break;
+            
+            case PanSpan:
+                this->labSurfaceOrPan->setEnabled(false);
+                this->togLinkSurfaceOrPan->setEnabled(false);
+                this->sliSurfaceOrPan->setEnabled(false);
+                
+                this->labAzimSpan->setEnabled(true);
+                this->togLinkAzimSpan->setEnabled(true);
+                this->sliAzimSpan->setEnabled(true);
+                
+                this->labElevSpan->setEnabled(true);
+                this->togLinkElevSpan->setEnabled(true);
+                this->sliAElevSpann->setEnabled(true);
+                
+                this->boxOutputParam->setEnabled(true);
+                
+                //Filter
+                this->octTab->getTabContentComponent(1)->setEnabled(true);
+                //Speakers
+                this->octTab->getTabContentComponent(3)->setEnabled(true);
+                this->labSpeakerSelectRay->setEnabled(false);
+                this->comSpeakerSelectRay->setEnabled(false);
+                this->labSpeakerInfoRay->setText("(1)", dontSendNotification);
+                this->labSpeakerInfoRay->setEnabled(false);
+                
+                this->filter->getSourceMover()->setSpeakersPosition((PositionSourceSpeaker)this->comSpeakerPos->getSelectedItemIndex());
+                this->updateSelectSpeaker();
+                
+                
+                break;
+               
+            case OSCSpatServer:
+                this->labSurfaceOrPan->setEnabled(true);
+                this->labSurfaceOrPan->setText("Height", dontSendNotification);
+                this->togLinkSurfaceOrPan->setEnabled(true);
+                this->sliSurfaceOrPan->setEnabled(true);
+                
+                this->labAzimSpan->setEnabled(true);
+                this->togLinkAzimSpan->setEnabled(true);
+                this->sliAzimSpan->setEnabled(true);
+                
+                this->labElevSpan->setEnabled(true);
+                this->togLinkElevSpan->setEnabled(true);
+                this->sliAElevSpann->setEnabled(true);
+                
+                this->boxOutputParam->setEnabled(false);
+                
+                //Filter
+                this->octTab->getTabContentComponent(1)->setEnabled(false);
+                //Speakers
+                this->octTab->getTabContentComponent(3)->setEnabled(false);
+                break;
+                
+            case OSCZirkonium:
+                this->labSurfaceOrPan->setEnabled(false);
+                this->togLinkSurfaceOrPan->setEnabled(false);
+                this->sliSurfaceOrPan->setEnabled(false);
+                
+                this->labAzimSpan->setEnabled(true);
+                this->togLinkAzimSpan->setEnabled(true);
+                this->sliAzimSpan->setEnabled(true);
+                
+                this->labElevSpan->setEnabled(true);
+                this->togLinkElevSpan->setEnabled(true);
+                this->sliAElevSpann->setEnabled(true);
+                
+                this->boxOutputParam->setEnabled(false);
+                
+                //Filter
+                this->octTab->getTabContentComponent(1)->setEnabled(false);
+                //Speakers
+                this->octTab->getTabContentComponent(3)->setEnabled(false);
+                break;
+                
+            default:
+                jassert(false);
+                break;
+        }
+        this->filter->setTypeProcess((ProcessType)this->comTypeProcess->getSelectedItemIndex());
+        
     }
 }
 
@@ -660,7 +878,9 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed (TextEditor &textE
         this->filter->getTrajectory()->setCycle(this->texCycleTrajectory->getText().getFloatValue());
         
     }else if(this->texTrajEllipseWidth == &textEditor){
-        this->filter->getTrajectory()->setEllipseWidth(this->texTrajEllipseWidth->getText().getFloatValue());
+        float w = GetValueInRange(this->texTrajEllipseWidth->getText().getFloatValue(), MinTrajWidthEllipse, MaxTrajWidthEllipse);
+        this->filter->getTrajectory()->setEllipseWidth(w);
+        this->texTrajEllipseWidth->setText(String(w,2), dontSendNotification);
         
     }else if(this->texTrajRadiusEnd == &textEditor){
         this->filter->getTrajectory()->setRadiusEnd(this->texTrajRadiusEnd->getText().getFloatValue());
@@ -674,11 +894,45 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed (TextEditor &textE
     else if(this->texTrajPendDevia == &textEditor){
         this->filter->getTrajectory()->setPendDeviation(this->texTrajPendDevia->getText().getFloatValue());
     }
+    else if(this->comSourceSelectRay == &textEditor || this->comSourceSelectAngle == &textEditor){
+        float r = GetValueInRange(this->comSourceSelectRay->getText().getFloatValue(), 0.0f, RadiusMax);
+        float a = GetValueInRange(this->comSourceSelectAngle->getText().getFloatValue(), 0.0f, AngleDegMax);
+        this->filter->setPosRayAngSource(this->comSourceSelectPos->getSelectedId()-1, r, a, false);
+        this->comSourceSelectRay->setText(String(r,4), dontSendNotification);
+        this->comSourceSelectAngle->setText(String(a ,4), dontSendNotification);
+    }
+    
+    else if(this->comSpeakerSelectRay == &textEditor || this->comSpeakerSelectAngle == &textEditor){
+        float r = GetValueInRange(this->comSpeakerSelectRay->getText().getFloatValue(), 0.0f, RadiusMax);
+        float a = GetValueInRange(this->comSpeakerSelectAngle->getText().getFloatValue(), 0.0f, AngleDegMax);
+        this->filter->getListSpeaker()[this->comSpeakerSelectPos->getSelectedId()-1]->setPosXY( GetXYFromRayAng(r, DegreeToRadian(a)));
+        this->comSpeakerSelectRay->setText(String(r,4), dontSendNotification);
+        this->comSpeakerSelectAngle->setText(String(a ,4), dontSendNotification);
+    }
+    
+    else if(this->texOSCSourceIDF == &textEditor){
+        this->filter->setOscFirstIdSource(this->texOSCSourceIDF->getText().getIntValue());
+    }
+    
+    else if(this->texOSCPort == &textEditor){
+        int v = GetValueInRange(this->texOSCPort->getText().getIntValue(), OscMinPort, OscMaxPort);
+        this->filter->setOscPort(v);
+        if(this->filter->getOscRun()){
+            this->labOSCPort->setColour(Label::textColourId, this->grisFeel.getFontColour());
+        }else{
+            this->labOSCPort->setColour(Label::textColourId, Colours::red);
+        }
+        this->texOSCPort->setText(String(v), dontSendNotification);
+    }
 }
 
 void SpatGrisAudioProcessorEditor::timerCallback()
 {
 	this->spatFieldComp->repaint();
+    
+    if(this->filter->getTrajectory()->getProcessTrajectory()){
+        this->progressBarTraject->setValue(this->filter->getTrajectory()->getProgressBar());
+    }
 }
 
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)
@@ -717,7 +971,7 @@ void SpatGrisAudioProcessorEditor::resized()
     this->boxTrajectory->correctSize(510, 170);    //w-(fieldSize + (Margin * 5))
     
     //OctTabbedComponent-----------------------
-    this->octTab->setBounds(x, 170+210, w-(fieldSize + (Margin * 4)), h - (170+200+(Margin*6)) );
+    this->octTab->setBounds(x, 170+206, w-(fieldSize + (Margin * 4)), h - (170+196+(Margin*6)) );
 
     
     this->resizer->setBounds (w - 16, h - 16, 16, 16);

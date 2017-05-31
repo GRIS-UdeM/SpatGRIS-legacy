@@ -49,7 +49,9 @@ public:
     void setMouvementMode(MouvementMode m);
     
     //==================================================
-    void setSourcesPosition();
+    void setSourcesPosition(PositionSourceSpeaker pss = LeftAlternate);
+    void setSpeakersPosition(PositionSourceSpeaker pss = LeftAlternate);
+    
     void beginMouvement();
     
     //==================================================
@@ -57,38 +59,45 @@ public:
     
     
     /*void begin(int s, MoverType mt);
-    void sortAngles();
-    void setEqualRadius();
-    void setEqualAngles();
-    void setEqualRadiusAndAngles();
-    void setSymmetricX();
-    void setSymmetricY();
-    void move(FPoint p, MoverType mt);
-    void storeAllDownPositions();
-    void storeDownPosition(int id, FPoint pointRT);
-    void end(MoverType mt, bool clearTrajectory = true);
-    void setFieldExists(bool v){ mFieldExists = v; }
-    
-    void setFieldComponent(FieldComponent* field){
-        mFieldExists = true;
-        mField = field;
-    }*/
+     void sortAngles();
+     void setEqualRadius();
+     void setEqualAngles();
+     void setEqualRadiusAndAngles();
+     void setSymmetricX();
+     void setSymmetricY();
+     void move(FPoint p, MoverType mt);
+     void storeAllDownPositions();
+     void storeDownPosition(int id, FPoint pointRT);
+     void end(MoverType mt, bool clearTrajectory = true);
+     void setFieldExists(bool v){ mFieldExists = v; }
+     
+     void setFieldComponent(FieldComponent* field){
+     mFieldExists = true;
+     mField = field;
+     }*/
     
 private:
+    void setEqualAngles();
+    void setEqualRadiusAndAngles();
+    void sortAngles();
+    
+    
     SpatGrisAudioProcessor * filter;
     MouvementMode   mouvementModeSelect;
     StringArray     listMouvement;
     
+    Array<FPoint>   listSourceXY;
     Array<FPoint>   listSourceRayAng;
+    Array<float>    listAngSourceSorted;
     //AudioParameterChoice * mouvementChoiceAuto;
     /*MoverType mMoverType;
-    int mSelectedSrc;
-    bool mFieldExists;
-    
-    
-    Array<FPoint> mSourcesDownRT;
-    Array<float> mSourcesAngularOrder;
-    FieldComponent* mField;*/
+     int mSelectedSrc;
+     bool mFieldExists;
+     
+     
+     Array<FPoint> mSourcesDownRT;
+     Array<float> mSourcesAngularOrder;
+     FieldComponent* mField;*/
 };
 
 #endif  // SOURCEMOVER_H_INCLUDED

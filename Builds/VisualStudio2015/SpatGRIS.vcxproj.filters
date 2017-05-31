@@ -397,25 +397,28 @@
     <ClCompile Include="..\..\HIDManager\IOHIDElement_.cpp">
       <Filter>SpatGRIS\HIDManager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Source.cpp">
+    <ClCompile Include="..\..\Source\HIDDelegate.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\SpatComponent.cpp">
+    <ClCompile Include="..\..\Source\Source.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Speaker.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\SpatComponent.cpp">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Trajectory.cpp">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\SourceMover.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\UiComponent.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Router.cpp">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\HIDDelegate.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\FirFilter.cpp">
@@ -434,9 +437,6 @@
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PluginEditor.cpp">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\SourceMover.cpp">
       <Filter>SpatGRIS\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
@@ -2304,16 +2304,25 @@
     <ClInclude Include="..\..\Source\DefaultParam.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Source.h">
+    <ClInclude Include="..\..\Source\_firs.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SpatComponent.h">
+    <ClInclude Include="..\..\Source\HIDDelegate.h">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Source.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Speaker.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\SpatComponent.h">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Trajectory.h">
+      <Filter>SpatGRIS\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\SourceMover.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\UiComponent.h">
@@ -2326,12 +2335,6 @@
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ParamSliderGris.h">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\HIDDelegate.h">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\_firs.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\FirFilter.h">
@@ -2350,9 +2353,6 @@
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PluginEditor.h">
-      <Filter>SpatGRIS\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\SourceMover.h">
       <Filter>SpatGRIS\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h">

@@ -10,8 +10,10 @@
 #include "PluginProcessor.h"
 
 
-Speaker::Speaker(SpatGrisAudioProcessor * filt, int idS):
-filter(filt),id(idS)
+Speaker::Speaker(SpatGrisAudioProcessor * filt, unsigned int idS):
+filter(filt), id(idS)
 {
-    
+    this->px = 0.f;
+    this->py = 0.f;
+    this->muted = false;
 }

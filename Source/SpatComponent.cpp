@@ -63,7 +63,7 @@ void SpatComponent::paint(Graphics &g)
     const int fieldWH = getWidth();     //Same getHeight
     const int fieldCenter = fieldWH/2;
     float w,x;
-
+    String stringVal;
     
     g.fillAll(this->grisFeel->getBackgroundColour());
     
@@ -97,6 +97,9 @@ void SpatComponent::paint(Graphics &g)
     // - - - - - - - - - - - -
     // draw little background circle
     // - - - - - - - - - - - -
+    if(this->filter->getTypeProcess() == OSCZirkonium || this->filter->getTypeProcess() == OSCSpatServer){
+        g.setColour(this->grisFeel->getLightColour().withBrightness(0.5));
+    }
     w = (fieldWH - SourceDiameter) / 2.0f;
     x = (fieldWH - w) / 2.0f;
     g.drawEllipse(x, x, w, w, 1);
@@ -112,10 +115,33 @@ void SpatComponent::paint(Graphics &g)
     
     
     // - - - - - - - - - - - -
+    // draw angles value
+    // - - - - - - - - - - - -
+    g.setColour(this->grisFeel->getFontColour().withBrightness(0.7));
+    g.setFont(this->grisFeel->getFont());
+    
+    g.drawText("0", fieldWH-30 , fieldCenter, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+    g.drawText("90", fieldCenter , 10, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+    g.drawText("180", 14 , fieldCenter, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+    g.drawText("270", fieldCenter+2 , fieldWH-28, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+
+    
+    // - - - - - - - - - - - -
     // draw Speaker
     // - - - - - - - - - - - -
-    for(unsigned int i = 0; i < this->filter->getNumSpeakerUsed(); ++i){
-        
+    w = (fieldWH - SourceDiameter);
+    if(this->filter->getTypeProcess() == FreeVolum || this->filter->getTypeProcess() == PanSpan){
+        for(int i = 0; i < this->filter->getNumSpeakerUsed(); ++i){
+            FPoint sourceP = this->filter->getListSpeaker()[i]->getPosXY();
+            sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
+            sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
+            
+            g.setColour(Colour::fromHSV(1.2,0,0.5,1));
+            g.fillEllipse(sourceP.x , sourceP.y , SourceDiameter, SourceDiameter);
+            
+            g.setColour(Colours::white);
+            g.drawText(String(i+1), sourceP.x, sourceP.y, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+        }
     }
     
     
@@ -124,20 +150,31 @@ void SpatComponent::paint(Graphics &g)
     // draw translucid circles (mode)
     // - - - - - - - - - - - -
     for (int i = 0; i < filter->getNumSourceUsed(); ++i) {
-        drawAzimElevSource(g, i, fieldWH, fieldCenter);
+        switch (this->filter->getTypeProcess()){
+                
+            case FreeVolum :
+                drawCircleSource(g, i, fieldWH, fieldCenter);
+                break;
+            
+            default:
+                drawAzimElevSource(g, i, fieldWH, fieldCenter);
+                break;
+        }
+        
     }
     
     // - - - - - - - - - - - -
     // draw Source
     // - - - - - - - - - - - -
-    String stringVal;
-    w = (fieldWH - SourceDiameter);
-    
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
         
-        FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
+        FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
         sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
         sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
+        
+        stringVal.clear();
+        stringVal << (int)(this->filter->getListSource()[i]->getId() + (this->filter->getOscFirstIdSource()-1));
+        
         
         // - - - - - - - - - - - -
         // draw Select Source
@@ -145,27 +182,25 @@ void SpatComponent::paint(Graphics &g)
         if(this->filter->getSelectItem()->selectID == i && this->filter->getSelectItem()->selecType == SelectedSource){
             
             g.setColour(this->getColor(i));
+            g.drawEllipse(fieldWH-40, 39 , SourceDiameter, SourceDiameter,2);
             float Radius = SourceDiameter/2;
             g.drawLine   (fieldCenter, fieldCenter,  sourceP.x+Radius , sourceP.y+Radius , 1);
             
             g.setColour(this->grisFeel->getLightColour());
             g.drawEllipse(sourceP.x-2 , sourceP.y-2 , SourceDiameter+4, SourceDiameter+4, 1);
+            
+
+            g.setColour(Colours::white);
+            g.drawText(stringVal, fieldWH-40, 40, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
         }
         
         g.setColour(this->getColor(i));
         g.fillEllipse(sourceP.x , sourceP.y , SourceDiameter, SourceDiameter);
-        
-        stringVal.clear();
-        stringVal << i+1;
-        
+
         g.setColour(Colours::black);
-        g.setFont(this->grisFeel->getFont());
-        
-        int tx = sourceP.x;
-        int ty = sourceP.y;
-        g.drawText(stringVal, tx+1 , ty+1, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+        g.drawText(stringVal, sourceP.x+1 , sourceP.y+1, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
         g.setColour(Colours::white);
-        g.drawText(stringVal, tx, ty, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
+        g.drawText(stringVal, sourceP.x, sourceP.y, SourceDiameter, SourceDiameter, Justification(Justification::centred), false);
         
     }
 }
@@ -185,10 +220,34 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     FPoint mouseP(event.x, event.y);
     
     const float w = (fieldWH - SourceDiameter) /2.0f;
+    this->filter->getSelectItem()->mouseOver = false;
     
+    if(this->filter->getTypeProcess() == FreeVolum || this->filter->getTypeProcess() == PanSpan){
+        //Speakers
+        for(int i = 0; i < this->filter->getNumSpeakerUsed(); ++i){
+            
+            FPoint sourceP = this->filter->getListSpeaker()[i]->getPosXY();
+            NormalizeXYSourceWithScreen(sourceP, w);
+            
+            float dx = mouseP.x - sourceP.x;
+            float dy = mouseP.y - sourceP.y;
+            float distanceSquared = dx*dx + dy*dy;
+            if(distanceSquared < SourceRadius*SourceRadius){
+                
+                this->clickedMouseP = mouseP;
+                NormalizeScreenWithSpat(this->clickedMouseP,w);
+                
+                this->filter->getSelectItem()->selectID = i;
+                this->filter->getSelectItem()->selecType = SelectedSpeaker;
+                this->filter->getSelectItem()->mouseOver = true;
+            }
+        }
+    }
+    
+    //Sources
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
 
-        FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
+        FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
         NormalizeXYSourceWithScreen(sourceP, w);
         
         float dx = mouseP.x - sourceP.x;
@@ -201,6 +260,7 @@ void SpatComponent::mouseDown(const MouseEvent &event)
             
             this->filter->getSelectItem()->selectID = i;
             this->filter->getSelectItem()->selecType = SelectedSource;
+            this->filter->getSelectItem()->mouseOver = true;
             
             this->filter->getSourceMover()->beginMouvement();
         }
@@ -211,6 +271,7 @@ void SpatComponent::mouseDown(const MouseEvent &event)
 
 void SpatComponent::mouseDrag(const MouseEvent &event)
 {
+    if(!this->filter->getSelectItem()->mouseOver){ return; }
     const int fieldWH = getWidth();
     FPoint mouseP(event.x, event.y);
     
@@ -221,8 +282,7 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
     switch(this->filter->getSelectItem()->selecType)
     {
         
-        case SelectedSource:
-
+        case SelectedSource:{
             float dx =  (x+(w/2.0f)) - mouseP.x;
             float dy =  (x+(w/2.0f)) - mouseP.y;
             float dist = sqrt(dx*dx + dy*dy);
@@ -235,13 +295,29 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
             this->filter->setPosXYSource(this->filter->getSelectItem()->selectID, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
             this->editor->updateSelectSource();
             break;
+        }
             
-        /*case SelectedSpeaker:
+        case SelectedSpeaker:{
+            float dx =  (x+(w/2.0f)) - mouseP.x;
+            float dy =  (x+(w/2.0f)) - mouseP.y;
+            float dist = sqrt(dx*dx + dy*dy);
             
+            NormalizeScreenWithSpat(mouseP, w);
+            float ang = AngleInCircle(mouseP);
+            if(this->filter->getTypeProcess() == PanSpan){
+                dist = 1.0f;
+            }else{
+                dist = dist/(w/2.0f);
+                if(dist > 2.0f){ dist = 2.0f; }
+            }
+            
+            this->filter->getListSpeaker()[this->filter->getSelectItem()->selectID]->setPosXY(FPoint (dist*cosf(ang), dist* sinf(ang)));
+            this->editor->updateSelectSpeaker();
             break;
+        }
         
         case NoSelection:
-            break;*/
+            break;
     }
     this->repaint();
 }
@@ -253,14 +329,32 @@ void SpatComponent::mouseUp(const MouseEvent &event)
 
 //=============================================================
 
-void SpatComponent::drawAzimElevSource(Graphics &g, int i, const int fieldWH, const int fieldCenter){
+void SpatComponent::drawCircleSource(Graphics &g, const int i, const int fieldWH, const int fieldCenter)
+{
+    const float w = (fieldWH - SourceDiameter);
+    const float surface =  (*this->filter->getListSource()[i]->getHeigt());
+    const float radius = (surface / (RadiusMax*2)) * (fieldWH - SourceDiameter);
+    const float diameter = radius * 2;
+    
+    FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
+    sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
+    sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
+    
+    g.setColour(this->getColor(i).withAlpha(0.2f));
+    g.fillEllipse(sourceP.x-radius , sourceP.y-radius , SourceDiameter+diameter, SourceDiameter+diameter);
+    //g.setColour(this->getColor(i).withAlpha(0.5f));
+    //g.drawEllipse(sourceP.x-radius , sourceP.y-radius , SourceDiameter+diameter, SourceDiameter+diameter, 1);
+}
+
+void SpatComponent::drawAzimElevSource(Graphics &g, int i, const int fieldWH, const int fieldCenter)
+{
     g.setColour(this->getColor(i));
     
-    FPoint sourceP = FPoint(*(this->filter->getListSource().at(i)->getX()), *(this->filter->getListSource().at(i)->getY()));
+    FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
     FPoint azimElev = GetSourceAzimElev(sourceP, true);
     
-    float HRAzimSpan = 180.0f *(*this->filter->getListSource().at(i)->getAzim());  //in zirkosc, this is [0,360]
-    float HRElevSpan = 180.0f *(*this->filter->getListSource().at(i)->getElev());  //in zirkosc, this is [0,90]
+    float HRAzimSpan = 180.0f *(*this->filter->getListSource()[i]->getAzim());  //in zirkosc, this is [0,360]
+    float HRElevSpan = 180.0f *(*this->filter->getListSource()[i]->getElev());  //in zirkosc, this is [0,90]
     
     float HRAzim = azimElev.x * 180.0f;    //in zirkosc [-180,180]
     float HRElev = azimElev.y * 180.0f;    //in zirkosc [0,89.9999]
@@ -301,8 +395,10 @@ void SpatComponent::drawAzimElevSource(Graphics &g, int i, const int fieldWH, co
     g.setColour(this->getColor(i).withAlpha(0.2f));
     g.fillPath(myPath);
     
-    g.setColour(this->getColor(i).withAlpha(0.6f));
-    g.strokePath(myPath, PathStrokeType(0.5));
+    if( (HRElevSpan==0 && HRAzimSpan!=0) || (HRAzimSpan==0 && HRElevSpan!=0) ){
+        g.setColour(this->getColor(i).withAlpha(0.5f));
+        g.strokePath(myPath, PathStrokeType(0.5));
+    }
 }
 
 Colour SpatComponent::getColor(int i) {

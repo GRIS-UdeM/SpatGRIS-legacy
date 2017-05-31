@@ -1,4 +1,4 @@
- /*
+/*
  ==============================================================================
  SpatGRIS: multichannel sound spatialization plug-in.
  
@@ -31,51 +31,51 @@
 #if JUCE_MSVC
 
 /*#include <sstream>
-#include <string>
-#include <windows.h>*/
+ #include <string>
+ #include <windows.h>*/
 
 /*
-template<class T>
-string toString(const T &value) {
-    ostringstream os;
-    os << value;
-    return os.str();
-}
-
-// from https://github.com/objectx/strlcpy/blob/master/strlcpy/strlcpy.c
-size_t strlcpy(char * dst, const char * src, size_t dstsize)
-{
-    if (dst == 0 || dstsize == 0) {
-        return 0;
-    }
-    if (src == 0) {
-        dst [0] = 0;
-        return 0;
-    } else {
-        size_t	src_len = strlen (src);
-        size_t	dstlimit = dstsize - 1;
-        
-        if (dstlimit < src_len) {
-            src_len = dstlimit;
-        }
-        memcpy (dst, src, src_len);
-        dst [src_len] = 0;
-        return src_len;
-    }
-}
-*/
+ template<class T>
+ string toString(const T &value) {
+ ostringstream os;
+ os << value;
+ return os.str();
+ }
+ 
+ // from https://github.com/objectx/strlcpy/blob/master/strlcpy/strlcpy.c
+ size_t strlcpy(char * dst, const char * src, size_t dstsize)
+ {
+ if (dst == 0 || dstsize == 0) {
+ return 0;
+ }
+ if (src == 0) {
+ dst [0] = 0;
+ return 0;
+ } else {
+ size_t	src_len = strlen (src);
+ size_t	dstlimit = dstsize - 1;
+ 
+ if (dstlimit < src_len) {
+ src_len = dstlimit;
+ }
+ memcpy (dst, src, src_len);
+ dst [src_len] = 0;
+ return src_len;
+ }
+ }
+ */
 #endif
 
 #if WIN32
-    #define M_PI 3.14159265358979323846264338327950288
+#define M_PI 3.14159265358979323846264338327950288
 #else
-    #ifndef USE_JOYSTICK
-        #define USE_JOYSTICK 1
-    #endif
+#ifndef USE_JOYSTICK
+#define USE_JOYSTICK 1
+#endif
 
-    #ifndef USE_LEAP
-        #define USE_LEAP 1
-    #endif
+#ifndef USE_LEAP
+#define USE_LEAP 1
+#endif
 #endif
 
 
@@ -94,24 +94,25 @@ typedef Point<float> FPoint;
 
 
 //==============================================================================
-class SpatGrisAudioProcessor : public AudioProcessor
+class SpatGrisAudioProcessor :  public AudioProcessor,
+private Timer
 {
 public:
     //==============================================================================
     SpatGrisAudioProcessor();
     ~SpatGrisAudioProcessor();
-
+    
     const String getName() const;
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     void releaseResources();
-
+    
     void processBlock (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
     void processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
     //==============================================================================
     AudioProcessorEditor* createEditor();
     bool hasEditor() const;
-
+    
     //==============================================================================
     double getTailLengthSeconds() const;
     bool acceptsMidi() const;
@@ -122,7 +123,7 @@ public:
     const String getProgramName (int index);
     void changeProgramName (int index, const String& newName);
     //==============================================================================
-    
+    void timerCallback() override;
     
     //==============================================================================
     SourceMover * getSourceMover()  { return this->sourceMover; }
@@ -131,28 +132,51 @@ public:
     unsigned int getNumSourceUsed() { return this->numSourceUsed;   }
     unsigned int getNumSpeakerUsed(){ return this->numSpeakerUsed;  }
     
-	vector<Source *>  getListSource() { return this->listSources;  }
-	vector<Speaker *> getListSpeaker() { return this->listSpeakers; }
-
+    Source **  getListSource() { return this->listSources;  }
+    Speaker ** getListSpeaker() { return this->listSpeakers; }
+    
     SelectItem * getSelectItem() { return this->selectItem; }
     
-    bool getLinkSurface()   { return this->linkSurface; }
+    //----
+    ProcessType getTypeProcess() { return this->typeProcess; }
+    void setTypeProcess(ProcessType v);
+    
+    bool getLinkHeight()    { return this->linkHeight; }
     bool getLinkAzimuth()   { return this->linkAzimuth; }
     bool getLinkElevation() { return this->linkElevation; }
+
     
-    void setLinkSurface(bool v)     { this->linkSurface = v; }
     void setLinkAzimuth(bool v)     { this->linkAzimuth = v; }
     void setLinkElevation(bool v)   { this->linkElevation = v; }
+    bool setLinkHeight(bool v)      { this->linkHeight= v; }
+    
+
+    //----
+    bool            getOscOn()              { return this->oscOn; }
+    unsigned int    getOscFirstIdSource()   { return this->oscFirstIdSource; }
+    unsigned int    getOscPort()            { return this->oscPort; }
+    bool            getOscRun()             { return this->oscRun; }
+    
+    void setOscOn(bool v)                   { this->oscOn = v; }
+    void setOscFirstIdSource(unsigned int v){ this->oscFirstIdSource = v; }
+    void setOscPort(unsigned int v)         {   this->oscPort = v;
+        this->oscRun = this->oscSender.connect(this->oscIpAddress, this->oscPort);
+    }
     //==============================================================================
     
     
     //==============================================================================
-    void setPosXYSource(int idS, float x, float y, bool updateAll = true);
-    FPoint getRayAngleSource(int idS);
+    void    setPosXYSource(int idS, float x, float y, bool updateAll = true);
+    void    setPosRayAngSource(int idS, float ray, float ang, bool updateAll = true);
+    void    setPosRayAngRadSource(int idS, float ray, float ang, bool updateAll = true);
     
-    void setSurfaceValue(float surf);
+    FPoint  getXYSource(int idS);
+    FPoint  getRayAngleSource(int idS);
+    
+    void setHeightSValue(float elev);
     void setAzimuthValue(float azim);
     void setElevationValue(float elev);
+
     
     //==============================================================================
     
@@ -161,26 +185,43 @@ public:
     void getStateInformation (MemoryBlock& destData);
     void setStateInformation (const void* data, int sizeInBytes);
     //==============================================================================
-
+    
 private:
-
-    vector<Source *>   listSources;
-    vector<Speaker *>  listSpeakers;
+    void processTrajectory();
+    void sendOscMessageValues();
+    
+    //Audio Param =================================
+    double  sampleRate;
+    int     bufferSize;
+    
+    //=============================================
+    Source *   listSources[MaxSources];
+    Speaker *  listSpeakers[MaxSpeakers];
     unsigned int numSourceUsed;
     unsigned int numSpeakerUsed;
     
+    ProcessType typeProcess;
+    
     SelectItem * selectItem;
     
-    bool linkSurface;
-    bool linkAzimuth;
-    bool linkElevation;
+    bool linkAzimuth    = false;
+    bool linkElevation  = false;
+    bool linkHeight     = false;
     
     //Trajectory param========================
     SourceMover     * sourceMover;
     Trajectory      * trajectory;
-    
-    
     //========================================
+    
+    //OSC param========================
+    OSCSender       oscSender;
+    bool            oscOn               = true;
+    bool            oscRun              = false;
+    unsigned int    oscFirstIdSource    = 1;
+    unsigned int    oscPort             = OscDefPort;
+    String          oscIpAddress        = "127.0.0.1";
+    //========================================
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGrisAudioProcessor)
 };

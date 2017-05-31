@@ -10,7 +10,7 @@
 #include "PluginProcessor.h"
 #include "DefaultParam.h"
 
-Source::Source(SpatGrisAudioProcessor * filt, int idS):
+Source::Source(SpatGrisAudioProcessor * filt, unsigned int idS):
 filter(filt),id(idS)
 {
     NormalisableRange<float> nrf = NormalisableRange<float> (-2.0f, 2.0f);
@@ -22,11 +22,16 @@ filter(filt),id(idS)
     
     this->audPY = new AudioParameterFloat(ss+"Y", ss+"Y", nrf, 1.0f);
     this->filter->addParameter(this->audPY);
-
-    NormalisableRange<float> nrfSurf = NormalisableRange<float> (MinSurfSource, MaxSurfSource);
+    
+    NormalisableRange<float> nrfZ = NormalisableRange<float> (MinHeigSource, MaxHeigSource);
+    nrfZ.interval = 0.00001f;
+    this->audPHeight = new AudioParameterFloat(ss+"Height", ss+"H", nrfZ, DefHeigSource);
+    this->filter->addParameter(this->audPHeight);
+    
+    /*NormalisableRange<float> nrfSurf = NormalisableRange<float> (MinSurfSource, MaxSurfSource);
     nrfSurf.interval = 0.00001f;
     this->audPSurf = new AudioParameterFloat(ss+"Surf", ss+"S", nrfSurf, DefSurfSource);
-    this->filter->addParameter(this->audPSurf);
+    this->filter->addParameter(this->audPSurf);*/
     
     
     NormalisableRange<float> nrfAZ = NormalisableRange<float> (MinAzimSource, MaxAzimSource);
@@ -38,5 +43,5 @@ filter(filt),id(idS)
     nrfEl.interval = 0.00001f;
     this->audPElev = new AudioParameterFloat(ss+"Elev", ss+"E", nrfEl, DefElevSource);
     this->filter->addParameter(this->audPElev);
-
+    
 }

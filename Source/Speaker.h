@@ -11,18 +11,33 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "DefaultParam.h"
+
 class SpatGrisAudioProcessor;
 class Speaker{
 
 public:
-    Speaker(SpatGrisAudioProcessor * filt, int idS = 0);
+    Speaker(SpatGrisAudioProcessor * filt, unsigned int idS = 0);
     ~Speaker();
 
+    unsigned int getId(){ return this->id; };
+    float getX(){ return this->px; }
+    float getY(){ return this->py; }
+    FPoint getPosXY(){ return FPoint(this->px, this->py); }
+    bool isMuted(){ return this->muted; }
+    
+    void setX(float x){ this->px = x; }
+    void setY(float y){ this->py = y; }
+    void setPosXY(FPoint xy){ this->px = xy.x; this->py = xy.y; }
+    void setMuted(bool m){ this->muted = m; }
     
 private:
     SpatGrisAudioProcessor * filter;
-    int id;
+    unsigned int id;
     
+    float px;
+    float py;
+    bool muted;
     
     
 };

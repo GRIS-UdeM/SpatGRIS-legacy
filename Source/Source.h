@@ -16,22 +16,27 @@ class SpatGrisAudioProcessor;
 class Source{
     
 public:
-    Source(SpatGrisAudioProcessor * filt, int idS = 0);
+    Source(SpatGrisAudioProcessor * filt, unsigned int idS = 0);
     ~Source();
+    
+    unsigned int getId(){ return this->id; }
+    //unsigned int getIdOSC(){ return this->idOSC; }
+    //void setIdOSC(unsigned int idO){ this->idOSC = idO; }
     
     AudioParameterFloat * getX(){ return this->audPX; }
     AudioParameterFloat * getY(){ return this->audPY; }
-    AudioParameterFloat * getSurf(){ return this->audPSurf; }
+    AudioParameterFloat * getHeigt(){ return this->audPHeight; }
     AudioParameterFloat * getAzim(){ return this->audPAzim; }
     AudioParameterFloat * getElev(){ return this->audPElev; }
     
 private:
     SpatGrisAudioProcessor * filter;
-    int id;
+    unsigned int id;
+    //unsigned int idOSC;
     
     AudioParameterFloat     * audPX;
     AudioParameterFloat     * audPY;
-    AudioParameterFloat     * audPSurf;
+    AudioParameterFloat     * audPHeight;
     AudioParameterFloat     * audPAzim;
     AudioParameterFloat     * audPElev;
     

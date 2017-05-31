@@ -33,39 +33,26 @@
 
 using namespace std;
 
-typedef Point<float> FPoint;
-
-
-
-
-/*struct TrajectoryProperties {
-    int                     type;
-    //SpatGrisAudioProcessor* filter;
-    //SourceMover*            mover;
-    float                   duration;
-    bool                    beats;
-    //unique_ptr<AllTrajectoryDirections> direction;
-    bool                    bReturn;
-    float                   repeats;
-    float                   dampening;
-    float                   deviation;
-    float                   turns;
-    float                   width;
-    FPoint                  endPoint;
-    vector<FPoint>          listPoints;
-};*/
 
 class SpatGrisAudioProcessor;
+
 class Trajectory
 {
 public:
-    Trajectory();
+    Trajectory(SpatGrisAudioProcessor * filter);
     ~Trajectory();
     
+    bool process(float seconds, float beats);
+    float getProgressBar();
+    int progressCycle();
+    void stop(bool clearTrajectory = true);
+    
+    //-----------------------------------------------
     //Getter
     bool   getProcessTrajectory(){ return this->processTrajectory; };
     TrajectoryType getTrajectoryType(){ return this->typeSelect; }
-  
+    
+    float getCyclePercent(){ return this->cyclePercent; }
     float getTimeDuration(){ return this->timeDuration; }
     bool  getInSeconds(){ return this->inSeconds; }
     float getCycle(){ return this->cycle; }
@@ -84,11 +71,12 @@ public:
     vector<FPoint>  getListPointsFreeDraw(){ return this->listPointsFreeDraw; }
     
     //Setter
-    void setProcessTrajectory(bool b){ this->processTrajectory = b; };
+    void setProcessTrajectory(bool b){ this->processTrajectory = b; if(this->processTrajectory){ this->start();}};
     void setTrajectoryType(TrajectoryType i){ this->typeSelect = i; }
+    void setCyclePercent(float cp){ this->cyclePercent = cp; }
     void setTimeDuration(float t){ this->timeDuration = t; }
     void setInSeconds(bool b){ this->inSeconds = b; }
-    void setCycle(float c){ this->cycle = c; }
+    void setCycle(float c){ this->cycle = c; (this->cycle==0.0f) ? this->infCycleLoop = true : this->infCycleLoop = false;}
     void setSpeed(float s){ this->speed = s; }
     
     void setEllipseWidth(float w){ this->ellipseWidth = w; }
@@ -102,17 +90,35 @@ public:
     void setRandSpeed(float s){ this->randSpeed = s; }
     void setRandSeparate(bool s){ this->randSeparate = s; }
     void setListPointsFreeDraw(vector<FPoint> vfp){ this->listPointsFreeDraw = vfp; }
-
+    
+    
+    
 private:
-    bool    processTrajectory = false;
+    
+    void circleProcess();
+    void ellipseProcess();
+    void spiralProcess();
+    
+    
+    void start();
+    
+    //--------------------------------------------------
+    SpatGrisAudioProcessor * filter;
+    vector<FPoint>   listSourceRayAng;
+    bool    processTrajectory   = false;
+    bool    processTrafEnd      = false;
+    float   timeDone            = 0.0f;
+    float   timeTotalDuration   = 0.0f;
     
     TrajectoryType  typeSelect;
+    float           cyclePercent;
     float           timeDuration = 1.f;
     bool            inSeconds = true;      //Second(true) or beat(false)
     float           cycle = 1.f;
+    bool            infCycleLoop = false;
     float           speed = 1.f;
     
-    float           ellipseWidth = 0.f;
+    float           ellipseWidth = 0.5f;
     bool            inOneWay = true;       //OneWay(true) or Return(false)
     float           radiusEnd = 0.f;
     float           angleEnd = 0.f;
@@ -125,50 +131,52 @@ private:
     vector<FPoint>  listPointsFreeDraw;
 };
 
-/*
-class Trajectory : public ReferenceCountedObject
-{
-public:
-    typedef ReferenceCountedObjectPtr<Trajectory> Ptr;
 
-    static String GetTrajectoryName(TrajectoryType i);
-    static Trajectory::Ptr CreateTrajectory(const TrajectoryProperties& properties);
-    
-    static unique_ptr<vector<String>> getAllPossibleDirections(int p_iTrajectory);
-    //static unique_ptr<AllTrajectoryDirections> getCurDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
-    static unique_ptr<std::vector<String>> getAllPossibleReturns(int p_iTrajectory);
-    
-public:
-    virtual ~Trajectory() {}
-    
-    
-    bool process(float seconds, float beats, float speed, float speedRand);
-    bool useBeats();
-    bool isInfinite();
-    float getTotalDuration();
-    float getCurrentTime();
-    float progress();
-    int progressCycle();
-    void stop(bool clearTrajectory = true);
-    
-protected:
-    virtual void childProcess(float duration, float seconds,float speedRand = 0) = 0;
-    virtual void childInit() {}
-    Array<Point<float>> mSourcesInitialPositionRT;
-    
-private:
-    void start();
-    
-protected:
-    Trajectory(const TrajectoryProperties& properties);
-    SpatGrisAudioProcessor *mFilter;
-    //SourceMover *m_pMover;
-    bool  m_bStarted, m_bStopped;
-    float m_fTimeDone;
-    float m_fDurationSingleTraj;
-    float m_fTotalDuration;
-    bool  m_bUseBeats;
-    float m_fSpeed;
-    bool m_bInfLoopRepeats;
-};*/
+
+/*
+ class Trajectory : public ReferenceCountedObject
+ {
+ public:
+ typedef ReferenceCountedObjectPtr<Trajectory> Ptr;
+ 
+ static String GetTrajectoryName(TrajectoryType i);
+ static Trajectory::Ptr CreateTrajectory(const TrajectoryProperties& properties);
+ 
+ static unique_ptr<vector<String>> getAllPossibleDirections(int p_iTrajectory);
+ //static unique_ptr<AllTrajectoryDirections> getCurDirection(int p_iSelectedTrajectory, int p_iSelectedDirection);
+ static unique_ptr<std::vector<String>> getAllPossibleReturns(int p_iTrajectory);
+ 
+ public:
+ virtual ~Trajectory() {}
+ 
+ 
+ bool process(float seconds, float beats, float speed, float speedRand);
+ bool useBeats();
+ bool isInfinite();
+ float getTotalDuration();
+ float getCurrentTime();
+ float progress();
+ int progressCycle();
+ void stop(bool clearTrajectory = true);
+ 
+ protected:
+ virtual void childProcess(float duration, float seconds,float speedRand = 0) = 0;
+ virtual void childInit() {}
+ Array<Point<float>> mSourcesInitialPositionRT;
+ 
+ private:
+ void start();
+ 
+ protected:
+ Trajectory(const TrajectoryProperties& properties);
+ SpatGrisAudioProcessor *mFilter;
+ //SourceMover *m_pMover;
+ bool  m_bStarted, m_bStopped;
+ float m_fTimeDone;
+ float m_fDurationSingleTraj;
+ float m_fTotalDuration;
+ bool  m_bUseBeats;
+ float m_fSpeed;
+ bool m_bInfLoopRepeats;
+ };*/
 #endif  // TRAJECTORY_H_INCLUDED

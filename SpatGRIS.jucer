@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="0.3.0"
+<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="1.0.1"
               bundleIdentifier="com.UdeM.SpatGRIS" includeBinaryInAppConfig="1"
               buildVST="1" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="SpatGris" pluginDesc="SpatGris" pluginManufacturer="UdeM"
@@ -57,15 +57,20 @@
     </GROUP>
     <GROUP id="{89B00B3D-3E60-2792-C7A4-D570AF057C40}" name="Source">
       <FILE id="rIIOui" name="DefaultParam.h" compile="0" resource="0" file="Source/DefaultParam.h"/>
+      <FILE id="iDZlup" name="_firs.h" compile="0" resource="0" file="Source/_firs.h"/>
+      <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>
+      <FILE id="QwSZHu" name="HIDDelegate.h" compile="0" resource="0" file="Source/HIDDelegate.h"/>
       <FILE id="Qyoyqq" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
       <FILE id="p5FAkF" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
+      <FILE id="LKhEke" name="Speaker.cpp" compile="1" resource="0" file="Source/Speaker.cpp"/>
+      <FILE id="Anw6ut" name="Speaker.h" compile="0" resource="0" file="Source/Speaker.h"/>
       <FILE id="d6ZV7D" name="SpatComponent.cpp" compile="1" resource="0"
             file="Source/SpatComponent.cpp"/>
       <FILE id="GGQpW0" name="SpatComponent.h" compile="0" resource="0" file="Source/SpatComponent.h"/>
-      <FILE id="LKhEke" name="Speaker.cpp" compile="1" resource="0" file="Source/Speaker.cpp"/>
-      <FILE id="Anw6ut" name="Speaker.h" compile="0" resource="0" file="Source/Speaker.h"/>
       <FILE id="WTOpfx" name="Trajectory.cpp" compile="1" resource="0" file="Source/Trajectory.cpp"/>
       <FILE id="LMFk8s" name="Trajectory.h" compile="0" resource="0" file="Source/Trajectory.h"/>
+      <FILE id="rZP6xp" name="SourceMover.cpp" compile="1" resource="0" file="Source/SourceMover.cpp"/>
+      <FILE id="ppYknM" name="SourceMover.h" compile="0" resource="0" file="Source/SourceMover.h"/>
       <FILE id="YZPwu8" name="UiComponent.cpp" compile="1" resource="0" file="Source/UiComponent.cpp"/>
       <FILE id="OH2ttx" name="UiComponent.h" compile="0" resource="0" file="Source/UiComponent.h"/>
       <FILE id="d1Wbzp" name="Router.cpp" compile="1" resource="0" file="Source/Router.cpp"/>
@@ -73,9 +78,6 @@
       <FILE id="CeUFNu" name="Areas.h" compile="0" resource="0" file="Source/Areas.h"/>
       <FILE id="wR0X34" name="ParamSliderGris.h" compile="0" resource="0"
             file="Source/ParamSliderGris.h"/>
-      <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>
-      <FILE id="QwSZHu" name="HIDDelegate.h" compile="0" resource="0" file="Source/HIDDelegate.h"/>
-      <FILE id="iDZlup" name="_firs.h" compile="0" resource="0" file="Source/_firs.h"/>
       <FILE id="HUCESA" name="FirFilter.cpp" compile="1" resource="0" file="Source/FirFilter.cpp"/>
       <FILE id="Dxarr9" name="FirFilter.h" compile="0" resource="0" file="Source/FirFilter.h"/>
       <FILE id="Amo7KP" name="LevelComponent.cpp" compile="1" resource="0"
@@ -94,8 +96,6 @@
       <FILE id="pRoxoW" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="HICz75" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="rZP6xp" name="SourceMover.cpp" compile="1" resource="0" file="Source/SourceMover.cpp"/>
-      <FILE id="ppYknM" name="SourceMover.h" compile="0" resource="0" file="Source/SourceMover.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

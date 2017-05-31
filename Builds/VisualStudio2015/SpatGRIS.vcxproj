@@ -72,7 +72,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.1;JUCE_APP_VERSION_HEX=0x10001;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -113,7 +113,7 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.1;JUCE_APP_VERSION_HEX=0x10001;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -155,7 +155,7 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.1;JUCE_APP_VERSION_HEX=0x10001;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -194,20 +194,20 @@
     <ClCompile Include="..\..\HIDManager\ImmHIDUtilAddOn.cpp"/>
     <ClCompile Include="..\..\HIDManager\IOHIDDevice_.cpp"/>
     <ClCompile Include="..\..\HIDManager\IOHIDElement_.cpp"/>
+    <ClCompile Include="..\..\Source\HIDDelegate.cpp"/>
     <ClCompile Include="..\..\Source\Source.cpp"/>
-    <ClCompile Include="..\..\Source\SpatComponent.cpp"/>
     <ClCompile Include="..\..\Source\Speaker.cpp"/>
+    <ClCompile Include="..\..\Source\SpatComponent.cpp"/>
     <ClCompile Include="..\..\Source\Trajectory.cpp"/>
+    <ClCompile Include="..\..\Source\SourceMover.cpp"/>
     <ClCompile Include="..\..\Source\UiComponent.cpp"/>
     <ClCompile Include="..\..\Source\Router.cpp"/>
-    <ClCompile Include="..\..\Source\HIDDelegate.cpp"/>
     <ClCompile Include="..\..\Source\FirFilter.cpp"/>
     <ClCompile Include="..\..\Source\LevelComponent.cpp"/>
     <ClCompile Include="..\..\Source\OctoLeap.cpp"/>
     <ClCompile Include="..\..\Source\OscComponent.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginEditor.cpp"/>
-    <ClCompile Include="..\..\Source\SourceMover.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1886,23 +1886,23 @@
     <ClInclude Include="..\..\HIDManager\IOHIDElement_.h"/>
     <ClInclude Include="..\..\HIDManager\IOHIDLib_.h"/>
     <ClInclude Include="..\..\Source\DefaultParam.h"/>
+    <ClInclude Include="..\..\Source\_firs.h"/>
+    <ClInclude Include="..\..\Source\HIDDelegate.h"/>
     <ClInclude Include="..\..\Source\Source.h"/>
-    <ClInclude Include="..\..\Source\SpatComponent.h"/>
     <ClInclude Include="..\..\Source\Speaker.h"/>
+    <ClInclude Include="..\..\Source\SpatComponent.h"/>
     <ClInclude Include="..\..\Source\Trajectory.h"/>
+    <ClInclude Include="..\..\Source\SourceMover.h"/>
     <ClInclude Include="..\..\Source\UiComponent.h"/>
     <ClInclude Include="..\..\Source\Router.h"/>
     <ClInclude Include="..\..\Source\Areas.h"/>
     <ClInclude Include="..\..\Source\ParamSliderGris.h"/>
-    <ClInclude Include="..\..\Source\HIDDelegate.h"/>
-    <ClInclude Include="..\..\Source\_firs.h"/>
     <ClInclude Include="..\..\Source\FirFilter.h"/>
     <ClInclude Include="..\..\Source\LevelComponent.h"/>
     <ClInclude Include="..\..\Source\OctoLeap.h"/>
     <ClInclude Include="..\..\Source\OscComponent.h"/>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>
-    <ClInclude Include="..\..\Source\SourceMover.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h"/>

@@ -63,6 +63,7 @@ public:
     LevelComponent(SpatGrisAudioProcessor * filt, GrisLookAndFeel *feel, int index);
     ~LevelComponent();
     
+    void setMuted(bool m){ this->muteToggleBut->setToggleState(m, sendNotification); }
     
     void buttonClicked(Button *button) override;
     void setBounds(const Rectangle<int> &newBounds);
