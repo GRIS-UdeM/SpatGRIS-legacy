@@ -63,6 +63,7 @@ private:
     Colour getColor(int i);
     
     void drawCircleSource(Graphics &g, const int i, const int fieldWH, const int fieldCenter);
+    void drawSpanSource(Graphics &g, const int i, const int fieldWH, const int fieldCenter);
     void drawAzimElevSource(Graphics &g, const int i, const int fieldWH, const int fieldCenter);
     
     

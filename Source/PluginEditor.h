@@ -181,6 +181,27 @@ private :
     Label           * labOSCPort;
     TextEditor      * texOSCPort;
     
+    //Filter-----------------
+    Label       * labVolCenter;
+    Slider      * sliVolCenter;
+    
+    Label       * labVolSpeaker;
+    Slider      * sliVolSpeaker;
+    
+    Label       * labVolFar;
+    Slider      * sliVolFar;
+    
+    Label       * labFilCenter;
+    Slider      * sliFilCenter;
+    
+    Label       * labFilSpeaker;
+    Slider      * sliFilSpeaker;
+    
+    Label       * labFilFar;
+    Slider      * sliFilFar;
+    
+    ToggleButton* togActiveFil;
+    
     //Source-----------------
     Label       * labSourcePos;
     ComboBox    * comSourcePos;

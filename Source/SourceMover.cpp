@@ -36,20 +36,20 @@ filter(filt)
     this->listAngSourceSorted.resize(MaxSources);
     
     for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
-        listMouvement.add(GetMouvementModeName((MouvementMode)i));
+        this->listMouvement.add(GetMouvementModeName((MouvementMode)i));
     }
-    //this->mouvementChoiceAuto = new AudioParameterChoice("Mouvement","Mouv Trajectory", listMouvement,1);
-    //this->filter->addParameter(this->mouvementChoiceAuto);
+    this->mouvementModeAudioParam = new AudioParameterChoice("Mouvement","Mouv Trajectory", this->listMouvement, 1);
+    this->filter->addParameter(this->mouvementModeAudioParam);
 }
+
 SourceMover::~SourceMover()
 {
 }
 
 void SourceMover::setMouvementMode(MouvementMode m)
 {
-    this->mouvementModeSelect = m;
-    
-    switch (this->mouvementModeSelect) {
+    (*this->mouvementModeAudioParam) = m;
+    switch (*this->mouvementModeAudioParam) {
             
         case CircularFixAng:{
             this->setEqualAngles();
@@ -64,7 +64,7 @@ void SourceMover::setMouvementMode(MouvementMode m)
             
     }
     this->beginMouvement();
-    //*this->mouvementChoiceAuto = (int)m;
+
 }
 //============================================================================
 void SourceMover::setSourcesPosition(PositionSourceSpeaker pss)
@@ -208,7 +208,7 @@ void SourceMover::updateSourcesPosition(int iSource, float x, float y)
     FPoint deltaMasterPos;
     
     
-    switch (this->mouvementModeSelect) {
+    switch (*this->mouvementModeAudioParam) {
             
         case Independent:{
             deltaMasterPos = currSelectSRayAng - this->listSourceRayAng[iSource];

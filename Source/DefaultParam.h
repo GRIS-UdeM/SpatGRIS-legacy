@@ -97,6 +97,22 @@ static const float HalfCircle       = M_PI;
 static const float QuarterCircle    = M_PI / 2.f;
 static const float ThetaMax         = M_PI * 2.f;
 
+//Filter - Slider
+static const float  MinVolCenter   = -10.f;
+static const float  MaxVolCenter   = 30.f;
+static const float  DefVolCenter   = 0.f;
+
+static const float  MinVolSpeaker   = -30.f;
+static const float  MaxVolSpeaker   = 10.f;
+static const float  DefVolSpeaker   = 0.f;
+
+static const float  MinVolFar       = -120.f;
+static const float  MaxVolFar       = 0.f;
+static const float  DefVolFar       = 0.f;
+
+static const float  MinFilter       = -100.f;
+static const float  MaxFilter       = 0.f;
+
 
 //--------------------------------------------------
 //Source Param
@@ -142,6 +158,7 @@ static const float  DefCyclePercent   = 100.f;
 //--------------------------------------------------
 static const float  DefaultSliderInter  = 0.00001f;
 static const float  ShowSliderInter     = 0.001f;
+static const float  ShowSliderInterInt  = 1.0f;
 
 static const int    Margin             = 2;
 static const int    CenterColumnWidth  = 180;
@@ -263,6 +280,13 @@ static FPoint GetSourceAzimElev(FPoint pXY, bool bUseCosElev = false)
     }
     
     return FPoint(fAzim, fElev);
+}
+
+static FPoint GetPositionRT(FPoint pXY) {
+    float r = hypotf(pXY.x, pXY.y);
+    float t = atan2f(pXY.y, pXY.x);
+    if (t < 0) t += ThetaMax;
+    return FPoint(r, t);
 }
 
 

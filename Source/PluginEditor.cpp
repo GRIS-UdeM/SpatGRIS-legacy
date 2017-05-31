@@ -192,8 +192,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     }
     this->comTypeProcess->setSelectedId(1);
     
-    this->labInOutMode      = addLabel("Input :", "Input mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->comInOutMode      = addComboBox("", "Input mode", 60, 30, DefaultLabWidth-40, DefaultLabHeight, settingsBox);
+    this->labInOutMode      = addLabel("In / Out :", "Input/Output mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
+    this->comInOutMode      = addComboBox("", "Input/Output mode", 60, 30, DefaultLabWidth-40, DefaultLabHeight, settingsBox);
     this->butInOutMode      = addButton("Apply", "Apply Input/Output mode", 150, 30, 60, DefaultLabHeight, settingsBox);
     
     //OSC Param
@@ -211,7 +211,26 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     //Volume and Filter
     //-----------------------------
     Component * volumeFBox = this->octTab->getTabContentComponent(1);
-    addLabel("Comming soon...", "", 0, 4, DefaultLabWidth, DefaultLabHeight, volumeFBox);
+    this->togActiveFil  = addToggleButton("Active", "Active Filter", 4, 0, DefaultLabWidth, DefaultLabHeight, volumeFBox);
+    
+    this->labVolCenter  = addLabel("Volume center (dB)", "Volume center (dB)", 0, 18, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
+    this->sliVolCenter  = addSlider("", "Volume center (dB)", 4, 34, 172, DefaultLabHeight, volumeFBox, MinVolCenter, MaxVolCenter, ShowSliderInterInt);
+    
+    this->labVolSpeaker = addLabel("Volume speakers (dB)", "Volume speakers (dB)", 180, 18, DefaultLabWidth+40, DefaultLabHeight,  volumeFBox);
+    this->sliVolSpeaker = addSlider("", "Volume speakers (dB)", 184, 34, 172, DefaultLabHeight, volumeFBox, MinVolSpeaker, MaxVolSpeaker, ShowSliderInterInt);
+    
+    this->labVolFar     = addLabel("Volume far (dB)", "Volume far (dB)", 360, 18, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
+    this->sliVolFar     = addSlider("", "Volume far (dB)", 364, 34, 172, DefaultLabHeight, volumeFBox, MinVolFar, MaxVolFar, ShowSliderInterInt);
+    
+    this->labFilCenter  = addLabel("Filter center (dB)", "Filter center (dB)", 0, 54, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
+    this->sliFilCenter  = addSlider("", "Volume center (dB)", 4, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, ShowSliderInterInt);
+    
+    this->labFilSpeaker = addLabel("Filter speakers (dB)", "Filter speakers (dB)", 180, 54, DefaultLabWidth+40, DefaultLabHeight,  volumeFBox);
+    this->sliFilSpeaker = addSlider("", "Volume speakers (dB)", 184, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, ShowSliderInterInt);
+    
+    this->labFilFar     = addLabel("Filter far (dB)", "Filter far (dB)", 360, 54, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
+    this->sliFilFar     = addSlider("", "Volume far (dB)", 364, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, ShowSliderInterInt);
+
     
     
     //Sources
@@ -225,8 +244,6 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->comSourcePos->setSelectedId(1);
     
     this->butSourcePos          = addButton("Apply", "Apply Source position", 254, 4, 60, DefaultLabHeight, sourcesBox);
-    
-    
     
     this->labSourceSelectPos    = addLabel("Selected :", "Source Selected", 0, 30, DefaultLabWidth, DefaultLabHeight, sourcesBox);
     this->comSourceSelectPos    = addComboBox("", "Source Selected", 80, 30, 40, DefaultLabHeight, sourcesBox);
@@ -252,8 +269,6 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     this->butSpeakerPos          = addButton("Apply", "Apply Speaker position", 254, 4, 60, DefaultLabHeight, speakersBox);
     
-    
-    
     this->labSpeakerSelectPos    = addLabel("Selected :", "Speaker Selected", 0, 30, DefaultLabWidth, DefaultLabHeight, speakersBox);
     this->comSpeakerSelectPos    = addComboBox("", "Speaker Selected", 80, 30, 40, DefaultLabHeight, speakersBox);
     
@@ -271,7 +286,6 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     Component * interfaceBox = this->octTab->getTabContentComponent(4);
     addLabel("Comming soon...", "", 0, 4, DefaultLabWidth, DefaultLabHeight, interfaceBox);
     //------------------------------------------------------------------------------------------------------
-    
     
     
     //Size window
@@ -436,7 +450,7 @@ void SpatGrisAudioProcessorEditor::updateComMouvement()
             this->comMouvement->addItem(GetMouvementModeName((MouvementMode)i), i+1);
         }
     }
-    this->comMouvement->setSelectedId(this->filter->getSourceMover()->getMouvementMode()+1);
+    this->comMouvement->setSelectedId((MouvementMode)(this->filter->getSourceMover()->getMouvementMode()));
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
@@ -478,7 +492,6 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
     }
     
     this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
-
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputMode()
@@ -526,7 +539,6 @@ void SpatGrisAudioProcessorEditor::updateInputOutputMode()
     for(int i = 0; i  < this->filter->getNumSpeakerUsed(); i++){
         this->comSpeakerSelectPos->addItem(String(i+1), i+1);
     }
-    
 }
 
 void SpatGrisAudioProcessorEditor::updateSelectSource()
@@ -536,7 +548,8 @@ void SpatGrisAudioProcessorEditor::updateSelectSource()
         FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
         this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
         this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }else{
+    }
+    else{
         this->comSourceSelectPos->setSelectedId(1, dontSendNotification);
         FPoint rayAngleS = this->filter->getRayAngleSource(0);
         this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
@@ -772,6 +785,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 
                 this->boxOutputParam->setEnabled(true);
                 
+                this->togOSCActive->setEnabled(false);
                 //Filter
                 this->octTab->getTabContentComponent(1)->setEnabled(false);
                 //Speakers
@@ -789,17 +803,20 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 this->sliSurfaceOrPan->setEnabled(false);
                 
                 this->labAzimSpan->setEnabled(true);
+                this->labAzimSpan->setText("Span", dontSendNotification);
                 this->togLinkAzimSpan->setEnabled(true);
                 this->sliAzimSpan->setEnabled(true);
                 
-                this->labElevSpan->setEnabled(true);
-                this->togLinkElevSpan->setEnabled(true);
-                this->sliAElevSpann->setEnabled(true);
+                this->labElevSpan->setEnabled(false);
+                this->togLinkElevSpan->setEnabled(false);
+                this->sliAElevSpann->setEnabled(false);
                 
                 this->boxOutputParam->setEnabled(true);
                 
+                this->togOSCActive->setEnabled(false);
                 //Filter
                 this->octTab->getTabContentComponent(1)->setEnabled(true);
+    
                 //Speakers
                 this->octTab->getTabContentComponent(3)->setEnabled(true);
                 this->labSpeakerSelectRay->setEnabled(false);
@@ -820,6 +837,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 this->sliSurfaceOrPan->setEnabled(true);
                 
                 this->labAzimSpan->setEnabled(true);
+                this->labAzimSpan->setText("Azimuth Span", dontSendNotification);
                 this->togLinkAzimSpan->setEnabled(true);
                 this->sliAzimSpan->setEnabled(true);
                 
@@ -829,6 +847,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 
                 this->boxOutputParam->setEnabled(false);
                 
+                this->togOSCActive->setEnabled(true);
                 //Filter
                 this->octTab->getTabContentComponent(1)->setEnabled(false);
                 //Speakers
@@ -841,6 +860,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 this->sliSurfaceOrPan->setEnabled(false);
                 
                 this->labAzimSpan->setEnabled(true);
+                this->labAzimSpan->setText("Azimuth Span", dontSendNotification);
                 this->togLinkAzimSpan->setEnabled(true);
                 this->sliAzimSpan->setEnabled(true);
                 
@@ -850,6 +870,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 
                 this->boxOutputParam->setEnabled(false);
                 
+                this->togOSCActive->setEnabled(true);
                 //Filter
                 this->octTab->getTabContentComponent(1)->setEnabled(false);
                 //Speakers

@@ -45,7 +45,7 @@ public:
     SourceMover(SpatGrisAudioProcessor *filt);
     ~SourceMover();
     
-    MouvementMode getMouvementMode(){ return this->mouvementModeSelect; }
+    MouvementMode getMouvementMode(){ return (MouvementMode)this->mouvementModeAudioParam->getIndex(); }
     void setMouvementMode(MouvementMode m);
     
     //==================================================
@@ -83,12 +83,15 @@ private:
     
     
     SpatGrisAudioProcessor * filter;
-    MouvementMode   mouvementModeSelect;
+    //MouvementMode   mouvementModeSelect;
+    AudioParameterChoice * mouvementModeAudioParam;
+    
     StringArray     listMouvement;
     
     Array<FPoint>   listSourceXY;
     Array<FPoint>   listSourceRayAng;
     Array<float>    listAngSourceSorted;
+
     //AudioParameterChoice * mouvementChoiceAuto;
     /*MoverType mMoverType;
      int mSelectedSrc;

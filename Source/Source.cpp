@@ -23,16 +23,11 @@ filter(filt),id(idS)
     this->audPY = new AudioParameterFloat(ss+"Y", ss+"Y", nrf, 1.0f);
     this->filter->addParameter(this->audPY);
     
+    
     NormalisableRange<float> nrfZ = NormalisableRange<float> (MinHeigSource, MaxHeigSource);
     nrfZ.interval = 0.00001f;
     this->audPHeight = new AudioParameterFloat(ss+"Height", ss+"H", nrfZ, DefHeigSource);
     this->filter->addParameter(this->audPHeight);
-    
-    /*NormalisableRange<float> nrfSurf = NormalisableRange<float> (MinSurfSource, MaxSurfSource);
-    nrfSurf.interval = 0.00001f;
-    this->audPSurf = new AudioParameterFloat(ss+"Surf", ss+"S", nrfSurf, DefSurfSource);
-    this->filter->addParameter(this->audPSurf);*/
-    
     
     NormalisableRange<float> nrfAZ = NormalisableRange<float> (MinAzimSource, MaxAzimSource);
     nrfAZ.interval = 0.00001f;

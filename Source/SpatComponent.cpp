@@ -155,7 +155,11 @@ void SpatComponent::paint(Graphics &g)
             case FreeVolum :
                 drawCircleSource(g, i, fieldWH, fieldCenter);
                 break;
-            
+                
+            case PanSpan :
+                drawSpanSource(g, i, fieldWH, fieldCenter);
+                break;
+                
             default:
                 drawAzimElevSource(g, i, fieldWH, fieldCenter);
                 break;
@@ -346,9 +350,49 @@ void SpatComponent::drawCircleSource(Graphics &g, const int i, const int fieldWH
     //g.drawEllipse(sourceP.x-radius , sourceP.y-radius , SourceDiameter+diameter, SourceDiameter+diameter, 1);
 }
 
+void SpatComponent::drawSpanSource(Graphics &g, const int i, const int fieldWH, const int fieldCenter)
+{
+    FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
+    FPoint rt = GetPositionRT(sourceP);
+    float angle = ((*(this->filter->getListSource()[i]->getAzim()))/2.0f) * M_PI;
+    
+    float fs = fieldWH - SourceDiameter;
+    float x = fs*0.25f + SourceRadius;
+    float y = fs*0.25f + SourceRadius;
+    float w = fs*0.5f;
+    float h = fs*0.5f;
+    float r1 = 0.5f*M_PI-(rt.y + angle);
+    float r2 = 0.5f*M_PI-(rt.y - angle );
+    float ir = (rt.x >= .999f) ? 2.f : 0.f;
+    
+    if (rt.x >= .999f) {
+        Path p;
+        p.addPieSegment(x, y, w, h, r1, r2, ir);
+        
+        g.setColour(this->getColor(i).withAlpha(0.2f));
+        g.fillPath(p);
+    }
+    else {
+        float front = rt.x * 0.5f + 0.5f;
+        float back = 1 - front;
+
+        Path pf;
+        Path pb;
+        pf.addPieSegment(x, y, w, h, r1, r2, ir);
+        pb.addPieSegment(x, y, w, h, r1 + M_PI, r2 + M_PI, ir);
+        
+        g.setColour(this->getColor(i).withAlpha(0.2f*front));
+        g.fillPath(pf);
+
+        g.setColour(this->getColor(i).withAlpha(0.2f*back));
+        g.fillPath(pb);
+    }
+}
+
+
 void SpatComponent::drawAzimElevSource(Graphics &g, int i, const int fieldWH, const int fieldCenter)
 {
-    g.setColour(this->getColor(i));
+    //g.setColour(this->getColor(i));
     
     FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
     FPoint azimElev = GetSourceAzimElev(sourceP, true);
