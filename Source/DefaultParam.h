@@ -16,16 +16,11 @@
 
 typedef Point<float> FPoint;
 
-typedef enum {
-    NoSelection,
-    SelectedSource,
-    SelectedSpeaker
-} SelectionType;
-
 struct SelectItem {
-    unsigned int selectID;
-    SelectionType selecType;
-    bool mouseOver;
+    unsigned int selectIdSource;
+    unsigned int selectIdSpeaker;
+    bool mouseOverSource;
+    bool mouseOverSpeaker;
 };
 
 typedef enum {

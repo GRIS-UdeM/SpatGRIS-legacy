@@ -183,7 +183,7 @@ void SpatComponent::paint(Graphics &g)
         // - - - - - - - - - - - -
         // draw Select Source
         // - - - - - - - - - - - -
-        if(this->filter->getSelectItem()->selectID == i && this->filter->getSelectItem()->selecType == SelectedSource){
+        if(this->filter->getSelectItem()->selectIdSource == i){
             
             g.setColour(this->getColor(i));
             g.drawEllipse(fieldWH-40, 39 , SourceDiameter, SourceDiameter,2);
@@ -224,7 +224,32 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     FPoint mouseP(event.x, event.y);
     
     const float w = (fieldWH - SourceDiameter) /2.0f;
-    this->filter->getSelectItem()->mouseOver = false;
+    this->filter->getSelectItem()->mouseOverSource = false;
+    this->filter->getSelectItem()->mouseOverSpeaker = false;
+    
+    //Sources
+    for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
+        
+        FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
+        NormalizeXYSourceWithScreen(sourceP, w);
+        
+        float dx = mouseP.x - sourceP.x;
+        float dy = mouseP.y - sourceP.y;
+        float distanceSquared = dx*dx + dy*dy;
+        if(distanceSquared < SourceRadius*SourceRadius){
+            
+            this->clickedMouseP = mouseP;
+            NormalizeScreenWithSpat(this->clickedMouseP,w);
+            
+            this->filter->getSelectItem()->selectIdSource = i;
+            this->filter->getSelectItem()->mouseOverSource = true;
+            
+            this->filter->getSourceMover()->beginMouvement();
+            
+            this->editor->updateSourceParam();
+            return;
+        }
+    }
     
     if(this->filter->getTypeProcess() == FreeVolum || this->filter->getTypeProcess() == PanSpan){
         //Speakers
@@ -241,41 +266,23 @@ void SpatComponent::mouseDown(const MouseEvent &event)
                 this->clickedMouseP = mouseP;
                 NormalizeScreenWithSpat(this->clickedMouseP,w);
                 
-                this->filter->getSelectItem()->selectID = i;
-                this->filter->getSelectItem()->selecType = SelectedSpeaker;
-                this->filter->getSelectItem()->mouseOver = true;
+                this->filter->getSelectItem()->selectIdSpeaker = i;
+                this->filter->getSelectItem()->mouseOverSpeaker = true;
+                
+                this->editor->updateSourceParam();
+                return;
             }
         }
     }
     
-    //Sources
-    for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
-
-        FPoint sourceP = FPoint(*(this->filter->getListSource()[i]->getX()), *(this->filter->getListSource()[i]->getY()));
-        NormalizeXYSourceWithScreen(sourceP, w);
-        
-        float dx = mouseP.x - sourceP.x;
-        float dy = mouseP.y - sourceP.y;
-        float distanceSquared = dx*dx + dy*dy;
-        if(distanceSquared < SourceRadius*SourceRadius){
-            
-            this->clickedMouseP = mouseP;
-            NormalizeScreenWithSpat(this->clickedMouseP,w);
-            
-            this->filter->getSelectItem()->selectID = i;
-            this->filter->getSelectItem()->selecType = SelectedSource;
-            this->filter->getSelectItem()->mouseOver = true;
-            
-            this->filter->getSourceMover()->beginMouvement();
-        }
-    }
     
     this->editor->updateSourceParam();
+    
 }
 
 void SpatComponent::mouseDrag(const MouseEvent &event)
 {
-    if(!this->filter->getSelectItem()->mouseOver){ return; }
+    //if(!this->filter->getSelectItem()->mouseOver){ return; }
     const int fieldWH = getWidth();
     FPoint mouseP(event.x, event.y);
     
@@ -283,45 +290,38 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
     const float x = (fieldWH - w) / 2.0f;
 
     
-    switch(this->filter->getSelectItem()->selecType)
+    if(this->filter->getSelectItem()->mouseOverSource)
     {
+        float dx =  (x+(w/2.0f)) - mouseP.x;
+        float dy =  (x+(w/2.0f)) - mouseP.y;
+        float dist = sqrt(dx*dx + dy*dy);
         
-        case SelectedSource:{
-            float dx =  (x+(w/2.0f)) - mouseP.x;
-            float dy =  (x+(w/2.0f)) - mouseP.y;
-            float dist = sqrt(dx*dx + dy*dy);
-            
-            NormalizeScreenWithSpat(mouseP, w);
-            float ang = AngleInCircle(mouseP);
+        NormalizeScreenWithSpat(mouseP, w);
+        float ang = AngleInCircle(mouseP);
+        dist = dist/(w/2.0f);
+        if(dist > 2.0f){ dist = 2.0f; }
+        
+        this->filter->setPosXYSource(this->filter->getSelectItem()->selectIdSource, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
+        this->editor->updateSelectSource();
+    }
+    
+    if(this->filter->getSelectItem()->mouseOverSpeaker)
+    {
+        float dx =  (x+(w/2.0f)) - mouseP.x;
+        float dy =  (x+(w/2.0f)) - mouseP.y;
+        float dist = sqrt(dx*dx + dy*dy);
+        
+        NormalizeScreenWithSpat(mouseP, w);
+        float ang = AngleInCircle(mouseP);
+        if(this->filter->getTypeProcess() == PanSpan){
+            dist = 1.0f;
+        }else{
             dist = dist/(w/2.0f);
             if(dist > 2.0f){ dist = 2.0f; }
-
-            this->filter->setPosXYSource(this->filter->getSelectItem()->selectID, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
-            this->editor->updateSelectSource();
-            break;
-        }
-            
-        case SelectedSpeaker:{
-            float dx =  (x+(w/2.0f)) - mouseP.x;
-            float dy =  (x+(w/2.0f)) - mouseP.y;
-            float dist = sqrt(dx*dx + dy*dy);
-            
-            NormalizeScreenWithSpat(mouseP, w);
-            float ang = AngleInCircle(mouseP);
-            if(this->filter->getTypeProcess() == PanSpan){
-                dist = 1.0f;
-            }else{
-                dist = dist/(w/2.0f);
-                if(dist > 2.0f){ dist = 2.0f; }
-            }
-            
-            this->filter->getListSpeaker()[this->filter->getSelectItem()->selectID]->setPosXY(FPoint (dist*cosf(ang), dist* sinf(ang)));
-            this->editor->updateSelectSpeaker();
-            break;
         }
         
-        case NoSelection:
-            break;
+        this->filter->getListSpeaker()[this->filter->getSelectItem()->selectIdSpeaker]->setPosXY(FPoint (dist*cosf(ang), dist* sinf(ang)));
+        this->editor->updateSelectSpeaker();
     }
     this->repaint();
 }

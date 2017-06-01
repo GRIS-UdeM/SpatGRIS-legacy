@@ -42,9 +42,10 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     this->trajectory = new Trajectory(this);
     
     this->selectItem = new SelectItem();
-    this->selectItem->selectID = 1;
-    this->selectItem->selecType = SelectedSource;
-    
+    this->selectItem->selectIdSource = 0;
+    this->selectItem->selectIdSpeaker = 0;
+    this->selectItem->mouseOverSpeaker = false;
+    this->selectItem->mouseOverSource = false;
     //this->listSources = vector<Source *>();
     //this->listSpeakers = vector<Speaker *>();
     
@@ -238,7 +239,7 @@ void SpatGrisAudioProcessor::setHeightSValue(float hei)
             *(this->listSources[iSour]->getHeigt()) = hei;
         }
     }else{
-        *(this->listSources[this->selectItem->selectID]->getHeigt()) = hei;
+        *(this->listSources[this->selectItem->selectIdSource]->getHeigt()) = hei;
     }
 }
 
@@ -249,7 +250,7 @@ void SpatGrisAudioProcessor::setAzimuthValue(float azim)
             *(this->listSources[iSour]->getAzim()) = azim;
         }
     }else{
-        *(this->listSources[this->selectItem->selectID]->getAzim()) = azim;
+        *(this->listSources[this->selectItem->selectIdSource]->getAzim()) = azim;
     }
 }
 
@@ -260,7 +261,7 @@ void SpatGrisAudioProcessor::setElevationValue(float elev)
             *(this->listSources[iSour]->getElev()) = elev;
         }
     }else{
-        *(this->listSources[this->selectItem->selectID]->getElev()) = elev;
+        *(this->listSources[this->selectItem->selectIdSource]->getElev()) = elev;
     }
 }
 

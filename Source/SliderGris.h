@@ -41,13 +41,12 @@ class SliderGRIS : public Slider
 {
     
 public:
-    SliderGRIS(SpatGrisAudioProcessorEditor * edi, float defaultV = 0.0f);
+    SliderGRIS(float defaultV = 0.0f);
 
     void mouseDown (const MouseEvent &e);
     
 private:
-    
-    SpatGrisAudioProcessorEditor * editor;
+
     float defaultValue;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderGRIS)

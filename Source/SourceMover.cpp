@@ -38,8 +38,9 @@ filter(filt)
     for(int i = 0; i  < MouvementMode::SIZE_MM; i++){
         this->listMouvement.add(GetMouvementModeName((MouvementMode)i));
     }
-    this->mouvementModeAudioParam = new AudioParameterChoice("Mouvement","Mouv Trajectory", this->listMouvement, 1);
+    this->mouvementModeAudioParam = new AudioParameterChoice("Mouvement","Mouv Trajectory", this->listMouvement, 0);
     this->filter->addParameter(this->mouvementModeAudioParam);
+    
 }
 
 SourceMover::~SourceMover()
@@ -357,9 +358,9 @@ void SourceMover::setEqualAngles()
     this->sortAngles();
     
     //then set them
-    FPoint selSrcRT = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
+    FPoint selSrcRT = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectIdSource);
     for (int iCurSrc = 0; iCurSrc < this->filter->getNumSourceUsed(); iCurSrc++) {
-        if (iCurSrc == this->filter->getSelectItem()->selectID){
+        if (iCurSrc == this->filter->getSelectItem()->selectIdSource){
             continue;
         }
         FPoint curSrcRT = this->filter->getRayAngleSource(iCurSrc);
@@ -381,9 +382,9 @@ void SourceMover::setEqualRadiusAndAngles()
 {
     this->sortAngles();
     
-    FPoint selSrcRT = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
+    FPoint selSrcRT = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectIdSource);
     for (int iCurSrc = 0; iCurSrc < this->filter->getNumSourceUsed(); iCurSrc++) {
-        if (iCurSrc == this->filter->getSelectItem()->selectID){
+        if (iCurSrc == this->filter->getSelectItem()->selectIdSource){
             continue;
         }
         FPoint curSrcRT = this->filter->getRayAngleSource(iCurSrc);
@@ -410,7 +411,7 @@ void SourceMover::sortAngles()
     qsort(ia, iNbrSrc, sizeof(IndexedAngle), IndexedAngleCompare);
     
     int b;
-    for (b = 0; b < iNbrSrc && ia[b].i != this->filter->getSelectItem()->selectID; b++) ;
+    for (b = 0; b < iNbrSrc && ia[b].i != this->filter->getSelectItem()->selectIdSource; b++) ;
     
     if (b == iNbrSrc) {
         printf("sort angle error!\n");

@@ -387,7 +387,7 @@ TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &emptyS, co
 
 Slider* SpatGrisAudioProcessorEditor::addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, float incr, juce::Slider::TextEntryBoxPosition tebp)
 {
-    Slider *sd = new SliderGRIS(this, defF);
+    Slider *sd = new SliderGRIS(defF);
     sd->setTooltip (stooltip);
     //sd->setTextValueSuffix(s);
     sd->setSize(w, h);
@@ -420,17 +420,17 @@ void SpatGrisAudioProcessorEditor::updateSourceParam()
     this->togLinkAzimSpan->setToggleState(this->filter->getLinkAzimuth(),       dontSendNotification);
     this->togLinkElevSpan->setToggleState(this->filter->getLinkElevation(),     dontSendNotification);
     
-    if(this->filter->getSelectItem()->selecType == SelectedSource){
-        const int idS = this->filter->getSelectItem()->selectID;
-        this->sliSurfaceOrPan->setValue(*(this->filter->getListSource()[idS]->getHeigt()),dontSendNotification);
-        this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
-        
-        this->sliAzimSpan->setValue(*(this->filter->getListSource()[idS]->getAzim()),    dontSendNotification);
-        this->sliAzimSpan->setTooltip("A:"+String(this->sliAzimSpan->getValue(),2));
-        
-        this->sliAElevSpann->setValue(*(this->filter->getListSource()[idS]->getElev()),  dontSendNotification);
-        this->sliAElevSpann->setTooltip("E:"+String(this->sliAElevSpann->getValue(),2));
-    }
+
+    const int idS = this->filter->getSelectItem()->selectIdSource;
+    this->sliSurfaceOrPan->setValue(*(this->filter->getListSource()[idS]->getHeigt()),dontSendNotification);
+    this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
+    
+    this->sliAzimSpan->setValue(*(this->filter->getListSource()[idS]->getAzim()),    dontSendNotification);
+    this->sliAzimSpan->setTooltip("A:"+String(this->sliAzimSpan->getValue(),2));
+    
+    this->sliAElevSpann->setValue(*(this->filter->getListSource()[idS]->getElev()),  dontSendNotification);
+    this->sliAElevSpann->setTooltip("E:"+String(this->sliAElevSpann->getValue(),2));
+
 }
 
 
@@ -447,7 +447,7 @@ void SpatGrisAudioProcessorEditor::updateComMouvement()
             this->comMouvement->addItem(GetMouvementModeName((MouvementMode)i), i+1);
         }
     }
-    this->comMouvement->setSelectedId((MouvementMode)(this->filter->getSourceMover()->getMouvementMode()));
+    this->comMouvement->setSelectedId(this->filter->getSourceMover()->getMouvementModeIndex());
 }
 
 void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
@@ -540,38 +540,38 @@ void SpatGrisAudioProcessorEditor::updateInputOutputMode()
 
 void SpatGrisAudioProcessorEditor::updateSelectSource()
 {
-    if(this->filter->getSelectItem()->selecType == SelectedSource){
-        this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectID+1, dontSendNotification);
-        FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectID);
+
+        this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSource+1, dontSendNotification);
+        FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectIdSource);
         this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
         this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }
-    else{
+    
+   /* else{
         this->comSourceSelectPos->setSelectedId(1, dontSendNotification);
         FPoint rayAngleS = this->filter->getRayAngleSource(0);
         this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
         this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }
+    }*/
 }
 
 void SpatGrisAudioProcessorEditor::updateSelectSpeaker()
 {
-    if(this->filter->getSelectItem()->selecType == SelectedSpeaker){
-        this->comSpeakerSelectPos->setSelectedId(this->filter->getSelectItem()->selectID+1, dontSendNotification);
-        FPoint xyS = this->filter->getListSpeaker()[this->filter->getSelectItem()->selectID]->getPosXY();
+
+        this->comSpeakerSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSpeaker+1, dontSendNotification);
+        FPoint xyS = this->filter->getListSpeaker()[this->filter->getSelectItem()->selectIdSpeaker]->getPosXY();
         
         FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
         this->comSpeakerSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
         this->comSpeakerSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }
-    else{
+    
+   /* else{
         this->comSpeakerSelectPos->setSelectedId(1, dontSendNotification);
         FPoint xyS = this->filter->getListSpeaker()[0]->getPosXY();
         
         FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
         this->comSpeakerSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
         this->comSpeakerSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }
+    }*/
 }
 
 //==============================================================================
@@ -613,9 +613,7 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
 }
 void SpatGrisAudioProcessorEditor::sliderValueChanged (Slider *slider)
 {
-    
     if(this->sliSurfaceOrPan == slider){
-        if(this->altDown){ this->sliSurfaceOrPan->setValue(DefHeigSource); }
         this->filter->setHeightSValue(this->sliSurfaceOrPan->getValue());
         this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
         
@@ -752,13 +750,11 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         this->filter->getTrajectory()->setInOneWay(!(this->comTrajOneWayReturn->getSelectedItemIndex()==1));
     }
     else if(this->comSourceSelectPos == comboBox){
-        this->filter->getSelectItem()->selecType = SelectedSource;
-        this->filter->getSelectItem()->selectID = this->comSourceSelectPos->getSelectedId()-1;
+        this->filter->getSelectItem()->selectIdSource = this->comSourceSelectPos->getSelectedId()-1;
         this->updateSelectSource();
     }
     else if(this->comSpeakerSelectPos == comboBox){
-        this->filter->getSelectItem()->selecType = SelectedSpeaker;
-        this->filter->getSelectItem()->selectID = this->comSpeakerSelectPos->getSelectedId()-1;
+        this->filter->getSelectItem()->selectIdSpeaker = this->comSpeakerSelectPos->getSelectedId()-1;
         this->updateSelectSpeaker();
     }
     
@@ -951,6 +947,13 @@ void SpatGrisAudioProcessorEditor::timerCallback()
     if(this->filter->getTrajectory()->getProcessTrajectory()){
         this->progressBarTraject->setValue(this->filter->getTrajectory()->getProgressBar());
     }
+    
+    if(this->comMouvement->getSelectedId() != this->filter->getSourceMover()->getMouvementMode()){
+        this->comMouvement->setSelectedId(this->filter->getSourceMover()->getMouvementModeIndex(), dontSendNotification);
+    }
+    this->updateSourceParam();
+
+    
 }
 
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)

@@ -10,9 +10,8 @@
 #include "PluginEditor.h"
 
 
-SliderGRIS::SliderGRIS(SpatGrisAudioProcessorEditor * edi, float defaultV)
+SliderGRIS::SliderGRIS( float defaultV)
 {
-    this->editor = edi;
     this->defaultValue = defaultV;
 }
 
@@ -20,6 +19,7 @@ void SliderGRIS::mouseDown (const MouseEvent &e)
 {
     if(e.mods.isAltDown()){
         Slider::setValue(this->defaultValue);
+    }else{
+        Slider::mouseDown(e);
     }
-    Slider::mouseDown(e);
 }

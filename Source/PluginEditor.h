@@ -56,7 +56,6 @@ public :
     ~SpatGrisAudioProcessorEditor();
     //==============================================================================
 
-    void setAltDown(bool alt){ this->altDown = alt; }
     //==============================================================================
     void buttonClicked (Button *button) override;
     void sliderValueChanged (Slider *slider) override;
@@ -86,8 +85,6 @@ private :
     Slider*         addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, float incr, juce::Slider::TextEntryBoxPosition tebp = juce::Slider::TextEntryBoxPosition::TextBoxLeft);
     ComboBox*       addComboBox(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into);
     //==============================================================================
-    
-    bool    altDown = false;
     
     SpatGrisAudioProcessor  * filter;
     
