@@ -35,6 +35,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     LookAndFeel::setDefaultLookAndFeel(&this->grisFeel);
     this->filter = filter;
+    
+
 
     this->spatFieldComp = new SpatComponent(this, this->filter, &this->grisFeel);
     this->addAndMakeVisible(this->spatFieldComp);
@@ -48,6 +50,7 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     this->boxTrajectory = new Box(&this->grisFeel, "Trajectories");
     this->addAndMakeVisible(this->boxTrajectory);
+    
 
     //OctTabbedComponent---------------------------------------------------
     this->octTab = new OctTabbedComponent(&this->grisFeel, TabbedButtonBar::TabsAtTop, this->filter);
@@ -60,21 +63,21 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->octTab->setTabBarDepth(28);
     this->addAndMakeVisible(this->octTab);
     
-    
+
     //Add All Component-------------------------------------------------------------------------------------
     
     //Source param
     this->labSurfaceOrPan       = addLabel("Surface", "Surface Master Soutce", 0, 0, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
     this->togLinkSurfaceOrPan   = addToggleButton("Link", "Link other sources", 90, 0, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliSurfaceOrPan       = addSlider("", "", 4, 18, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinHeigSource, MaxHeigSource, ShowSliderInter);
+    this->sliSurfaceOrPan       = addSlider("", "", 4, 18, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinHeigSource, MaxHeigSource,DefHeigSource, SliderInter);
     
     this->labAzimSpan           = addLabel("Azimuth Span", "Azimuth Span Selected Source", 0, 50, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
     this->togLinkAzimSpan       = addToggleButton("Link", "Link other sources", 90, 50, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliAzimSpan           = addSlider("", "", 4, 68, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinAzimSource, MaxAzimSource, ShowSliderInter);
+    this->sliAzimSpan           = addSlider("", "", 4, 68, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinAzimSource, MaxAzimSource,DefAzimSource, SliderInter);
     
     this->labElevSpan           = addLabel("Elevation Span", "Elevation Span Selected Source", 0, 100, DefaultLabWidth, DefaultLabHeight, this->boxSourceParam->getContent());
     this->togLinkElevSpan       = addToggleButton("Link", "Link other sources", 90, 100, DefaultLabWidth, DefaultLabHeight,  this->boxSourceParam->getContent());
-    this->sliAElevSpann         = addSlider("", "", 4, 118, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinElevSource, MaxElevSource, ShowSliderInter);
+    this->sliAElevSpann         = addSlider("", "", 4, 118, 180, DefaultLabHeight, this->boxSourceParam->getContent(), MinElevSource, MaxElevSource,DefElevSource, SliderInter);
     //-----------------------------
     
     
@@ -108,14 +111,14 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     
     this->labTimeTrajectory = addLabel("Time :", "Time of trajectory", 0, 50, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTimeTrajectory = addTextEditor("", "", "Time of trajectory", 60, 50, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTimeTrajectory = addTextEditor("", "Time of trajectory", 60, 50, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTimeTrajectory = addComboBox("", "Per cycle(s)", 124, 50, DefaultLabWidth-34, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTimeTrajectory->addItem("Second(s)", 1);
     this->comTimeTrajectory->addItem("Beat(s)", 2);
     this->comTimeTrajectory->setSelectedId(1);
     
     this->labCycleTrajectory = addLabel("Cycle(s) :", "Cycle of trajectory", 0, 70, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texCycleTrajectory = addTextEditor("", "", "Numbers of cycle(s) 0=inf", 60, 70, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texCycleTrajectory = addTextEditor("", "Numbers of cycle(s) 0=inf", 60, 70, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
     this->butReadyTrajectory = addButton("Ready", "Valid trajectory param", 60, 100, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
@@ -124,17 +127,17 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->boxTrajectory->getContent()->addAndMakeVisible(this->progressBarTraject);
     this->progressBarTraject->setVisible(false);
     
-    this->sliSpeedTrajectory = addSlider("Speed :", "Speed of trajectory", 14, 150, 204, DefaultLabHeight, this->boxTrajectory->getContent(), MinSpeedTrajectory, MaxSpeedTrajectory,  0.001f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
+    this->sliSpeedTrajectory = addSlider("Speed :", "Speed of trajectory", 14, 150, 204, DefaultLabHeight, this->boxTrajectory->getContent(), MinSpeedTrajectory, MaxSpeedTrajectory, DefSpeedTrajectory,  0.001f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
     addLabel("Speed", "", 10, 134, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
     //Other param Trajectories hided---
     int rowX = 260;
     
     this->labCyclePercent = addLabel("% cycle", "", rowX, 30, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->sliCyclePercent = addSlider("% :", "", rowX+50, 30, 180, DefaultLabHeight, this->boxTrajectory->getContent(), MinCyclePercent, MaxCyclePercent,  1.0f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
+    this->sliCyclePercent = addSlider("% :", "", rowX+50, 30, 180, DefaultLabHeight, this->boxTrajectory->getContent(), MinCyclePercent, MaxCyclePercent, DefCyclePercent,  1.0f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
 
     this->labTrajEllipseWidth = addLabel("Width :", "Width of ellipse", rowX,       50, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajEllipseWidth = addTextEditor("", "", "Width of ellipse", rowX+50,  50, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajEllipseWidth = addTextEditor("", "Width of ellipse", rowX+50,  50, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
     this->comTrajOneWayReturn = addComboBox("", "Trajectory cycle", rowX,           50, DefaultLabWidth-30, DefaultLabHeight, this->boxTrajectory->getContent());
     this->comTrajOneWayReturn->addItem("One Way", 1);
@@ -142,17 +145,17 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->comTrajOneWayReturn->setSelectedId(1);
 
     this->labTrajRadAngEnd = addLabel("Radius / Angle of end point :", "Radius and angle end point", rowX-5, 70, 200, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajRadiusEnd = addTextEditor("", "", "Radius (0-2)", rowX, 90, 40, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajAngleEnd = addTextEditor("", "", "Angle (0-360)", rowX+50, 90, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajRadiusEnd = addTextEditor("", "Radius (0-2)", rowX, 90, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajAngleEnd = addTextEditor("", "Angle (0-360)", rowX+50, 90, 40, DefaultLabHeight, this->boxTrajectory->getContent());
 
     this->butTrajSetEnd = addButton("Set", "Set end point", rowX+100, 90, 70, DefaultLabHeight, this->boxTrajectory->getContent());
     this->butTrajResetEnd = addButton("Reset", "Reset end point", rowX+180, 90, 70, DefaultLabHeight, this->boxTrajectory->getContent());
 
     this->labTrajPendDampe = addLabel("Dampening :", "Dampening (0-1)", rowX-5, 114, 80, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajPendDampe = addTextEditor("", "", "Dampening (0-1)", rowX+80,114, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajPendDampe = addTextEditor("", "Dampening (0-1)", rowX+80,114, 40, DefaultLabHeight, this->boxTrajectory->getContent());
 
     this->labTrajPendDevia = addLabel("Deviation :", "Deviation (0-360)", rowX-5, 134, 80, DefaultLabHeight, this->boxTrajectory->getContent());
-    this->texTrajPendDevia = addTextEditor("", "", "Deviation (0-360)", rowX+80, 134, 40, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->texTrajPendDevia = addTextEditor("", "Deviation (0-360)", rowX+80, 134, 40, DefaultLabHeight, this->boxTrajectory->getContent());
     
     this->labTrajRandSpeed = addLabel("Speed :", "Speed Random", rowX-5, 50, 80, DefaultLabHeight, this->boxTrajectory->getContent());
     this->sliTrajRandSpeed = addSlider("Speed :", "Speed Random", rowX+48, 50, 160, DefaultLabHeight, this->boxTrajectory->getContent(), MinTrajRandomSpeed, MaxTrajRandomSpeed,  0.01f, juce::Slider::TextEntryBoxPosition::TextBoxLeft);
@@ -201,11 +204,11 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->togOSCActive->setToggleState(this->filter->getOscOn(), dontSendNotification);
     
     this->labOSCSourceIDF   = addLabel("OSC 1er ID :", "OSC 1er Source ID", 240, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->texOSCSourceIDF   = addTextEditor("", "", "OSC 1er Source ID", 320, 30, 60, DefaultLabHeight, settingsBox);
+    this->texOSCSourceIDF   = addTextEditor("", "OSC 1er Source ID", 320, 30, 60, DefaultLabHeight, settingsBox);
     this->texOSCSourceIDF->setText(String(this->filter->getOscFirstIdSource()));
     
     this->labOSCPort        = addLabel("OSC Port :", "OSC Port", 240, 50, DefaultLabWidth, DefaultLabHeight, settingsBox);
-    this->texOSCPort        = addTextEditor("", "", "OSC Port", 320, 50, 60, DefaultLabHeight, settingsBox);
+    this->texOSCPort        = addTextEditor("", "OSC Port", 320, 50, 60, DefaultLabHeight, settingsBox);
     this->texOSCPort->setText(String(this->filter->getOscPort()));
     
     //Volume and Filter
@@ -214,22 +217,22 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->togActiveFil  = addToggleButton("Active", "Active Filter", 4, 0, DefaultLabWidth, DefaultLabHeight, volumeFBox);
     
     this->labVolCenter  = addLabel("Volume center (dB)", "Volume center (dB)", 0, 18, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
-    this->sliVolCenter  = addSlider("", "Volume center (dB)", 4, 34, 172, DefaultLabHeight, volumeFBox, MinVolCenter, MaxVolCenter, ShowSliderInterInt);
+    this->sliVolCenter  = addSlider("", "Volume center (dB)", 4, 34, 172, DefaultLabHeight, volumeFBox, MinVolCenter, MaxVolCenter, DefVolCenter, SliderInterInt);
     
     this->labVolSpeaker = addLabel("Volume speakers (dB)", "Volume speakers (dB)", 180, 18, DefaultLabWidth+40, DefaultLabHeight,  volumeFBox);
-    this->sliVolSpeaker = addSlider("", "Volume speakers (dB)", 184, 34, 172, DefaultLabHeight, volumeFBox, MinVolSpeaker, MaxVolSpeaker, ShowSliderInterInt);
+    this->sliVolSpeaker = addSlider("", "Volume speakers (dB)", 184, 34, 172, DefaultLabHeight, volumeFBox, MinVolSpeaker, MaxVolSpeaker, DefVolSpeaker, SliderInterInt);
     
     this->labVolFar     = addLabel("Volume far (dB)", "Volume far (dB)", 360, 18, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
-    this->sliVolFar     = addSlider("", "Volume far (dB)", 364, 34, 172, DefaultLabHeight, volumeFBox, MinVolFar, MaxVolFar, ShowSliderInterInt);
+    this->sliVolFar     = addSlider("", "Volume far (dB)", 364, 34, 172, DefaultLabHeight, volumeFBox, MinVolFar, MaxVolFar, DefVolFar, SliderInterInt);
     
-    this->labFilCenter  = addLabel("Filter center (dB)", "Filter center (dB)", 0, 54, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
-    this->sliFilCenter  = addSlider("", "Volume center (dB)", 4, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, ShowSliderInterInt);
+    this->labFilCenter  = addLabel("Filter center", "Filter center", 0, 54, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
+    this->sliFilCenter  = addSlider("", "Filter center", 4, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, DefFilterCenter, SliderInterInt);
     
-    this->labFilSpeaker = addLabel("Filter speakers (dB)", "Filter speakers (dB)", 180, 54, DefaultLabWidth+40, DefaultLabHeight,  volumeFBox);
-    this->sliFilSpeaker = addSlider("", "Volume speakers (dB)", 184, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, ShowSliderInterInt);
+    this->labFilSpeaker = addLabel("Filter speakers", "Filter speakers", 180, 54, DefaultLabWidth+40, DefaultLabHeight,  volumeFBox);
+    this->sliFilSpeaker = addSlider("", "Filter speakers", 184, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, DefFilterSpeaker, SliderInterInt);
     
-    this->labFilFar     = addLabel("Filter far (dB)", "Filter far (dB)", 360, 54, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
-    this->sliFilFar     = addSlider("", "Volume far (dB)", 364, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, ShowSliderInterInt);
+    this->labFilFar     = addLabel("Filter far", "Filter far", 360, 54, DefaultLabWidth, DefaultLabHeight,  volumeFBox);
+    this->sliFilFar     = addSlider("", "Filter far", 364, 70, 172, DefaultLabHeight, volumeFBox, MinFilter, MaxFilter, DefFilterFar, SliderInterInt);
 
     
     
@@ -249,11 +252,11 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->comSourceSelectPos    = addComboBox("", "Source Selected", 80, 30, 40, DefaultLabHeight, sourcesBox);
     
     this->labSourceSelectRay    = addLabel("Ray :", "Ray (0 - 2)", 0, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
-    this->comSourceSelectRay    = addTextEditor("","", "Ray (0 - 2)", 50, 50, 70, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectRay    = addTextEditor("", "Ray (0 - 2)", 50, 50, 70, DefaultLabHeight, sourcesBox);
     this->labSourceInfoRay      = addLabel("(0 - 2)", "", 120, 50, DefaultLabWidth, DefaultLabHeight, sourcesBox);
     
     this->labSourceSelectAngle  = addLabel("Angle :", "Angle (0 - 360)", 0, 70, DefaultLabWidth, DefaultLabHeight, sourcesBox);
-    this->comSourceSelectAngle  = addTextEditor("","", "Angle (0 - 360)", 50, 70, 70, DefaultLabHeight, sourcesBox);
+    this->comSourceSelectAngle  = addTextEditor("", "Angle (0 - 360)", 50, 70, 70, DefaultLabHeight, sourcesBox);
     this->labSourceInfoAngle    = addLabel("(0 - 360)", "", 120, 70, DefaultLabWidth, DefaultLabHeight, sourcesBox);
     
     
@@ -273,11 +276,11 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->comSpeakerSelectPos    = addComboBox("", "Speaker Selected", 80, 30, 40, DefaultLabHeight, speakersBox);
     
     this->labSpeakerSelectRay    = addLabel("Ray :", "Ray (0 - 2)", 0, 50, DefaultLabWidth, DefaultLabHeight, speakersBox);
-    this->comSpeakerSelectRay    = addTextEditor("","", "Ray (0 - 2)", 50, 50, 70, DefaultLabHeight, speakersBox);
+    this->comSpeakerSelectRay    = addTextEditor("", "Ray (0 - 2)", 50, 50, 70, DefaultLabHeight, speakersBox);
     this->labSpeakerInfoRay      = addLabel("(0 - 2)", "", 120, 50, DefaultLabWidth, DefaultLabHeight, speakersBox);
     
     this->labSpeakerSelectAngle  = addLabel("Angle :", "Angle (0 - 360)", 0, 70, DefaultLabWidth, DefaultLabHeight, speakersBox);
-    this->comSpeakerSelectAngle  = addTextEditor("","", "Angle (0 - 360)", 50, 70, 70, DefaultLabHeight, speakersBox);
+    this->comSpeakerSelectAngle  = addTextEditor("", "Angle (0 - 360)", 50, 70, 70, DefaultLabHeight, speakersBox);
     this->labSpeakerInfoAngle    = addLabel("(0 - 360)", "", 120, 70, DefaultLabWidth, DefaultLabHeight, speakersBox);
     
     
@@ -301,6 +304,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     
     this->updateSelectSource();
     this->updateSelectSpeaker();
+    
+
     
 	this->startTimerHz(HertzRefresh);
 }
@@ -367,35 +372,27 @@ ToggleButton* SpatGrisAudioProcessorEditor::addToggleButton(const String &s, con
     return tb;
 }
 
-TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &s, const String &emptyS, const String &stooltip, int x, int y, int w, int h, Component *into, int wLab)
+TextEditor* SpatGrisAudioProcessorEditor::addTextEditor(const String &emptyS, const String &stooltip, int x, int y, int w, int h, Component *into, int wLab)
 {
     TextEditor *te = new TextEditor();
     te->setTooltip (stooltip);
     te->setTextToShowWhenEmpty(emptyS, this->grisFeel.getOffColour());
     te->setColour(ToggleButton::textColourId, this->grisFeel.getFontColour());
     te->setLookAndFeel(&this->grisFeel);
-    
-    if (s.isEmpty()){
-        te->setBounds(x, y, w, h);
-    }else{
-        te->setBounds(x+wLab, y, w, h);
-        Label *lb =addLabel(s, "", x, y, wLab, h, into);
-        lb->setJustificationType(Justification::centredRight);
-    }
-    
+    te->setBounds(x, y, w, h);
     te->addListener(this);
     into->addAndMakeVisible(te);
     return te;
 }
 
-Slider* SpatGrisAudioProcessorEditor::addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, juce::Slider::TextEntryBoxPosition tebp)
+Slider* SpatGrisAudioProcessorEditor::addSlider(const String &s, const String &stooltip, int x, int y, int w, int h, Component *into, float minF, float maxF, float defF, float incr, juce::Slider::TextEntryBoxPosition tebp)
 {
-    Slider *sd = new Slider();
+    Slider *sd = new SliderGRIS(this, defF);
     sd->setTooltip (stooltip);
     //sd->setTextValueSuffix(s);
     sd->setSize(w, h);
     sd->setTopLeftPosition(x, y);
-    sd->setRange(minF, maxF, defF);
+    sd->setRange(minF, maxF, incr);
     //sd->setSliderStyle(Slider::Rotary);
     //sd->setRotaryParameters(M_PI * 1.3f, M_PI * 2.7f, true);
     sd->setTextBoxStyle (tebp, false, 40, DefaultLabHeight);
@@ -578,7 +575,6 @@ void SpatGrisAudioProcessorEditor::updateSelectSpeaker()
 }
 
 //==============================================================================
-
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
 {
     if(this->togLinkAzimSpan == button){
@@ -619,6 +615,7 @@ void SpatGrisAudioProcessorEditor::sliderValueChanged (Slider *slider)
 {
     
     if(this->sliSurfaceOrPan == slider){
+        if(this->altDown){ this->sliSurfaceOrPan->setValue(DefHeigSource); }
         this->filter->setHeightSValue(this->sliSurfaceOrPan->getValue());
         this->sliSurfaceOrPan->setTooltip("S:"+String(this->sliSurfaceOrPan->getValue(),2));
         

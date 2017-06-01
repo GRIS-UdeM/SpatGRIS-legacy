@@ -100,7 +100,7 @@ static const float ThetaMax         = M_PI * 2.f;
 //Filter - Slider
 static const float  MinVolCenter   = -10.f;
 static const float  MaxVolCenter   = 30.f;
-static const float  DefVolCenter   = 0.f;
+static const float  DefVolCenter   = 6.f;
 
 static const float  MinVolSpeaker   = -30.f;
 static const float  MaxVolSpeaker   = 10.f;
@@ -108,11 +108,13 @@ static const float  DefVolSpeaker   = 0.f;
 
 static const float  MinVolFar       = -120.f;
 static const float  MaxVolFar       = 0.f;
-static const float  DefVolFar       = 0.f;
+static const float  DefVolFar       = -36.f;
 
 static const float  MinFilter       = -100.f;
 static const float  MaxFilter       = 0.f;
-
+static const float  DefFilterCenter = 0.f;
+static const float  DefFilterSpeaker= -10.f;
+static const float  DefFilterFar    = -50.f;
 
 //--------------------------------------------------
 //Source Param
@@ -157,8 +159,8 @@ static const float  DefCyclePercent   = 100.f;
 //UI Param
 //--------------------------------------------------
 static const float  DefaultSliderInter  = 0.00001f;
-static const float  ShowSliderInter     = 0.001f;
-static const float  ShowSliderInterInt  = 1.0f;
+static const float  SliderInter     = 0.001f;
+static const float  SliderInterInt  = 1.0f;
 
 static const int    Margin             = 2;
 static const int    CenterColumnWidth  = 180;
