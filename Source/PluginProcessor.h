@@ -137,6 +137,7 @@ public:
     
     SelectItem * getSelectItem() { return this->selectItem; }
     
+    bool    isPlaying(){ return this->cpi.isPlaying; }
     //----
     ProcessType getTypeProcess() { return this->typeProcess; }
     void setTypeProcess(ProcessType v);
@@ -208,6 +209,7 @@ private:
     bool linkElevation  = false;
     bool linkHeight     = false;
     
+    AudioPlayHead::CurrentPositionInfo cpi;
     //Trajectory param========================
     SourceMover     * sourceMover;
     Trajectory      * trajectory;

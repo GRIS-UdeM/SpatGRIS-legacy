@@ -123,9 +123,15 @@ int Trajectory::progressCycle()
 
 void Trajectory::stop(bool clearTrajectory)
 {
-    this->processTrafEnd = false;
+    this->processTrafEnd = false;   
 }
 
+void Trajectory::restorePosSources()
+{
+    for (int i = 0; i < this->filter->getNumSourceUsed(); i++){
+        this->filter->setPosRayAngRadSource(i, this->listSourceRayAng[i].x, this->listSourceRayAng[i].y);
+    }
+}
 // ===========================================================================================================
 void Trajectory::circleProcess()
 {

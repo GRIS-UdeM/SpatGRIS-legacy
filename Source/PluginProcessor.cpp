@@ -94,6 +94,7 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     if (this->bufferSize != pBuffer.getNumSamples()){
         this->bufferSize = pBuffer.getNumSamples();
     }
+    this->getPlayHead()->getCurrentPosition(this->cpi);
     
     //==================================== PROCESS TRAJECTORIES ===========================================
     this->processTrajectory();
@@ -177,7 +178,6 @@ void SpatGrisAudioProcessor::setTypeProcess(ProcessType v)
             break;
             
         default:
-            
             break;
     }
 
@@ -270,10 +270,7 @@ void SpatGrisAudioProcessor::setElevationValue(float elev)
 //==============================================================================
 void SpatGrisAudioProcessor::processTrajectory()
 {
-    AudioPlayHead::CurrentPositionInfo cpi;
-    getPlayHead()->getCurrentPosition(cpi);
-    
-    if(this->trajectory->getProcessTrajectory() && cpi.isPlaying){
+    if(this->trajectory->getProcessTrajectory() && this->isPlaying()){
         double bps = cpi.bpm / 60;
         float seconds = this->bufferSize / this->sampleRate;
         float beats = seconds * bps;

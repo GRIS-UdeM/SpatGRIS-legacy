@@ -46,6 +46,7 @@ public:
     float getProgressBar();
     int progressCycle();
     void stop(bool clearTrajectory = true);
+    void restorePosSources();
     
     //-----------------------------------------------
     //Getter

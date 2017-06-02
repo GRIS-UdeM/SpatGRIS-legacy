@@ -486,9 +486,11 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
         
         this->progressBarTraject->setVisible(false);
         this->filter->getTrajectory()->setProcessTrajectory(false);
+        this->filter->getTrajectory()->restorePosSources();
     }
     
     this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
+    
 }
 
 void SpatGrisAudioProcessorEditor::updateInputOutputMode()
@@ -540,38 +542,31 @@ void SpatGrisAudioProcessorEditor::updateInputOutputMode()
 
 void SpatGrisAudioProcessorEditor::updateSelectSource()
 {
-
-        this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSource+1, dontSendNotification);
-        FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectIdSource);
-        this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
-        this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSource+1, dontSendNotification);
+    FPoint rayAngleS = this->filter->getRayAngleSource(this->filter->getSelectItem()->selectIdSource);
     
-   /* else{
-        this->comSourceSelectPos->setSelectedId(1, dontSendNotification);
-        FPoint rayAngleS = this->filter->getRayAngleSource(0);
+    if(this->comSourceSelectRay->getText() != String(rayAngleS.x,4)){
         this->comSourceSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+    }
+    if(this->comSourceSelectAngle->getText() != String(RadianToDegree(rayAngleS.y))){
         this->comSourceSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }*/
+    }
 }
 
 void SpatGrisAudioProcessorEditor::updateSelectSpeaker()
 {
-
-        this->comSpeakerSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSpeaker+1, dontSendNotification);
-        FPoint xyS = this->filter->getListSpeaker()[this->filter->getSelectItem()->selectIdSpeaker]->getPosXY();
-        
-        FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
-        this->comSpeakerSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
-        this->comSpeakerSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
+    this->comSpeakerSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSpeaker+1, dontSendNotification);
+    FPoint xyS = this->filter->getListSpeaker()[this->filter->getSelectItem()->selectIdSpeaker]->getPosXY();
     
-   /* else{
-        this->comSpeakerSelectPos->setSelectedId(1, dontSendNotification);
-        FPoint xyS = this->filter->getListSpeaker()[0]->getPosXY();
-        
-        FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
+    FPoint rayAngleS = FPoint(GetRaySpat(xyS.x, xyS.y), GetAngleSpat(xyS.x, xyS.y));
+    
+    
+    if(this->comSpeakerSelectRay->getText() != String(rayAngleS.x,4)){
         this->comSpeakerSelectRay->setText(String(rayAngleS.x,4), dontSendNotification);
+    }
+    if(this->comSpeakerSelectAngle->getText() != String(RadianToDegree(rayAngleS.y))){
         this->comSpeakerSelectAngle->setText(String(RadianToDegree(rayAngleS.y) ,4), dontSendNotification);
-    }*/
+    }
 }
 
 //==============================================================================
@@ -952,8 +947,18 @@ void SpatGrisAudioProcessorEditor::timerCallback()
         this->comMouvement->setSelectedId(this->filter->getSourceMover()->getMouvementModeIndex(), dontSendNotification);
     }
     this->updateSourceParam();
-
     
+    if(this->filter->isPlaying()){
+        //Sources
+        if(octTab->getCurrentTabIndex() == 2){
+            this->updateSelectSource();
+        }
+        
+        //Speakers
+        if(octTab->getCurrentTabIndex() == 3){
+            this->updateSelectSpeaker();
+        }
+    }
 }
 
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)
