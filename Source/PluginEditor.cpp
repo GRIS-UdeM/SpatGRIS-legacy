@@ -959,6 +959,12 @@ void SpatGrisAudioProcessorEditor::timerCallback()
             this->updateSelectSpeaker();
         }
     }
+    
+    for (auto&& it : this->vecLevelOut)
+    {
+        it->update();
+    }
+    
 }
 
 void SpatGrisAudioProcessorEditor::paint (Graphics& g)

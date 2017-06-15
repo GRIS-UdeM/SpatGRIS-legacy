@@ -16,4 +16,5 @@ filter(filt), id(idS)
     this->px = 0.f;
     this->py = 0.f;
     this->muted = false;
+    this->level = -60.0f;
 }

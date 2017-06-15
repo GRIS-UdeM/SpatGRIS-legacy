@@ -25,11 +25,13 @@ public:
     float getY(){ return this->py; }
     FPoint getPosXY(){ return FPoint(this->px, this->py); }
     bool isMuted(){ return this->muted; }
+    float getLevel(){ return this->level; }
     
     void setX(float x){ this->px = x; }
     void setY(float y){ this->py = y; }
     void setPosXY(FPoint xy){ this->px = xy.x; this->py = xy.y; }
     void setMuted(bool m){ this->muted = m; }
+    void setLevel(float lev){ this->level = lev; }
     
 private:
     SpatGrisAudioProcessor * filter;
@@ -38,6 +40,7 @@ private:
     float px;
     float py;
     bool muted;
+    float level;
     
     
 };

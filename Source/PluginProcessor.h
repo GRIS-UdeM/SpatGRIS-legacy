@@ -102,26 +102,26 @@ public:
     SpatGrisAudioProcessor();
     ~SpatGrisAudioProcessor();
     
-    const String getName() const;
+    const String getName() const override;
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock);
-    void releaseResources();
+    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void releaseResources() override;
     
-    void processBlock (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
-    void processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages);
+    void processBlock (AudioBuffer<float> &buffer, MidiBuffer& midiMessages) override;
+    void processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages) override;
     //==============================================================================
-    AudioProcessorEditor* createEditor();
-    bool hasEditor() const;
+    AudioProcessorEditor* createEditor() override;
+    bool hasEditor() const override;
     
     //==============================================================================
-    double getTailLengthSeconds() const;
-    bool acceptsMidi() const;
-    bool producesMidi() const;
-    int getNumPrograms();
-    int getCurrentProgram();
-    void setCurrentProgram (int index);
-    const String getProgramName (int index);
-    void changeProgramName (int index, const String& newName);
+    double getTailLengthSeconds() const override;
+    bool acceptsMidi() const override;
+    bool producesMidi() const override;
+    int getNumPrograms() override;
+    int getCurrentProgram() override;
+    void setCurrentProgram (int index) override;
+    const String getProgramName (int index) override;
+    void changeProgramName (int index, const String& newName) override;
     //==============================================================================
     void timerCallback() override;
     
@@ -178,13 +178,13 @@ public:
     void setAzimuthValue(float azim);
     void setElevationValue(float elev);
 
-    
+    float getLevel(int index){ return (15.0f * log10f(sqrtf(this->listSpeakers[index]->getLevel()))); }
     //==============================================================================
     
     
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData);
-    void setStateInformation (const void* data, int sizeInBytes);
+    void getStateInformation (MemoryBlock& destData) override;
+    void setStateInformation (const void* data, int sizeInBytes) override;
     //==============================================================================
     
 private:
@@ -194,6 +194,7 @@ private:
     //Audio Param =================================
     double  sampleRate;
     int     bufferSize;
+    AudioBuffer<float> pBufferIn;
     
     //=============================================
     Source *   listSources[MaxSources];

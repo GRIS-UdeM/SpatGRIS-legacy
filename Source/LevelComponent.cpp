@@ -111,7 +111,7 @@ LevelComponent::~LevelComponent()
 
 void LevelComponent::buttonClicked(Button *button){
     if (button == this->muteToggleBut) {
-        this->filter->getListSpeaker()[this->indexLev]->setMuted(this->muteToggleBut->getToggleState());
+        this->filter->getListSpeaker()[this->indexLev-1]->setMuted(this->muteToggleBut->getToggleState());
         this->levelBox->repaint();
     }
 }
@@ -133,7 +133,7 @@ float LevelComponent::getLevel(){
 }
 
 void LevelComponent::update(){
-    float l = -30.0f;// this->filter->getLevel(indexLev);
+    float l = this->filter->getLevel(indexLev-1);
     if(isnan(l)){ return; }
     if(!this->muteToggleBut->getToggleState() && this->level != l){
         this->repaint();

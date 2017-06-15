@@ -99,6 +99,75 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     //==================================== PROCESS TRAJECTORIES ===========================================
     this->processTrajectory();
     
+    
+    if(this->typeProcess == OSCZirkonium ||  this->typeProcess == OSCSpatServer)
+    {
+        return;
+    }
+    
+    //==================================== PROCESS BUFFERS ================================================
+    //Copy Buffer to pBufferIn and Clear pBuffer
+    pBufferIn.makeCopyOf(pBuffer);
+    for (int i = 0; i < pBuffer.getNumChannels(); ++i) {
+        memset (pBuffer.getWritePointer(i), 0, sizeof (float) * this->bufferSize);
+    }
+
+    
+    //==================================== PROCESS MODE ===================================================
+    switch (this->typeProcess) {
+        case FreeVolum:
+            for (int o = 0; o < this->numSpeakerUsed; ++o){
+                
+                float outputX = this->listSpeakers[o]->getX();
+                float outputY = this->listSpeakers[o]->getY();
+                
+                for(int i = 0; i < this->numSourceUsed; ++i){
+                    
+                    float dx = (*this->listSources[i]->getX()) - outputX;
+                    float dy = (*this->listSources[i]->getY()) - outputY;
+                    float di = MaxHeigSource - (*this->listSources[i]->getHeigt());
+                    float da = sqrtf(dx*dx + dy*dy) * di;
+                    
+                    if (da > 1.0f) da = 1.0f;
+                    if (da < 0.01f) da = 0.01f;
+                    
+                    da = -log10f(da);
+                    for (int f = 0; f < this->bufferSize; ++f){
+                        if(i == 0){
+                            pBuffer.setSample(o, f, (da *  (*this->pBufferIn.getWritePointer(0, f))));
+                        }
+                        else{
+                            pBuffer.setSample(o, f,  (*pBuffer.getWritePointer(o,f)) += (da *  (*this->pBufferIn.getWritePointer(0, f))));
+                        }
+                    }
+                }
+            }
+            break;
+            
+        case PanSpan:
+            break;
+        
+        default:
+            break;
+    }
+    
+   
+    //==================================== PROCESS VUMETER & MUTE ==========================================
+    for (int i = 0; i < pBuffer.getNumChannels(); ++i) {
+        //Mute ----------------
+        if(this->listSpeakers[i]->isMuted()){
+            memset (pBuffer.getWritePointer(i), 0, sizeof (float) * this->bufferSize);
+        }
+        
+        float sumOut = 0.0f;
+        //Vu Meter ----------------
+        for(int nF = 0; nF < this->bufferSize; ++nF) {
+            sumOut += (*pBuffer.getWritePointer(i, nF)) * (*pBuffer.getWritePointer(i, nF));
+        }
+        this->listSpeakers[i]->setLevel(sumOut/this->bufferSize);
+    }
+
+
 }
 void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, MidiBuffer& midiMessages)
 {
