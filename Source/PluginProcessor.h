@@ -146,10 +146,10 @@ public:
     bool getLinkAzimuth()   { return this->linkAzimuth; }
     bool getLinkElevation() { return this->linkElevation; }
 
-    
+    void setLinkHeight(bool v)      { this->linkHeight = v; }
     void setLinkAzimuth(bool v)     { this->linkAzimuth = v; }
     void setLinkElevation(bool v)   { this->linkElevation = v; }
-    bool setLinkHeight(bool v)      { this->linkHeight= v; }
+
     
     void setIdInOutMode(int idMode);
     InOutMode getInIoutMode(){return (InOutMode)((int)this->inOutModeUsed+1); }
@@ -191,6 +191,9 @@ public:
 private:
     void processTrajectory();
     void sendOscMessageValues();
+    
+    void processFreeVolume(AudioBuffer<float> &pBuffer);
+    void processPanSpan(AudioBuffer<float> &pBuffer);
     
     //Audio Param =================================
     double  sampleRate;

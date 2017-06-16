@@ -152,7 +152,8 @@ void SpatComponent::paint(Graphics &g)
     // - - - - - - - - - - - -
     // draw FreeDraw
     // - - - - - - - - - - - -
-    if(this->filter->getTrajectory()->getListPointsFreeDrawScreen()->size() > 1){
+    if(this->filter->getTrajectory()->getTrajectoryType() == FreeDrawing &&
+       this->filter->getTrajectory()->getListPointsFreeDrawScreen()->size() > 1){
         g.setColour(Colours::white.withAlpha(0.7f));
         this->pathFreeDraw.clear();
         this->pathFreeDraw.startNewSubPath(this->filter->getTrajectory()->getListPointsFreeDrawScreen()->at(0).x, this->filter->getTrajectory()->getListPointsFreeDrawScreen()->at(0).y);

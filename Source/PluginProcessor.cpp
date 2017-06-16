@@ -46,12 +46,9 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     this->selectItem->selectIdSpeaker = 0;
     this->selectItem->mouseOverSpeaker = false;
     this->selectItem->mouseOverSource = false;
-    //this->listSources = vector<Source *>();
-    //this->listSpeakers = vector<Speaker *>();
+
     
-    
-    
-    
+    this->typeProcess = FreeVolum;
     this->numSourceUsed = MaxSources;
     this->numSpeakerUsed = MaxSpeakers;
     this->inOutModeUsed = i1o1;
@@ -117,35 +114,11 @@ void SpatGrisAudioProcessor::processBlock(AudioBuffer<float> &pBuffer, MidiBuffe
     //==================================== PROCESS MODE ===================================================
     switch (this->typeProcess) {
         case FreeVolum:
-            for (int o = 0; o < this->numSpeakerUsed; ++o){
-                
-                float outputX = this->listSpeakers[o]->getX();
-                float outputY = this->listSpeakers[o]->getY();
-                
-                for(int i = 0; i < this->numSourceUsed; ++i){
-                    
-                    float dx = (*this->listSources[i]->getX()) - outputX;
-                    float dy = (*this->listSources[i]->getY()) - outputY;
-                    float di = MaxHeigSource - (*this->listSources[i]->getHeigt());
-                    float da = sqrtf(dx*dx + dy*dy) * di;
-                    
-                    if (da > 1.0f) da = 1.0f;
-                    if (da < 0.01f) da = 0.01f;
-                    
-                    da = -log10f(da);
-                    for (int f = 0; f < this->bufferSize; ++f){
-                        if(i == 0){
-                            pBuffer.setSample(o, f, (da *  (*this->pBufferIn.getWritePointer(0, f))));
-                        }
-                        else{
-                            pBuffer.setSample(o, f,  (*pBuffer.getWritePointer(o,f)) += (da *  (*this->pBufferIn.getWritePointer(0, f))));
-                        }
-                    }
-                }
-            }
+            this->processFreeVolume(pBuffer);
             break;
             
         case PanSpan:
+            this->processPanSpan(pBuffer);
             break;
         
         default:
@@ -175,7 +148,40 @@ void SpatGrisAudioProcessor::processBlockBypassed (AudioBuffer<float> &buffer, M
     
 }
 //==============================================================================
+void SpatGrisAudioProcessor::processFreeVolume(AudioBuffer<float> &pBuffer)
+{
+    for (int o = 0; o < this->numSpeakerUsed; ++o){
+        
+        float outputX = this->listSpeakers[o]->getX();
+        float outputY = this->listSpeakers[o]->getY();
+        
+        for(int i = 0; i < this->numSourceUsed; ++i){
+            
+            float dx = (*this->listSources[i]->getX()) - outputX;
+            float dy = (*this->listSources[i]->getY()) - outputY;
+            float di = MaxHeigSource - (*this->listSources[i]->getHeigt());
+            float da = sqrtf(dx*dx + dy*dy) * di;
+            
+            if (da > 1.0f) da = 1.0f;
+            if (da < 0.01f) da = 0.01f;
+            
+            da = -log10f(da);
+            for (int f = 0; f < this->bufferSize; ++f){
+                if(i == 0){
+                    (*pBuffer.getWritePointer(o, f)) = (da *  (*this->pBufferIn.getWritePointer(i, f)));
+                }
+                else{
+                    (*pBuffer.getWritePointer(o, f))  += (da *  (*this->pBufferIn.getWritePointer(i, f)));
+                }
+            }
+        }
+    }
+}
 
+void SpatGrisAudioProcessor::processPanSpan(AudioBuffer<float> &pBuffer)
+{
+
+}
 
 //==============================================================================
 AudioProcessorEditor* SpatGrisAudioProcessor::createEditor()

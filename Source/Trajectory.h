@@ -112,8 +112,8 @@ private:
     float   timeDone            = 0.0f;
     float   timeTotalDuration   = 0.0f;
     
-    TrajectoryType  typeSelect;
-    float           cyclePercent;
+    TrajectoryType  typeSelect = Circle;
+    float           cyclePercent  = 100.0f;
     float           timeDuration = 1.f;
     bool            inSeconds = true;      //Second(true) or beat(false)
     float           cycle = 1.f;
