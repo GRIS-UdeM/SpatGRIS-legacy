@@ -193,7 +193,6 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     for(int i = 0; i  < ProcessType::SIZE_PT; i++){
         this->comTypeProcess->addItem(GetProcessTypeName((ProcessType)i), i+1);
     }
-    this->comTypeProcess->setSelectedId(1);
     
     this->labInOutMode      = addLabel("In / Out :", "Input/Output mode", 0, 30, DefaultLabWidth, DefaultLabHeight, settingsBox);
     this->comInOutMode      = addComboBox("", "Input/Output mode", 60, 30, DefaultLabWidth-40, DefaultLabHeight, settingsBox);
@@ -296,11 +295,12 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->addAndMakeVisible (this->resizer = new ResizableCornerComponent (this, &this->resizeWindow));
     this->setSize(DefaultUItWidth, DefaultUIHeight);
     
+    this->comTypeProcess->setSelectedId(this->filter->getTypeProcess()+1, sendNotification);
     this->updateComMouvement();
     this->updateSourceParam();
     this->updateTrajectoryParam();
     this->updateInputOutputMode();
-    this->comInOutMode->setSelectedId(1);
+    this->updateLevelOutMode();
     
     this->updateSelectSource();
     this->updateSelectSpeaker();
@@ -316,8 +316,6 @@ SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
     {
         delete (it);
     }
-    
-    //delete this->sourceMover;
     
     delete this->progressBarTraject;
     
@@ -469,6 +467,8 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryParam()
     this->sliTrajRandSpeed->setValue(this->filter->getTrajectory()->getRandSpeed());
     this->togTrajRandSepare->setToggleState(this->filter->getTrajectory()->getRandSeparate(),dontSendNotification);
     
+    this->sliCyclePercent->setValue(this->filter->getTrajectory()->getCyclePercent());
+    
     if(!(this->filter->getTrajectory()->getProcessTrajectory())){   //Start ready...
         for (auto&& it : this->listLockCompTrajectory)
         {
@@ -499,45 +499,39 @@ void SpatGrisAudioProcessorEditor::updateInputOutputMode()
     int iMaxSpeakers  = this->filter->getTotalNumOutputChannels();
     
     
-    if (iMaxSpeakers >=1)  { this->comInOutMode->addItem("1x1",  1);  }
+    if (iMaxSpeakers >=1)  { this->comInOutMode->addItem("1x1",  1);  }//i1o1+1
     if (iMaxSpeakers >=2)  { this->comInOutMode->addItem("1x2",  2);  }
     if (iMaxSpeakers >=4)  { this->comInOutMode->addItem("1x4",  3);  }
     if (iMaxSpeakers >=6)  { this->comInOutMode->addItem("1x6",  4);  }
     if (iMaxSpeakers >=8)  { this->comInOutMode->addItem("1x8",  5);  }
-    if (iMaxSpeakers >=12) { this->comInOutMode->addItem("1x12", 7); }
-    if (iMaxSpeakers >=16) { this->comInOutMode->addItem("1x16", 8); }
+    if (iMaxSpeakers >=12) { this->comInOutMode->addItem("1x12", 6); }
+    if (iMaxSpeakers >=16) { this->comInOutMode->addItem("1x16", 7); }
     
-    if (iMaxSources >=2 && iMaxSpeakers >=2)  { this->comInOutMode->addItem("2x2",  9);  }  //the id here cannot be 0
-    if (iMaxSources >=2 && iMaxSpeakers >=4)  { this->comInOutMode->addItem("2x4",  10);  }
-    if (iMaxSources >=2 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("2x6",  11);  }
-    if (iMaxSources >=2 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("2x8",  12);  }
-    if (iMaxSources >=2 && iMaxSpeakers >=12) { this->comInOutMode->addItem("2x12", 13); }
-    if (iMaxSources >=2 && iMaxSpeakers >=16) { this->comInOutMode->addItem("2x16", 14); }
+    if (iMaxSources >=2 && iMaxSpeakers >=2)  { this->comInOutMode->addItem("2x2",  8);  }  //the id here cannot be 0
+    if (iMaxSources >=2 && iMaxSpeakers >=4)  { this->comInOutMode->addItem("2x4",  9);  }
+    if (iMaxSources >=2 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("2x6",  10);  }
+    if (iMaxSources >=2 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("2x8",  11);  }
+    if (iMaxSources >=2 && iMaxSpeakers >=12) { this->comInOutMode->addItem("2x12", 12); }
+    if (iMaxSources >=2 && iMaxSpeakers >=16) { this->comInOutMode->addItem("2x16", 13); }
     
-    if (iMaxSources >=4 && iMaxSpeakers >=4)  { this->comInOutMode->addItem("4x4",  15);  }
-    if (iMaxSources >=4 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("4x6",  16);  }
-    if (iMaxSources >=4 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("4x8",  17);  }
-    if (iMaxSources >=4 && iMaxSpeakers >=12) { this->comInOutMode->addItem("4x12", 18); }
-    if (iMaxSources >=4 && iMaxSpeakers >=16) { this->comInOutMode->addItem("4x16", 19); }
+    if (iMaxSources >=4 && iMaxSpeakers >=4)  { this->comInOutMode->addItem("4x4",  14);  }
+    if (iMaxSources >=4 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("4x6",  15);  }
+    if (iMaxSources >=4 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("4x8",  16);  }
+    if (iMaxSources >=4 && iMaxSpeakers >=12) { this->comInOutMode->addItem("4x12", 17); }
+    if (iMaxSources >=4 && iMaxSpeakers >=16) { this->comInOutMode->addItem("4x16", 18); }
     
-    if (iMaxSources >=6 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("6x6",  20);  }
-    if (iMaxSources >=6 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("6x8",  21);  }
-    if (iMaxSources >=6 && iMaxSpeakers >=12) { this->comInOutMode->addItem("6x12", 22); }
-    if (iMaxSources >=6 && iMaxSpeakers >=16) { this->comInOutMode->addItem("6x16", 23); }
+    if (iMaxSources >=6 && iMaxSpeakers >=6)  { this->comInOutMode->addItem("6x6",  19);  }
+    if (iMaxSources >=6 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("6x8",  20);  }
+    if (iMaxSources >=6 && iMaxSpeakers >=12) { this->comInOutMode->addItem("6x12", 21); }
+    if (iMaxSources >=6 && iMaxSpeakers >=16) { this->comInOutMode->addItem("6x16", 22); }
     
-    if (iMaxSources >=8 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("8x8",  24);  }
-    if (iMaxSources >=8 && iMaxSpeakers >=12) { this->comInOutMode->addItem("8x12", 25); }
-    if (iMaxSources >=8 && iMaxSpeakers >=16) { this->comInOutMode->addItem("8x16", 26); }
+    if (iMaxSources >=8 && iMaxSpeakers >=8)  { this->comInOutMode->addItem("8x8",  23);  }
+    if (iMaxSources >=8 && iMaxSpeakers >=12) { this->comInOutMode->addItem("8x12", 24); }
+    if (iMaxSources >=8 && iMaxSpeakers >=16) { this->comInOutMode->addItem("8x16", 25); }
     
-    this->comSourceSelectPos->clear();
-    for(int i = 0; i  < this->filter->getNumSourceUsed(); i++){
-        this->comSourceSelectPos->addItem(String(i+1), i+1);
-    }
+    this->updateLevelOutMode();
     
-    this->comSpeakerSelectPos->clear();
-    for(int i = 0; i  < this->filter->getNumSpeakerUsed(); i++){
-        this->comSpeakerSelectPos->addItem(String(i+1), i+1);
-    }
+    this->comInOutMode->setSelectedId((int)this->filter->getInIoutMode());
 }
 
 void SpatGrisAudioProcessorEditor::updateSelectSource()
@@ -569,20 +563,45 @@ void SpatGrisAudioProcessorEditor::updateSelectSpeaker()
     }
 }
 
+void SpatGrisAudioProcessorEditor::updateLevelOutMode()
+{
+    int i = 1;
+    for (auto&& it : this->vecLevelOut)
+    {
+        if(i > this->filter->getNumSpeakerUsed()){
+            it->setVisible(false);
+        }else{
+            it->setVisible(true);
+        }
+        i+=1;
+    }
+
+    this->comSourceSelectPos->clear();
+    for(int i = 0; i  < this->filter->getNumSourceUsed(); i++){
+        this->comSourceSelectPos->addItem(String(i+1), i+1);
+    }
+    this->comSourceSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSource+1);
+    
+    this->comSpeakerSelectPos->clear();
+    for(int i = 0; i  < this->filter->getNumSpeakerUsed(); i++){
+        this->comSpeakerSelectPos->addItem(String(i+1), i+1);
+    }
+    this->comSpeakerSelectPos->setSelectedId(this->filter->getSelectItem()->selectIdSpeaker+1);
+
+}
 //==============================================================================
 void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
 {
     if(this->togLinkAzimSpan == button){
         this->filter->setLinkAzimuth(this->togLinkAzimSpan->getToggleState());
-        
     }
     else if(this->togLinkElevSpan == button){
         this->filter->setLinkElevation(this->togLinkElevSpan->getToggleState());
-        
     }
     else if(this->togLinkSurfaceOrPan == button){
         this->filter->setLinkHeight(this->togLinkSurfaceOrPan->getToggleState());
     }
+    
     else if(this->togTrajRandSepare == button){
         this->filter->getTrajectory()->setRandSeparate(this->togTrajRandSepare->getToggleState());
         
@@ -591,6 +610,12 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button)
         this->butReadyTrajectory->setToggleState(this->filter->getTrajectory()->getProcessTrajectory(), dontSendNotification);
         this->updateTrajectoryParam();
     }
+    
+    else if(this->butInOutMode == button){
+        this->filter->setIdInOutMode(this->comInOutMode->getSelectedId());
+        this->updateLevelOutMode();
+    }
+    
     else if(this->butSourcePos == button){
         this->filter->getSourceMover()->setSourcesPosition((PositionSourceSpeaker)this->comSourcePos->getSelectedItemIndex());
         this->updateSelectSource();
@@ -669,6 +694,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             case Circle:
                 this->labCyclePercent->setVisible(true);
                 this->sliCyclePercent->setVisible(true);
+                break;
                 
             case Ellipse:
                 this->labCyclePercent->setVisible(true);
@@ -745,17 +771,21 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         this->filter->getTrajectory()->setInOneWay(!(this->comTrajOneWayReturn->getSelectedItemIndex()==1));
     }
     else if(this->comSourceSelectPos == comboBox){
-        this->filter->getSelectItem()->selectIdSource = this->comSourceSelectPos->getSelectedId()-1;
-        this->updateSelectSource();
+        if(this->comSourceSelectPos->getSelectedId() > 0){
+            this->filter->getSelectItem()->selectIdSource = this->comSourceSelectPos->getSelectedId()-1;
+            this->updateSelectSource();
+        }
     }
     else if(this->comSpeakerSelectPos == comboBox){
-        this->filter->getSelectItem()->selectIdSpeaker = this->comSpeakerSelectPos->getSelectedId()-1;
-        this->updateSelectSpeaker();
+        if(this->comSpeakerSelectPos->getSelectedId() > 0){
+            this->filter->getSelectItem()->selectIdSpeaker = this->comSpeakerSelectPos->getSelectedId()-1;
+            this->updateSelectSpeaker();
+        }
     }
     
     else if(this->comTypeProcess == comboBox){
-
-        switch ((ProcessType)this->comTypeProcess->getSelectedItemIndex()) {
+        this->filter->setTypeProcess((ProcessType)this->comTypeProcess->getSelectedItemIndex());
+        switch (this->filter->getTypeProcess()) {
                 
             case FreeVolum:
                 this->labSurfaceOrPan->setEnabled(true);
@@ -869,7 +899,7 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
                 jassert(false);
                 break;
         }
-        this->filter->setTypeProcess((ProcessType)this->comTypeProcess->getSelectedItemIndex());
+        
         
     }
 }
@@ -906,17 +936,21 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed (TextEditor &textE
     else if(this->comSourceSelectRay == &textEditor || this->comSourceSelectAngle == &textEditor){
         float r = GetValueInRange(this->comSourceSelectRay->getText().getFloatValue(), 0.0f, RadiusMax);
         float a = GetValueInRange(this->comSourceSelectAngle->getText().getFloatValue(), 0.0f, AngleDegMax);
-        this->filter->setPosRayAngSource(this->comSourceSelectPos->getSelectedId()-1, r, a, false);
-        this->comSourceSelectRay->setText(String(r,4), dontSendNotification);
-        this->comSourceSelectAngle->setText(String(a ,4), dontSendNotification);
+        if(this->comSourceSelectPos->getSelectedId() > 0){
+            this->filter->setPosRayAngSource(this->comSourceSelectPos->getSelectedId()-1, r, a, false);
+            this->comSourceSelectRay->setText(String(r,4), dontSendNotification);
+            this->comSourceSelectAngle->setText(String(a ,4), dontSendNotification);
+        }
     }
     
     else if(this->comSpeakerSelectRay == &textEditor || this->comSpeakerSelectAngle == &textEditor){
         float r = GetValueInRange(this->comSpeakerSelectRay->getText().getFloatValue(), 0.0f, RadiusMax);
         float a = GetValueInRange(this->comSpeakerSelectAngle->getText().getFloatValue(), 0.0f, AngleDegMax);
-        this->filter->getListSpeaker()[this->comSpeakerSelectPos->getSelectedId()-1]->setPosXY( GetXYFromRayAng(r, DegreeToRadian(a)));
-        this->comSpeakerSelectRay->setText(String(r,4), dontSendNotification);
-        this->comSpeakerSelectAngle->setText(String(a ,4), dontSendNotification);
+        if(this->comSpeakerSelectPos->getSelectedId() > 0){
+            this->filter->getListSpeaker()[this->comSpeakerSelectPos->getSelectedId()-1]->setPosXY( GetXYFromRayAng(r, DegreeToRadian(a)));
+            this->comSpeakerSelectRay->setText(String(r,4), dontSendNotification);
+            this->comSpeakerSelectAngle->setText(String(a ,4), dontSendNotification);
+        }
     }
     
     else if(this->texOSCSourceIDF == &textEditor){

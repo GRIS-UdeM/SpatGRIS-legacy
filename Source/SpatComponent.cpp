@@ -136,7 +136,11 @@ void SpatComponent::paint(Graphics &g)
             sourceP.x = (w/2.0f) + ((w/4.0f)*sourceP.x);
             sourceP.y = (w/2.0f) - ((w/4.0f)*sourceP.y);
             
-            g.setColour(Colour::fromHSV(1.2,0,0.5,1));
+            if(this->filter->getListSpeaker()[i]->isMuted()){
+                g.setColour(Colour::fromHSV(0,0.4,0.5,1));
+            }else{
+                g.setColour(Colour::fromHSV(1.2,0,0.5,1));
+            }
             g.fillEllipse(sourceP.x , sourceP.y , SourceDiameter, SourceDiameter);
             
             g.setColour(Colours::white);
@@ -145,6 +149,19 @@ void SpatComponent::paint(Graphics &g)
     }
     
     
+    // - - - - - - - - - - - -
+    // draw FreeDraw
+    // - - - - - - - - - - - -
+    if(this->filter->getTrajectory()->getListPointsFreeDrawScreen()->size() > 1){
+        g.setColour(Colours::white.withAlpha(0.7f));
+        this->pathFreeDraw.clear();
+        this->pathFreeDraw.startNewSubPath(this->filter->getTrajectory()->getListPointsFreeDrawScreen()->at(0).x, this->filter->getTrajectory()->getListPointsFreeDrawScreen()->at(0).y);
+        for(int i = 1; i< this->filter->getTrajectory()->getListPointsFreeDraw()->size(); ++i)
+        {
+            pathFreeDraw.lineTo(this->filter->getTrajectory()->getListPointsFreeDrawScreen()->at(i).x, this->filter->getTrajectory()->getListPointsFreeDrawScreen()->at(i).y);
+        }
+        g.strokePath (pathFreeDraw, PathStrokeType (1.0f, PathStrokeType::JointStyle::curved));
+    }
     
     // - - - - - - - - - - - -
     // draw translucid circles (mode)
@@ -227,6 +244,11 @@ void SpatComponent::mouseDown(const MouseEvent &event)
     this->filter->getSelectItem()->mouseOverSource = false;
     this->filter->getSelectItem()->mouseOverSpeaker = false;
     
+    if(event.mods.isRightButtonDown()){
+        this->filter->getTrajectory()->getListPointsFreeDraw()->clear();
+        this->filter->getTrajectory()->getListPointsFreeDrawScreen()->clear();
+    }
+    
     //Sources
     for(int i = 0; i < this->filter->getNumSourceUsed(); ++i){
         
@@ -301,8 +323,18 @@ void SpatComponent::mouseDrag(const MouseEvent &event)
         dist = dist/(w/2.0f);
         if(dist > 2.0f){ dist = 2.0f; }
         
-        this->filter->setPosXYSource(this->filter->getSelectItem()->selectIdSource, dist*cosf(ang), dist* sinf(ang));    //(-2, 2)
+        this->filter->setPosXYSource(this->filter->getSelectItem()->selectIdSource, dist * cosf(ang), dist * sinf(ang));    //(-2, 2)
         this->editor->updateSelectSource();
+        
+        if(this->filter->getTrajectory()->getTrajectoryType() == FreeDrawing){
+            this->filter->getTrajectory()->getListPointsFreeDraw()->push_back(FPoint(dist * cosf(ang), dist * sinf(ang)));
+            
+            FPoint sourceP = FPoint(*(this->filter->getListSource()[this->filter->getSelectItem()->selectIdSource]->getX()), *(this->filter->getListSource()[this->filter->getSelectItem()->selectIdSource]->getY()));
+            sourceP.x = (w + ((w/2.0f)*sourceP.x))+(SourceDiameter/2.0f);
+            sourceP.y = (w - ((w/2.0f)*sourceP.y))+(SourceDiameter/2.0f);
+            this->filter->getTrajectory()->getListPointsFreeDrawScreen()->push_back(FPoint(sourceP.x, sourceP.y));
+        }
+
     }
     
     if(this->filter->getSelectItem()->mouseOverSpeaker)

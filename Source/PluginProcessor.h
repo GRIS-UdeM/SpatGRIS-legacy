@@ -151,7 +151,8 @@ public:
     void setLinkElevation(bool v)   { this->linkElevation = v; }
     bool setLinkHeight(bool v)      { this->linkHeight= v; }
     
-
+    void setIdInOutMode(int idMode);
+    InOutMode getInIoutMode(){return (InOutMode)((int)this->inOutModeUsed+1); }
     //----
     bool            getOscOn()              { return this->oscOn; }
     unsigned int    getOscFirstIdSource()   { return this->oscFirstIdSource; }
@@ -201,6 +202,7 @@ private:
     Speaker *  listSpeakers[MaxSpeakers];
     unsigned int numSourceUsed;
     unsigned int numSpeakerUsed;
+    InOutMode    inOutModeUsed;
     
     ProcessType typeProcess;
     

@@ -74,7 +74,7 @@ private:
     Label       labVersion;
     
     FPoint clickedMouseP;
-    
+    Path pathFreeDraw;
     
 };
 #endif  // SPATCOMPONENT_H_INCLUDED

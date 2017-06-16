@@ -72,6 +72,7 @@ public :
     void updateComMouvement();
     void updateTrajectoryParam();
     void updateInputOutputMode();
+    void updateLevelOutMode();
     
     void updateSelectSource();
     void updateSelectSpeaker();

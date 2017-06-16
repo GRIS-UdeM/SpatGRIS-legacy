@@ -69,7 +69,8 @@ public:
     
     float getRandSpeed(){ return this->randSpeed; }
     bool  getRandSeparate(){ return this->randSeparate; }
-    vector<FPoint>  getListPointsFreeDraw(){ return this->listPointsFreeDraw; }
+    vector<FPoint>  * getListPointsFreeDraw(){ return &this->listPointsFreeDraw; }
+    vector<FPoint>  * getListPointsFreeDrawScreen(){ return &this->listPointsFreeDrawScreen; }
     
     //Setter
     void setProcessTrajectory(bool b){ this->processTrajectory = b; if(this->processTrajectory){ this->start();}};
@@ -130,6 +131,7 @@ private:
     float           randSpeed = 1.f;
     bool            randSeparate = false;
     vector<FPoint>  listPointsFreeDraw;
+    vector<FPoint>  listPointsFreeDrawScreen;
 };
 
 

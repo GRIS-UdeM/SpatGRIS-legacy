@@ -54,6 +54,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     
     this->numSourceUsed = MaxSources;
     this->numSpeakerUsed = MaxSpeakers;
+    this->inOutModeUsed = i1o1;
     
     this->sourceMover->setSourcesPosition();
     this->sourceMover->setSpeakersPosition();
@@ -238,6 +239,11 @@ void SpatGrisAudioProcessor::setTypeProcess(ProcessType v)
     this->stopTimer();
     
     switch (this->typeProcess) {
+        case FreeVolum:
+            break;
+        case PanSpan:
+            break;
+
         case OSCSpatServer:
             this->startTimerHz(OscTimerHz);
             break;
@@ -247,9 +253,122 @@ void SpatGrisAudioProcessor::setTypeProcess(ProcessType v)
             break;
             
         default:
+            this->typeProcess = FreeVolum;
             break;
     }
 
+}
+
+
+void SpatGrisAudioProcessor::setIdInOutMode(int idMode)
+{
+    this->inOutModeUsed = (InOutMode)(idMode-1);
+    switch (this->inOutModeUsed){
+        case i1o1:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 1;
+            break;
+        case i1o2:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 2;
+            break;
+        case i1o4:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 4;
+            break;
+        case i1o6:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 6;
+            break;
+        case i1o8:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 8;
+            break;
+        case i1o12:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 12;
+            break;
+        case i1o16:
+            this->numSourceUsed = 1;
+            this->numSpeakerUsed = 16;
+            break;
+        case i2o2:
+            this->numSourceUsed = 2;
+            this->numSpeakerUsed = 2;
+            break;
+        case i2o4:
+            this->numSourceUsed = 2;
+            this->numSpeakerUsed = 4;
+            break;
+        case i2o6:
+            this->numSourceUsed = 2;
+            this->numSpeakerUsed = 6;
+            break;
+        case i2o8:
+            this->numSourceUsed = 2;
+            this->numSpeakerUsed = 8;
+            break;
+        case i2o12:
+            this->numSourceUsed = 2;
+            this->numSpeakerUsed = 12;
+            break;
+        case i2o16:
+            this->numSourceUsed = 2;
+            this->numSpeakerUsed = 16;
+            break;
+        case i4o4:
+            this->numSourceUsed = 4;
+            this->numSpeakerUsed = 4;
+            break;
+        case i4o6:
+            this->numSourceUsed = 4;
+            this->numSpeakerUsed = 6;
+            break;
+        case i4o8:
+            this->numSourceUsed = 4;
+            this->numSpeakerUsed = 8;
+            break;
+        case i4o12:
+            this->numSourceUsed = 4;
+            this->numSpeakerUsed = 12;
+            break;
+        case i4o16:
+            this->numSourceUsed = 4;
+            this->numSpeakerUsed = 16;
+            break;
+        case i6o6:
+            this->numSourceUsed = 6;
+            this->numSpeakerUsed = 6;
+            break;
+        case i6o8:
+            this->numSourceUsed = 6;
+            this->numSpeakerUsed = 8;
+            break;
+        case i6o12:
+            this->numSourceUsed = 6;
+            this->numSpeakerUsed = 12;
+            break;
+        case i6o16:
+            this->numSourceUsed = 6;
+            this->numSpeakerUsed = 16;
+            break;
+        case i8o8:
+            this->numSourceUsed = 8;
+            this->numSpeakerUsed = 8;
+            break;
+        case i8o12:
+            this->numSourceUsed = 8;
+            this->numSpeakerUsed = 12;
+            break;
+        case i8o16:
+            this->numSourceUsed = 8;
+            this->numSpeakerUsed = 16;
+            break;
+        default:
+            this->numSourceUsed = this->getTotalNumInputChannels();
+            this->numSpeakerUsed = this->getTotalNumOutputChannels();
+            break;
+    }
 }
 
 //==============================================================================
