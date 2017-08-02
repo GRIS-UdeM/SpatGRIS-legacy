@@ -187,7 +187,9 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     //==============================================================================
-    
+
+    void resetOSC();
+
 private:
     void processTrajectory();
     void sendOscMessageValues();

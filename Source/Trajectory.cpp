@@ -43,6 +43,7 @@ Trajectory::~Trajectory()
 
 void Trajectory::start()
 {
+    this->turnCount = 0;
     this->timeDone = 0.0f;
     this->timeTotalDuration = (this->timeDuration * this->cycle);
     
@@ -135,8 +136,20 @@ void Trajectory::restorePosSources()
 // ===========================================================================================================
 void Trajectory::circleProcess()
 {
-    float deltaTheta = (float)(this->timeDone / this->timeDuration);
-    deltaTheta = deltaTheta * 2 * M_PI ;
+    float deltaTheta = ((float)(this->timeDone / this->timeDuration) * 2 * M_PI);
+    
+    double maxDelta = (this->turnCount * 2 * M_PI) + (2 * M_PI * (this->cyclePercent/100.0f));
+    
+    if(this->speed < 0.0f){maxDelta = -maxDelta;}
+    if(this->turnCount>0){
+        deltaTheta += this->turnCount *((2 * M_PI) - (2 * M_PI * (this->cyclePercent/100.0f))) ;
+    }
+    cout << maxDelta << " - "<< deltaTheta << newLine;
+
+    if(deltaTheta > maxDelta){
+        this->turnCount+=1;
+         cout << " >> "<< this->turnCount << newLine;
+    }
     
     const int idMaster = 0;//this->filter->getSelectItem()->selectID;
     FPoint startPointRT  = this->listSourceRayAng[idMaster];

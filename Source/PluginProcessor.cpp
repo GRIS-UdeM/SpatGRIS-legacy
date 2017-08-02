@@ -490,10 +490,10 @@ void SpatGrisAudioProcessor::sendOscMessageValues()
                     float elevspan_osc  = *this->getListSource()[iCurSrc]->getElev();
                     float height_osc    = *this->getListSource()[iCurSrc]->getHeigt();
                     float gain_osc      = 1;
-                    
+                
                     OSCAddressPattern oscPattern("/spat/serv");
                     OSCMessage message(oscPattern);
-                    
+                
                     message.addInt32(channel_osc);
                     message.addFloat32(azim_osc);
                     message.addFloat32(elev_osc);
@@ -536,6 +536,42 @@ void SpatGrisAudioProcessor::sendOscMessageValues()
                 break;
             }
                 
+        }
+    } else {
+        switch (this->typeProcess) {
+            case OSCSpatServer:{
+                for(int iCurSrc = 0; iCurSrc < this->numSourceUsed; ++iCurSrc){
+                    int channel_osc = this->oscFirstIdSource+iCurSrc-1;
+                    OSCAddressPattern oscPattern("/spat/serv");
+                    OSCMessage message(oscPattern);
+                    message.addString("reset");
+                    message.addInt32(channel_osc);
+                    if (!this->oscSender.send(message)) {
+                        DBG("Error: could not send OSC message.");
+                        return;
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
+void SpatGrisAudioProcessor::resetOSC() {
+    switch (this->typeProcess) {
+        case OSCSpatServer:{
+            for(int iCurSrc = 0; iCurSrc < this->numSourceUsed; ++iCurSrc){
+                int channel_osc = this->oscFirstIdSource+iCurSrc-1;
+                OSCAddressPattern oscPattern("/spat/serv");
+                OSCMessage message(oscPattern);
+                message.addString("reset");
+                message.addInt32(channel_osc);
+                if (!this->oscSender.send(message)) {
+                    DBG("Error: could not send OSC message.");
+                    return;
+                }
+            }
+            break;
         }
     }
 }

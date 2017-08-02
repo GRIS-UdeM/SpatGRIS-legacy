@@ -132,6 +132,8 @@ private:
     bool            randSeparate = false;
     vector<FPoint>  listPointsFreeDraw;
     vector<FPoint>  listPointsFreeDrawScreen;
+    
+    int             turnCount;
 };
 
 

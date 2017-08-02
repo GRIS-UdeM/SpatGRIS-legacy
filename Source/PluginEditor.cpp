@@ -120,7 +120,7 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
     this->labCycleTrajectory = addLabel("Cycle(s) :", "Cycle of trajectory", 0, 70, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     this->texCycleTrajectory = addTextEditor("", "Numbers of cycle(s) 0=inf", 60, 70, DefaultTexWidth, DefaultLabHeight, this->boxTrajectory->getContent());
     
-    this->butReadyTrajectory = addButton("Ready", "Valid trajectory param", 60, 100, DefaultLabWidth, DefaultLabHeight, this->boxTrajectory->getContent());
+    this->butReadyTrajectory = addButton("Ready", "Valid trajectory param", 60, 100, DefaultLabWidth+30, DefaultLabHeight, this->boxTrajectory->getContent());
     
     this->progressBarTraject = new ProgressBarTraj();
     this->progressBarTraject->setBounds(60, 124, DefaultLabWidth+30, DefaultLabHeight);
@@ -312,6 +312,8 @@ SpatGrisAudioProcessorEditor::SpatGrisAudioProcessorEditor(SpatGrisAudioProcesso
 
 SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
 {
+    this->filter->resetOSC();
+
     for (auto&& it : this->vecLevelOut)
     {
         delete (it);
@@ -1037,7 +1039,7 @@ void SpatGrisAudioProcessorEditor::resized()
     this->boxTrajectory->correctSize(510, 170);    //w-(fieldSize + (Margin * 5))
     
     //OctTabbedComponent-----------------------
-    this->octTab->setBounds(x, 170+206, w-(fieldSize + (Margin * 4)), h - (170+196+(Margin*6)) );
+    this->octTab->setBounds(x-1, 170+206, w-(fieldSize + (Margin * 4)), h - (170+196+(Margin*6)) );
 
     
     this->resizer->setBounds (w - 16, h - 16, 16, 16);
