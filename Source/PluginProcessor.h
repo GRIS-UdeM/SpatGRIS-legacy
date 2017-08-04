@@ -820,7 +820,9 @@ public:
     bool isLevelUilcok(){ return bLevelUiLock; }
     void threadUpdateNonSelectedSourcePositions();
     void bypassOrNotSourceUpdateThread();
-	
+
+    void resetOSC();
+
 private:
     
     bool isKnownHost();

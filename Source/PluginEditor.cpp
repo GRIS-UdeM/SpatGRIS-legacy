@@ -1495,7 +1495,7 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
 
 SpatGrisAudioProcessorEditor::~SpatGrisAudioProcessorEditor()
 {
-    
+    mFilter->resetOSC();
     mFilter->setCalculateLevels(false);
     mFilter->removeListener(this);
 
