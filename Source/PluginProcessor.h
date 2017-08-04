@@ -814,7 +814,9 @@ public:
     bool isPlaying(){ return m_bIsPlaying;}
     void threadUpdateNonSelectedSourcePositions();
     void bypassOrNotSourceUpdateThread();
-	
+
+    void resetOSC();
+
 private:
     
     bool isKnownHost();

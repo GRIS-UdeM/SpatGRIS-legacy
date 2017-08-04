@@ -85,14 +85,8 @@ public:
                 case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
-                case kParamTrajSpeed:
-                    newVal = 1.0f;
+                case kParamTrajSpeed:       newVal = 1.0f;
                     mFilter->setSpeedTraject(newVal);
-                    this->setValue(newVal);
-                    return;
-                case kParamDirRandom:
-                    newVal = 0.5f;
-                    mFilter->setDirRandomTraject(newVal);
                     this->setValue(newVal);
                     return;
             }
