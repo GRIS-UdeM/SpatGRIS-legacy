@@ -654,13 +654,13 @@ void HIDDumpDeviceInfo(IOHIDDeviceRef inIOHIDDeviceRef) {
 	char manufacturer[256] = ""; // name of manufacturer
 	CFStringRef tCFStringRef = IOHIDDevice_GetManufacturer(inIOHIDDeviceRef);
 	if (tCFStringRef) {
-        verify(CFStringGetCString(tCFStringRef, manufacturer, sizeof(manufacturer), kCFStringEncodingUTF8));
+        //verify(CFStringGetCString(tCFStringRef, manufacturer, sizeof(manufacturer), kCFStringEncodingUTF8));
 	}
     
 	char product[256] = "";      // name of product
 	tCFStringRef = IOHIDDevice_GetProduct(inIOHIDDeviceRef);
 	if (tCFStringRef) {
-        verify(CFStringGetCString(tCFStringRef, product, sizeof(product), kCFStringEncodingUTF8));
+        //verify(CFStringGetCString(tCFStringRef, product, sizeof(product), kCFStringEncodingUTF8));
 	}
     
     printf("%s - %s, ", manufacturer, product);
@@ -705,7 +705,7 @@ void HIDDumpDeviceInfo(IOHIDDeviceRef inIOHIDDeviceRef) {
 #if true
 	tCFStringRef = HIDCopyUsageName(usagePage, usage);
 	if (tCFStringRef) {
-		verify(CFStringGetCString(tCFStringRef, cstring, sizeof(cstring), kCFStringEncodingUTF8));
+		//verify(CFStringGetCString(tCFStringRef, cstring, sizeof(cstring), kCFStringEncodingUTF8));
 		printf("\"%s\", ", cstring);
 		CFRelease(tCFStringRef);
 	}
@@ -715,7 +715,7 @@ void HIDDumpDeviceInfo(IOHIDDeviceRef inIOHIDDeviceRef) {
 #if true
 	tCFStringRef = IOHIDDevice_GetTransport(inIOHIDDeviceRef);
 	if (tCFStringRef) {
-		verify(CFStringGetCString(tCFStringRef, cstring, sizeof(cstring), kCFStringEncodingUTF8));
+		//verify(CFStringGetCString(tCFStringRef, cstring, sizeof(cstring), kCFStringEncodingUTF8));
 		printf("Transport: \"%s\", ", cstring);
 	}
     
@@ -731,7 +731,7 @@ void HIDDumpDeviceInfo(IOHIDDeviceRef inIOHIDDeviceRef) {
     
 	tCFStringRef = IOHIDDevice_GetSerialNumber(inIOHIDDeviceRef);
 	if (tCFStringRef) {
-		verify(CFStringGetCString(tCFStringRef, cstring, sizeof(cstring), kCFStringEncodingUTF8));
+		//verify(CFStringGetCString(tCFStringRef, cstring, sizeof(cstring), kCFStringEncodingUTF8));
 		printf("SerialNumber: \"%s\", ", cstring);
 	}
     
@@ -919,7 +919,7 @@ void HIDDumpElementInfo(IOHIDElementRef inIOHIDElementRef) {
 		CFStringRef tCFStringRef = HIDCopyUsageName(usagePage, usage);
 		if (tCFStringRef) {
 			char usageString[256] = "";
-			verify(CFStringGetCString(tCFStringRef, usageString, sizeof(usageString), kCFStringEncodingUTF8));
+			//verify(CFStringGetCString(tCFStringRef, usageString, sizeof(usageString), kCFStringEncodingUTF8));
 			printf("\"%s\", ", usageString);
 			CFRelease(tCFStringRef);
 		}

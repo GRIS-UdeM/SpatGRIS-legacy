@@ -8,8 +8,8 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="SpatGrisAU" pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris"
-              pluginAAXCategory="AAX_ePlugInCategory_SoundField" jucerVersion="4.3.1"
-              pluginIsMidiEffectPlugin="0" companyName="UdeM" buildAUv3="0">
+              pluginAAXCategory="512" jucerVersion="5.3.2" pluginIsMidiEffectPlugin="0"
+              companyName="UdeM" buildAUv3="0" pluginFormats="buildVST,buildAU">
   <MAINGROUP id="rRl79u" name="SpatGRIS">
     <GROUP id="{48A026D6-2EE7-E714-8C68-003BA85B16C8}" name="GrisCommonFiles">
       <FILE id="jDkaGa" name="GrisLookAndFeel.h" compile="0" resource="0"
@@ -98,10 +98,10 @@
                postbuildCommand="" externalLibraries="Leap" aaxFolder="~/Documents/sdks/AAX_SDK_2p1p1/"
                vst3Folder="~/Documents/sdks/VST3.6.5 SDK">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="Native"
+        <CONFIGURATION name="Debug" osxCompatibility="10.9 SDK" osxArchitecture="Native"
                        isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="~/Documents/sdks/LeapSDK/include"
                        libraryPath="~/Documents/sdks/LeapSDK/lib&#10;"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
+        <CONFIGURATION name="Release" osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
                        isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath="~/Documents/sdks/LeapSDK/include&#10;"
                        libraryPath="~/Documents/sdks/LeapSDK/lib"/>
       </CONFIGURATIONS>
@@ -153,19 +153,20 @@
     </VS2015>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_gui_basics" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1"
+             useGlobalPath="1"/>
+    <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_gui_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
   </MODULES>
   <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
   <LIVE_SETTINGS>

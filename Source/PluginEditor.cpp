@@ -118,8 +118,8 @@ public:
             mViewport->setViewedComponent(mContent, false);
             mViewport->setScrollBarsShown(true, true);
             mViewport->setScrollBarThickness(6);
-            mViewport->getVerticalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
-            mViewport->getHorizontalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            mViewport->getVerticalScrollBar().setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            mViewport->getHorizontalScrollBar().setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
             
             mViewport->setLookAndFeel(feel);
             addAndMakeVisible(mViewport);
