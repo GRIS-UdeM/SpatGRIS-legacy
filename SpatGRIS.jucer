@@ -99,11 +99,11 @@
                vst3Folder="~/Documents/sdks/VST3.6.5 SDK">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxCompatibility="10.9 SDK" osxArchitecture="Native"
-                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="~/Documents/sdks/LeapSDK/include"
-                       libraryPath="~/Documents/sdks/LeapSDK/lib&#10;"/>
+                       isDebug="1" optimisation="1" targetName="SpatGRIS" headerPath="../../../../SDKs/LeapSDK/include;../../HIDManager"
+                       libraryPath="../../../../SDKs/LeapSDK/lib&#10;"/>
         <CONFIGURATION name="Release" osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
-                       isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath="~/Documents/sdks/LeapSDK/include&#10;"
-                       libraryPath="~/Documents/sdks/LeapSDK/lib"/>
+                       isDebug="0" optimisation="3" targetName="SpatGRIS" headerPath="../../../../SDKs/LeapSDK/include;../../HIDManager&#10;"
+                       libraryPath="../../../../SDKs/LeapSDK/lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../sdks/JUCE-4.3.1/modules"/>
