@@ -296,7 +296,17 @@ AudioProcessorEditor (ownerFilter)
         float fCurElevSpan = mFilter->getSourceElevSpan01(m_iSelectedSrcEditor);
         mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, m_iSelectedSrcEditor, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
-        
+        //--------------------- radius -----------------------
+        //add radius label
+        mRadiusLabel = addLabel("Radius", x, y, w*9/12, dh, boxContent);
+        y += dh;
+        //add radius link button
+        mRadiusLinkButton = addCheckbox("Link", mFilter->getLinkRadius(), x, y, w*3/12, dh, boxContent);
+        //add radius slider
+        float fCurRadius = mFilter->getSourceRadius01(m_iSelectedSrcEditor);
+        mRadiusSlider = addParamSliderGRIS(kParamRadius, m_iSelectedSrcEditor, fCurRadius, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 10;
+
         boxContent->setSize(w, y);
         
         mSrcSelectCombo = new ComboBox();
@@ -1309,7 +1319,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mElevSpanSlider->setEnabled(true);
             mElevSpanLabel->setEnabled(true);
             mElevSpanLinkButton->setEnabled(true);
-            
+            mRadiusSlider->setEnabled(true);
+            mRadiusLabel->setEnabled(true);
+            mRadiusLinkButton->setEnabled(true);
+
             mSpeakersBox->setEnabled(false);
             mSmoothingLabel->setEnabled(false);
             mSmoothingSlider->setEnabled(false);
@@ -1339,7 +1352,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mElevSpanSlider->setEnabled(false);
             mElevSpanLabel->setEnabled(false);
             mElevSpanLinkButton->setEnabled(false);
-            
+            mRadiusSlider->setEnabled(false);
+            mRadiusLabel->setEnabled(false);
+            mRadiusLinkButton->setEnabled(false);
+
             mSpeakersBox->setEnabled(true);
             mSmoothingLabel->setEnabled(true);
             mSmoothingSlider->setEnabled(true);
@@ -1370,7 +1386,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mElevSpanSlider->setEnabled(false);
             mElevSpanLabel->setEnabled(false);
             mElevSpanLinkButton->setEnabled(false);
-            
+            mRadiusSlider->setEnabled(false);
+            mRadiusLabel->setEnabled(false);
+            mRadiusLinkButton->setEnabled(false);
+
             mSpeakersBox->setEnabled(true);
             mSmoothingLabel->setEnabled(true);
             mSmoothingSlider->setEnabled(true);
@@ -1555,16 +1574,16 @@ void SpatGrisAudioProcessorEditor::resized()
     mSourcesBoxLabel->setTopLeftPosition(x, y);
     
     int lh = mSourcesBoxLabel->getHeight();
-    mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, 155);
+    mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, 195);
     
-    mTrajectoryBoxLabel->setTopLeftPosition(x, 176);
-    mTrajectoryBox->setBounds(x, 192 , w-(fieldSize + (iExtraSpace * 5)), 170);
+    mTrajectoryBoxLabel->setTopLeftPosition(x, 216);
+    mTrajectoryBox->setBounds(x, 232 , w-(fieldSize + (iExtraSpace * 5)), 170);
 
-    mTabs->setBounds(x-1, 180+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 5)), h - (180+186 + iExtraSpace));
+    mTabs->setBounds(x-1, 220+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 5)), h - (180+186 + iExtraSpace));
 
     x += kCenterColumnWidth + kMargin + kMargin;
     mSpeakersBoxLabel->setTopLeftPosition(x, y);
-    mSpeakersBox->setBounds(x, y + lh, w-(fieldSize+ kCenterColumnWidth + (iExtraSpace * 7)), 155);
+    mSpeakersBox->setBounds(x, y + lh, w-(fieldSize+ kCenterColumnWidth + (iExtraSpace * 7)), 195);
 }
 
 void SpatGrisAudioProcessorEditor::updateEditorSources(bool p_bCalledFromConstructor){
@@ -1780,7 +1799,12 @@ ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(paramTypes par
             index = mFilter->getParamForSourceElevSpan(si);
             ds = new ParamSliderGRIS(index, paramType, mElevSpanLinkButton, mFilter);
             break;
-        
+
+        case kParamRadius :
+            index = mFilter->getParamForSourceRadius(si);
+            ds = new ParamSliderGRIS(index, paramType, mRadiusLinkButton, mFilter);
+            break;
+
         default:
             index = si;
             ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
@@ -2020,6 +2044,9 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (button == mElevSpanLinkButton) {
         mFilter->setLinkElevSpan(button->getToggleState());
+    }
+    else if (button == mRadiusLinkButton) {
+        mFilter->setLinkRadius(button->getToggleState());
     }
     else if (button == mApplyFilterButton) {
         mFilter->setApplyFilter(button->getToggleState());
@@ -2560,6 +2587,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkSurfaceOrPan(),     dontSendNotification);
     mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
     mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
+    mRadiusLinkButton->setToggleState(mFilter->getLinkRadius(),         dontSendNotification);
     mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
     //mApplyOutputRamping->setToggleState(mFilter->getApplyOutRamp(),           dontSendNotification);
 }
@@ -2609,6 +2637,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         mSurfaceOrPanSlider->setParamIndex(mFilter->getParamForSourceD(m_iSelectedSrcEditor));
         mAzimSpanSlider->    setParamIndex(mFilter->getParamForSourceAzimSpan(m_iSelectedSrcEditor));
         mElevSpanSlider->    setParamIndex(mFilter->getParamForSourceElevSpan(m_iSelectedSrcEditor));
+        mRadiusSlider->      setParamIndex(mFilter->getParamForSourceRadius(m_iSelectedSrcEditor));
     }
     if (mFilter->getProcessMode() == kFreeVolumeMode){
         mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
@@ -2617,6 +2646,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     }
     mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
+    mRadiusSlider->      setValue(mFilter->getSourceRadius01(iSelSrc), dontSendNotification);
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
         mMuteButtons[i]->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
         mLevelComponents[i]->setMute(mMuteButtons[i]->getToggleState());

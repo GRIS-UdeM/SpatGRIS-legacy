@@ -42,7 +42,7 @@ public:
     mMouseDown(false),
     mIsPanSpan(false)
     {
-        jassert(mLinkButton || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan));
+        jassert(mLinkButton || (mParamType != kParamSource && mParamType != kParamAzimSpan && mParamType != kParamElevSpan && mParamType != kParamRadius));
     }
     
     void setIsPanSpan(bool b, bool p_bSetToDefault = false){
@@ -85,6 +85,7 @@ public:
                 case kParamRoutingVolume:   newVal = normalize(kRoutingVolumeMin, kRoutingVolumeMax, kRoutingVolumeDefault); break;
                 case kParamAzimSpan:        newVal = 0; break;
                 case kParamElevSpan:        newVal = 0; break;
+                case kParamRadius:          newVal = 1.0f; break;
                 case kParamTrajSpeed:       newVal = 1.0f;
                     mFilter->setSpeedTraject(newVal);
                     this->setValue(newVal);
@@ -111,6 +112,15 @@ public:
                 mFilter->setPreventSourceAzimElevSpanUpdate(true);
                 for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
                     int paramIndex = mFilter->getParamForSourceElevSpan(i);
+                    if (mFilter->getParameter(paramIndex) != newVal){
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                    }
+                }
+                mFilter->setPreventSourceAzimElevSpanUpdate(false);
+            } else if (mParamType == kParamRadius && mLinkButton->getToggleState()) {
+                mFilter->setPreventSourceAzimElevSpanUpdate(true);
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceRadius(i);
                     if (mFilter->getParameter(paramIndex) != newVal){
                         mFilter->setParameterNotifyingHost(paramIndex, newVal);
                     }
@@ -201,11 +211,22 @@ public:
                     mFilter->setParameterNotifyingHost(mParamIndex, newVal);
                 }
             }
-        }
-        else if (mParamType == kParamTrajSpeed) {
+        } else if (mParamType == kParamRadius) {
+            const float newVal = (float)getValue();
+            if (mLinkButton->getToggleState()) {
+                for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
+                    int paramIndex = mFilter->getParamForSourceRadius(i);
+                    if (mFilter->getParameter(paramIndex) != newVal)
+                        mFilter->setParameterNotifyingHost(paramIndex, newVal);
+                }
+            } else {
+                if (mFilter->getParameter(mParamIndex) != newVal){
+                    mFilter->setParameterNotifyingHost(mParamIndex, newVal);
+                }
+            }
+        } else if (mParamType == kParamTrajSpeed) {
             mFilter->setSpeedTraject((float)getValue());
-        }
-        else {
+        } else {
             const float newVal = (float)getValue();
             if (mFilter->getParameter(mParamIndex) != newVal)
                 mFilter->setParameterNotifyingHost(mParamIndex, newVal);

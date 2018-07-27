@@ -160,6 +160,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 ,m_iSourceLocationChanged(-1)
 ,m_iSourceAzimSpanChanged(-1)
 ,m_iSourceElevSpanChanged(-1)
+,m_iSourceRadiusChanged(-1)
 ,m_bPreventSourceLocationUpdate(false)
 ,m_bPreventSourceAzimElevSpanUpdate(false)
 {
@@ -249,8 +250,8 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
 	mShowGridLines  = false;
     m_bOscActive    = true;
 	mTrSeparateAutomationMode = false;
-    mGuiWidth = kDefaultWidth,
-    mGuiHeight = kDefaultHeight,
+    mGuiWidth = kDefaultWidth;
+    mGuiHeight = kDefaultHeight;
 	mHostChangedParameterProcessor = 0;
 	mHostChangedPropertyProcessor = 0;
     setGuiTab(0);
@@ -304,6 +305,7 @@ SpatGrisAudioProcessor::SpatGrisAudioProcessor()
     for (int i = 0; i < JucePlugin_MaxNumInputChannels; i++){
         float fDefaultVal = normalize(kSourceMinDistance, kSourceMaxDistance, kSourceDefaultDistance);
         mParameters.set(getParamForSourceD(i), fDefaultVal);
+        mParameters.set(getParamForSourceRadius(i), 1.0f);
     }
 
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++){
@@ -378,6 +380,23 @@ void SpatGrisAudioProcessor::threadUpdateNonSelectedSourcePositions(){
         }
         setSourceElevSpanChanged(-1);
     }
+
+    int iSourceRadiusChanged = getSourceRadiusChanged();
+    if (iSourceRadiusChanged != -1){
+        if (mLinkRadius){
+            float fCurRadius = getParameter(getParamForSourceRadius(iSourceRadiusChanged));
+            for (int i = 0; i < getNumberOfSources(); ++i) {
+                if (i == iSourceRadiusChanged){
+                    continue;
+                }
+                int paramIndex = getParamForSourceRadius(i);
+                if (getParameter(paramIndex) != fCurRadius){
+                    setParameterNotifyingHost(paramIndex, fCurRadius);
+                }
+            }
+        }
+        setSourceRadiusChanged(-1);
+    }
 }
 
 //==============================================================================
@@ -440,8 +459,11 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         float elev_osc      = curPoint.y;                       //For Zirkonium, 0 is the edge of the dome, .5 is the top
         float azimspan_osc  = 2*getSourceAzimSpan01(iCurSrc);     //min azim span is 0, max is 2. I figure this is radians.
         float elevspan_osc  = getSourceElevSpan01(iCurSrc)/2;     //min elev span is 0, max is .5
+        float radius_osc = getSourceRadius01(iCurSrc);
         float gain_osc      = 1;                                //gain is just locked to max value
-        
+
+        // TODO: Now we need to remove "/pan/az" handler and adapt all values to the format expected by "/spat/serv".
+        // Maybe we can keep a copy of this function for a "legacy" mode...
         OSCAddressPattern oscPattern("/pan/az");
         OSCMessage message(oscPattern);
         
@@ -524,7 +546,8 @@ void SpatGrisAudioProcessor::setParameter (int index, float newValue){
         for (int iCurSource = 0; iCurSource < getNumberOfSources(); ++iCurSource){
             if (iCurSource != getSelectedSrc()){
                 if (index == getParamForSourceX(iCurSource) || index == getParamForSourceY(iCurSource) ||
-                    index == getParamForSourceAzimSpan(iCurSource) || index == getParamForSourceElevSpan(iCurSource)) {
+                    index == getParamForSourceAzimSpan(iCurSource) || index == getParamForSourceElevSpan(iCurSource) ||
+                    index == getParamForSourceRadius(iCurSource)) {
                     return;
                 }
             }
@@ -582,6 +605,10 @@ void SpatGrisAudioProcessor::setParameterInternal (const int &index, const float
                     setSourceElevSpanChanged(iCurSource);
                     break;
                 }
+                if (index == getParamForSourceRadius(iCurSource)){
+                    setSourceRadiusChanged(iCurSource);
+                    break;
+                }
             }
         }
         ++mHostChangedParameterProcessor;
@@ -610,6 +637,7 @@ void SpatGrisAudioProcessor::setParameterNotifyingHost (int index, float newValu
         case kSourceD:
         case kSourceAzimSpan:
         case kSourceElevSpan:
+        case kSourceRadiusVal:
             ++mHostChangedParameterProcessor;
             break;
         default:
@@ -650,6 +678,7 @@ const String SpatGrisAudioProcessor::getParameterName (int index) {
 			case kSourceD:          s << " - S"; break;
             case kSourceAzimSpan:   s << " - AS"; break;
             case kSourceElevSpan:   s << " - ES"; break;
+            case kSourceRadiusVal:  s << " - RAD"; break;
             default: return String::empty;
 		}
 		return s;
@@ -1597,7 +1626,7 @@ void SpatGrisAudioProcessor::createParameterRamps(float *p_pfParamCopy, const fl
     
     //for each kNonConstantParameters parameter, ie, IDs 0 to 120
     for (int iCurParamId = 0; iCurParamId < kNonConstantParameters; ++iCurParamId) {
-        //skip all parameters but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan) and for each speaker kSpeakerM
+        //skip all parameters but those: for each source (kSourceX,kSourceY,kSourceD,kSourceAzimSpan,kSourceElevSpan,kSourceRadiusVal) and for each speaker kSpeakerM
         if (iCurParamId >= kiTotalSourceParameters && iCurParamId < (kiTotalSourceParameters + kiTotalSpeakerParameters) && (
           ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerX ||
           ((iCurParamId - kiTotalSourceParameters) % kParamsPerSpeakers) == kSpeakerY ||
@@ -2188,7 +2217,7 @@ void SpatGrisAudioProcessor::storeCurrentLocations(){
         mBufferSrcLocD[i]  = mParameters[getParamForSourceD(i)];
         mBufferSrcLocAS[i] = mParameters[getParamForSourceAzimSpan(i)];
         mBufferSrcLocES[i] = mParameters[getParamForSourceElevSpan(i)];
-
+        mBufferSrcLocRAD[i] = mParameters[getParamForSourceRadius(i)];
     }
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; i++) {
         mBufferSpLocX[i] =  mParameters[getParamForSpeakerX(i)];
@@ -2234,6 +2263,7 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("mLinkSurfaceOrPan", mLinkSurfaceOrPan);
     xml.setAttribute ("mLinkAzimSpan", mLinkAzimSpan);
     xml.setAttribute ("mLinkElevSpan", mLinkElevSpan);
+    xml.setAttribute ("mLinkRadius", mLinkRadius);
     xml.setAttribute ("mGuiWidth", mGuiWidth);
     xml.setAttribute ("mGuiHeight", mGuiHeight);
     xml.setAttribute ("mGuiTab", mGuiTab);
@@ -2292,6 +2322,8 @@ void SpatGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
         xml.setAttribute (srcAS, mParameters[getParamForSourceAzimSpan(i)]);
         String srcES = "src" + to_string(i) + "ES";
         xml.setAttribute (srcES, mParameters[getParamForSourceElevSpan(i)]);
+        String srcRAD = "src" + to_string(i) + "RAD";
+        xml.setAttribute (srcRAD, mParameters[getParamForSourceRadius(i)]);
     }
     for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i) {
         String spkX = "spk" + to_string(i) + "x";
@@ -2403,7 +2435,10 @@ void SpatGrisAudioProcessor::setStateInformation (const void* data, int sizeInBy
                 
                 String srcES = "src" + to_string(iCurSource) + "ES";
                 mParameters.set(getParamForSourceElevSpan(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcES, 0)));
-            }
+
+                String srcRAD = "src" + to_string(iCurSource) + "RAD";
+                mParameters.set(getParamForSourceRadius(iCurSource), static_cast<float>(xmlState->getDoubleAttribute(srcRAD, 1)));
+}
             for (int iCurSpeaker = 0; iCurSpeaker < JucePlugin_MaxNumOutputChannels; ++iCurSpeaker){
                 String spkX = "spk" + to_string(iCurSpeaker) + "x";
                 mParameters.set(getParamForSpeakerX(iCurSpeaker), static_cast<float>(xmlState->getDoubleAttribute(spkX, 0)));

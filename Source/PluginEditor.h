@@ -56,6 +56,7 @@ enum paramTypes {
     kParamAzimSpan,
     kParamElevSpan,
     kParamTrajSpeed,
+    kParamRadius,
 };
 
 enum placement{
@@ -165,6 +166,10 @@ private:
     ParamSliderGRIS          *mElevSpanSlider;
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
+
+    ParamSliderGRIS          *mRadiusSlider;
+    ToggleButton    *mRadiusLinkButton;
+    Component       *mRadiusLabel;
 
 #if USE_DB_METERS
     LevelComponent* mLevelComponents[kMaxChannels];
