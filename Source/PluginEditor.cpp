@@ -1892,7 +1892,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     }
     else if (&textEditor == mOscSpat1stSrcIdTextEditor){
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
-        if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
+        if (i1stSrcId >= 1 && i1stSrcId <= 256){
             mFilter->setOscSpat1stSrcId(i1stSrcId);
             mFieldNeedRepaint = true;
         }
