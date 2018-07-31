@@ -456,7 +456,15 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         int   channel_osc   = getOscSpat1stSrcId()+iCurSrc-1;   //in gui the range is 1-99, for zirkonium it actually starts at 0 (or potentially lower, but Zirkosc uses 0 as starting channel)
         FPoint curPoint     = getSourceAzimElev(iCurSrc);
         float azim_osc      = curPoint.x;                       //For Zirkonium, -1 is in the back right and +1 in the back left. 0 is forward
+        if (azim_osc < 0) {
+            azim_osc = fabsf(azim_osc) * M_PI;
+        } else {
+            azim_osc = (1.0f - azim_osc) * M_PI + M_PI;
+        }
+
         float elev_osc      = curPoint.y;                       //For Zirkonium, 0 is the edge of the dome, .5 is the top
+        elev_osc = (M_PI / 2) - (M_PI * elev_osc);
+
         float azimspan_osc  = 2*getSourceAzimSpan01(iCurSrc);     //min azim span is 0, max is 2. I figure this is radians.
         float elevspan_osc  = getSourceElevSpan01(iCurSrc)/2;     //min elev span is 0, max is .5
         float radius_osc = getSourceRadius01(iCurSrc);
@@ -464,7 +472,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
 
         // TODO: Now we need to remove "/pan/az" handler and adapt all values to the format expected by "/spat/serv".
         // Maybe we can keep a copy of this function for a "legacy" mode...
-        OSCAddressPattern oscPattern("/pan/az");
+        OSCAddressPattern oscPattern("/spat/serv");
         OSCMessage message(oscPattern);
         
         message.addInt32(channel_osc);
@@ -472,6 +480,7 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
         message.addFloat32(elev_osc);
         message.addFloat32(azimspan_osc);
         message.addFloat32(elevspan_osc);
+        message.addFloat32(radius_osc);
         message.addFloat32(gain_osc);
         if (!mOscSpatSender.send(message)) {
             DBG("Error: could not send OSC message.");
