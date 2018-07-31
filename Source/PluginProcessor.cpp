@@ -528,9 +528,13 @@ bool SpatGrisAudioProcessor::isNewMovementMode(float m_fNewValue){
 #endif
 
 bool SpatGrisAudioProcessor::isKnownHost(){
+#ifdef __linux__
+    return true;
+#else
     return (host.isLogic() || host.isReaper() || host.isAbletonLive() || host.isDigitalPerformer() ||
             host.isAdobeAudition() || host.isArdour() || host.isCubase() || host.isFruityLoops() ||
             host.isNuendo() || host.isSonar());
+#endif
 }
 
 void SpatGrisAudioProcessor::setParameter (int index, float newValue){
