@@ -490,15 +490,17 @@ void SpatGrisAudioProcessor::sendOscSpatValues(){
 }
 
 void SpatGrisAudioProcessor::resetOSC() {
-    for (int iCurSrc = 0; iCurSrc < mNumberOfSources; ++iCurSrc) {
-        int channel_osc = getOscSpat1stSrcId()+iCurSrc-1;
-        OSCAddressPattern oscPattern("/spat/serv");
-        OSCMessage message(oscPattern);
-        message.addString("reset");
-        message.addInt32(channel_osc);
-        if (!mOscSpatSender.send(message)) {
-            DBG("Error: could not send OSC message.");
-            return;
+    if (m_bOscSpatSenderIsConnected) {
+        for (int iCurSrc = 0; iCurSrc < mNumberOfSources; ++iCurSrc) {
+            int channel_osc = getOscSpat1stSrcId()+iCurSrc-1;
+            OSCAddressPattern oscPattern("/spat/serv");
+            OSCMessage message(oscPattern);
+            message.addString("reset");
+            message.addInt32(channel_osc);
+            if (!mOscSpatSender.send(message)) {
+                DBG("Error: could not send OSC message.");
+                return;
+            }
         }
     }
 }

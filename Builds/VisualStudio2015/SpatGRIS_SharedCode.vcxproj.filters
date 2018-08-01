@@ -4307,14 +4307,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\libLeap.dylib">
+      <Filter>SpatGRIS\Resources</Filter>
+    </None>
     <None Include="..\..\..\GrisCommonFiles\Fonts\sinkin-sans\SinkinSans-400Regular.otf">
       <Filter>SpatGRIS\Resources</Filter>
     </None>
     <None Include="..\..\logoGris.png">
       <Filter>SpatGRIS\Resources</Filter>
-    </None>
-    <None Include="..\..\libLeap.dylib">
-      <Filter>SpatGRIS</Filter>
     </None>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\flac\Flac Licence.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\flac</Filter>

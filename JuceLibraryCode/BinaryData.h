@@ -8,14 +8,14 @@
 
 namespace BinaryData
 {
+    extern const char*   libLeap_dylib;
+    const int            libLeap_dylibSize = 2280096;
+
     extern const char*   SinkinSans400Regular_otf;
     const int            SinkinSans400Regular_otfSize = 35872;
 
     extern const char*   logoGris_png;
     const int            logoGris_pngSize = 400483;
-
-    extern const char*   libLeap_dylib;
-    const int            libLeap_dylibSize = 2280096;
 
     extern const char*   HID_Config_Utilities_h;
     const int            HID_Config_Utilities_hSize = 324;
