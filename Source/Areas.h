@@ -60,6 +60,9 @@ public:
 
 static void AddArea(int speaker, float ix1, float iy1, float ix2, float iy2, Area *areas, int &areaCount, int &speakerCount)
 {
+    if (ix1 == ix2)
+        ix2 = ix1 + 1e-06;
+
     jassert(ix1 < ix2);
     
     //fprintf(stderr, "speaker: %d x1: %f x2: %f dc: %f\n", speaker, ix1, ix2, ix2 - ix1);
@@ -127,10 +130,10 @@ static void Integrate(float x1, float x2, const Area *areas, int areaCount, floa
         float dc = c2 - c1;
         //fprintf(stderr, "x1: %f x2: %f area.x1: %f area.x2: %f c1: %f c2: %f dc: %f\n", x1, x2, area.x1, area.x2, c1, c2, dc);
         //fflush(stderr);
-        jassert(dc > 0);
+        jassert(dc >= 0);
         
         float v = dc * (y1+y2); // * 0.5f;
-        if (v <= 0) v = 1e-6;
+        if (v <= 1e-6 || isnan(v)) v = 1e-6;
         
         mOutFactors[area.speaker] += v * factor;
     }

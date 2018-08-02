@@ -524,16 +524,13 @@ Boolean HIDSaveElementPref(const CFStringRef	inKeyCFStringRef,
         inIOHIDElementRef)
     {
         uint32_t vendorID = IOHIDDevice_GetVendorID(inIOHIDDeviceRef);
-        require(vendorID,
-                Oops);
+        //require(vendorID, Oops);
         
         uint32_t productID = IOHIDDevice_GetProductID(inIOHIDDeviceRef);
-        require(productID,
-                Oops);
+        //require(productID, Oops);
         
         uint32_t locID = IOHIDDevice_GetLocationID(inIOHIDDeviceRef);
-        require(locID,
-                Oops);
+        //require(locID, Oops);
         
         uint32_t usagePage = IOHIDDevice_GetUsagePage(inIOHIDDeviceRef);
         uint32_t usage = IOHIDDevice_GetUsage(inIOHIDDeviceRef);
@@ -544,9 +541,7 @@ Boolean HIDSaveElementPref(const CFStringRef	inKeyCFStringRef,
             usage = IOHIDDevice_GetPrimaryUsage(inIOHIDDeviceRef);
         }
         
-        require(usagePage &&
-                usage,
-                Oops);
+        //require(usagePage && usage, Oops);
         
         uint32_t usagePageE = IOHIDElementGetUsagePage(inIOHIDElementRef);
         uint32_t usageE = IOHIDElementGetUsage(inIOHIDElementRef);

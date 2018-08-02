@@ -1,6 +1,12 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
-Project("{85A258DB-E0EC-DBA5-F960-91A2E7AB3005}") = "SpatGRIS", "SpatGRIS.vcxproj", "{85B349BE-0514-8781-EF8C-E922FF5EEC35}"
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpatGRIS - VST", "SpatGRIS_VST.vcxproj", "{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661} = {C0160EB6-7AAD-68B5-EE63-1B3C1A702661}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpatGRIS - Shared Code", "SpatGRIS_SharedCode.vcxproj", "{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,12 +15,18 @@ Global
 		Release_x64|x64 = Release_x64|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{85B349BE-0514-8781-EF8C-E922FF5EEC35}.Debug|Win32.ActiveCfg = Debug|Win32
-		{85B349BE-0514-8781-EF8C-E922FF5EEC35}.Debug|Win32.Build.0 = Debug|Win32
-		{85B349BE-0514-8781-EF8C-E922FF5EEC35}.Release_x86|Win32.ActiveCfg = Release_x86|Win32
-		{85B349BE-0514-8781-EF8C-E922FF5EEC35}.Release_x86|Win32.Build.0 = Release_x86|Win32
-		{85B349BE-0514-8781-EF8C-E922FF5EEC35}.Release_x64|x64.ActiveCfg = Release_x64|x64
-		{85B349BE-0514-8781-EF8C-E922FF5EEC35}.Release_x64|x64.Build.0 = Release_x64|x64
+		{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}.Debug|Win32.Build.0 = Debug|Win32
+		{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}.Release_x86|Win32.ActiveCfg = Release_x86|Win32
+		{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}.Release_x86|Win32.Build.0 = Release_x86|Win32
+		{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}.Release_x64|x64.ActiveCfg = Release_x64|x64
+		{60F2F758-3CEF-F9BA-26C9-22EED06B34E4}.Release_x64|x64.Build.0 = Release_x64|x64
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}.Debug|Win32.Build.0 = Debug|Win32
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}.Release_x86|Win32.ActiveCfg = Release_x86|Win32
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}.Release_x86|Win32.Build.0 = Release_x86|Win32
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}.Release_x64|x64.ActiveCfg = Release_x64|x64
+		{C0160EB6-7AAD-68B5-EE63-1B3C1A702661}.Release_x64|x64.Build.0 = Release_x64|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

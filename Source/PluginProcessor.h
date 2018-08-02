@@ -61,6 +61,8 @@ using namespace std;
 
 #if WIN32
     #define M_PI 3.14159265358979323846264338327950288
+#elif defined __linux__
+
 #else
     #ifndef USE_JOYSTICK
         #define USE_JOYSTICK 1
@@ -87,6 +89,7 @@ enum sourceParameters{
     kSourceD,
     kSourceAzimSpan,
     kSourceElevSpan,
+    kSourceRadiusVal,
     kParamsPerSource
 };
 
@@ -100,7 +103,7 @@ enum speakerParameters{
     kParamsPerSpeakers
 };
 
-//the JucePlugin values are from the introjucer:   8           * 5                + 16                              * 5 = 120
+//the JucePlugin values are from the introjucer:   8           * 6                + 16                              * 5 = 128
 #define kNonConstantParameters (JucePlugin_MaxNumInputChannels * kParamsPerSource + JucePlugin_MaxNumOutputChannels * kParamsPerSpeakers)
 
 enum constantParameters{
@@ -254,7 +257,7 @@ static const float kDirRandDefault = 0.5f;
 
 static const int    kMargin             = 2;
 static const int    kCenterColumnWidth  = 180;
-static const int    kDefaultFieldSize   = 500;
+static const int    kDefaultFieldSize   = 540;
 static const int    kMinFieldSize       = 300;
 static const int    kRightColumnWidth   = 340;
 static const int    kDefaultWidth       = 1090;//kMargin + kDefaultFieldSize + kMargin + kCenterColumnWidth + kMargin + kRightColumnWidth + kMargin + 106;
@@ -422,7 +425,10 @@ public:
 
     bool getLinkElevSpan() const { return mLinkElevSpan; }
     void setLinkElevSpan(bool s) { mLinkElevSpan = s; }
-    
+
+    bool getLinkRadius() const { return mLinkRadius; }
+    void setLinkRadius(bool s) { mLinkRadius = s; }
+
 	int getProcessMode() const { return mProcessMode; }
     void setProcessMode(int s) ;
     
@@ -565,14 +571,16 @@ public:
     int getParamForSourceD(int index) const { return kSourceD + index * kParamsPerSource; }
     int getParamForSourceAzimSpan(int index) const { return kSourceAzimSpan + index * kParamsPerSource; }
     int getParamForSourceElevSpan(int index) const { return kSourceElevSpan + index * kParamsPerSource; }
-    
+    int getParamForSourceRadius(int index) const { return kSourceRadiusVal + index * kParamsPerSource; }
+
     float getSourceX(int index) const { return mParameters.getUnchecked(kSourceX + index * kParamsPerSource); }
     float getSourceY(int index) const { return mParameters.getUnchecked(kSourceY + index * kParamsPerSource); }
     float getSourceD(int index) const { return mParameters.getUnchecked(kSourceD + index * kParamsPerSource); }
     float getDenormedSourceD(int index) const { return denormalize(kSourceMinDistance, kSourceMaxDistance, getSourceD(index)); }
     float getSourceAzimSpan01(int index) const { return mParameters.getUnchecked(kSourceAzimSpan + index * kParamsPerSource); }
     float getSourceElevSpan01(int index) const { return mParameters.getUnchecked(kSourceElevSpan + index * kParamsPerSource); }
-    
+    float getSourceRadius01(int index) const { return mParameters.getUnchecked(kSourceRadiusVal + index * kParamsPerSource); }
+
     float getSmoothing() const { return mParameters.getUnchecked(kSmooth); }
     
     int getNumberOfSpeakers() const { return mNumberOfSpeakers; }
@@ -784,7 +792,10 @@ public:
 
     void setSourceElevSpanChanged(int i)    {  m_iSourceElevSpanChanged = i;    }
     int  getSourceElevSpanChanged()         { return m_iSourceElevSpanChanged;  }
-    
+
+    void setSourceRadiusChanged(int i)    {  m_iSourceRadiusChanged = i;    }
+    int  getSourceRadiusChanged()         { return m_iSourceRadiusChanged;  }
+
     
     int getSelectedSrc() const {return mSelectedSrc;}
     int getSpSelected() const  {return mSpSelected;}
@@ -834,6 +845,7 @@ private:
 	bool mLinkSurfaceOrPan;
     bool mLinkAzimSpan;
     bool mLinkElevSpan;
+    bool mLinkRadius;
 //	int m_iMovementMode;
 	bool mShowGridLines;
     bool m_bOscActive;
@@ -926,7 +938,8 @@ private:
     float mBufferSrcLocD[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocAS[JucePlugin_MaxNumInputChannels];
     float mBufferSrcLocES[JucePlugin_MaxNumInputChannels];
-    
+    float mBufferSrcLocRAD[JucePlugin_MaxNumInputChannels];
+
     float mBufferSpLocX[JucePlugin_MaxNumOutputChannels];
     float mBufferSpLocY[JucePlugin_MaxNumOutputChannels];
     float mBufferSpLocM[JucePlugin_MaxNumOutputChannels];
@@ -958,7 +971,8 @@ private:
     int m_iSourceLocationChanged;
     int m_iSourceAzimSpanChanged;
     int m_iSourceElevSpanChanged;
-    
+    int m_iSourceRadiusChanged;
+
     bool m_bPreventSourceLocationUpdate;
     bool m_bPreventSourceAzimElevSpanUpdate;
     bool m_bIsSettingEndPoint;

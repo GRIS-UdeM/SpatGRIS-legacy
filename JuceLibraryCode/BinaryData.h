@@ -4,19 +4,18 @@
 
 */
 
-#ifndef BINARYDATA_H_1750437_INCLUDED
-#define BINARYDATA_H_1750437_INCLUDED
+#pragma once
 
 namespace BinaryData
 {
+    extern const char*   libLeap_dylib;
+    const int            libLeap_dylibSize = 2280096;
+
     extern const char*   SinkinSans400Regular_otf;
     const int            SinkinSans400Regular_otfSize = 35872;
 
     extern const char*   logoGris_png;
     const int            logoGris_pngSize = 400483;
-
-    extern const char*   libLeap_dylib;
-    const int            libLeap_dylibSize = 2280096;
 
     extern const char*   HID_Config_Utilities_h;
     const int            HID_Config_Utilities_hSize = 324;
@@ -48,15 +47,20 @@ namespace BinaryData
     extern const char*   IOHIDLib__h;
     const int            IOHIDLib__hSize = 3029;
 
+    // Number of elements in the namedResourceList and originalFileNames arrays.
+    const int namedResourceListSize = 13;
+
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
 
-    // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 13;
+    // Points to the start of a list of resource filenames.
+    extern const char* originalFilenames[];
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).
-    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
-}
+    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes);
 
-#endif
+    // If you provide the name of one of the binary resource variables above, this function will
+    // return the corresponding original, non-mangled filename (or a null pointer if the name isn't found).
+    const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8);
+}

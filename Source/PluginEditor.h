@@ -27,10 +27,10 @@
 #define PLUGINEDITOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 #include "PluginProcessor.h"
 #include "LevelComponent.h"
 #include "SourceMover.h"
+#include "../../GrisCommonFiles/GrisLookAndFeel.h"
 
 #if USE_LEAP
 #include "Leap.h"
@@ -56,7 +56,7 @@ enum paramTypes {
     kParamAzimSpan,
     kParamElevSpan,
     kParamTrajSpeed,
-    kParamDirRandom,
+    kParamRadius,
 };
 
 enum placement{
@@ -167,10 +167,16 @@ private:
     ToggleButton    *mElevSpanLinkButton;
     Component       *mElevSpanLabel;
 
+    ParamSliderGRIS          *mRadiusSlider;
+    ToggleButton    *mRadiusLinkButton;
+    Component       *mRadiusLabel;
+
+#if USE_DB_METERS
     LevelComponent* mLevelComponents[kMaxChannels];
     ToggleButton*   mMuteButtons[kMaxChannels];
     Component*          mLabelSourceId[kMaxChannels];
-
+#endif
+    
     ToggleButton *mEnableJoystick;
     ToggleButton *mEnableLeap;
 	ToggleButton *mShowGridLines;
@@ -193,12 +199,17 @@ private:
 	Slider *mFilterNear;
 	Slider *mMaxSpanVolumeSlider;
     Slider *mSpeedTrajectory;
-    Slider *mDirRandTrajectory;
     Component *mMaxSpanVolumeLabel;
     //Label *mShowChange;
     Label *mStateLeap;
     Label *mStateJoystick;
     Label *m_VersionLabel;
+	
+#if ALLOW_INTERNAL_WRITE
+	ComboBox *mRoutingModeCombo;
+    Component *mRoutingModeLabel;
+	Slider *mRoutingVolumeSlider;
+#endif
     
     ImageComponent m_logoImage;
 
@@ -307,14 +318,6 @@ private:
     void applyCurrentSrcPlacement();
     void applyCurrentSpkPlacement();
     
-    Component * mrayLab;
-    Component * mrayvalLab;
-    
-    
-    //TextEditor *mSpeedStartAccel;
-    //TextEditor *mSpeedEndtAccel;
-    //TextEditor *mTimeStartAccel;
-    //ComboBox *mTypeAccel;
     
 #if TIME_GUI
     int m_iGuiRefreshCounter = 0;

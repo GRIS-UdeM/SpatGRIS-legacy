@@ -325,6 +325,7 @@ void FieldComponent::paint (Graphics& g)
     // - - - - - - - - - - - -
     //draw line and circle for selected source
     // - - - - - - - - - - - -
+    float HRSelRadiusToSize = (1 - mFilter->getSourceRadius01(iSelectedSrc)) * 0.5 + 1.0;
     hueSelect = (float)iSelectedSrc / mFilter->getNumberOfSources() + 0.577251;
     if (hueSelect > 1){
         hueSelect -= 1;
@@ -335,7 +336,7 @@ void FieldComponent::paint (Graphics& g)
     float radiusZenith = sqrtf(pow(2 * sourceXY.x * fRadius,2) + pow(2 * sourceXY.y * fRadius,2));
     g.drawEllipse(fFieldCenter - radiusZenith/2 , fFieldCenter - radiusZenith/2, radiusZenith, radiusZenith, 1.5);
 
-    radius = kSourceRadius*1.22, diameter = kSourceDiameter*1.22;
+    radius = kSourceRadius*1.22*HRSelRadiusToSize, diameter = kSourceDiameter*1.22*HRSelRadiusToSize;
     pCurLoc = getSourcePoint(iSelectedSrc);
     g.setColour(Colours::whitesmoke);
     g.drawEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter, 2);
@@ -345,7 +346,10 @@ void FieldComponent::paint (Graphics& g)
 	// draw sources
 	// - - - - - - - - - - - -
 	for (int i = 0; i < mFilter->getNumberOfSources(); i++) {
-        radius = kSourceRadius, diameter = kSourceDiameter;
+        float HRRadiusToValue = mFilter->getSourceRadius01(i) * 0.75 + 0.25;
+        float HRRadiusToSize = (1 - mFilter->getSourceRadius01(i)) * 0.5 + 1.0;
+
+        radius = kSourceRadius*HRRadiusToSize, diameter = kSourceDiameter*HRRadiusToSize;
 		pCurLoc = getSourcePoint(i);
 		
 		hue = (float)i / mFilter->getNumberOfSources() + 0.577251;
@@ -353,7 +357,7 @@ void FieldComponent::paint (Graphics& g)
             hue -= 1;
         }
 		
-		g.setColour(Colour::fromHSV(hue, 1, 1, 0.5f));
+		g.setColour(Colour::fromHSV(hue, 1, HRRadiusToValue, 0.5f));
 
         //draw the line that goes with every source
 		if (processMode != kFreeVolumeMode && processMode != kOscSpatMode) {
@@ -361,7 +365,7 @@ void FieldComponent::paint (Graphics& g)
             g.drawLine(Line<float>(convertSourceRT(1, rt.y), convertSourceRT((rt.x >= .999) ? 2 : -1, rt.y)));
 		}
 		
-		g.setColour(Colour::fromHSV(hue, 1, 1, 1));
+		g.setColour(Colour::fromHSV(hue, 1, HRRadiusToValue, 1));
 		g.fillEllipse(pCurLoc.x - radius, pCurLoc.y - radius, diameter, diameter);
 		
 		g.setColour(Colours::black);

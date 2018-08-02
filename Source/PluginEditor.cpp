@@ -118,8 +118,8 @@ public:
             mViewport->setViewedComponent(mContent, false);
             mViewport->setScrollBarsShown(true, true);
             mViewport->setScrollBarThickness(6);
-            mViewport->getVerticalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
-            mViewport->getHorizontalScrollBar()->setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            mViewport->getVerticalScrollBar().setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
+            mViewport->getHorizontalScrollBar().setColour(ScrollBar::ColourIds::thumbColourId, feel->getScrollBarColour());
             
             mViewport->setLookAndFeel(feel);
             addAndMakeVisible(mViewport);
@@ -296,7 +296,17 @@ AudioProcessorEditor (ownerFilter)
         float fCurElevSpan = mFilter->getSourceElevSpan01(m_iSelectedSrcEditor);
         mElevSpanSlider = addParamSliderGRIS(kParamElevSpan, m_iSelectedSrcEditor, fCurElevSpan, x + w*3/12, y, w*9/12, dh, boxContent);
         y += dh + 10;
-        
+        //--------------------- radius -----------------------
+        //add radius label
+        mRadiusLabel = addLabel("Radius", x, y, w*9/12, dh, boxContent);
+        y += dh;
+        //add radius link button
+        mRadiusLinkButton = addCheckbox("Link", mFilter->getLinkRadius(), x, y, w*3/12, dh, boxContent);
+        //add radius slider
+        float fCurRadius = mFilter->getSourceRadius01(m_iSelectedSrcEditor);
+        mRadiusSlider = addParamSliderGRIS(kParamRadius, m_iSelectedSrcEditor, fCurRadius, x + w*3/12, y, w*9/12, dh, boxContent);
+        y += dh + 10;
+
         boxContent->setSize(w, y);
         
         mSrcSelectCombo = new ComboBox();
@@ -322,7 +332,23 @@ AudioProcessorEditor (ownerFilter)
 
         Component *ct = mSpeakersBox->getContent();
         const int muteWidth = 50;
-
+        //addLabel("Mute", x, y, muteWidth, dh, ct);
+#if USE_DB_METERS
+       // addLabel("Level", x+muteWidth, y, w/3, dh, ct);
+#endif
+        
+#if ALLOW_INTERNAL_WRITE
+        addLabel("   Routing \nvolume (dB):", x+muteWidth+w/3, y, w/3, 2*dh, ct);
+        y += dh;
+    #if WIN32
+        mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y+20, w/4, 200, ct);
+    #else
+        mRoutingVolumeSlider = addParamSliderGRIS(kParamRoutingVolume, kRoutingVolume, mFilter->getParameter(kRoutingVolume), x+muteWidth+w/3, y, w/4, 200, ct);
+    #endif
+        mRoutingVolumeSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 30, dh);
+        mRoutingVolumeSlider->setSliderStyle(Slider::LinearVertical);
+#endif
+        
         y += dh + -22;
         x = 6;
         for (int i = 0; i < kMaxChannels; ++i){
@@ -342,8 +368,7 @@ AudioProcessorEditor (ownerFilter)
             mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
             mMuteButtons[i] = mute;
             const int muteWidth = 50;
-
-            //DB meter
+#if USE_DB_METERS
             juce::Rectangle<int> level(x+3, muteWidth-30, dh - 6, w/3 - 10 );
         
             LevelComponent *lc = new LevelComponent(mFilter, i);
@@ -351,7 +376,7 @@ AudioProcessorEditor (ownerFilter)
             ct->addAndMakeVisible(lc);
             mComponents.add(lc);
             mLevelComponents[i] = lc;
-
+#endif
             x += dh + 5;
         }
         
@@ -421,13 +446,6 @@ AudioProcessorEditor (ownerFilter)
             
             mTrDirectionComboBox = cb;
             mTrDirectionComboBox->addListener(this);
-        }
-        
-        {
-            Slider *ds = addParamSliderGRIS(kParamDirRandom, -1, mFilter->getSpeedTraject(), x+cbw+5, y+2, w, dh-5, box);
-            ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
-            ds->setRange(0.0f, 1.0f);
-            mDirRandTrajectory = ds;
         }
         
         {
@@ -542,7 +560,7 @@ AudioProcessorEditor (ownerFilter)
         
         addLabel("Speed", x-4, y-14, w+10, dh, box);
         
-        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, -1, mFilter->getSpeedTraject(), x, y, w, dh-5, box);
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, 2.5f, mFilter->getSpeedTraject(), x, y, w, dh-5, box);
         ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
         ds->setRange(-2.5f, 2.5f);
         
@@ -553,54 +571,13 @@ AudioProcessorEditor (ownerFilter)
         box->addChildComponent(mTrProgressBar);
         mComponents.add(mTrProgressBar);
         
-         x = 2*cbw + 2*kMargin + 140;
-        y -= (dh + 4)*2;
-
-        //addLabel("Acceleration:", x, y, cbw, dh, box);
-
-        y += dh + 4;
-        
-        
-        /*mSpeedStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
-        mSpeedStartAccel->setTextToShowWhenEmpty("Start", juce::Colour::greyLevel(.6));
-        mSpeedStartAccel->addListener(this);
-        
-        y += dh + 4;*/
-        /*addLabel("Speed", x+cbw/2, y, cbw/2, dh, box);
-
-        mSpeedEndtAccel = addTextEditor("", x, y, cbw/2, dh, box);
-        mSpeedEndtAccel->setTextToShowWhenEmpty("End", juce::Colour::greyLevel(.6));
-        mSpeedEndtAccel->addListener(this);*/
-        
-        
-
-        //x = 2*cbw + 2*kMargin+110;
-        /*y += dh + 4;
-        addLabel("Time (0 = Off)", x+cbw/2, y, cbw, dh, box);
-        mTimeStartAccel = addTextEditor("", x, y, cbw/2, dh, box);
-        mTimeStartAccel->setTextToShowWhenEmpty("Duration", juce::Colour::greyLevel(.6));
-        mTimeStartAccel->addListener(this);*/
-        
-        
-        /*y += dh + 4;
-        ComboBox *cb = new ComboBox();
-        int index = 1;
-        for (int i = 0; i < TotalNumberAccelerationtModes; i++){
-            cb->addItem(getAccelerationName(i), index++);
+        if(mFilter->getTrState() == kTrWriting){
+            updateTrajectoryStartComponent(kRunning);
+            mTrWriteButton->setToggleState(true, dontSendNotification);
         }
-        cb->setSelectedId(mFilter->getTrType());
-        cb->setSize(cbw/2, dh);
-        cb->setTopLeftPosition(x, y);
-        box->addAndMakeVisible(cb);
-        mComponents.add(cb);
-        
-        mTypeAccel = cb;
-        mTypeAccel->addListener(this);*/
         
         x = 2*cbw + 2*kMargin;
         y = kMargin + dh + 5;
-        
-        
         /*addLabel("Movements:", x, y, w-50, dh, box);
 
         mMovementModeCombo = new ComboBox();
@@ -637,7 +614,6 @@ AudioProcessorEditor (ownerFilter)
         //mApplyOutputRamping = addCheckbox("Output Ramping", mFilter->getApplyOutRamp(), x, y, w, dh, box);
         //mApplyOutputRamping->setTooltip("Warning : destroy performence");
         y += dh + 4;
-#endif
         mShowGridLines = addCheckbox("Show grid lines", mFilter->getShowGridLines(), x, y, w, dh, box);
 
         //-----------------------------
@@ -661,6 +637,33 @@ AudioProcessorEditor (ownerFilter)
             y += dh + 4;
             updateInputOutputCombo();
         }
+        #if ALLOW_INTERNAL_WRITE
+        mRoutingModeLabel = addLabel("Routing mode", x, y, w, dh, box);
+        y += dh + 4;
+        {
+            ComboBox *cb = new ComboBox();
+            int index = 1;
+            cb->addItem("Normal", index++);
+            cb->addItem("Internal write", index++);
+            cb->addItem("Internal read 1-2", index++);
+            cb->addItem("Internal read 3-4", index++);
+            cb->addItem("Internal read 5-6", index++);
+            cb->addItem("Internal read 7-8", index++);
+            cb->addItem("Internal read 9-10", index++);
+            cb->addItem("Internal read 11-12", index++);
+            cb->addItem("Internal read 13-14", index++);
+            cb->addItem("Internal read 15-16", index++);
+            cb->setSelectedId(mFilter->getRoutingMode() + 1);
+            cb->setSize(w, dh);
+            cb->setTopLeftPosition(x, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            y += dh + 4;
+            
+            cb->addListener(this);
+            mRoutingModeCombo = cb;
+        }
+#endif
         
         mOscActiveButton = addCheckbox("Osc Active", mFilter->getOscActive(), x, y, w, dh, box);
          y += dh + 4;
@@ -712,7 +715,178 @@ AudioProcessorEditor (ownerFilter)
         
     }
     
-   
+    //--------------- TRAJECTORIES TAB ---------------- //
+    //box = mTabs->getTabContentComponent(1);
+    //{
+        /*
+        //---------- ROW 1 -------------
+        int x = kMargin, y = kMargin, w = (box->getWidth() - kMargin) / 3 - kMargin;
+        
+        int cbw = 130;
+        {
+            ComboBox *cb = new ComboBox();
+            int index = 1;
+            for (int i = 1; i < Trajectory::NumberOfTrajectories(); i++){
+                cb->addItem(Trajectory::GetTrajectoryName(i), index++);
+            }
+            cb->setSelectedId(mFilter->getTrType());
+            cb->setSize(cbw, dh);
+            cb->setTopLeftPosition(x, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrTypeComboBox = cb;
+            mTrTypeComboBox->addListener(this);
+        }
+        
+        {
+            ComboBox *cb = new ComboBox();
+            cb->setSize(cbw, dh);
+            cb->setTopLeftPosition(x+cbw+5, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrDirectionComboBox = cb;
+            mTrDirectionComboBox->addListener(this);
+        }
+        
+        {
+            ComboBox *cb = new ComboBox();
+            cb->setSize(cbw-40, dh);
+            cb->setTopLeftPosition(x+2*(cbw+5), y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrReturnComboBox = cb;
+            mTrReturnComboBox->addListener(this);
+        }
+        
+        
+        mTrSeparateAutomationModeButton = addCheckbox("Force separate automation", mFilter->getShowGridLines(), x+3*(cbw+5)-40, y, cbw+20, dh, box);
+        
+        int tewShort = 30;
+        int x2 = x+3*(cbw+5);
+        mTrDampeningTextEditor = addTextEditor(String(mFilter->getTrDampening()), x2, y, tewShort, dh, box);
+        mTrDampeningTextEditor->addListener(this);
+        mTrDampeningLabel = addLabel("dampening", x2 + tewShort, y, w, dh, box);
+        
+        mTrTurnsTextEditor = addTextEditor(String(mFilter->getTrTurns()), x2, y, tewShort, dh, box);
+        mTrTurnsTextEditor->addListener(this);
+        mTrTurnsLabel = addLabel("turn(s)", x2 + tewShort, y, w, dh, box);
+
+        
+        //---------- ROW 2 -------------
+        y += dh + 4;
+        x = kMargin;
+        int tew = 80;
+        
+        mTrDuration = addTextEditor(String(mFilter->getTrDuration()), x, y, tew, dh, box);
+        mTrDuration->addListener(this);
+        x += tew + kMargin;
+        {
+            ComboBox *cb = new ComboBox();
+            int index = 1;
+            cb->addItem("Beat(s)", index++);
+            cb->addItem("Second(s)", index++);
+            
+            cb->setSelectedId(mFilter->getTrUnits());
+            cb->setSize(tew, dh);
+            cb->setTopLeftPosition(x, y);
+            box->addAndMakeVisible(cb);
+            mComponents.add(cb);
+            
+            mTrUnits = cb;
+            mTrUnits->addListener(this);
+        }
+        x += tew + kMargin;
+        addLabel("per cycle", x, y, w, dh, box);
+        
+        mTrDeviationTextEditor = addTextEditor(String(mFilter->getTrDeviation()*360), x2, y, tewShort, dh, box);
+        mTrDeviationTextEditor->addListener(this);
+        mTrDeviationLabel = addLabel("deviation", x2 + tewShort, y, w, dh, box);
+        
+        
+        mTrEllipseWidthTextEditor = addTextEditor(String(mFilter->getTrEllipseWidth()*2), x2, y, tewShort, dh, box);
+        mTrEllipseWidthTextEditor->addListener(this);
+        mTrEllipseWidthLabel = addLabel("width factor", x2 + tewShort, y, w, dh, box);
+
+        
+        //---------- ROW 3 -------------
+        y += dh + 4;
+        x = kMargin;
+        
+        mTrRepeats = addTextEditor(String(mFilter->getTrRepeats()), x, y, tew, dh, box);
+        mTrRepeats->addListener(this);
+        x += tew + kMargin;
+        
+        addLabel("cycle(s)", x, y, w, dh, box);
+        
+        //---------- ROW 4 -------------
+        y += dh + 4;
+        x = kMargin;
+        
+        mTrEndPointButton = addButton("Set end point", x, y, cbw, dh, box);
+        mTrEndPointButton->setClickingTogglesState(true);
+        
+        x += cbw + kMargin;
+        m_pTrEndRayTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
+        m_pTrEndRayTextEditor->setTextToShowWhenEmpty("Ray", juce::Colour::greyLevel(.6));
+        m_pTrEndRayTextEditor->addListener(this);
+        
+        x += cbw/2 + kMargin;
+        m_pTrEndAngleTextEditor = addTextEditor("", x, y, cbw/2, dh, box);
+        m_pTrEndAngleTextEditor->setTextToShowWhenEmpty("Angle", juce::Colour::greyLevel(.6));
+        m_pTrEndAngleTextEditor->addListener(this);
+        updateEndLocationTextEditors();
+
+        x += cbw/2 + kMargin;
+        m_pTrResetEndButton = addButton("Reset end point", x, y, cbw, dh, box);
+        
+        x = kMargin;
+        y += dh + 4;
+        
+        mTrWriteButton = addButton("Ready", x, y, cbw, dh, box);
+        mTrWriteButton->setClickingTogglesState(true);
+        
+        mTrEndPointLabel = addLabel("Click anywhere on circle to set end point", x+cbw+kMargin-2, y-4, 300, dh, box);
+        mTrEndPointLabel->setVisible(false);
+        
+        y += dh + 4;
+        
+        mTrProgressBar = new MiniProgressBar();
+        mTrProgressBar->setSize(cbw , dh-5);//tew
+        mTrProgressBar->setTopLeftPosition(x, y);
+        mTrProgressBar->setVisible(false);
+        
+        x = 1*cbw + 2*kMargin;
+        
+        addLabel("Speed", x-4, y-14, w+10, dh, box);
+        
+        Slider *ds = addParamSliderGRIS(kParamTrajSpeed, kTrajectorySpeed, mFilter->getParameter(kTrajectorySpeed), x, y, w, dh-5, box);
+        ds->setTextBoxStyle(Slider::TextBoxLeft, false, 40, dh);
+        ds->setRange(-2.5f, 2.5f);
+        
+        //ds->setTextBoxStyle (Slider::TextBoxBelow, false, 90, 20);
+        mSpeedTrajectory = ds;
+
+        
+        box->addChildComponent(mTrProgressBar);
+        mComponents.add(mTrProgressBar);
+        
+        if(mFilter->getTrState() == kTrWriting){
+            updateTrajectoryStartComponent(kRunning);
+            mTrWriteButton->setToggleState(true, dontSendNotification);
+        }
+       
+        x = 2*cbw + 2*kMargin;
+        y = kMargin + dh + 5;
+        addLabel("Movements:", x, y, w-50, dh, box);
+        */
+ 
+       
+        
+    //}
+    
     //--------------- V & F TAB ---------------- //
     box = mTabs->getTabContentComponent(1);
     {
@@ -892,11 +1066,11 @@ AudioProcessorEditor (ownerFilter)
         int lw = 60;
         y += dh + 4;
         
-        mrayLab = addLabel("Ray", x, y, lw, dh, box);
+        addLabel("Ray", x, y, lw, dh, box);
         mSpR = addTextEditor("1", x + (w - selectw -25), y, 75, dh, box);
         mSpR->setExplicitFocusOrder(6);
         mSpR->addListener(this);
-        mrayvalLab = addLabel("(0 - 2)", x +(w - selectw+50), y, lw, dh, box);
+        addLabel("(0 - 2)", x +(w - selectw+50), y, lw, dh, box);
         y += dh + 4;
         
         addLabel("Angle", x, y, lw, dh, box);
@@ -1012,12 +1186,7 @@ AudioProcessorEditor (ownerFilter)
     addAndMakeVisible (m_pResizer = new ResizableCornerComponent (this, &m_oResizeLimits));
     setSize (mFilter->getGuiWidth(), mFilter->getGuiHeight());
     
-    if(mFilter->getTrState() == kTrWriting){
-        updateTrajectoryStartComponent(kRunning);
-        mTrWriteButton->setToggleState(true, dontSendNotification);
-    }
-    
-    propertyChanged();
+ 
     startTimerHz (hertzRefresh);
     
 }
@@ -1048,7 +1217,16 @@ void SpatGrisAudioProcessorEditor::updateInputOutputCombo(){
 	}
     //insert all modes available, based on iMaxSources and iMaxSpeakers
     int iMaxSources = mFilter->getTotalNumInputChannels();
-    int iMaxSpeakers  = mFilter->getTotalNumOutputChannels();
+    int iMaxSpeakers;
+#if ALLOW_INTERNAL_WRITE
+    if (mFilter->getRoutingMode() == kInternalWrite){
+        iMaxSpeakers = 16;
+    } else {
+        iMaxSpeakers = mFilter->getTotalNumOutputChannels();
+    }
+#else
+    iMaxSpeakers = mFilter->getTotalNumOutputChannels();
+#endif
 
     if (iMaxSpeakers >=1)  { mInputOutputModeCombo->addItem("1x1",  i1o1+1);  }
     if (iMaxSpeakers >=2)  { mInputOutputModeCombo->addItem("1x2",  i1o2+1);  }
@@ -1141,11 +1319,17 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mElevSpanSlider->setEnabled(true);
             mElevSpanLabel->setEnabled(true);
             mElevSpanLinkButton->setEnabled(true);
-            
+            mRadiusSlider->setEnabled(true);
+            mRadiusLabel->setEnabled(true);
+            mRadiusLinkButton->setEnabled(true);
+
             mSpeakersBox->setEnabled(false);
             mSmoothingLabel->setEnabled(false);
             mSmoothingSlider->setEnabled(false);
-            
+#if ALLOW_INTERNAL_WRITE
+            mRoutingModeCombo->setEnabled(false);
+            mRoutingModeLabel->setEnabled(false);
+#endif
             mMaxSpanVolumeLabel->setEnabled(false);
             mMaxSpanVolumeSlider->setEnabled(false);
             mTabs->getTabContentComponent(1)->setEnabled(false);
@@ -1168,7 +1352,10 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mElevSpanSlider->setEnabled(false);
             mElevSpanLabel->setEnabled(false);
             mElevSpanLinkButton->setEnabled(false);
-            
+            mRadiusSlider->setEnabled(false);
+            mRadiusLabel->setEnabled(false);
+            mRadiusLinkButton->setEnabled(false);
+
             mSpeakersBox->setEnabled(true);
             mSmoothingLabel->setEnabled(true);
             mSmoothingSlider->setEnabled(true);
@@ -1183,13 +1370,9 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mSurfaceOrPanSlider->setEnabled(true);
             mSurfaceOrPanLinkButton->setEnabled(true);
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Surface", dontSendNotification);
-            mrayLab->setEnabled(true);
-            mrayvalLab->setEnabled(true);
-            mSpR->setEnabled(true);
-            static_cast<Label*>(mrayvalLab)->setText("(0 - 2)", dontSendNotification);
             break;
             
-            //SpanMode
+            
         default:
             mOscSpat1stSrcIdLabel->setVisible(false);
             mOscSpat1stSrcIdTextEditor->setVisible(false);
@@ -1203,11 +1386,17 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mElevSpanSlider->setEnabled(false);
             mElevSpanLabel->setEnabled(false);
             mElevSpanLinkButton->setEnabled(false);
-            
+            mRadiusSlider->setEnabled(false);
+            mRadiusLabel->setEnabled(false);
+            mRadiusLinkButton->setEnabled(false);
+
             mSpeakersBox->setEnabled(true);
             mSmoothingLabel->setEnabled(true);
             mSmoothingSlider->setEnabled(true);
-
+#if ALLOW_INTERNAL_WRITE
+            mRoutingModeCombo->setEnabled(true);
+            mRoutingModeLabel->setEnabled(true);
+#endif
             mMaxSpanVolumeLabel->setEnabled(true);
             mMaxSpanVolumeSlider->setEnabled(true);
             mTabs->getTabContentComponent(1)->setEnabled(true);
@@ -1217,10 +1406,6 @@ void SpatGrisAudioProcessorEditor::updateProcessModeComponents(){
             mSurfaceOrPanSlider->setEnabled(true);
             mSurfaceOrPanLinkButton->setEnabled(true);
             static_cast<Label*>(mSurfaceOrPanLabel)->setText("Pan span", dontSendNotification);
-            mrayLab->setEnabled(false);
-            mrayvalLab->setEnabled(false);
-            mSpR->setEnabled(false);
-            static_cast<Label*>(mrayvalLab)->setText("(1)", dontSendNotification);
             
     }
     
@@ -1292,12 +1477,6 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryTypeComponents(){
         mTrSeparateAutomationModeButton->setVisible(true);
     } else {
         mTrSeparateAutomationModeButton->setVisible(false);
-    }
-    
-    if(iSelectedTrajectory == RandomTrajectory){
-         mDirRandTrajectory->setVisible(true);
-    }else{
-        mDirRandTrajectory->setVisible(false);
     }
     
     unique_ptr<vector<String>> allDirections = Trajectory::getAllPossibleDirections(iSelectedTrajectory);
@@ -1395,16 +1574,16 @@ void SpatGrisAudioProcessorEditor::resized()
     mSourcesBoxLabel->setTopLeftPosition(x, y);
     
     int lh = mSourcesBoxLabel->getHeight();
-    mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, 155);
+    mSourcesBox->setBounds(x, y + lh, kCenterColumnWidth, 195);
     
-    mTrajectoryBoxLabel->setTopLeftPosition(x, 176);
-    mTrajectoryBox->setBounds(x, 192 , w-(fieldSize + (iExtraSpace * 5)), 170);
+    mTrajectoryBoxLabel->setTopLeftPosition(x, 216);
+    mTrajectoryBox->setBounds(x, 232 , w-(fieldSize + (iExtraSpace * 5)), 170);
 
-    mTabs->setBounds(x-1, 180+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 4)), h - (180+186 + iExtraSpace));
+    mTabs->setBounds(x-1, 220+184+iExtraSpace, w-(fieldSize + (iExtraSpace * 5)), h - (180+186 + iExtraSpace));
 
     x += kCenterColumnWidth + kMargin + kMargin;
     mSpeakersBoxLabel->setTopLeftPosition(x, y);
-    mSpeakersBox->setBounds(x, y + lh, w-(fieldSize+ kCenterColumnWidth + (iExtraSpace * 7)), 155);
+    mSpeakersBox->setBounds(x, y + lh, w-(fieldSize+ kCenterColumnWidth + (iExtraSpace * 7)), 195);
 }
 
 void SpatGrisAudioProcessorEditor::updateEditorSources(bool p_bCalledFromConstructor){
@@ -1437,15 +1616,46 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
     //remove old stuff
     Component *ct = mSpeakersBox->getContent();
     
+//    for (int iCurLevelComponent = 0; iCurLevelComponent < mMuteButtons.size(); ++iCurLevelComponent){
+//        ct->removeChildComponent(mMuteButtons.getUnchecked(iCurLevelComponent));
+//#if USE_DB_METERS
+//        ct->removeChildComponent(mLevelComponents.getUnchecked(iCurLevelComponent));
+//        mComponents.removeObject(mLevelComponents.getUnchecked(iCurLevelComponent));
+//#endif
+//    }
+    
+//    mMuteButtons.clear();
     mSpSelectCombo->clear();
-
+#if USE_DB_METERS
+//    mLevelComponents.clear();
+#endif
     
     //put new stuff
     int iCurSpeakers = mFilter->getNumberOfSpeakers();
-   	int dh = kDefaultLabelHeight;
-    int y = dh + 4;
+   	int dh = kDefaultLabelHeight, x = 0, y = 0, w = kRightColumnWidth;
+    
+    const int muteWidth = 50;
+    y += dh + 4;
 
     for (int i = 0; i < kMaxChannels; i++){
+//        String s; s << i+1;
+//#if USE_DB_METERS
+//        s << ":";
+//#endif
+//        
+//		float fMute = mFilter->getSpeakerM(i);
+//		ToggleButton *mute = addCheckbox(s, fMute, x, y, muteWidth, dh, ct);
+//        mute->setColour(ToggleButton::textColourId, mGrisFeel.getFontColour());
+//        mMuteButtons.add(mute);
+//        const int muteWidth = 50;
+//#if USE_DB_METERS
+//        juce::Rectangle<int> level(x+muteWidth, y + 3, w/3 - 10, dh - 6);
+//        LevelComponent *lc = new LevelComponent(mFilter, i);
+//        lc->setBounds(level);
+//        ct->addAndMakeVisible(lc);
+//        mComponents.add(lc);
+//        mLevelComponents.add(lc);
+//#endif
         if (i < iCurSpeakers){
             y += dh + 4;
             mLevelComponents[i]->setVisible(true);
@@ -1454,7 +1664,7 @@ void SpatGrisAudioProcessorEditor::updateEditorSpeakers(bool p_bCalledFromConstr
         } else {
             mLevelComponents[i]->setVisible(false);
             mMuteButtons[i]->setVisible(false);
-            mLabelSourceId[i]->setVisible(false);
+             mLabelSourceId[i]->setVisible(false);
         }
     }
     //ensure box height is not smaller than mRoutingVolumeSlider
@@ -1589,7 +1799,12 @@ ParamSliderGRIS* SpatGrisAudioProcessorEditor::addParamSliderGRIS(paramTypes par
             index = mFilter->getParamForSourceElevSpan(si);
             ds = new ParamSliderGRIS(index, paramType, mElevSpanLinkButton, mFilter);
             break;
-        
+
+        case kParamRadius :
+            index = mFilter->getParamForSourceRadius(si);
+            ds = new ParamSliderGRIS(index, paramType, mRadiusLinkButton, mFilter);
+            break;
+
         default:
             index = si;
             ds = new ParamSliderGRIS(index, paramType, NULL, mFilter);
@@ -1677,7 +1892,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
     }
     else if (&textEditor == mOscSpat1stSrcIdTextEditor){
         int i1stSrcId = mOscSpat1stSrcIdTextEditor->getText().getIntValue();
-        if (i1stSrcId >= 1 && i1stSrcId <= 99-7){
+        if (i1stSrcId >= 1 && i1stSrcId <= 256){
             mFilter->setOscSpat1stSrcId(i1stSrcId);
             mFieldNeedRepaint = true;
         }
@@ -1702,23 +1917,7 @@ void SpatGrisAudioProcessorEditor::textEditorReturnKeyPressed(TextEditor & textE
             mFilter->setEndLocationXY01(FPoint (endPoint.x, 1-endPoint.y));
         }
         updateEndLocationTextEditors();
-    }
-    /*else /*if (&textEditor == mSpeedStartAccel){
-        mFilter->setStarSpeedS(mSpeedStartAccel->getText().getFloatValue());
-    }
-    else if (&textEditor == mSpeedEndtAccel){
-        float speedE = paramRange(-kSpeedMinMax, kSpeedMinMax, mSpeedEndtAccel->getText().getFloatValue());
-        mFilter->setEndSpeedS(speedE);
-        mSpeedEndtAccel->setText(String(speedE));
-        
-    }
-    else if (&textEditor == mTimeStartAccel){
-        float timeEnd = paramRange(0, numeric_limits<float>::max(), mTimeStartAccel->getText().getFloatValue());
-        mFilter->setTimeSpeedS(timeEnd);
-        mTimeStartAccel->setText(String(timeEnd));
-    }*/
-    
-    else {
+    } else {
         printf("unknown TextEditor clicked...\n");
     }
     
@@ -1765,7 +1964,6 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
             properties.turns        = mTrTurnsTextEditor->getText().getFloatValue();
             properties.width        = mTrEllipseWidthTextEditor->getText().getFloatValue();
             properties.endPoint     = mFilter->getEndLocationXY01();
-            properties.listPoints   = *mFilter->getListPointFreeDraw();
             
             mFilter->setTrajectory(Trajectory::CreateTrajectory(properties));
             
@@ -1846,6 +2044,9 @@ void SpatGrisAudioProcessorEditor::buttonClicked (Button *button){
     }
     else if (button == mElevSpanLinkButton) {
         mFilter->setLinkElevSpan(button->getToggleState());
+    }
+    else if (button == mRadiusLinkButton) {
+        mFilter->setLinkRadius(button->getToggleState());
     }
     else if (button == mApplyFilterButton) {
         mFilter->setApplyFilter(button->getToggleState());
@@ -2082,6 +2283,13 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
             }
         }
     }
+#if ALLOW_INTERNAL_WRITE
+    else if (comboBox == mRoutingModeCombo) {
+        JUCE_COMPILER_WARNING("this will update the number of speakers in the processor, not sure this is the smartest place to do that")
+		mFilter->setRoutingMode(comboBox->getSelectedId() - 1);
+        updateRoutingModeComponents();
+	}
+#endif
     else if (comboBox == mProcessModeCombo) {
         int iSelectedMode = comboBox->getSelectedId() - 1;
         mFilter->setProcessMode(iSelectedMode);
@@ -2118,11 +2326,6 @@ void SpatGrisAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
         int iReturn = mTrReturnComboBox->getSelectedId()-1;
         mFilter->setTrReturn(iReturn);
     }
-    /*else if (comboBox == mTypeAccel)
-    {
-        int type = mTypeAccel->getSelectedId();
-        mFilter->setAccelMode(type);
-    }*/
     else
     {
         printf("unknown combobox clicked...\n");
@@ -2212,8 +2415,6 @@ void SpatGrisAudioProcessorEditor::updateTrajectoryStartComponent(trajectoryStat
     updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   isStarting);
     updateSingleTrajectoryStartComponent(m_pTrEndRayTextEditor,     isStarting);
     updateSingleTrajectoryStartComponent(m_pTrEndAngleTextEditor,   isStarting);
-    updateSingleTrajectoryStartComponent(mInputOutputModeCombo,     isStarting);
-    updateSingleTrajectoryStartComponent(mApplyInputOutputModeButton,   isStarting);
 }
 
 //==============================================================================
@@ -2232,13 +2433,24 @@ void SpatGrisAudioProcessorEditor::timerCallback(){
 #endif
 
 //---------------------------------------- DB METERS -----------------------------------------
-
+#if USE_DB_METERS
+    
     if (!mFilter->getIsRecordingAutomation()){
         const int nbrS = mFilter->getNumberOfSpeakers();
         for (int i = 0; i < nbrS; ++i){
             mLevelComponents[i]->repaint();
         }
     }
+    
+    /*
+    if (!mFilter->getIsRecordingAutomation() && !mFilter->isLevelUilcok()){
+        for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
+            if(!mFilter->isLevelUilcok() && mLevelComponents[i] != NULL){
+                mLevelComponents[i]->repaint();
+            }
+        }
+    }*/
+#endif
     
 #if TIME_GUI
     Time timeDbMeters = Time::getCurrentTime();
@@ -2365,10 +2577,6 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mTrTurnsTextEditor->        setText(String(mFilter->getTrTurns()));
     mOscSpat1stSrcIdTextEditor->setText(String(mFilter->getOscSpat1stSrcId()));
     mOscSpatPortTextEditor->    setText(String(mFilter->getOscSpatPort()));
-    //mSpeedStartAccel->          setText(String(mFilter->getStarSpeedS()));
-    //mSpeedEndtAccel->           setText(String(mFilter->getEndSpeedS()));
-    //mTimeStartAccel->           setText(String(mFilter->getTimeSpeedS()));
-    //mTypeAccel->                setText(String(mFilter->getAccelMode()));
     
 #if USE_TOUCH_OSC
     updateOscComponent(mOsc);
@@ -2379,6 +2587,7 @@ void SpatGrisAudioProcessorEditor::propertyChanged(){
     mSurfaceOrPanLinkButton->setToggleState(mFilter->getLinkSurfaceOrPan(),     dontSendNotification);
     mAzimSpanLinkButton->setToggleState(mFilter->getLinkAzimSpan(),         dontSendNotification);
     mElevSpanLinkButton->setToggleState(mFilter->getLinkElevSpan(),         dontSendNotification);
+    mRadiusLinkButton->setToggleState(mFilter->getLinkRadius(),         dontSendNotification);
     mApplyFilterButton->setToggleState(mFilter->getApplyFilter(),           dontSendNotification);
     //mApplyOutputRamping->setToggleState(mFilter->getApplyOutRamp(),           dontSendNotification);
 }
@@ -2401,8 +2610,9 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     mFilterMid->            setValue(mFilter->getParameter(kFilterMid));
     mFilterFar->            setValue(mFilter->getParameter(kFilterFar));
     mSpeedTrajectory->      setValue(mFilter->getSpeedTraject());
-    mDirRandTrajectory->    setValue(mFilter->getDirRandomTraject());
-   
+#if ALLOW_INTERNAL_WRITE
+    mRoutingVolumeSlider->  setValue(mFilter->getParameter(kRoutingVolume));
+#endif
     
 #if TIME_GUI
     Time timeSliders = Time::getCurrentTime();
@@ -2427,6 +2637,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
         mSurfaceOrPanSlider->setParamIndex(mFilter->getParamForSourceD(m_iSelectedSrcEditor));
         mAzimSpanSlider->    setParamIndex(mFilter->getParamForSourceAzimSpan(m_iSelectedSrcEditor));
         mElevSpanSlider->    setParamIndex(mFilter->getParamForSourceElevSpan(m_iSelectedSrcEditor));
+        mRadiusSlider->      setParamIndex(mFilter->getParamForSourceRadius(m_iSelectedSrcEditor));
     }
     if (mFilter->getProcessMode() == kFreeVolumeMode){
         mSurfaceOrPanSlider->setValue(1.f - mFilter->getSourceD(iSelSrc), dontSendNotification);
@@ -2435,6 +2646,7 @@ void SpatGrisAudioProcessorEditor::repaintTheStuff(){
     }
     mAzimSpanSlider->    setValue(mFilter->getSourceAzimSpan01(iSelSrc), dontSendNotification);
     mElevSpanSlider->    setValue(mFilter->getSourceElevSpan01(iSelSrc), dontSendNotification);
+    mRadiusSlider->      setValue(mFilter->getSourceRadius01(iSelSrc), dontSendNotification);
     for (int i = 0; i < mFilter->getNumberOfSpeakers(); i++){
         mMuteButtons[i]->setToggleState((mFilter->getSpeakerM(i) > .5), dontSendNotification);
         mLevelComponents[i]->setMute(mMuteButtons[i]->getToggleState());

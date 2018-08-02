@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="ZtKxiG" name="SpatGRIS" projectType="audioplug" version="1.0.2"
+              bundleIdentifier="com.UdeM.SpatGRIS" includeBinaryInAppConfig="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
+              pluginName="SpatGris" pluginDesc="SpatGris" pluginManufacturer="UdeM"
+              pluginManufacturerCode="UdeM" pluginCode="Spat" pluginIsSynth="0"
+              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="1"
+              pluginEditorRequiresKeys="0" pluginAUExportPrefix="SpatGrisAU"
+              pluginRTASCategory="" aaxIdentifier="com.UdeM.SpatGris" pluginAAXCategory="512"
+              jucerVersion="5.3.2" pluginIsMidiEffectPlugin="0" companyName="UdeM"
+              buildAUv3="0" pluginFormats="buildVST,buildAU" pluginChannelConfigs="{8,16}, {1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}">
+  <MAINGROUP id="rRl79u" name="SpatGRIS">
+    <GROUP id="{48A026D6-2EE7-E714-8C68-003BA85B16C8}" name="GrisCommonFiles">
+      <FILE id="jDkaGa" name="GrisLookAndFeel.h" compile="0" resource="0"
+            file="../GrisCommonFiles/GrisLookAndFeel.h"/>
+    </GROUP>
+    <GROUP id="{B76B0FE8-BBC6-AA42-5E09-44DABB7BB441}" name="Resources">
+      <FILE id="u2xufn" name="SinkinSans-400Regular.otf" compile="0" resource="1"
+            file="../GrisCommonFiles/Fonts/sinkin-sans/SinkinSans-400Regular.otf"/>
+      <FILE id="NATXje" name="logoGris.png" compile="0" resource="1" file="logoGris.png"/>
+    </GROUP>
+    <FILE id="oQBaSA" name="libLeap.dylib" compile="0" resource="1" file="libLeap.dylib"/>
+    <GROUP id="{86F10CED-1EF2-11AE-6DFA-1E8A090A7A24}" name="HIDManager">
+      <FILE id="RebHZI" name="HID_Config_Utilities.cpp" compile="0" resource="0"
+            file="HIDManager/HID_Config_Utilities.cpp"/>
+      <FILE id="hqBKBt" name="HID_Config_Utilities.h" compile="0" resource="0"
+            file="HIDManager/HID_Config_Utilities.h"/>
+      <FILE id="iFJ5ws" name="HID_Error_Handler.cpp" compile="0" resource="0"
+            file="HIDManager/HID_Error_Handler.cpp"/>
+      <FILE id="vL3lvI" name="HID_Error_Handler.h" compile="0" resource="0"
+            file="HIDManager/HID_Error_Handler.h"/>
+      <FILE id="mpoSvN" name="HID_Name_Lookup.cpp" compile="0" resource="0"
+            file="HIDManager/HID_Name_Lookup.cpp"/>
+      <FILE id="rZmPrq" name="HID_Name_Lookup.h" compile="0" resource="0"
+            file="HIDManager/HID_Name_Lookup.h"/>
+      <FILE id="K5AoSF" name="HID_Queue_Utilities.cpp" compile="0" resource="0"
+            file="HIDManager/HID_Queue_Utilities.cpp"/>
+      <FILE id="bjiowX" name="HID_Queue_Utilities.h" compile="0" resource="0"
+            file="HIDManager/HID_Queue_Utilities.h"/>
+      <FILE id="FfX1kW" name="HID_Utilities.cpp" compile="0" resource="0"
+            file="HIDManager/HID_Utilities.cpp"/>
+      <FILE id="HQwkAl" name="HID_Utilities.h" compile="0" resource="0" file="HIDManager/HID_Utilities.h"/>
+      <FILE id="GdNnRt" name="HID_Utilities_External.h" compile="0" resource="0"
+            file="HIDManager/HID_Utilities_External.h"/>
+      <FILE id="qaW3Fz" name="ImmHIDUtilAddOn.cpp" compile="0" resource="0"
+            file="HIDManager/ImmHIDUtilAddOn.cpp"/>
+      <FILE id="f4ENYc" name="ImmHIDUtilAddOn.h" compile="0" resource="0"
+            file="HIDManager/ImmHIDUtilAddOn.h"/>
+      <FILE id="mRDyIc" name="IOHIDDevice_.cpp" compile="0" resource="0"
+            file="HIDManager/IOHIDDevice_.cpp"/>
+      <FILE id="ygbU65" name="IOHIDDevice_.h" compile="0" resource="0" file="HIDManager/IOHIDDevice_.h"/>
+      <FILE id="n8RfFk" name="IOHIDElement_.cpp" compile="0" resource="0"
+            file="HIDManager/IOHIDElement_.cpp"/>
+      <FILE id="SsW75f" name="IOHIDElement_.h" compile="0" resource="0" file="HIDManager/IOHIDElement_.h"/>
+      <FILE id="ebGlDe" name="IOHIDLib_.h" compile="0" resource="0" file="HIDManager/IOHIDLib_.h"/>
+    </GROUP>
+    <GROUP id="{89B00B3D-3E60-2792-C7A4-D570AF057C40}" name="Source">
+      <FILE id="d1Wbzp" name="Router.cpp" compile="1" resource="0" file="Source/Router.cpp"/>
+      <FILE id="upyF1w" name="Router.h" compile="0" resource="0" file="Source/Router.h"/>
+      <FILE id="CeUFNu" name="Areas.h" compile="0" resource="0" file="Source/Areas.h"/>
+      <FILE id="wR0X34" name="ParamSliderGris.h" compile="0" resource="0"
+            file="Source/ParamSliderGris.h"/>
+      <FILE id="bDIKcy" name="HIDDelegate.cpp" compile="1" resource="0" file="Source/HIDDelegate.cpp"/>
+      <FILE id="QwSZHu" name="HIDDelegate.h" compile="0" resource="0" file="Source/HIDDelegate.h"/>
+      <FILE id="iDZlup" name="_firs.h" compile="0" resource="0" file="Source/_firs.h"/>
+      <FILE id="dqxZV5" name="FieldComponent.cpp" compile="1" resource="0"
+            file="Source/FieldComponent.cpp"/>
+      <FILE id="S23HIf" name="FieldComponent.h" compile="0" resource="0"
+            file="Source/FieldComponent.h"/>
+      <FILE id="HUCESA" name="FirFilter.cpp" compile="1" resource="0" file="Source/FirFilter.cpp"/>
+      <FILE id="Dxarr9" name="FirFilter.h" compile="0" resource="0" file="Source/FirFilter.h"/>
+      <FILE id="Amo7KP" name="LevelComponent.cpp" compile="1" resource="0"
+            file="Source/LevelComponent.cpp"/>
+      <FILE id="qrzOaK" name="LevelComponent.h" compile="0" resource="0"
+            file="Source/LevelComponent.h"/>
+      <FILE id="YmogaO" name="OctoLeap.cpp" compile="1" resource="0" file="Source/OctoLeap.cpp"/>
+      <FILE id="y1Har7" name="OctoLeap.h" compile="0" resource="0" file="Source/OctoLeap.h"/>
+      <FILE id="kCb8Dq" name="OscComponent.cpp" compile="1" resource="0"
+            file="Source/OscComponent.cpp"/>
+      <FILE id="Ik4mYY" name="OscComponent.h" compile="0" resource="0" file="Source/OscComponent.h"/>
+      <FILE id="dgSZr1" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="weDkcs" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="pRoxoW" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="HICz75" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="rZP6xp" name="SourceMover.cpp" compile="1" resource="0" file="Source/SourceMover.cpp"/>
+      <FILE id="ppYknM" name="SourceMover.h" compile="0" resource="0" file="Source/SourceMover.h"/>
+      <FILE id="y4THbS" name="Trajectories.cpp" compile="1" resource="0"
+            file="Source/Trajectories.cpp"/>
+      <FILE id="tjT8To" name="Trajectories.h" compile="0" resource="0" file="Source/Trajectories.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="-Wall">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="/home/olivier/SDKs/LeapSDK/include"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="/home/olivier/SDKs/LeapSDK/include"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_osc" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1"
+             useGlobalPath="1"/>
+    <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_gui_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <LIVE_SETTINGS>
+    <OSX/>
+    <LINUX/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>
